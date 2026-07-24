@@ -623,7 +623,7 @@ function ScheduleScreen({ store }: { store: Store }) {
 function PracticeScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[296px] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[296px] bg-peach rounded-b-[32px]">
         <StatusBar />
         <div className="flex justify-center pt-6">
           <img src={borbyMeditate} alt="" className="h-36 w-36 object-contain" />
@@ -704,7 +704,7 @@ function HomeScreen({ store }: { store: Store }) {
 function HomeIdle({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-peach rounded-b-[32px]">
         <StatusBar />
         <div className="flex justify-center mt-6">
           <img src={borbySleep} alt="" className="h-36 w-36 object-contain" />
@@ -731,7 +731,7 @@ function HomeActive({ store }: { store: Store }) {
   const remaining = store.totalSessions - store.sessions;
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[343px] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[343px] bg-peach rounded-b-[32px]">
         <StatusBar />
         <div className="flex items-center gap-2 px-4 pt-3">
           <button onClick={() => store.go("profile")} className="h-9 w-9 rounded-xl bg-white overflow-hidden flex items-center justify-center">
@@ -1200,7 +1200,7 @@ function PassedScreen({ store }: { store: Store }) {
   useEffect(() => { store.completeSession(); store.addRumbles(40); }, []);
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-olive">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-olive rounded-b-[32px]">
         <StatusBar tint="cream" />
         <div className="flex flex-col items-center pt-2">
           <p className="text-[140px] font-black text-white leading-none tracking-tight">96</p>
@@ -1251,7 +1251,7 @@ function SignalRow({ label, value, tone = "olive" }: { label: string; value: str
 function FlaggedScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-coral">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-coral rounded-b-[32px]">
         <StatusBar tint="cream" />
         <div className="flex flex-col items-center pt-2">
           <p className="text-[140px] font-black text-white leading-none tracking-tight">41</p>
@@ -1466,7 +1466,7 @@ function SleepScreen({ store }: { store: Store }) {
 function DayCompleteScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[360px] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[360px] bg-peach rounded-b-[32px]">
         <StatusBar />
         <div className="flex justify-center mt-6">
           <img src={borbySleep} alt="" className="h-40 w-40 object-contain" />
