@@ -4,6 +4,23 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+
+  --color-cream: #F7F3EA;
+  --color-peach: #FBE0C8;
+  --color-espresso: #2B2620;
+  --color-coral: #DB6A3A;
+  --color-coral-deep: #C25E30;
+  --color-olive: #5C7A3D;
+  --color-sage: #E4EBDA;
+  --color-sand: #EFE4D6;
+  --color-taupe: #8A8175;
+  --color-hairline: #F0EDE7;
+  --color-borby: #F2A87F;
+  --color-borby-belly: #F7CBAE;
+}
+
 /*
  * Design system definition.
  *
