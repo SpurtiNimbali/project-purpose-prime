@@ -331,13 +331,11 @@ function HomeIndicator({ tint = "espresso" }: { tint?: "espresso" | "cream" }) {
   );
 }
 
-function CurveDivider({ fill = "#FFFFFF" }: { fill?: string }) {
-  return (
-    <svg viewBox="0 0 393 90" preserveAspectRatio="none" className="block w-full" style={{ height: 60 }}>
-      <path d="M0 90 L0 60 Q 196 -30 393 60 L393 90 Z" fill={fill} />
-    </svg>
-  );
+function CurveDivider(_props: { fill?: string } = {}) {
+  void _props;
+  return null;
 }
+
 
 function PillNav({
   active,
