@@ -1193,7 +1193,7 @@ function MealScreen({ store }: { store: Store }) {
         </div>
       </div>
       <div className="absolute inset-x-6 bottom-16">
-        <PrimaryBtn onClick={() => { store.addRumbles(10); store.go("sleep"); }}>Log it</PrimaryBtn>
+        <PrimaryBtn onClick={() => { store.addRumbles(10); store.flowActive ? store.finishCurrentStep() : store.go("sleep"); }}>Log it</PrimaryBtn>
       </div>
       <HomeIndicator />
     </>
