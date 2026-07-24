@@ -158,7 +158,15 @@ function Prototype() {
     },
     exitFlow: () => { setFlowActive(false); setCurrentStepIdx(null); setScreen("home"); },
   };
+
+  useEffect(() => {
+    if (screen === "splash") {
+      const t = setTimeout(() => setScreen("welcome"), 1600);
+      return () => clearTimeout(t);
+    }
   }, [screen]);
+
+
 
   return (
     <div className="min-h-screen bg-cream font-sans text-espresso antialiased">
