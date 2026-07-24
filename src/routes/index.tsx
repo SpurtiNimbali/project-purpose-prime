@@ -1505,11 +1505,7 @@ function StreakScreen({ store }: { store: Store }) {
   const pct = Math.min(100, Math.round((store.rumbles / 580) * 100));
   return (
     <>
-      <div className="absolute inset-0 bg-espresso pointer-events-none" style={{ maskImage: "linear-gradient(180deg, #000 0, #000 260px, transparent 340px)", WebkitMaskImage: "linear-gradient(180deg, #000 0, #000 260px, transparent 340px)" }}>
-        <div className="h-full w-full bg-espresso" />
-      </div>
-      <div className="absolute inset-x-0 top-0 h-[280px]">
-
+      <div className="absolute inset-x-0 top-0 h-[280px] bg-espresso rounded-b-[32px]">
         <StatusBar tint="cream" />
         <div className="flex justify-center mt-4">
           <img src={borbyFire} alt="" className="h-32 w-32 object-contain" />
