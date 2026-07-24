@@ -1549,7 +1549,7 @@ function DailyFlowScreen({ store }: { store: Store }) {
         <div className="px-4 mt-4">
           <p className="text-[10px] font-extrabold text-taupe uppercase tracking-[0.14em] mb-2">Up next</p>
           <div className="rounded-[16px] bg-sand/60 border border-hairline p-3 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-[18px] shrink-0">{upNext.emoji}</div>
+            <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shrink-0 text-espresso"><FlowIcon iconKey={upNext.iconKey} size={18} /></div>
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-extrabold text-espresso truncate">{upNext.title}</p>
               <p className="text-[11px] font-bold text-taupe truncate">{upNext.sub}</p>
