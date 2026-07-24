@@ -746,7 +746,8 @@ function HomeActive({ store }: { store: Store }) {
                   {Object.values(store.completedSteps).filter(Boolean).length} of {FLOW_STEPS.length} steps done · never miss one
                 </p>
               </div>
-              <ArrowRight />
+              <ArrowRight color="#F7F3EA" />
+
             </div>
           </button>
 
