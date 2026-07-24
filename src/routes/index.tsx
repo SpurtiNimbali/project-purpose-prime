@@ -216,7 +216,10 @@ function ActiveScreen({ store }: { store: Store }) {
     case "reward": return <RewardScreen store={store} />;
     case "symptom": return <SymptomScreen store={store} />;
     case "meal": return <MealScreen store={store} />;
+    case "water": return <WaterScreen store={store} />;
+    case "bathroom": return <BathroomScreen store={store} />;
     case "sleep": return <SleepScreen store={store} />;
+    case "dailyFlow": return <DailyFlowScreen store={store} />;
     case "dayComplete": return <DayCompleteScreen store={store} />;
     case "streak": return <StreakScreen store={store} />;
     case "week": return <WeekScreen store={store} />;
