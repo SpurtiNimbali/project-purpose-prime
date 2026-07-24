@@ -1229,7 +1229,7 @@ function SleepScreen({ store }: { store: Store }) {
         </div>
       </div>
       <div className="absolute inset-x-6 bottom-16">
-        <PrimaryBtn onClick={() => { store.addRumbles(10); store.go("home"); }}>Save</PrimaryBtn>
+        <PrimaryBtn onClick={() => { store.addRumbles(10); store.flowActive ? store.finishCurrentStep() : store.go("home"); }}>Save</PrimaryBtn>
       </div>
       <HomeIndicator />
     </>
