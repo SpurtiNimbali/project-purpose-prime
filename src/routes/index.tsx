@@ -1249,15 +1249,22 @@ function SymptomScreen({ store }: { store: Store }) {
         <h1 className="text-[24px] font-black leading-tight">How bloated do you feel right now?</h1>
         <p className="mt-1.5 text-[12px] font-bold text-taupe">Since your last recording</p>
         <div className="mt-6 flex items-end justify-between">
-          {severityFaces.map((f, i) => (
-            <button key={i} onClick={() => setSel(i)} className={`flex flex-col items-center gap-1.5 transition ${sel === i ? "scale-110" : "opacity-40"}`}>
-              <span className="rounded-full flex items-center justify-center relative" style={{ background: f.color, width: sel === i ? 46 : 36, height: sel === i ? 46 : 36 }}>
-                <span className="absolute inset-0 flex items-center justify-center text-white text-[12px] font-black">•‿•</span>
-              </span>
-              <span className="text-[10px] font-extrabold text-taupe">{f.label}</span>
-            </button>
-          ))}
+          {severityFaces.map((f, i) => {
+            const active = sel === i;
+            return (
+              <button key={i} onClick={() => setSel(i)} className={`flex flex-col items-center gap-1.5 transition ${active ? "scale-110" : "opacity-40"}`}>
+                <span
+                  className="rounded-full flex items-center justify-center text-white"
+                  style={{ background: f.color, width: active ? 46 : 36, height: active ? 46 : 36 }}
+                >
+                  <SmileIcon color="#FFFFFF" />
+                </span>
+                <span className="text-[10px] font-extrabold text-taupe">{f.label}</span>
+              </button>
+            );
+          })}
         </div>
+
         <div className="mt-6 rounded-[20px] bg-white border border-hairline p-4">
           <p className="text-[13px] font-extrabold">Anything else going on?</p>
           <div className="mt-3 flex flex-wrap gap-2">
