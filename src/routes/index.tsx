@@ -331,13 +331,11 @@ function HomeIndicator({ tint = "espresso" }: { tint?: "espresso" | "cream" }) {
   );
 }
 
-function CurveDivider({ fill = "#FFFFFF" }: { fill?: string }) {
-  return (
-    <svg viewBox="0 0 393 90" preserveAspectRatio="none" className="block w-full" style={{ height: 60 }}>
-      <path d="M0 90 L0 60 Q 196 -30 393 60 L393 90 Z" fill={fill} />
-    </svg>
-  );
+function CurveDivider(_props: { fill?: string } = {}) {
+  void _props;
+  return null;
 }
+
 
 function PillNav({
   active,
@@ -1419,89 +1417,125 @@ function ProfileScreen({ store }: { store: Store }) {
 function DailyFlowScreen({ store }: { store: Store }) {
   const done = FLOW_STEPS.filter((s) => store.completedSteps[s.id]).length;
   const total = FLOW_STEPS.length;
-  const pct = Math.round((done / total) * 100);
   const nextIdx = FLOW_STEPS.findIndex((s) => !store.completedSteps[s.id]);
   const allDone = nextIdx === -1;
+  const activeIdx = allDone ? total - 1 : nextIdx;
+  const current = FLOW_STEPS[activeIdx];
+  const upNext = FLOW_STEPS[activeIdx + 1];
 
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[32%] bg-peach">
-        <StatusBar />
-        <div className="flex items-center gap-2 px-4 pt-3">
-          <button onClick={store.exitFlow} className="h-9 w-9 rounded-full bg-white flex items-center justify-center text-[18px] font-black text-espresso">←</button>
-          <div className="flex-1 text-center">
-            <p className="text-[11px] font-extrabold text-coral-deep uppercase tracking-wide">Guided day</p>
-            <p className="text-[15px] font-black text-espresso">Today's flow</p>
-          </div>
-          <div className="h-9 w-9 rounded-full bg-white flex items-center justify-center overflow-hidden">
-            <img src={borbyWave} alt="" className="h-8 w-8 object-contain" loading="lazy" />
-          </div>
+      <StatusBar />
+      {/* Top bar */}
+      <div className="px-4 pt-3 flex items-center gap-2">
+        <button onClick={store.exitFlow} className="h-9 w-9 rounded-full bg-sand flex items-center justify-center text-[18px] font-black text-espresso">←</button>
+        <div className="flex-1 text-center">
+          <p className="text-[10px] font-extrabold text-taupe uppercase tracking-[0.14em]">Guided day</p>
+          <p className="text-[14px] font-black text-espresso">Step {Math.min(activeIdx + 1, total)} of {total}</p>
         </div>
-        <div className="px-6 mt-2">
-          <div className="flex items-baseline justify-between">
-            <p className="text-[22px] font-black text-espresso leading-tight">{done} of {total} done</p>
-            <p className="text-[12px] font-extrabold text-coral-deep">{pct}%</p>
-          </div>
-          <div className="mt-2 h-2 rounded-full bg-white/60 overflow-hidden">
-            <div className="h-full bg-coral transition-all" style={{ width: `${pct}%` }} />
+        <div className="h-9 px-2.5 rounded-full bg-sand flex items-center gap-1 text-[11px] font-extrabold text-espresso">
+          {done}/{total}
+        </div>
+      </div>
+
+      {/* Horizontal progress rail */}
+      <div className="px-4 mt-4">
+        <div className="relative flex items-center">
+          <span className="absolute inset-x-1 top-1/2 -translate-y-1/2 h-[3px] rounded-full bg-hairline" />
+          <span
+            className="absolute left-1 top-1/2 -translate-y-1/2 h-[3px] rounded-full bg-coral transition-all"
+            style={{ width: `calc(${(activeIdx / Math.max(1, total - 1)) * 100}% - 4px)` }}
+          />
+          <div className="relative z-10 flex items-center justify-between w-full">
+            {FLOW_STEPS.map((step, i) => {
+              const isDone = !!store.completedSteps[step.id];
+              const isActive = i === activeIdx && !allDone;
+              return (
+                <button
+                  key={step.id}
+                  onClick={() => store.openStep(i)}
+                  aria-label={step.title}
+                  className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-black transition ${
+                    isDone
+                      ? "bg-olive text-cream"
+                      : isActive
+                      ? "bg-coral text-cream ring-4 ring-coral/20"
+                      : "bg-cream text-taupe border border-hairline"
+                  }`}
+                >
+                  {isDone ? "✓" : i + 1}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      <div className="relative pt-[32%]">
-        <CurveDivider />
-        <div className="px-4 -mt-1 pb-32 max-h-[420px] overflow-y-auto">
-          <div className="relative">
-            <span className="absolute left-[22px] top-2 bottom-2 w-[2px] bg-hairline" />
-            <div className="space-y-2">
-              {FLOW_STEPS.map((step, i) => {
-                const isDone = store.completedSteps[step.id];
-                const isNext = i === nextIdx;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => store.openStep(i)}
-                    className={`relative w-full flex items-center gap-3 rounded-[18px] p-3 text-left transition active:scale-[0.99] ${
-                      isNext ? "bg-white border-[2px] border-coral shadow-[0_6px_16px_-8px_rgba(219,106,58,0.4)]" :
-                      isDone ? "bg-sage/40 border border-hairline" :
-                      "bg-white/70 border border-hairline"
-                    }`}
-                  >
-                    <div className={`relative z-10 h-11 w-11 rounded-full flex items-center justify-center text-[18px] ${
-                      isDone ? "bg-olive text-cream" : isNext ? "bg-coral text-cream" : "bg-sand text-espresso"
-                    }`}>
-                      {isDone ? <CheckIcon color="#F7F3EA" /> : <span>{step.emoji}</span>}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className={`text-[14px] font-extrabold leading-tight ${isDone ? "text-taupe line-through" : "text-espresso"}`}>{step.title}</p>
-                        {isNext && <span className="rounded-full bg-coral px-2 py-0.5 text-[9px] font-black text-cream uppercase tracking-wide">Now</span>}
-                      </div>
-                      <p className="text-[11px] font-bold text-taupe mt-0.5">{step.sub} · +{step.reward} rumbles</p>
-                    </div>
-                    {!isDone && <ArrowRight />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="absolute inset-x-6 bottom-16">
+      {/* Focused current step card */}
+      <div className="px-4 mt-6">
         {allDone ? (
-          <PrimaryBtn onClick={() => { store.exitFlow(); store.go("dayComplete"); }} tone="coral">Wrap the day</PrimaryBtn>
+          <div className="rounded-[24px] bg-espresso text-cream p-6 text-center">
+            <img src={borbyFire} alt="" className="mx-auto h-24 w-24 object-contain" />
+            <p className="mt-2 text-[11px] font-extrabold text-coral uppercase tracking-wide">Day complete</p>
+            <h1 className="mt-1 text-[24px] font-black leading-tight">Every step logged</h1>
+            <p className="mt-2 text-[13px] font-bold text-cream/70">Nothing missed today. Come back tomorrow to keep the streak.</p>
+          </div>
         ) : (
-          <PrimaryBtn onClick={() => store.openStep(nextIdx)} tone="coral">
-            Continue → {FLOW_STEPS[nextIdx].title}
-          </PrimaryBtn>
+          <div className="rounded-[24px] bg-white border border-hairline p-5 shadow-[0_8px_24px_-16px_rgba(60,30,10,0.25)]">
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-coral/12 text-coral-deep px-2.5 py-1 text-[10px] font-black uppercase tracking-wide">Now</span>
+              <span className="text-[11px] font-extrabold text-taupe">+{current.reward} rumbles</span>
+            </div>
+            <div className="mt-3 flex items-start gap-4">
+              <div className="h-16 w-16 rounded-2xl bg-peach flex items-center justify-center text-[32px] shrink-0">
+                {current.emoji}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-[22px] font-black leading-tight text-espresso">{current.title}</h1>
+                <p className="mt-1 text-[13px] font-bold text-taupe leading-snug">{current.sub}</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => store.openStep(activeIdx)}
+              className="mt-5 w-full rounded-[16px] bg-coral text-cream py-3.5 text-[15px] font-black active:scale-[0.99] transition flex items-center justify-center gap-2"
+            >
+              Start this step <ArrowRight />
+            </button>
+            <button
+              onClick={() => { store.completedSteps[current.id] = true; store.finishCurrentStep(); }}
+              className="mt-2 w-full text-center text-[12px] font-extrabold text-taupe py-1"
+            >
+              Skip for now
+            </button>
+          </div>
         )}
-        <button onClick={store.exitFlow} className="mt-2 w-full text-center text-[12px] font-bold text-taupe">Pause the flow</button>
       </div>
+
+      {/* Up next preview */}
+      {!allDone && upNext && (
+        <div className="px-4 mt-4">
+          <p className="text-[10px] font-extrabold text-taupe uppercase tracking-[0.14em] mb-2">Up next</p>
+          <div className="rounded-[16px] bg-sand/60 border border-hairline p-3 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-[18px] shrink-0">{upNext.emoji}</div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-extrabold text-espresso truncate">{upNext.title}</p>
+              <p className="text-[11px] font-bold text-taupe truncate">{upNext.sub}</p>
+            </div>
+            <span className="text-[11px] font-extrabold text-taupe shrink-0">+{upNext.reward}</span>
+          </div>
+        </div>
+      )}
+
+      <button onClick={store.exitFlow} className="absolute inset-x-0 bottom-14 text-center text-[12px] font-bold text-taupe">
+        Pause the flow
+      </button>
       <HomeIndicator />
     </>
   );
 }
+
+
 
 /* =================================================================
    Screens — Water & Bathroom
