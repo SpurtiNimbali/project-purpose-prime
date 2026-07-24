@@ -1202,18 +1202,17 @@ function PassedScreen({ store }: { store: Store }) {
   useEffect(() => { store.completeSession(); store.addRumbles(40); }, []);
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-olive rounded-b-[32px]">
-        <StatusBar tint="cream" />
-        <div className="flex flex-col items-center pt-2">
-          <p className="text-[140px] font-black text-white leading-none tracking-tight">96</p>
+      <StatusBar tint="cream" />
+      <div className="flex flex-col h-full pb-[96px]">
+        <div className="flex flex-col items-center pt-8">
+          <p className="text-[11px] font-extrabold text-cream/80 uppercase tracking-[0.14em]">Session score</p>
+          <p className="mt-1 text-[128px] font-black text-white leading-none tracking-tight">96</p>
+          <span className="mt-3 rounded-full bg-white/15 px-3 py-1 text-[11px] font-extrabold text-cream">Clean signal</span>
         </div>
-      </div>
-      <div className="relative pt-[328px]">
-        <CurveDivider />
-        <div className="px-5 -mt-1">
+        <div className="mt-6 flex-1 rounded-t-[28px] bg-cream px-5 pt-5 overflow-y-auto">
           <p className="text-[13px] font-extrabold text-taupe">Clip quality, both sides</p>
-          <h1 className="mt-1 text-[22px] font-black leading-tight">Clean signal. Nothing for you to fix.</h1>
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <h1 className="mt-1 text-[22px] font-black leading-tight">Clean signal. Nothing to fix.</h1>
+          <div className="mt-4 grid grid-cols-2 gap-2">
             <div className="rounded-[18px] bg-sand p-3">
               <p className="text-[11px] font-extrabold text-taupe">Streak</p>
               <p className="text-[18px] font-black mt-0.5">{store.streak} days</p>
@@ -1233,7 +1232,7 @@ function PassedScreen({ store }: { store: Store }) {
           </div>
         </div>
       </div>
-      <div className="absolute inset-x-6 bottom-16">
+      <div className="absolute inset-x-6 bottom-8">
         <PrimaryBtn onClick={() => store.flowActive ? store.finishCurrentStep() : store.go("reward")}>Continue</PrimaryBtn>
       </div>
       <HomeIndicator />
@@ -1253,15 +1252,14 @@ function SignalRow({ label, value, tone = "olive" }: { label: string; value: str
 function FlaggedScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-coral rounded-b-[32px]">
-        <StatusBar tint="cream" />
-        <div className="flex flex-col items-center pt-2">
-          <p className="text-[140px] font-black text-white leading-none tracking-tight">41</p>
+      <StatusBar tint="cream" />
+      <div className="flex flex-col h-full pb-[128px]">
+        <div className="flex flex-col items-center pt-8">
+          <p className="text-[11px] font-extrabold text-cream/80 uppercase tracking-[0.14em]">Session score</p>
+          <p className="mt-1 text-[128px] font-black text-white leading-none tracking-tight">41</p>
+          <span className="mt-3 rounded-full bg-white/15 px-3 py-1 text-[11px] font-extrabold text-cream">Needs a redo</span>
         </div>
-      </div>
-      <div className="relative pt-[328px]">
-        <CurveDivider />
-        <div className="px-5 -mt-1">
+        <div className="mt-6 flex-1 rounded-t-[28px] bg-cream px-5 pt-5 overflow-y-auto">
           <p className="text-[13px] font-extrabold text-taupe">Clip quality</p>
           <h1 className="mt-1 text-[22px] font-black leading-tight">Too much background noise</h1>
           <div className="mt-3 rounded-[20px] border-[1.5px] border-hairline bg-white p-3">
@@ -1273,16 +1271,16 @@ function FlaggedScreen({ store }: { store: Store }) {
             </div>
           </div>
           <div className="mt-3 rounded-[20px] bg-peach p-3 flex items-center gap-3">
-            <img src={borbyWave} alt="" className="h-12 w-12 object-contain" />
+            <img src={borbyWave} alt="" className="h-12 w-12 object-contain shrink-0" />
             <p className="text-[12px] font-bold leading-snug">
               That one won't be usable. Want to redo it while you're still fasted?
             </p>
           </div>
         </div>
       </div>
-      <div className="absolute inset-x-6 bottom-16 space-y-2">
+      <div className="absolute inset-x-6 bottom-8 space-y-2">
         <PrimaryBtn onClick={() => store.go("recording")}>Redo now</PrimaryBtn>
-        <button onClick={() => store.go("home")} className="w-full text-center text-[13px] font-bold text-taupe">
+        <button onClick={() => store.go("home")} className="w-full text-center text-[13px] font-bold text-cream/90">
           Skip this session
         </button>
       </div>
