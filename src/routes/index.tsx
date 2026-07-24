@@ -1518,9 +1518,10 @@ function DailyFlowScreen({ store }: { store: Store }) {
               <span className="text-[11px] font-extrabold text-taupe">+{current.reward} rumbles</span>
             </div>
             <div className="mt-3 flex items-start gap-4">
-              <div className="h-16 w-16 rounded-2xl bg-peach flex items-center justify-center text-[32px] shrink-0">
-                {current.emoji}
+              <div className="h-16 w-16 rounded-2xl bg-peach flex items-center justify-center shrink-0 text-coral-deep">
+                <FlowIcon iconKey={current.iconKey} size={28} />
               </div>
+
               <div className="min-w-0 flex-1">
                 <h1 className="text-[22px] font-black leading-tight text-espresso">{current.title}</h1>
                 <p className="mt-1 text-[13px] font-bold text-taupe leading-snug">{current.sub}</p>
