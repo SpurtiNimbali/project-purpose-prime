@@ -265,9 +265,9 @@ function PhoneShell({ children, screen }: { children: React.ReactNode; screen: S
     screen === "recording" || screen === "sideSwitch"
       ? "#DB6A3A"
       : screen === "passed"
-        ? "#EEF1E4"
+        ? "#5C7A3D"
         : screen === "flagged"
-          ? "#FBE0D6"
+          ? "#DB6A3A"
           : peachScreens.includes(screen)
             ? "#FBE0C8"
             : "#F7F3EA";
@@ -704,19 +704,16 @@ function HomeScreen({ store }: { store: Store }) {
 function HomeIdle({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-peach rounded-b-[32px]">
-        <StatusBar />
-        <div className="flex justify-center mt-6">
-          <img src={borbySleep} alt="" className="h-36 w-36 object-contain" />
+      <StatusBar />
+      <div className="flex flex-col h-full pb-[104px]">
+        <div className="flex justify-center pt-4">
+          <img src={borbySleep} alt="" className="h-32 w-32 object-contain" />
         </div>
-      </div>
-      <div className="relative pt-[328px]">
-        <CurveDivider />
-        <div className="px-5 -mt-1">
+        <div className="px-5 mt-6">
           <h1 className="text-[26px] font-black leading-tight">All done for today</h1>
           <p className="mt-1.5 text-[13px] font-bold text-taupe">Tomorrow's first window opens at 6:40</p>
-          <button onClick={() => store.go("dayComplete")} className="mt-4 w-full rounded-[20px] bg-sand p-4 text-left active:scale-[0.99] transition">
-            <p className="text-[11px] font-extrabold text-taupe">Wrap the day</p>
+          <button onClick={() => store.go("dayComplete")} className="mt-4 w-full rounded-[20px] bg-white/70 border border-white p-4 text-left active:scale-[0.99] transition">
+            <p className="text-[11px] font-extrabold text-coral-deep">Wrap the day</p>
             <p className="mt-1 text-[15px] font-extrabold">Review today's summary</p>
           </button>
         </div>
@@ -729,52 +726,57 @@ function HomeIdle({ store }: { store: Store }) {
 
 function HomeActive({ store }: { store: Store }) {
   const remaining = store.totalSessions - store.sessions;
+  const stepsDone = Object.values(store.completedSteps).filter(Boolean).length;
+  const stepsOpen = FLOW_STEPS.length - stepsDone;
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[343px] bg-peach rounded-b-[32px]">
-        <StatusBar />
-        <div className="flex items-center gap-2 px-4 pt-3">
-          <button onClick={() => store.go("profile")} className="h-9 w-9 rounded-xl bg-white overflow-hidden flex items-center justify-center">
+      <StatusBar />
+      <div className="flex flex-col h-full pb-[104px] overflow-y-auto">
+        {/* Top chip row */}
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 px-4 pt-3">
+          <button onClick={() => store.go("profile")} className="h-9 w-9 rounded-xl bg-white overflow-hidden flex items-center justify-center shrink-0">
             <img src={borbyWave} alt="" className="h-8 w-8 object-contain" />
           </button>
-          <span className="rounded-full bg-white/85 px-3 py-1 text-[11px] font-extrabold text-espresso">Day {store.streak} of 7</span>
-          <button onClick={() => store.go("streak")} className="rounded-full bg-white px-2.5 py-1 text-[11px] font-extrabold text-espresso flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-coral" />
-            {store.rumbles}
-          </button>
-          <button onClick={() => store.go("chat")} className="ml-auto h-9 w-9 rounded-xl bg-coral flex items-center justify-center">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-extrabold text-espresso whitespace-nowrap">Day {store.streak}/7</span>
+            <button onClick={() => store.go("streak")} className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-extrabold text-espresso flex items-center gap-1 whitespace-nowrap">
+              <span className="h-1.5 w-1.5 rounded-full bg-coral" />
+              {store.rumbles}
+            </button>
+          </div>
+          <button onClick={() => store.go("chat")} className="h-9 w-9 rounded-xl bg-coral flex items-center justify-center shrink-0">
             <ChatBubbleIcon color="#F7F3EA" />
           </button>
         </div>
-        <div className="flex justify-center mt-1">
-          <img src={borbyFire} alt="" className="h-28 w-28 object-contain" />
+
+        {/* Hero */}
+        <div className="flex justify-center mt-2">
+          <img src={borbyFire} alt="" className="h-32 w-32 object-contain" />
         </div>
-      </div>
-      <div className="relative pt-[343px]">
-        <CurveDivider />
-        <div className="px-5 -mt-1">
-          <h1 className="text-[26px] font-black leading-tight">{remaining} sessions left</h1>
-          <p className="mt-1 text-[13px] font-bold text-taupe">{store.sessions} recorded · {FLOW_STEPS.filter(s => !store.completedSteps[s.id]).length} steps open</p>
+
+        {/* Content */}
+        <div className="px-5 mt-3">
+          <h1 className="text-[26px] font-black leading-tight">{remaining} {remaining === 1 ? "session" : "sessions"} left</h1>
+          <p className="mt-1 text-[13px] font-bold text-taupe">{store.sessions} recorded · {stepsOpen} steps open</p>
 
           <button onClick={store.startFlow} className="mt-4 w-full rounded-[22px] bg-espresso p-4 text-left active:scale-[0.99] transition">
             <div className="flex items-center gap-3">
-              <div className="h-14 w-14 rounded-2xl bg-coral flex items-center justify-center text-cream"><CompassIcon color="#F7F3EA" /></div>
-              <div className="flex-1">
+              <div className="h-14 w-14 rounded-2xl bg-coral flex items-center justify-center shrink-0"><CompassIcon color="#F7F3EA" /></div>
+              <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-extrabold text-coral">Guided day</p>
                 <p className="mt-0.5 text-[16px] font-extrabold text-cream leading-tight">Walk me through today</p>
-                <p className="mt-1 text-[11px] font-bold text-cream/70">
-                  {Object.values(store.completedSteps).filter(Boolean).length} of {FLOW_STEPS.length} steps done · never miss one
+                <p className="mt-1 text-[11px] font-bold text-cream/70 leading-snug">
+                  {stepsDone} of {FLOW_STEPS.length} steps done · never miss one
                 </p>
               </div>
               <ArrowRight color="#F7F3EA" />
-
             </div>
           </button>
 
           <p className="mt-4 text-[11px] font-extrabold text-taupe uppercase tracking-wide">Or jump in</p>
-          <button onClick={() => store.go("preGate")} className="mt-2 w-full rounded-[22px] bg-peach p-4 text-left active:scale-[0.99] transition">
+          <button onClick={() => store.go("preGate")} className="mt-2 w-full rounded-[22px] bg-white/70 border border-white p-4 text-left active:scale-[0.99] transition">
             <div className="flex items-start justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <p className="text-[11px] font-extrabold text-coral-deep">Before lunch</p>
                 <p className="mt-1 text-[16px] font-extrabold">Session {store.sessions + 1}</p>
                 <div className="mt-2 flex gap-1.5">
@@ -784,7 +786,7 @@ function HomeActive({ store }: { store: Store }) {
                 </div>
                 <p className="mt-2 text-[11px] font-bold text-taupe">Tap to open · 40 rumbles</p>
               </div>
-              <div className="h-14 w-14 rounded-2xl bg-coral flex items-center justify-center">
+              <div className="h-14 w-14 rounded-2xl bg-coral flex items-center justify-center shrink-0">
                 <WaveformIcon />
               </div>
             </div>
@@ -1200,18 +1202,17 @@ function PassedScreen({ store }: { store: Store }) {
   useEffect(() => { store.completeSession(); store.addRumbles(40); }, []);
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-olive rounded-b-[32px]">
-        <StatusBar tint="cream" />
-        <div className="flex flex-col items-center pt-2">
-          <p className="text-[140px] font-black text-white leading-none tracking-tight">96</p>
+      <StatusBar tint="cream" />
+      <div className="flex flex-col h-full pb-[96px]">
+        <div className="flex flex-col items-center pt-8">
+          <p className="text-[11px] font-extrabold text-cream/80 uppercase tracking-[0.14em]">Session score</p>
+          <p className="mt-1 text-[128px] font-black text-white leading-none tracking-tight">96</p>
+          <span className="mt-3 rounded-full bg-white/15 px-3 py-1 text-[11px] font-extrabold text-cream">Clean signal</span>
         </div>
-      </div>
-      <div className="relative pt-[328px]">
-        <CurveDivider />
-        <div className="px-5 -mt-1">
+        <div className="mt-6 flex-1 rounded-t-[28px] bg-cream px-5 pt-5 overflow-y-auto">
           <p className="text-[13px] font-extrabold text-taupe">Clip quality, both sides</p>
-          <h1 className="mt-1 text-[22px] font-black leading-tight">Clean signal. Nothing for you to fix.</h1>
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <h1 className="mt-1 text-[22px] font-black leading-tight">Clean signal. Nothing to fix.</h1>
+          <div className="mt-4 grid grid-cols-2 gap-2">
             <div className="rounded-[18px] bg-sand p-3">
               <p className="text-[11px] font-extrabold text-taupe">Streak</p>
               <p className="text-[18px] font-black mt-0.5">{store.streak} days</p>
@@ -1231,7 +1232,7 @@ function PassedScreen({ store }: { store: Store }) {
           </div>
         </div>
       </div>
-      <div className="absolute inset-x-6 bottom-16">
+      <div className="absolute inset-x-6 bottom-8">
         <PrimaryBtn onClick={() => store.flowActive ? store.finishCurrentStep() : store.go("reward")}>Continue</PrimaryBtn>
       </div>
       <HomeIndicator />
@@ -1251,15 +1252,14 @@ function SignalRow({ label, value, tone = "olive" }: { label: string; value: str
 function FlaggedScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-coral rounded-b-[32px]">
-        <StatusBar tint="cream" />
-        <div className="flex flex-col items-center pt-2">
-          <p className="text-[140px] font-black text-white leading-none tracking-tight">41</p>
+      <StatusBar tint="cream" />
+      <div className="flex flex-col h-full pb-[128px]">
+        <div className="flex flex-col items-center pt-8">
+          <p className="text-[11px] font-extrabold text-cream/80 uppercase tracking-[0.14em]">Session score</p>
+          <p className="mt-1 text-[128px] font-black text-white leading-none tracking-tight">41</p>
+          <span className="mt-3 rounded-full bg-white/15 px-3 py-1 text-[11px] font-extrabold text-cream">Needs a redo</span>
         </div>
-      </div>
-      <div className="relative pt-[328px]">
-        <CurveDivider />
-        <div className="px-5 -mt-1">
+        <div className="mt-6 flex-1 rounded-t-[28px] bg-cream px-5 pt-5 overflow-y-auto">
           <p className="text-[13px] font-extrabold text-taupe">Clip quality</p>
           <h1 className="mt-1 text-[22px] font-black leading-tight">Too much background noise</h1>
           <div className="mt-3 rounded-[20px] border-[1.5px] border-hairline bg-white p-3">
@@ -1271,16 +1271,16 @@ function FlaggedScreen({ store }: { store: Store }) {
             </div>
           </div>
           <div className="mt-3 rounded-[20px] bg-peach p-3 flex items-center gap-3">
-            <img src={borbyWave} alt="" className="h-12 w-12 object-contain" />
+            <img src={borbyWave} alt="" className="h-12 w-12 object-contain shrink-0" />
             <p className="text-[12px] font-bold leading-snug">
               That one won't be usable. Want to redo it while you're still fasted?
             </p>
           </div>
         </div>
       </div>
-      <div className="absolute inset-x-6 bottom-16 space-y-2">
+      <div className="absolute inset-x-6 bottom-8 space-y-2">
         <PrimaryBtn onClick={() => store.go("recording")}>Redo now</PrimaryBtn>
-        <button onClick={() => store.go("home")} className="w-full text-center text-[13px] font-bold text-taupe">
+        <button onClick={() => store.go("home")} className="w-full text-center text-[13px] font-bold text-cream/90">
           Skip this session
         </button>
       </div>
