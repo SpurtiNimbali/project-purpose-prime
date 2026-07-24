@@ -50,11 +50,48 @@ type ScreenKey =
   | "reward"
   | "symptom"
   | "meal"
+  | "water"
+  | "bathroom"
   | "sleep"
+  | "dailyFlow"
   | "dayComplete"
   | "streak"
   | "week"
   | "profile";
+
+type StepId =
+  | "sleep"
+  | "symptomAM"
+  | "fasted"
+  | "breakfast"
+  | "water"
+  | "bathroom"
+  | "preLunch"
+  | "lunch"
+  | "evening"
+  | "symptomPM";
+
+type FlowStep = {
+  id: StepId;
+  title: string;
+  sub: string;
+  screen: ScreenKey;
+  emoji: string;
+  reward: number;
+};
+
+const FLOW_STEPS: FlowStep[] = [
+  { id: "sleep",      title: "Last night's sleep",     sub: "How many hours",             screen: "sleep",   emoji: "🌙", reward: 10 },
+  { id: "symptomAM",  title: "Morning symptoms",       sub: "Bloat, cramps, energy",      screen: "symptom", emoji: "😊", reward: 10 },
+  { id: "fasted",     title: "Fasted recording",       sub: "3-min quiet-window clip",    screen: "preGate", emoji: "🎙️", reward: 40 },
+  { id: "breakfast",  title: "Log breakfast",          sub: "What you ate & when",        screen: "meal",    emoji: "🥣", reward: 10 },
+  { id: "water",      title: "Log water intake",       sub: "Glasses since waking",       screen: "water",   emoji: "💧", reward: 5  },
+  { id: "bathroom",   title: "Log bathroom",           sub: "Bowel movement (Bristol)",   screen: "bathroom",emoji: "🚽", reward: 15 },
+  { id: "preLunch",   title: "Before-lunch recording", sub: "3-min quiet-window clip",    screen: "preGate", emoji: "🎙️", reward: 40 },
+  { id: "lunch",      title: "Log lunch",              sub: "What you ate & when",        screen: "meal",    emoji: "🍜", reward: 10 },
+  { id: "evening",    title: "Evening recording",      sub: "3-min quiet-window clip",    screen: "preGate", emoji: "🎙️", reward: 40 },
+  { id: "symptomPM",  title: "Evening symptoms",       sub: "How the day felt",           screen: "symptom", emoji: "🌆", reward: 10 },
+];
 
 type Store = {
   screen: ScreenKey;
@@ -65,6 +102,13 @@ type Store = {
   totalSessions: number;
   addRumbles: (n: number) => void;
   completeSession: () => void;
+  flowActive: boolean;
+  currentStepIdx: number | null;
+  completedSteps: Record<StepId, boolean>;
+  startFlow: () => void;
+  openStep: (idx: number) => void;
+  finishCurrentStep: () => void;
+  exitFlow: () => void;
 };
 
 /* =================================================================
@@ -76,6 +120,12 @@ function Prototype() {
   const [rumbles, setRumbles] = useState(200);
   const [streak, setStreak] = useState(3);
   const [sessions, setSessions] = useState(1);
+  const [flowActive, setFlowActive] = useState(false);
+  const [currentStepIdx, setCurrentStepIdx] = useState<number | null>(null);
+  const [completedSteps, setCompletedSteps] = useState<Record<StepId, boolean>>({
+    sleep: false, symptomAM: false, fasted: true, breakfast: false, water: false,
+    bathroom: false, preLunch: false, lunch: false, evening: false, symptomPM: false,
+  });
 
   const store: Store = {
     screen,
@@ -86,15 +136,37 @@ function Prototype() {
     totalSessions: 4,
     addRumbles: (n) => setRumbles((r) => r + n),
     completeSession: () => setSessions((s) => Math.min(s + 1, 4)),
+    flowActive,
+    currentStepIdx,
+    completedSteps,
+    startFlow: () => {
+      setFlowActive(true);
+      setCurrentStepIdx(null);
+      setScreen("dailyFlow");
+    },
+    openStep: (idx) => {
+      setFlowActive(true);
+      setCurrentStepIdx(idx);
+      setScreen(FLOW_STEPS[idx].screen);
+    },
+    finishCurrentStep: () => {
+      if (currentStepIdx == null) { setScreen("dailyFlow"); return; }
+      const step = FLOW_STEPS[currentStepIdx];
+      setCompletedSteps((c) => ({ ...c, [step.id]: true }));
+      setCurrentStepIdx(null);
+      setScreen("dailyFlow");
+    },
+    exitFlow: () => { setFlowActive(false); setCurrentStepIdx(null); setScreen("home"); },
   };
 
-  // Auto-advance from splash
   useEffect(() => {
     if (screen === "splash") {
       const t = setTimeout(() => setScreen("welcome"), 1600);
       return () => clearTimeout(t);
     }
   }, [screen]);
+
+
 
   return (
     <div className="min-h-screen bg-cream font-sans text-espresso antialiased">
@@ -144,7 +216,10 @@ function ActiveScreen({ store }: { store: Store }) {
     case "reward": return <RewardScreen store={store} />;
     case "symptom": return <SymptomScreen store={store} />;
     case "meal": return <MealScreen store={store} />;
+    case "water": return <WaterScreen store={store} />;
+    case "bathroom": return <BathroomScreen store={store} />;
     case "sleep": return <SleepScreen store={store} />;
+    case "dailyFlow": return <DailyFlowScreen store={store} />;
     case "dayComplete": return <DayCompleteScreen store={store} />;
     case "streak": return <StreakScreen store={store} />;
     case "week": return <WeekScreen store={store} />;
@@ -200,7 +275,10 @@ function ScreenJumper({
     { k: "reward", label: "Reward moment" },
     { k: "symptom", label: "Symptom log" },
     { k: "meal", label: "Meal log" },
+    { k: "water", label: "Water log" },
+    { k: "bathroom", label: "Bathroom log" },
     { k: "sleep", label: "Sleep log" },
+    { k: "dailyFlow", label: "Daily flow" },
     { k: "dayComplete", label: "Day complete" },
     { k: "streak", label: "Streak" },
     { k: "week", label: "Week grid" },
@@ -627,8 +705,24 @@ function HomeActive({ store }: { store: Store }) {
         <CurveDivider />
         <div className="px-5 -mt-1">
           <h1 className="text-[26px] font-black leading-tight">{remaining} sessions left</h1>
-          <p className="mt-1 text-[13px] font-bold text-taupe">{store.sessions} recorded · 3 logs open</p>
-          <button onClick={() => store.go("preGate")} className="mt-4 w-full rounded-[22px] bg-peach p-4 text-left active:scale-[0.99] transition">
+          <p className="mt-1 text-[13px] font-bold text-taupe">{store.sessions} recorded · {FLOW_STEPS.filter(s => !store.completedSteps[s.id]).length} steps open</p>
+
+          <button onClick={store.startFlow} className="mt-4 w-full rounded-[22px] bg-espresso p-4 text-left active:scale-[0.99] transition">
+            <div className="flex items-center gap-3">
+              <div className="h-14 w-14 rounded-2xl bg-coral flex items-center justify-center text-[26px]">🧭</div>
+              <div className="flex-1">
+                <p className="text-[11px] font-extrabold text-coral">Guided day</p>
+                <p className="mt-0.5 text-[16px] font-extrabold text-cream leading-tight">Walk me through today</p>
+                <p className="mt-1 text-[11px] font-bold text-cream/70">
+                  {Object.values(store.completedSteps).filter(Boolean).length} of {FLOW_STEPS.length} steps done · never miss one
+                </p>
+              </div>
+              <ArrowRight />
+            </div>
+          </button>
+
+          <p className="mt-4 text-[11px] font-extrabold text-taupe uppercase tracking-wide">Or jump in</p>
+          <button onClick={() => store.go("preGate")} className="mt-2 w-full rounded-[22px] bg-peach p-4 text-left active:scale-[0.99] transition">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-extrabold text-coral-deep">Before lunch</p>
@@ -645,10 +739,6 @@ function HomeActive({ store }: { store: Store }) {
               </div>
             </div>
           </button>
-          <div className="mt-3 space-y-2">
-            <ListRow title="Morning symptoms" meta="+10 rumbles" onClick={() => store.go("symptom")} />
-            <ListRow title="Last night's sleep" meta="+10 rumbles" onClick={() => store.go("sleep")} />
-          </div>
         </div>
       </div>
       <PillNav active="home" go={store.go} />
@@ -934,7 +1024,7 @@ function PassedScreen({ store }: { store: Store }) {
         </div>
       </div>
       <div className="absolute inset-x-6 bottom-16">
-        <PrimaryBtn onClick={() => store.go("reward")}>Continue</PrimaryBtn>
+        <PrimaryBtn onClick={() => store.flowActive ? store.finishCurrentStep() : store.go("reward")}>Continue</PrimaryBtn>
       </div>
       <HomeIndicator />
     </>
@@ -1070,7 +1160,7 @@ function SymptomScreen({ store }: { store: Store }) {
         </div>
       </div>
       <div className="absolute inset-x-6 bottom-16">
-        <PrimaryBtn onClick={() => { store.addRumbles(10); store.go("meal"); }}>Continue</PrimaryBtn>
+        <PrimaryBtn onClick={() => { store.addRumbles(10); store.flowActive ? store.finishCurrentStep() : store.go("meal"); }}>Continue</PrimaryBtn>
       </div>
       <HomeIndicator />
     </>
@@ -1115,7 +1205,7 @@ function MealScreen({ store }: { store: Store }) {
         </div>
       </div>
       <div className="absolute inset-x-6 bottom-16">
-        <PrimaryBtn onClick={() => { store.addRumbles(10); store.go("sleep"); }}>Log it</PrimaryBtn>
+        <PrimaryBtn onClick={() => { store.addRumbles(10); store.flowActive ? store.finishCurrentStep() : store.go("sleep"); }}>Log it</PrimaryBtn>
       </div>
       <HomeIndicator />
     </>
@@ -1151,7 +1241,7 @@ function SleepScreen({ store }: { store: Store }) {
         </div>
       </div>
       <div className="absolute inset-x-6 bottom-16">
-        <PrimaryBtn onClick={() => { store.addRumbles(10); store.go("home"); }}>Save</PrimaryBtn>
+        <PrimaryBtn onClick={() => { store.addRumbles(10); store.flowActive ? store.finishCurrentStep() : store.go("home"); }}>Save</PrimaryBtn>
       </div>
       <HomeIndicator />
     </>
@@ -1317,6 +1407,213 @@ function ProfileScreen({ store }: { store: Store }) {
         </button>
       </div>
       <PillNav active="profile" go={store.go} />
+      <HomeIndicator />
+    </>
+  );
+}
+
+/* =================================================================
+   Screens — Guided daily flow
+================================================================= */
+
+function DailyFlowScreen({ store }: { store: Store }) {
+  const done = FLOW_STEPS.filter((s) => store.completedSteps[s.id]).length;
+  const total = FLOW_STEPS.length;
+  const pct = Math.round((done / total) * 100);
+  const nextIdx = FLOW_STEPS.findIndex((s) => !store.completedSteps[s.id]);
+  const allDone = nextIdx === -1;
+
+  return (
+    <>
+      <div className="absolute inset-x-0 top-0 h-[32%] bg-peach">
+        <StatusBar />
+        <div className="flex items-center gap-2 px-4 pt-3">
+          <button onClick={store.exitFlow} className="h-9 w-9 rounded-full bg-white flex items-center justify-center text-[18px] font-black text-espresso">←</button>
+          <div className="flex-1 text-center">
+            <p className="text-[11px] font-extrabold text-coral-deep uppercase tracking-wide">Guided day</p>
+            <p className="text-[15px] font-black text-espresso">Today's flow</p>
+          </div>
+          <div className="h-9 w-9 rounded-full bg-white flex items-center justify-center overflow-hidden">
+            <img src={borbyWave} alt="" className="h-8 w-8 object-contain" loading="lazy" />
+          </div>
+        </div>
+        <div className="px-6 mt-2">
+          <div className="flex items-baseline justify-between">
+            <p className="text-[22px] font-black text-espresso leading-tight">{done} of {total} done</p>
+            <p className="text-[12px] font-extrabold text-coral-deep">{pct}%</p>
+          </div>
+          <div className="mt-2 h-2 rounded-full bg-white/60 overflow-hidden">
+            <div className="h-full bg-coral transition-all" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      </div>
+
+      <div className="relative pt-[32%]">
+        <CurveDivider />
+        <div className="px-4 -mt-1 pb-32 max-h-[420px] overflow-y-auto">
+          <div className="relative">
+            <span className="absolute left-[22px] top-2 bottom-2 w-[2px] bg-hairline" />
+            <div className="space-y-2">
+              {FLOW_STEPS.map((step, i) => {
+                const isDone = store.completedSteps[step.id];
+                const isNext = i === nextIdx;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => store.openStep(i)}
+                    className={`relative w-full flex items-center gap-3 rounded-[18px] p-3 text-left transition active:scale-[0.99] ${
+                      isNext ? "bg-white border-[2px] border-coral shadow-[0_6px_16px_-8px_rgba(219,106,58,0.4)]" :
+                      isDone ? "bg-sage/40 border border-hairline" :
+                      "bg-white/70 border border-hairline"
+                    }`}
+                  >
+                    <div className={`relative z-10 h-11 w-11 rounded-full flex items-center justify-center text-[18px] ${
+                      isDone ? "bg-olive text-cream" : isNext ? "bg-coral text-cream" : "bg-sand text-espresso"
+                    }`}>
+                      {isDone ? <CheckIcon color="#F7F3EA" /> : <span>{step.emoji}</span>}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className={`text-[14px] font-extrabold leading-tight ${isDone ? "text-taupe line-through" : "text-espresso"}`}>{step.title}</p>
+                        {isNext && <span className="rounded-full bg-coral px-2 py-0.5 text-[9px] font-black text-cream uppercase tracking-wide">Now</span>}
+                      </div>
+                      <p className="text-[11px] font-bold text-taupe mt-0.5">{step.sub} · +{step.reward} rumbles</p>
+                    </div>
+                    {!isDone && <ArrowRight />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute inset-x-6 bottom-16">
+        {allDone ? (
+          <PrimaryBtn onClick={() => { store.exitFlow(); store.go("dayComplete"); }} tone="coral">Wrap the day</PrimaryBtn>
+        ) : (
+          <PrimaryBtn onClick={() => store.openStep(nextIdx)} tone="coral">
+            Continue → {FLOW_STEPS[nextIdx].title}
+          </PrimaryBtn>
+        )}
+        <button onClick={store.exitFlow} className="mt-2 w-full text-center text-[12px] font-bold text-taupe">Pause the flow</button>
+      </div>
+      <HomeIndicator />
+    </>
+  );
+}
+
+/* =================================================================
+   Screens — Water & Bathroom
+================================================================= */
+
+function WaterScreen({ store }: { store: Store }) {
+  const [glasses, setGlasses] = useState(3);
+  return (
+    <>
+      <StatusBar />
+      <div className="px-6 pt-4 flex items-center gap-2">
+        <p className="text-[13px] font-extrabold">Hydration</p>
+        {store.flowActive && store.currentStepIdx != null && (
+          <span className="ml-auto rounded-full bg-sand px-2.5 py-1 text-[10px] font-extrabold text-taupe">
+            Step {store.currentStepIdx + 1} of {FLOW_STEPS.length}
+          </span>
+        )}
+      </div>
+      <div className="px-6 mt-3">
+        <h1 className="text-[26px] font-black leading-tight">How much water so far?</h1>
+        <p className="mt-1.5 text-[12px] font-bold text-taupe">Since you woke up · glasses (~250 ml)</p>
+
+        <div className="mt-8 flex items-center justify-center gap-5">
+          <button onClick={() => setGlasses((g) => Math.max(0, g - 1))} className="h-12 w-12 rounded-full bg-sand text-[24px] font-black">−</button>
+          <div className="flex flex-col items-center">
+            <p className="text-[68px] font-black tracking-tight leading-none tabular-nums">{glasses}</p>
+            <p className="text-[12px] font-bold text-taupe mt-1">glasses</p>
+          </div>
+          <button onClick={() => setGlasses((g) => Math.min(20, g + 1))} className="h-12 w-12 rounded-full bg-coral text-cream text-[24px] font-black">+</button>
+        </div>
+
+        <div className="mt-6 flex justify-center gap-1.5">
+          {Array.from({ length: Math.min(glasses, 12) }).map((_, i) => (
+            <span key={i} className="text-[22px]">💧</span>
+          ))}
+        </div>
+
+        <div className="mt-6 rounded-[18px] bg-sand p-3 flex items-center gap-3">
+          <img src={borbyWave} alt="" className="h-10 w-10 object-contain" loading="lazy" />
+          <p className="text-[12px] font-bold leading-snug">Water intake changes what your gut sounds like — tracking it helps me read your clips.</p>
+        </div>
+      </div>
+      <div className="absolute inset-x-6 bottom-16">
+        <PrimaryBtn onClick={() => { store.addRumbles(5); store.flowActive ? store.finishCurrentStep() : store.go("home"); }}>Log {glasses} glasses</PrimaryBtn>
+      </div>
+      <HomeIndicator />
+    </>
+  );
+}
+
+function BathroomScreen({ store }: { store: Store }) {
+  const [type, setType] = useState(4);
+  const [urgency, setUrgency] = useState<"Normal" | "Urgent" | "Held back">("Normal");
+  const bristol = [
+    { n: 1, label: "Hard lumps" },
+    { n: 2, label: "Lumpy sausage" },
+    { n: 3, label: "Cracked sausage" },
+    { n: 4, label: "Smooth sausage" },
+    { n: 5, label: "Soft blobs" },
+    { n: 6, label: "Mushy" },
+    { n: 7, label: "Liquid" },
+  ];
+  return (
+    <>
+      <StatusBar />
+      <div className="px-6 pt-4 flex items-center gap-2">
+        <p className="text-[13px] font-extrabold">Bathroom log</p>
+        {store.flowActive && store.currentStepIdx != null && (
+          <span className="ml-auto rounded-full bg-sand px-2.5 py-1 text-[10px] font-extrabold text-taupe">
+            Step {store.currentStepIdx + 1} of {FLOW_STEPS.length}
+          </span>
+        )}
+      </div>
+      <div className="px-6 mt-3">
+        <h1 className="text-[24px] font-black leading-tight">Bowel movement today?</h1>
+        <p className="mt-1.5 text-[12px] font-bold text-taupe">Bristol scale — pick what's closest</p>
+
+        <div className="mt-4 space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
+          {bristol.map((b) => {
+            const on = type === b.n;
+            return (
+              <button
+                key={b.n}
+                onClick={() => setType(b.n)}
+                className={`w-full flex items-center gap-3 rounded-[16px] p-2.5 text-left transition ${
+                  on ? "bg-coral text-cream" : "bg-white border border-hairline text-espresso"
+                }`}
+              >
+                <span className={`h-8 w-8 rounded-full flex items-center justify-center text-[13px] font-black ${on ? "bg-cream text-coral-deep" : "bg-sand text-espresso"}`}>{b.n}</span>
+                <span className="text-[13px] font-extrabold">{b.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="mt-4 text-[13px] font-extrabold">How was it?</p>
+        <div className="mt-2 flex gap-2 flex-wrap">
+          {(["Normal", "Urgent", "Held back"] as const).map((u) => (
+            <button
+              key={u}
+              onClick={() => setUrgency(u)}
+              className={`rounded-full px-3 py-2 text-[12px] font-extrabold ${urgency === u ? "bg-espresso text-cream" : "bg-white border border-hairline text-espresso"}`}
+            >
+              {u}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="absolute inset-x-6 bottom-16">
+        <PrimaryBtn onClick={() => { store.addRumbles(15); store.flowActive ? store.finishCurrentStep() : store.go("home"); }}>Log it</PrimaryBtn>
+        <button onClick={() => store.flowActive ? store.finishCurrentStep() : store.go("home")} className="mt-2 w-full text-center text-[12px] font-bold text-taupe">Nothing today</button>
+      </div>
       <HomeIndicator />
     </>
   );
