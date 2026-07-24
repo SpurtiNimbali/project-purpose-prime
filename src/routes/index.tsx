@@ -738,7 +738,7 @@ function HomeActive({ store }: { store: Store }) {
 
           <button onClick={store.startFlow} className="mt-4 w-full rounded-[22px] bg-espresso p-4 text-left active:scale-[0.99] transition">
             <div className="flex items-center gap-3">
-              <div className="h-14 w-14 rounded-2xl bg-coral flex items-center justify-center text-[26px]">🧭</div>
+              <div className="h-14 w-14 rounded-2xl bg-coral flex items-center justify-center text-cream"><CompassIcon color="#F7F3EA" /></div>
               <div className="flex-1">
                 <p className="text-[11px] font-extrabold text-coral">Guided day</p>
                 <p className="mt-0.5 text-[16px] font-extrabold text-cream leading-tight">Walk me through today</p>
