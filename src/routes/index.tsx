@@ -1087,13 +1087,13 @@ function RecordingScreen({ store }: { store: Store }) {
         </div>
       </div>
 
-      {/* Symptom logger — big tap targets, phone-on-belly friendly */}
-      <div className="absolute inset-x-4 bottom-[132px]">
-        <div className="flex items-center justify-between px-2 mb-2">
-          <p className="text-[11px] font-extrabold uppercase tracking-wider text-cream/80">
-            Feel something? Tap it
+      {/* Bottom sheet — symptom logger + stop, grouped as one production surface */}
+      <div className="absolute inset-x-3 bottom-3 rounded-[26px] bg-black/15 backdrop-blur-sm p-3">
+        <div className="flex items-center justify-between px-1 mb-2">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-cream/85">
+            Feel something · tap
           </p>
-          <p className="text-[11px] font-extrabold text-cream/80 tabular-nums">
+          <p className="text-[10px] font-extrabold text-cream tabular-nums bg-white/15 rounded-full px-2 py-0.5">
             {markers.length} logged
           </p>
         </div>
@@ -1101,18 +1101,19 @@ function RecordingScreen({ store }: { store: Store }) {
           {SYMPTOMS.map((s) => {
             const count = markers.filter((m) => m.k === s.k).length;
             const isFlash = flash === s.k;
+            const Icon = s.Icon;
             return (
               <button
                 key={s.k}
                 onClick={() => logSymptom(s.k)}
-                className={`relative flex flex-col items-center justify-center rounded-2xl py-3 transition-all active:scale-95 ${
-                  isFlash ? "bg-cream text-coral-deep scale-105" : "bg-white/15 text-cream"
+                className={`relative flex flex-col items-center justify-center rounded-2xl h-[62px] transition-all active:scale-95 ${
+                  isFlash ? "bg-cream text-coral-deep scale-[1.04]" : "bg-white/12 text-cream"
                 }`}
               >
-                <span className="text-[22px] leading-none">{s.emoji}</span>
-                <span className="mt-1 text-[10px] font-extrabold">{s.label}</span>
+                <Icon color={isFlash ? "#B84A1F" : "#F7F3EA"} />
+                <span className="mt-1 text-[9.5px] font-extrabold tracking-wide">{s.label}</span>
                 {count > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-cream text-coral-deep text-[10px] font-black flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 rounded-full bg-cream text-coral-deep text-[10px] font-black flex items-center justify-center ring-2 ring-coral">
                     {count}
                   </span>
                 )}
@@ -1120,10 +1121,7 @@ function RecordingScreen({ store }: { store: Store }) {
             );
           })}
         </div>
-      </div>
-
-      <div className="absolute inset-x-6 bottom-16">
-        <button onClick={() => store.go("sideSwitch")} className="w-full rounded-full bg-cream text-coral-deep py-3 text-[13px] font-extrabold">
+        <button onClick={() => store.go("sideSwitch")} className="mt-3 w-full rounded-full bg-cream text-coral-deep py-3 text-[13px] font-extrabold">
           Stop early
         </button>
         <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] font-bold text-cream/85">
