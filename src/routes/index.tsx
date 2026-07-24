@@ -269,7 +269,7 @@ function PhoneShell({ children, screen }: { children: React.ReactNode; screen: S
         : screen === "flagged"
           ? "#FBE0D6"
           : peachScreens.includes(screen)
-            ? "#FADFC7"
+            ? "#FBE0C8"
             : "#F7F3EA";
   return (
     <div
