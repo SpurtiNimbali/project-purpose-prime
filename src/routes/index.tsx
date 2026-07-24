@@ -76,22 +76,37 @@ type FlowStep = {
   title: string;
   sub: string;
   screen: ScreenKey;
-  emoji: string;
+  iconKey: "moon" | "smile" | "mic" | "bowl" | "droplet" | "toilet" | "fork" | "sunset";
   reward: number;
 };
 
 const FLOW_STEPS: FlowStep[] = [
-  { id: "sleep",      title: "Last night's sleep",     sub: "How many hours",             screen: "sleep",   emoji: "🌙", reward: 10 },
-  { id: "symptomAM",  title: "Morning symptoms",       sub: "Bloat, cramps, energy",      screen: "symptom", emoji: "😊", reward: 10 },
-  { id: "fasted",     title: "Fasted recording",       sub: "3-min quiet-window clip",    screen: "preGate", emoji: "🎙️", reward: 40 },
-  { id: "breakfast",  title: "Log breakfast",          sub: "What you ate & when",        screen: "meal",    emoji: "🥣", reward: 10 },
-  { id: "water",      title: "Log water intake",       sub: "Glasses since waking",       screen: "water",   emoji: "💧", reward: 5  },
-  { id: "bathroom",   title: "Log bathroom",           sub: "Bowel movement (Bristol)",   screen: "bathroom",emoji: "🚽", reward: 15 },
-  { id: "preLunch",   title: "Before-lunch recording", sub: "3-min quiet-window clip",    screen: "preGate", emoji: "🎙️", reward: 40 },
-  { id: "lunch",      title: "Log lunch",              sub: "What you ate & when",        screen: "meal",    emoji: "🍜", reward: 10 },
-  { id: "evening",    title: "Evening recording",      sub: "3-min quiet-window clip",    screen: "preGate", emoji: "🎙️", reward: 40 },
-  { id: "symptomPM",  title: "Evening symptoms",       sub: "How the day felt",           screen: "symptom", emoji: "🌆", reward: 10 },
+  { id: "sleep",      title: "Last night's sleep",     sub: "How many hours",             screen: "sleep",   iconKey: "moon",    reward: 10 },
+  { id: "symptomAM",  title: "Morning symptoms",       sub: "Bloat, cramps, energy",      screen: "symptom", iconKey: "smile",   reward: 10 },
+  { id: "fasted",     title: "Fasted recording",       sub: "3-min quiet-window clip",    screen: "preGate", iconKey: "mic",     reward: 40 },
+  { id: "breakfast",  title: "Log breakfast",          sub: "What you ate & when",        screen: "meal",    iconKey: "bowl",    reward: 10 },
+  { id: "water",      title: "Log water intake",       sub: "Glasses since waking",       screen: "water",   iconKey: "droplet", reward: 5  },
+  { id: "bathroom",   title: "Log bathroom",           sub: "Bowel movement (Bristol)",   screen: "bathroom",iconKey: "toilet",  reward: 15 },
+  { id: "preLunch",   title: "Before-lunch recording", sub: "3-min quiet-window clip",    screen: "preGate", iconKey: "mic",     reward: 40 },
+  { id: "lunch",      title: "Log lunch",              sub: "What you ate & when",        screen: "meal",    iconKey: "fork",    reward: 10 },
+  { id: "evening",    title: "Evening recording",      sub: "3-min quiet-window clip",    screen: "preGate", iconKey: "mic",     reward: 40 },
+  { id: "symptomPM",  title: "Evening symptoms",       sub: "How the day felt",           screen: "symptom", iconKey: "sunset",  reward: 10 },
 ];
+
+function FlowIcon({ iconKey, color = "currentColor", size = 22 }: { iconKey: FlowStep["iconKey"]; color?: string; size?: number }) {
+  const p = { color };
+  switch (iconKey) {
+    case "moon":    return <MoonIcon {...p} />;
+    case "smile":   return <SmileIcon {...p} />;
+    case "mic":     return <MicIcon {...p} />;
+    case "bowl":    return <BowlIcon {...p} />;
+    case "droplet": return <DropletIcon color={color} size={size} />;
+    case "toilet":  return <ToiletIcon {...p} />;
+    case "fork":    return <ForkKnifeIcon {...p} />;
+    case "sunset":  return <SunsetIcon {...p} />;
+  }
+}
+
 
 type Store = {
   screen: ScreenKey;
@@ -393,13 +408,29 @@ function BookIcon() { return (<svg width="20" height="20" viewBox="0 0 24 24" {.
 function FlameIcon() { return (<svg width="20" height="20" viewBox="0 0 24 24" {...stroke}><path d="M12 3s4 4 4 8a4 4 0 11-8 0c0-1 .5-2 1-2.5C10 10 12 8 12 3z" /></svg>); }
 function ChartIcon() { return (<svg width="20" height="20" viewBox="0 0 24 24" {...stroke}><path d="M4 20V10M10 20V4M16 20v-8M22 20H2" /></svg>); }
 function WaveformIcon({ color = "#F7F3EA" }: { color?: string }) { return (<svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 12v0M8 8v8M12 4v16M16 8v8M20 12v0" stroke={color} strokeWidth="2.4" strokeLinecap="round" /></svg>); }
-function ArrowRight() { return (<svg width="18" height="18" viewBox="0 0 24 24" {...stroke} stroke="#DB6A3A"><path d="M5 12h14M13 6l6 6-6 6" /></svg>); }
+function ArrowRight({ color = "#DB6A3A" }: { color?: string }) { return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>); }
 function ChatBubbleIcon({ color = "#DB6A3A" }: { color?: string }) { return (<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H9l-4 4v-4H6a2 2 0 01-2-2V6z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>); }
 function ShieldIcon({ color = "#5C7A3D" }: { color?: string }) { return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>); }
 function CheckIcon({ color = "#5C7A3D" }: { color?: string }) { return (<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>); }
-function MicIcon() { return (<svg width="20" height="20" viewBox="0 0 24 24" {...stroke}><rect x="9" y="3" width="6" height="12" rx="3" /><path d="M5 11a7 7 0 0014 0M12 18v3" /></svg>); }
+function MicIcon({ color = "currentColor" }: { color?: string } = {}) { return (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="3" width="6" height="12" rx="3" /><path d="M5 11a7 7 0 0014 0M12 18v3" /></svg>); }
 function BellIcon() { return (<svg width="20" height="20" viewBox="0 0 24 24" {...stroke}><path d="M6 16V11a6 6 0 1112 0v5l1.5 2h-15L6 16zM10 21h4" /></svg>); }
 function HeartPulseIcon() { return (<svg width="20" height="20" viewBox="0 0 24 24" {...stroke}><path d="M20.8 11c.8-4-2.2-7-5.3-7-1.5 0-2.9.7-3.5 1.6C11.4 4.7 10 4 8.5 4 5.4 4 2.4 7 3.2 11c.7 3.5 4.4 6.4 8.8 9 4.4-2.6 8.1-5.5 8.8-9z" /><path d="M6 13h3l1.5-3 3 6L15 13h3" /></svg>); }
+
+/* Flow / log icons */
+function MoonIcon({ color = "currentColor" }: { color?: string } = {}) { return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.5 14.3A8.5 8.5 0 019.7 3.5a1 1 0 00-1.3-1.2 10 10 0 1013.3 13.3 1 1 0 00-1.2-1.3z" /></svg>); }
+function SmileIcon({ color = "currentColor" }: { color?: string } = {}) { return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8.5 14a4 4 0 007 0" /><circle cx="9" cy="10" r="0.9" fill={color} stroke="none" /><circle cx="15" cy="10" r="0.9" fill={color} stroke="none" /></svg>); }
+function StethoscopeIcon({ color = "currentColor" }: { color?: string } = {}) { return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 3v6a4 4 0 008 0V3M6 3h-.5M12 3h.5" /><path d="M9 13v3a5 5 0 0010 0v-2" /><circle cx="19" cy="12" r="2" /></svg>); }
+function BowlIcon({ color = "currentColor" }: { color?: string } = {}) { return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11h18a9 9 0 01-18 0z" /><path d="M2 11h20" /><path d="M9 6c0-1 1-2 2-2s1 1 2 1 2-1 2-1" /></svg>); }
+function ForkKnifeIcon({ color = "currentColor" }: { color?: string } = {}) { return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M7 3v8M5 3v4a2 2 0 004 0V3M7 11v10" /><path d="M17 21V3s3 1 3 6-3 5-3 5" /></svg>); }
+function DropletIcon({ color = "currentColor", size = 22 }: { color?: string; size?: number } = {}) { return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z" /></svg>); }
+function ToiletIcon({ color = "currentColor" }: { color?: string } = {}) { return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 4h14v6a5 5 0 01-1.5 3.6L16 15v6h-8v-6l-1.5-1.4A5 5 0 015 10V4z" /><path d="M8 10h8" /></svg>); }
+function SunsetIcon({ color = "currentColor" }: { color?: string } = {}) { return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 10V3M4.9 10.9L3.5 9.5M19.1 10.9l1.4-1.4M2 18h20M6 18a6 6 0 0112 0" /><path d="M8 22h8" /></svg>); }
+function CompassIcon({ color = "currentColor" }: { color?: string } = {}) { return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5L14 14l-5.5 1.5L10 10z" /></svg>); }
+function ClockIcon({ color = "currentColor" }: { color?: string } = {}) { return (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>); }
+function DocIcon({ color = "currentColor" }: { color?: string } = {}) { return (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h9l4 4v14a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></svg>); }
+function SendIcon({ color = "#F7F3EA" }: { color?: string } = {}) { return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l16-8-6 18-3-7-7-3z" /></svg>); }
+function DotsIcon({ color = "currentColor" }: { color?: string } = {}) { return (<svg width="18" height="18" viewBox="0 0 24 24" fill={color}><circle cx="5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="19" cy="12" r="1.6" /></svg>); }
+
 
 /* =================================================================
    Small UI atoms
@@ -455,7 +486,7 @@ function SplashScreen() {
 function WelcomeScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[42%] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-peach">
         <StatusBar />
       </div>
       <div className="relative pt-10">
@@ -572,13 +603,13 @@ function ScheduleScreen({ store }: { store: Store }) {
 function PracticeScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[38%] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[296px] bg-peach">
         <StatusBar />
         <div className="flex justify-center pt-6">
           <img src={borbyMeditate} alt="" className="h-36 w-36 object-contain" />
         </div>
       </div>
-      <div className="relative pt-[38%]">
+      <div className="relative pt-[296px]">
         <CurveDivider />
         <div className="px-6 -mt-1">
           <h1 className="text-[26px] font-black leading-tight">Let's do one practice recording</h1>
@@ -653,13 +684,13 @@ function HomeScreen({ store }: { store: Store }) {
 function HomeIdle({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[42%] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-peach">
         <StatusBar />
         <div className="flex justify-center mt-6">
           <img src={borbySleep} alt="" className="h-36 w-36 object-contain" />
         </div>
       </div>
-      <div className="relative pt-[42%]">
+      <div className="relative pt-[328px]">
         <CurveDivider />
         <div className="px-5 -mt-1">
           <h1 className="text-[26px] font-black leading-tight">All done for today</h1>
@@ -680,7 +711,7 @@ function HomeActive({ store }: { store: Store }) {
   const remaining = store.totalSessions - store.sessions;
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[44%] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[343px] bg-peach">
         <StatusBar />
         <div className="flex items-center gap-2 px-4 pt-3">
           <button onClick={() => store.go("profile")} className="h-9 w-9 rounded-xl bg-white overflow-hidden flex items-center justify-center">
@@ -699,7 +730,7 @@ function HomeActive({ store }: { store: Store }) {
           <img src={borbyFire} alt="" className="h-28 w-28 object-contain" />
         </div>
       </div>
-      <div className="relative pt-[44%]">
+      <div className="relative pt-[343px]">
         <CurveDivider />
         <div className="px-5 -mt-1">
           <h1 className="text-[26px] font-black leading-tight">{remaining} sessions left</h1>
@@ -707,7 +738,7 @@ function HomeActive({ store }: { store: Store }) {
 
           <button onClick={store.startFlow} className="mt-4 w-full rounded-[22px] bg-espresso p-4 text-left active:scale-[0.99] transition">
             <div className="flex items-center gap-3">
-              <div className="h-14 w-14 rounded-2xl bg-coral flex items-center justify-center text-[26px]">🧭</div>
+              <div className="h-14 w-14 rounded-2xl bg-coral flex items-center justify-center text-cream"><CompassIcon color="#F7F3EA" /></div>
               <div className="flex-1">
                 <p className="text-[11px] font-extrabold text-coral">Guided day</p>
                 <p className="mt-0.5 text-[16px] font-extrabold text-cream leading-tight">Walk me through today</p>
@@ -715,7 +746,8 @@ function HomeActive({ store }: { store: Store }) {
                   {Object.values(store.completedSteps).filter(Boolean).length} of {FLOW_STEPS.length} steps done · never miss one
                 </p>
               </div>
-              <ArrowRight />
+              <ArrowRight color="#F7F3EA" />
+
             </div>
           </button>
 
@@ -749,75 +781,162 @@ function HomeActive({ store }: { store: Store }) {
    Screens — Chat
 ================================================================= */
 
+type ChatMsg =
+  | { who: "borby"; text: string; protocol?: string }
+  | { who: "me"; text: string }
+  | { who: "cta"; label: string; sub: string; onOpen: ScreenKey };
+
 function ChatScreen({ store }: { store: Store }) {
-  const [msgs, setMsgs] = useState<{ who: "borby" | "me"; text: string }[]>([
+  const [msgs, setMsgs] = useState<ChatMsg[]>([
     { who: "borby", text: "Morning. Before water, food, or standing up — let's catch the quiet window." },
+    { who: "cta", label: "Start fasted recording", sub: "Closes in 48 min", onOpen: "preGate" },
   ]);
   const [input, setInput] = useState("");
+  const [typing, setTyping] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [msgs, typing]);
+
+  function reply(text: string) {
+    const t = text.toLowerCase();
+    if (t.includes("water") || t.includes("drink") || t.includes("sip")) {
+      return { text: "Hold off — water starts contractions we'd read as baseline. Record first, then drink all you want. Four minutes.", protocol: "Protocol 2.1" };
+    }
+    if (t.includes("skip") || t.includes("cancel")) {
+      return { text: "You can skip today without breaking your streak. Want me to log it as a protocol skip?", protocol: "Protocol 3.3" };
+    }
+    if (t.includes("week") || t.includes("progress")) {
+      return { text: "You're day 3 of 7, with 200 rumbles banked. Nice pace — $25 unlocked so far." };
+    }
+    if (t.includes("next") || t.includes("what")) {
+      return { text: "Your fasted window closes at 7:28. After that: breakfast log, then water. I'll walk you through." };
+    }
+    return { text: "Got it. I'll factor that into today's read." };
+  }
 
   function send(text: string) {
     if (!text.trim()) return;
     setMsgs((m) => [...m, { who: "me", text }]);
     setInput("");
+    setTyping(true);
     setTimeout(() => {
-      setMsgs((m) => [
-        ...m,
-        { who: "borby", text: "Hold off — water starts contractions we'd read as baseline. Record first, then drink all you want." },
-      ]);
-    }, 700);
+      const r = reply(text);
+      setTyping(false);
+      setMsgs((m) => [...m, { who: "borby", ...r }]);
+    }, 800);
   }
 
   return (
     <>
       <StatusBar />
-      <div className="flex items-center gap-3 px-5 pt-3 pb-3 border-b border-hairline">
-        <button onClick={() => store.go("home")} className="h-9 w-9 rounded-full bg-peach flex items-center justify-center overflow-hidden">
-          <img src={borbyWave} alt="" className="h-8 w-8 object-contain" />
+      {/* Header */}
+      <div className="flex items-center gap-3 px-5 pt-3 pb-3">
+        <button onClick={() => store.go("home")} className="h-10 w-10 rounded-full bg-peach flex items-center justify-center overflow-hidden shrink-0">
+          <img src={borbyWave} alt="" className="h-9 w-9 object-contain" />
         </button>
-        <div className="flex-1">
-          <p className="text-[15px] font-black">Borby</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-[16px] font-black text-espresso leading-tight">Borby</p>
           <p className="text-[11px] font-bold text-taupe">Day {store.streak} of 7 · always here</p>
         </div>
+        <button aria-label="More" className="h-9 w-9 rounded-full flex items-center justify-center text-taupe">
+          <DotsIcon />
+        </button>
       </div>
-      <div className="absolute inset-x-0 top-[92px] bottom-[132px] overflow-y-auto px-5 py-4 space-y-3">
-        {msgs.map((m, i) => (
-          <div key={i} className={`flex ${m.who === "me" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[78%] rounded-[18px] px-3.5 py-2.5 text-[13px] font-semibold leading-snug ${
-              m.who === "me" ? "bg-espresso text-cream" : "bg-white border border-hairline text-espresso"
-            }`}>
-              {m.text}
+
+      {/* Messages */}
+      <div ref={scrollRef} className="absolute inset-x-0 top-[92px] bottom-[136px] overflow-y-auto px-4 py-3 space-y-3">
+        {msgs.map((m, i) => {
+          if (m.who === "me") {
+            return (
+              <div key={i} className="flex justify-end">
+                <div className="max-w-[78%] rounded-[20px] rounded-br-[6px] bg-espresso text-cream px-4 py-2.5 text-[14px] font-semibold leading-snug">
+                  {m.text}
+                </div>
+              </div>
+            );
+          }
+          if (m.who === "cta") {
+            return (
+              <div key={i} className="rounded-[22px] bg-coral p-3">
+                <div className="flex items-center gap-1.5 px-1 text-cream/90 text-[11px] font-extrabold">
+                  <ClockIcon color="#F7F3EA" /> {m.sub}
+                </div>
+                <button
+                  onClick={() => store.go(m.onOpen)}
+                  className="mt-2 w-full rounded-[16px] bg-cream text-espresso py-3 text-[14px] font-black active:scale-[0.99] transition"
+                >
+                  {m.label}
+                </button>
+              </div>
+            );
+          }
+          return (
+            <div key={i} className="flex justify-start">
+              <div className="max-w-[82%] rounded-[20px] rounded-bl-[6px] bg-white border border-hairline px-4 py-3 text-[14px] font-semibold leading-snug text-espresso shadow-[0_2px_10px_-6px_rgba(60,30,10,0.15)]">
+                {m.text}
+                {m.protocol && (
+                  <div className="mt-2 flex items-center gap-1.5 text-[11px] font-extrabold text-taupe">
+                    <DocIcon color="#8A8175" /> {m.protocol}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {typing && (
+          <div className="flex justify-start">
+            <div className="rounded-[20px] rounded-bl-[6px] bg-white border border-hairline px-4 py-3 flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-taupe/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-taupe/60 animate-bounce" style={{ animationDelay: "120ms" }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-taupe/60 animate-bounce" style={{ animationDelay: "240ms" }} />
             </div>
           </div>
-        ))}
-        <div className="rounded-[18px] bg-coral text-cream p-3">
-          <p className="text-[11px] font-extrabold opacity-90">Closes in 48 min</p>
-          <button onClick={() => store.go("preGate")} className="mt-2 w-full rounded-full bg-cream text-coral-deep py-2 text-[13px] font-extrabold">
-            Start fasted recording
-          </button>
-        </div>
+        )}
       </div>
-      <div className="absolute inset-x-0 bottom-12 px-4">
-        <div className="flex gap-2 mb-2">
-          {["My week", "What's next", "Skip today"].map((s) => (
-            <button key={s} onClick={() => send(s)} className="rounded-full bg-white border border-hairline px-3 py-1.5 text-[11px] font-extrabold text-espresso">
-              {s}
+
+      {/* Composer */}
+      <div className="absolute inset-x-0 bottom-10 px-3">
+        <div className="flex gap-1.5 mb-2 px-1 overflow-x-auto no-scrollbar">
+          {[
+            { label: "My week", tone: "sage" },
+            { label: "What's next", tone: "sage" },
+            { label: "Skip today", tone: "peach" },
+          ].map((c) => (
+            <button
+              key={c.label}
+              onClick={() => send(c.label)}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-extrabold ${
+                c.tone === "peach" ? "bg-peach text-coral-deep" : "bg-sage/60 text-espresso"
+              }`}
+            >
+              {c.label}
             </button>
           ))}
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex gap-2">
+        <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex items-center gap-2 rounded-full bg-white border border-hairline pl-4 pr-1.5 py-1.5">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask Borby anything"
-            className="flex-1 rounded-full bg-white border border-hairline px-4 py-2.5 text-[13px] font-semibold placeholder:text-taupe focus:outline-none focus:border-coral"
+            className="flex-1 bg-transparent text-[14px] font-semibold placeholder:text-taupe focus:outline-none"
           />
-          <button type="submit" className="rounded-full bg-coral text-cream px-4 text-[13px] font-extrabold">Send</button>
+          <button
+            type="submit"
+            aria-label="Send"
+            disabled={!input.trim()}
+            className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 transition ${input.trim() ? "bg-coral" : "bg-hairline"}`}
+          >
+            <SendIcon />
+          </button>
         </form>
       </div>
       <HomeIndicator />
     </>
   );
 }
+
 
 /* =================================================================
    Screens — Pre-gate + recording
@@ -990,13 +1109,13 @@ function PassedScreen({ store }: { store: Store }) {
   useEffect(() => { store.completeSession(); store.addRumbles(40); }, []);
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[42%] bg-olive">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-olive">
         <StatusBar tint="cream" />
         <div className="flex flex-col items-center pt-2">
           <p className="text-[140px] font-black text-white leading-none tracking-tight">96</p>
         </div>
       </div>
-      <div className="relative pt-[42%]">
+      <div className="relative pt-[328px]">
         <CurveDivider />
         <div className="px-5 -mt-1">
           <p className="text-[13px] font-extrabold text-taupe">Clip quality, both sides</p>
@@ -1041,13 +1160,13 @@ function SignalRow({ label, value, tone = "olive" }: { label: string; value: str
 function FlaggedScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[42%] bg-coral">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-coral">
         <StatusBar tint="cream" />
         <div className="flex flex-col items-center pt-2">
           <p className="text-[140px] font-black text-white leading-none tracking-tight">41</p>
         </div>
       </div>
-      <div className="relative pt-[42%]">
+      <div className="relative pt-[328px]">
         <CurveDivider />
         <div className="px-5 -mt-1">
           <p className="text-[13px] font-extrabold text-taupe">Clip quality</p>
@@ -1130,15 +1249,22 @@ function SymptomScreen({ store }: { store: Store }) {
         <h1 className="text-[24px] font-black leading-tight">How bloated do you feel right now?</h1>
         <p className="mt-1.5 text-[12px] font-bold text-taupe">Since your last recording</p>
         <div className="mt-6 flex items-end justify-between">
-          {severityFaces.map((f, i) => (
-            <button key={i} onClick={() => setSel(i)} className={`flex flex-col items-center gap-1.5 transition ${sel === i ? "scale-110" : "opacity-40"}`}>
-              <span className="rounded-full flex items-center justify-center relative" style={{ background: f.color, width: sel === i ? 46 : 36, height: sel === i ? 46 : 36 }}>
-                <span className="absolute inset-0 flex items-center justify-center text-white text-[12px] font-black">•‿•</span>
-              </span>
-              <span className="text-[10px] font-extrabold text-taupe">{f.label}</span>
-            </button>
-          ))}
+          {severityFaces.map((f, i) => {
+            const active = sel === i;
+            return (
+              <button key={i} onClick={() => setSel(i)} className={`flex flex-col items-center gap-1.5 transition ${active ? "scale-110" : "opacity-40"}`}>
+                <span
+                  className="rounded-full flex items-center justify-center text-white"
+                  style={{ background: f.color, width: active ? 46 : 36, height: active ? 46 : 36 }}
+                >
+                  <SmileIcon color="#FFFFFF" />
+                </span>
+                <span className="text-[10px] font-extrabold text-taupe">{f.label}</span>
+              </button>
+            );
+          })}
         </div>
+
         <div className="mt-6 rounded-[20px] bg-white border border-hairline p-4">
           <p className="text-[13px] font-extrabold">Anything else going on?</p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -1249,13 +1375,13 @@ function SleepScreen({ store }: { store: Store }) {
 function DayCompleteScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[46%] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[360px] bg-peach">
         <StatusBar />
         <div className="flex justify-center mt-6">
           <img src={borbySleep} alt="" className="h-40 w-40 object-contain" />
         </div>
       </div>
-      <div className="relative pt-[46%]">
+      <div className="relative pt-[360px]">
         <CurveDivider />
         <div className="px-6 -mt-1">
           <h1 className="text-[28px] font-black leading-tight">That's the day</h1>
@@ -1288,13 +1414,13 @@ function StreakScreen({ store }: { store: Store }) {
   const pct = Math.min(100, Math.round((store.rumbles / 580) * 100));
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[36%] bg-espresso">
+      <div className="absolute inset-x-0 top-0 h-[280px] bg-espresso">
         <StatusBar tint="cream" />
         <div className="flex justify-center mt-4">
           <img src={borbyFire} alt="" className="h-32 w-32 object-contain" />
         </div>
       </div>
-      <div className="relative pt-[36%]">
+      <div className="relative pt-[280px]">
         <CurveDivider />
         <div className="px-5 -mt-1">
           <h1 className="text-[26px] font-black leading-tight">Three days lit</h1>
@@ -1463,7 +1589,7 @@ function DailyFlowScreen({ store }: { store: Store }) {
                       : "bg-cream text-taupe border border-hairline"
                   }`}
                 >
-                  {isDone ? "✓" : i + 1}
+                  {isDone ? <CheckIcon color="#F7F3EA" /> : i + 1}
                 </button>
               );
             })}
@@ -1487,9 +1613,10 @@ function DailyFlowScreen({ store }: { store: Store }) {
               <span className="text-[11px] font-extrabold text-taupe">+{current.reward} rumbles</span>
             </div>
             <div className="mt-3 flex items-start gap-4">
-              <div className="h-16 w-16 rounded-2xl bg-peach flex items-center justify-center text-[32px] shrink-0">
-                {current.emoji}
+              <div className="h-16 w-16 rounded-2xl bg-peach flex items-center justify-center shrink-0 text-coral-deep">
+                <FlowIcon iconKey={current.iconKey} size={28} />
               </div>
+
               <div className="min-w-0 flex-1">
                 <h1 className="text-[22px] font-black leading-tight text-espresso">{current.title}</h1>
                 <p className="mt-1 text-[13px] font-bold text-taupe leading-snug">{current.sub}</p>
@@ -1500,7 +1627,7 @@ function DailyFlowScreen({ store }: { store: Store }) {
               onClick={() => store.openStep(activeIdx)}
               className="mt-5 w-full rounded-[16px] bg-coral text-cream py-3.5 text-[15px] font-black active:scale-[0.99] transition flex items-center justify-center gap-2"
             >
-              Start this step <ArrowRight />
+              Start this step <ArrowRight color="#F7F3EA" />
             </button>
             <button
               onClick={() => { store.completedSteps[current.id] = true; store.finishCurrentStep(); }}
@@ -1517,7 +1644,7 @@ function DailyFlowScreen({ store }: { store: Store }) {
         <div className="px-4 mt-4">
           <p className="text-[10px] font-extrabold text-taupe uppercase tracking-[0.14em] mb-2">Up next</p>
           <div className="rounded-[16px] bg-sand/60 border border-hairline p-3 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-[18px] shrink-0">{upNext.emoji}</div>
+            <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shrink-0 text-espresso"><FlowIcon iconKey={upNext.iconKey} size={18} /></div>
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-extrabold text-espresso truncate">{upNext.title}</p>
               <p className="text-[11px] font-bold text-taupe truncate">{upNext.sub}</p>
@@ -1567,11 +1694,12 @@ function WaterScreen({ store }: { store: Store }) {
           <button onClick={() => setGlasses((g) => Math.min(20, g + 1))} className="h-12 w-12 rounded-full bg-coral text-cream text-[24px] font-black">+</button>
         </div>
 
-        <div className="mt-6 flex justify-center gap-1.5">
+        <div className="mt-6 flex justify-center gap-1.5 text-coral">
           {Array.from({ length: Math.min(glasses, 12) }).map((_, i) => (
-            <span key={i} className="text-[22px]">💧</span>
+            <DropletIcon key={i} color="#DB6A3A" size={22} />
           ))}
         </div>
+
 
         <div className="mt-6 rounded-[18px] bg-sand p-3 flex items-center gap-3">
           <img src={borbyWave} alt="" className="h-10 w-10 object-contain" loading="lazy" />
