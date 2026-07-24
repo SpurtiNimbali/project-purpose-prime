@@ -455,7 +455,7 @@ function SplashScreen() {
 function WelcomeScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[42%] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-peach">
         <StatusBar />
       </div>
       <div className="relative pt-10">
@@ -572,13 +572,13 @@ function ScheduleScreen({ store }: { store: Store }) {
 function PracticeScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[38%] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[296px] bg-peach">
         <StatusBar />
         <div className="flex justify-center pt-6">
           <img src={borbyMeditate} alt="" className="h-36 w-36 object-contain" />
         </div>
       </div>
-      <div className="relative pt-[38%]">
+      <div className="relative pt-[296px]">
         <CurveDivider />
         <div className="px-6 -mt-1">
           <h1 className="text-[26px] font-black leading-tight">Let's do one practice recording</h1>
@@ -653,13 +653,13 @@ function HomeScreen({ store }: { store: Store }) {
 function HomeIdle({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[42%] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-peach">
         <StatusBar />
         <div className="flex justify-center mt-6">
           <img src={borbySleep} alt="" className="h-36 w-36 object-contain" />
         </div>
       </div>
-      <div className="relative pt-[42%]">
+      <div className="relative pt-[328px]">
         <CurveDivider />
         <div className="px-5 -mt-1">
           <h1 className="text-[26px] font-black leading-tight">All done for today</h1>
@@ -680,7 +680,7 @@ function HomeActive({ store }: { store: Store }) {
   const remaining = store.totalSessions - store.sessions;
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[44%] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[343px] bg-peach">
         <StatusBar />
         <div className="flex items-center gap-2 px-4 pt-3">
           <button onClick={() => store.go("profile")} className="h-9 w-9 rounded-xl bg-white overflow-hidden flex items-center justify-center">
@@ -699,7 +699,7 @@ function HomeActive({ store }: { store: Store }) {
           <img src={borbyFire} alt="" className="h-28 w-28 object-contain" />
         </div>
       </div>
-      <div className="relative pt-[44%]">
+      <div className="relative pt-[343px]">
         <CurveDivider />
         <div className="px-5 -mt-1">
           <h1 className="text-[26px] font-black leading-tight">{remaining} sessions left</h1>
@@ -990,13 +990,13 @@ function PassedScreen({ store }: { store: Store }) {
   useEffect(() => { store.completeSession(); store.addRumbles(40); }, []);
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[42%] bg-olive">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-olive">
         <StatusBar tint="cream" />
         <div className="flex flex-col items-center pt-2">
           <p className="text-[140px] font-black text-white leading-none tracking-tight">96</p>
         </div>
       </div>
-      <div className="relative pt-[42%]">
+      <div className="relative pt-[328px]">
         <CurveDivider />
         <div className="px-5 -mt-1">
           <p className="text-[13px] font-extrabold text-taupe">Clip quality, both sides</p>
@@ -1041,13 +1041,13 @@ function SignalRow({ label, value, tone = "olive" }: { label: string; value: str
 function FlaggedScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[42%] bg-coral">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-coral">
         <StatusBar tint="cream" />
         <div className="flex flex-col items-center pt-2">
           <p className="text-[140px] font-black text-white leading-none tracking-tight">41</p>
         </div>
       </div>
-      <div className="relative pt-[42%]">
+      <div className="relative pt-[328px]">
         <CurveDivider />
         <div className="px-5 -mt-1">
           <p className="text-[13px] font-extrabold text-taupe">Clip quality</p>
@@ -1249,13 +1249,13 @@ function SleepScreen({ store }: { store: Store }) {
 function DayCompleteScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[46%] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[360px] bg-peach">
         <StatusBar />
         <div className="flex justify-center mt-6">
           <img src={borbySleep} alt="" className="h-40 w-40 object-contain" />
         </div>
       </div>
-      <div className="relative pt-[46%]">
+      <div className="relative pt-[360px]">
         <CurveDivider />
         <div className="px-6 -mt-1">
           <h1 className="text-[28px] font-black leading-tight">That's the day</h1>
@@ -1288,13 +1288,13 @@ function StreakScreen({ store }: { store: Store }) {
   const pct = Math.min(100, Math.round((store.rumbles / 580) * 100));
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[36%] bg-espresso">
+      <div className="absolute inset-x-0 top-0 h-[280px] bg-espresso">
         <StatusBar tint="cream" />
         <div className="flex justify-center mt-4">
           <img src={borbyFire} alt="" className="h-32 w-32 object-contain" />
         </div>
       </div>
-      <div className="relative pt-[36%]">
+      <div className="relative pt-[280px]">
         <CurveDivider />
         <div className="px-5 -mt-1">
           <h1 className="text-[26px] font-black leading-tight">Three days lit</h1>
