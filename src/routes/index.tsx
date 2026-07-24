@@ -247,8 +247,30 @@ function ActiveScreen({ store }: { store: Store }) {
 ================================================================= */
 
 function PhoneShell({ children, screen }: { children: React.ReactNode; screen: ScreenKey }) {
-  // Choose device-frame background based on screen tone.
-  const dark = screen === "recording" || screen === "sideSwitch";
+  // Screen background is chosen so it matches whatever colored header band a
+  // screen uses. This prevents the visible seam that appeared when a fixed-
+  // height peach/olive/coral header ended mid-screen and the rest of the shell
+  // fell back to cream.
+  const peachScreens: ScreenKey[] = [
+    "welcome",
+    "welcomeGift",
+    "home",
+    "practice",
+    "reward",
+    "streak",
+    "dayComplete",
+    "dailyFlow",
+  ];
+  const bg =
+    screen === "recording" || screen === "sideSwitch"
+      ? "#DB6A3A"
+      : screen === "passed"
+        ? "#EEF1E4"
+        : screen === "flagged"
+          ? "#FBE0D6"
+          : peachScreens.includes(screen)
+            ? "#FADFC7"
+            : "#F7F3EA";
   return (
     <div
       className="relative rounded-[46px] p-[6px] shadow-[0_30px_60px_-30px_rgba(43,38,32,0.35)]"
@@ -256,7 +278,7 @@ function PhoneShell({ children, screen }: { children: React.ReactNode; screen: S
     >
       <div
         className="relative h-full w-full overflow-hidden rounded-[40px]"
-        style={{ background: dark ? "#DB6A3A" : "#F7F3EA", isolation: "isolate" }}
+        style={{ background: bg, isolation: "isolate" }}
       >
         <div className="pointer-events-none absolute left-1/2 top-2 z-30 h-[26px] w-[110px] -translate-x-1/2 rounded-full bg-espresso" />
         {children}
