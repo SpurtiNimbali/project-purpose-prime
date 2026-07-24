@@ -705,8 +705,24 @@ function HomeActive({ store }: { store: Store }) {
         <CurveDivider />
         <div className="px-5 -mt-1">
           <h1 className="text-[26px] font-black leading-tight">{remaining} sessions left</h1>
-          <p className="mt-1 text-[13px] font-bold text-taupe">{store.sessions} recorded · 3 logs open</p>
-          <button onClick={() => store.go("preGate")} className="mt-4 w-full rounded-[22px] bg-peach p-4 text-left active:scale-[0.99] transition">
+          <p className="mt-1 text-[13px] font-bold text-taupe">{store.sessions} recorded · {FLOW_STEPS.filter(s => !store.completedSteps[s.id]).length} steps open</p>
+
+          <button onClick={store.startFlow} className="mt-4 w-full rounded-[22px] bg-espresso p-4 text-left active:scale-[0.99] transition">
+            <div className="flex items-center gap-3">
+              <div className="h-14 w-14 rounded-2xl bg-coral flex items-center justify-center text-[26px]">🧭</div>
+              <div className="flex-1">
+                <p className="text-[11px] font-extrabold text-coral">Guided day</p>
+                <p className="mt-0.5 text-[16px] font-extrabold text-cream leading-tight">Walk me through today</p>
+                <p className="mt-1 text-[11px] font-bold text-cream/70">
+                  {Object.values(store.completedSteps).filter(Boolean).length} of {FLOW_STEPS.length} steps done · never miss one
+                </p>
+              </div>
+              <ArrowRight />
+            </div>
+          </button>
+
+          <p className="mt-4 text-[11px] font-extrabold text-taupe uppercase tracking-wide">Or jump in</p>
+          <button onClick={() => store.go("preGate")} className="mt-2 w-full rounded-[22px] bg-peach p-4 text-left active:scale-[0.99] transition">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-extrabold text-coral-deep">Before lunch</p>
@@ -723,10 +739,6 @@ function HomeActive({ store }: { store: Store }) {
               </div>
             </div>
           </button>
-          <div className="mt-3 space-y-2">
-            <ListRow title="Morning symptoms" meta="+10 rumbles" onClick={() => store.go("symptom")} />
-            <ListRow title="Last night's sleep" meta="+10 rumbles" onClick={() => store.go("sleep")} />
-          </div>
         </div>
       </div>
       <PillNav active="home" go={store.go} />
