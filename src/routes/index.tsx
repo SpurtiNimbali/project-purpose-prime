@@ -50,11 +50,48 @@ type ScreenKey =
   | "reward"
   | "symptom"
   | "meal"
+  | "water"
+  | "bathroom"
   | "sleep"
+  | "dailyFlow"
   | "dayComplete"
   | "streak"
   | "week"
   | "profile";
+
+type StepId =
+  | "sleep"
+  | "symptomAM"
+  | "fasted"
+  | "breakfast"
+  | "water"
+  | "bathroom"
+  | "preLunch"
+  | "lunch"
+  | "evening"
+  | "symptomPM";
+
+type FlowStep = {
+  id: StepId;
+  title: string;
+  sub: string;
+  screen: ScreenKey;
+  emoji: string;
+  reward: number;
+};
+
+const FLOW_STEPS: FlowStep[] = [
+  { id: "sleep",      title: "Last night's sleep",     sub: "How many hours",             screen: "sleep",   emoji: "🌙", reward: 10 },
+  { id: "symptomAM",  title: "Morning symptoms",       sub: "Bloat, cramps, energy",      screen: "symptom", emoji: "😊", reward: 10 },
+  { id: "fasted",     title: "Fasted recording",       sub: "3-min quiet-window clip",    screen: "preGate", emoji: "🎙️", reward: 40 },
+  { id: "breakfast",  title: "Log breakfast",          sub: "What you ate & when",        screen: "meal",    emoji: "🥣", reward: 10 },
+  { id: "water",      title: "Log water intake",       sub: "Glasses since waking",       screen: "water",   emoji: "💧", reward: 5  },
+  { id: "bathroom",   title: "Log bathroom",           sub: "Bowel movement (Bristol)",   screen: "bathroom",emoji: "🚽", reward: 15 },
+  { id: "preLunch",   title: "Before-lunch recording", sub: "3-min quiet-window clip",    screen: "preGate", emoji: "🎙️", reward: 40 },
+  { id: "lunch",      title: "Log lunch",              sub: "What you ate & when",        screen: "meal",    emoji: "🍜", reward: 10 },
+  { id: "evening",    title: "Evening recording",      sub: "3-min quiet-window clip",    screen: "preGate", emoji: "🎙️", reward: 40 },
+  { id: "symptomPM",  title: "Evening symptoms",       sub: "How the day felt",           screen: "symptom", emoji: "🌆", reward: 10 },
+];
 
 type Store = {
   screen: ScreenKey;
@@ -65,6 +102,13 @@ type Store = {
   totalSessions: number;
   addRumbles: (n: number) => void;
   completeSession: () => void;
+  flowActive: boolean;
+  currentStepIdx: number | null;
+  completedSteps: Record<StepId, boolean>;
+  startFlow: () => void;
+  openStep: (idx: number) => void;
+  finishCurrentStep: () => void;
+  exitFlow: () => void;
 };
 
 /* =================================================================
@@ -76,6 +120,12 @@ function Prototype() {
   const [rumbles, setRumbles] = useState(200);
   const [streak, setStreak] = useState(3);
   const [sessions, setSessions] = useState(1);
+  const [flowActive, setFlowActive] = useState(false);
+  const [currentStepIdx, setCurrentStepIdx] = useState<number | null>(null);
+  const [completedSteps, setCompletedSteps] = useState<Record<StepId, boolean>>({
+    sleep: false, symptomAM: false, fasted: true, breakfast: false, water: false,
+    bathroom: false, preLunch: false, lunch: false, evening: false, symptomPM: false,
+  });
 
   const store: Store = {
     screen,
@@ -86,14 +136,28 @@ function Prototype() {
     totalSessions: 4,
     addRumbles: (n) => setRumbles((r) => r + n),
     completeSession: () => setSessions((s) => Math.min(s + 1, 4)),
+    flowActive,
+    currentStepIdx,
+    completedSteps,
+    startFlow: () => {
+      setFlowActive(true);
+      setCurrentStepIdx(null);
+      setScreen("dailyFlow");
+    },
+    openStep: (idx) => {
+      setFlowActive(true);
+      setCurrentStepIdx(idx);
+      setScreen(FLOW_STEPS[idx].screen);
+    },
+    finishCurrentStep: () => {
+      if (currentStepIdx == null) { setScreen("dailyFlow"); return; }
+      const step = FLOW_STEPS[currentStepIdx];
+      setCompletedSteps((c) => ({ ...c, [step.id]: true }));
+      setCurrentStepIdx(null);
+      setScreen("dailyFlow");
+    },
+    exitFlow: () => { setFlowActive(false); setCurrentStepIdx(null); setScreen("home"); },
   };
-
-  // Auto-advance from splash
-  useEffect(() => {
-    if (screen === "splash") {
-      const t = setTimeout(() => setScreen("welcome"), 1600);
-      return () => clearTimeout(t);
-    }
   }, [screen]);
 
   return (
