@@ -1012,7 +1012,7 @@ function PassedScreen({ store }: { store: Store }) {
         </div>
       </div>
       <div className="absolute inset-x-6 bottom-16">
-        <PrimaryBtn onClick={() => store.go("reward")}>Continue</PrimaryBtn>
+        <PrimaryBtn onClick={() => store.flowActive ? store.finishCurrentStep() : store.go("reward")}>Continue</PrimaryBtn>
       </div>
       <HomeIndicator />
     </>
