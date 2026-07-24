@@ -76,22 +76,37 @@ type FlowStep = {
   title: string;
   sub: string;
   screen: ScreenKey;
-  emoji: string;
+  iconKey: "moon" | "smile" | "mic" | "bowl" | "droplet" | "toilet" | "fork" | "sunset";
   reward: number;
 };
 
 const FLOW_STEPS: FlowStep[] = [
-  { id: "sleep",      title: "Last night's sleep",     sub: "How many hours",             screen: "sleep",   emoji: "🌙", reward: 10 },
-  { id: "symptomAM",  title: "Morning symptoms",       sub: "Bloat, cramps, energy",      screen: "symptom", emoji: "😊", reward: 10 },
-  { id: "fasted",     title: "Fasted recording",       sub: "3-min quiet-window clip",    screen: "preGate", emoji: "🎙️", reward: 40 },
-  { id: "breakfast",  title: "Log breakfast",          sub: "What you ate & when",        screen: "meal",    emoji: "🥣", reward: 10 },
-  { id: "water",      title: "Log water intake",       sub: "Glasses since waking",       screen: "water",   emoji: "💧", reward: 5  },
-  { id: "bathroom",   title: "Log bathroom",           sub: "Bowel movement (Bristol)",   screen: "bathroom",emoji: "🚽", reward: 15 },
-  { id: "preLunch",   title: "Before-lunch recording", sub: "3-min quiet-window clip",    screen: "preGate", emoji: "🎙️", reward: 40 },
-  { id: "lunch",      title: "Log lunch",              sub: "What you ate & when",        screen: "meal",    emoji: "🍜", reward: 10 },
-  { id: "evening",    title: "Evening recording",      sub: "3-min quiet-window clip",    screen: "preGate", emoji: "🎙️", reward: 40 },
-  { id: "symptomPM",  title: "Evening symptoms",       sub: "How the day felt",           screen: "symptom", emoji: "🌆", reward: 10 },
+  { id: "sleep",      title: "Last night's sleep",     sub: "How many hours",             screen: "sleep",   iconKey: "moon",    reward: 10 },
+  { id: "symptomAM",  title: "Morning symptoms",       sub: "Bloat, cramps, energy",      screen: "symptom", iconKey: "smile",   reward: 10 },
+  { id: "fasted",     title: "Fasted recording",       sub: "3-min quiet-window clip",    screen: "preGate", iconKey: "mic",     reward: 40 },
+  { id: "breakfast",  title: "Log breakfast",          sub: "What you ate & when",        screen: "meal",    iconKey: "bowl",    reward: 10 },
+  { id: "water",      title: "Log water intake",       sub: "Glasses since waking",       screen: "water",   iconKey: "droplet", reward: 5  },
+  { id: "bathroom",   title: "Log bathroom",           sub: "Bowel movement (Bristol)",   screen: "bathroom",iconKey: "toilet",  reward: 15 },
+  { id: "preLunch",   title: "Before-lunch recording", sub: "3-min quiet-window clip",    screen: "preGate", iconKey: "mic",     reward: 40 },
+  { id: "lunch",      title: "Log lunch",              sub: "What you ate & when",        screen: "meal",    iconKey: "fork",    reward: 10 },
+  { id: "evening",    title: "Evening recording",      sub: "3-min quiet-window clip",    screen: "preGate", iconKey: "mic",     reward: 40 },
+  { id: "symptomPM",  title: "Evening symptoms",       sub: "How the day felt",           screen: "symptom", iconKey: "sunset",  reward: 10 },
 ];
+
+function FlowIcon({ iconKey, color = "currentColor", size = 22 }: { iconKey: FlowStep["iconKey"]; color?: string; size?: number }) {
+  const p = { color };
+  switch (iconKey) {
+    case "moon":    return <MoonIcon {...p} />;
+    case "smile":   return <SmileIcon {...p} />;
+    case "mic":     return <MicIcon {...p} />;
+    case "bowl":    return <BowlIcon {...p} />;
+    case "droplet": return <DropletIcon color={color} size={size} />;
+    case "toilet":  return <ToiletIcon {...p} />;
+    case "fork":    return <ForkKnifeIcon {...p} />;
+    case "sunset":  return <SunsetIcon {...p} />;
+  }
+}
+
 
 type Store = {
   screen: ScreenKey;
