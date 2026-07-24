@@ -1412,6 +1412,213 @@ function ProfileScreen({ store }: { store: Store }) {
   );
 }
 
+/* =================================================================
+   Screens — Guided daily flow
+================================================================= */
+
+function DailyFlowScreen({ store }: { store: Store }) {
+  const done = FLOW_STEPS.filter((s) => store.completedSteps[s.id]).length;
+  const total = FLOW_STEPS.length;
+  const pct = Math.round((done / total) * 100);
+  const nextIdx = FLOW_STEPS.findIndex((s) => !store.completedSteps[s.id]);
+  const allDone = nextIdx === -1;
+
+  return (
+    <>
+      <div className="absolute inset-x-0 top-0 h-[32%] bg-peach">
+        <StatusBar />
+        <div className="flex items-center gap-2 px-4 pt-3">
+          <button onClick={store.exitFlow} className="h-9 w-9 rounded-full bg-white flex items-center justify-center text-[18px] font-black text-espresso">←</button>
+          <div className="flex-1 text-center">
+            <p className="text-[11px] font-extrabold text-coral-deep uppercase tracking-wide">Guided day</p>
+            <p className="text-[15px] font-black text-espresso">Today's flow</p>
+          </div>
+          <div className="h-9 w-9 rounded-full bg-white flex items-center justify-center overflow-hidden">
+            <img src={borbyWave} alt="" className="h-8 w-8 object-contain" loading="lazy" />
+          </div>
+        </div>
+        <div className="px-6 mt-2">
+          <div className="flex items-baseline justify-between">
+            <p className="text-[22px] font-black text-espresso leading-tight">{done} of {total} done</p>
+            <p className="text-[12px] font-extrabold text-coral-deep">{pct}%</p>
+          </div>
+          <div className="mt-2 h-2 rounded-full bg-white/60 overflow-hidden">
+            <div className="h-full bg-coral transition-all" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      </div>
+
+      <div className="relative pt-[32%]">
+        <CurveDivider />
+        <div className="px-4 -mt-1 pb-32 max-h-[420px] overflow-y-auto">
+          <div className="relative">
+            <span className="absolute left-[22px] top-2 bottom-2 w-[2px] bg-hairline" />
+            <div className="space-y-2">
+              {FLOW_STEPS.map((step, i) => {
+                const isDone = store.completedSteps[step.id];
+                const isNext = i === nextIdx;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => store.openStep(i)}
+                    className={`relative w-full flex items-center gap-3 rounded-[18px] p-3 text-left transition active:scale-[0.99] ${
+                      isNext ? "bg-white border-[2px] border-coral shadow-[0_6px_16px_-8px_rgba(219,106,58,0.4)]" :
+                      isDone ? "bg-sage/40 border border-hairline" :
+                      "bg-white/70 border border-hairline"
+                    }`}
+                  >
+                    <div className={`relative z-10 h-11 w-11 rounded-full flex items-center justify-center text-[18px] ${
+                      isDone ? "bg-olive text-cream" : isNext ? "bg-coral text-cream" : "bg-sand text-espresso"
+                    }`}>
+                      {isDone ? <CheckIcon color="#F7F3EA" /> : <span>{step.emoji}</span>}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className={`text-[14px] font-extrabold leading-tight ${isDone ? "text-taupe line-through" : "text-espresso"}`}>{step.title}</p>
+                        {isNext && <span className="rounded-full bg-coral px-2 py-0.5 text-[9px] font-black text-cream uppercase tracking-wide">Now</span>}
+                      </div>
+                      <p className="text-[11px] font-bold text-taupe mt-0.5">{step.sub} · +{step.reward} rumbles</p>
+                    </div>
+                    {!isDone && <ArrowRight />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute inset-x-6 bottom-16">
+        {allDone ? (
+          <PrimaryBtn onClick={() => { store.exitFlow(); store.go("dayComplete"); }} tone="coral">Wrap the day</PrimaryBtn>
+        ) : (
+          <PrimaryBtn onClick={() => store.openStep(nextIdx)} tone="coral">
+            Continue → {FLOW_STEPS[nextIdx].title}
+          </PrimaryBtn>
+        )}
+        <button onClick={store.exitFlow} className="mt-2 w-full text-center text-[12px] font-bold text-taupe">Pause the flow</button>
+      </div>
+      <HomeIndicator />
+    </>
+  );
+}
+
+/* =================================================================
+   Screens — Water & Bathroom
+================================================================= */
+
+function WaterScreen({ store }: { store: Store }) {
+  const [glasses, setGlasses] = useState(3);
+  return (
+    <>
+      <StatusBar />
+      <div className="px-6 pt-4 flex items-center gap-2">
+        <p className="text-[13px] font-extrabold">Hydration</p>
+        {store.flowActive && store.currentStepIdx != null && (
+          <span className="ml-auto rounded-full bg-sand px-2.5 py-1 text-[10px] font-extrabold text-taupe">
+            Step {store.currentStepIdx + 1} of {FLOW_STEPS.length}
+          </span>
+        )}
+      </div>
+      <div className="px-6 mt-3">
+        <h1 className="text-[26px] font-black leading-tight">How much water so far?</h1>
+        <p className="mt-1.5 text-[12px] font-bold text-taupe">Since you woke up · glasses (~250 ml)</p>
+
+        <div className="mt-8 flex items-center justify-center gap-5">
+          <button onClick={() => setGlasses((g) => Math.max(0, g - 1))} className="h-12 w-12 rounded-full bg-sand text-[24px] font-black">−</button>
+          <div className="flex flex-col items-center">
+            <p className="text-[68px] font-black tracking-tight leading-none tabular-nums">{glasses}</p>
+            <p className="text-[12px] font-bold text-taupe mt-1">glasses</p>
+          </div>
+          <button onClick={() => setGlasses((g) => Math.min(20, g + 1))} className="h-12 w-12 rounded-full bg-coral text-cream text-[24px] font-black">+</button>
+        </div>
+
+        <div className="mt-6 flex justify-center gap-1.5">
+          {Array.from({ length: Math.min(glasses, 12) }).map((_, i) => (
+            <span key={i} className="text-[22px]">💧</span>
+          ))}
+        </div>
+
+        <div className="mt-6 rounded-[18px] bg-sand p-3 flex items-center gap-3">
+          <img src={borbyWave} alt="" className="h-10 w-10 object-contain" loading="lazy" />
+          <p className="text-[12px] font-bold leading-snug">Water intake changes what your gut sounds like — tracking it helps me read your clips.</p>
+        </div>
+      </div>
+      <div className="absolute inset-x-6 bottom-16">
+        <PrimaryBtn onClick={() => { store.addRumbles(5); store.flowActive ? store.finishCurrentStep() : store.go("home"); }}>Log {glasses} glasses</PrimaryBtn>
+      </div>
+      <HomeIndicator />
+    </>
+  );
+}
+
+function BathroomScreen({ store }: { store: Store }) {
+  const [type, setType] = useState(4);
+  const [urgency, setUrgency] = useState<"Normal" | "Urgent" | "Held back">("Normal");
+  const bristol = [
+    { n: 1, label: "Hard lumps" },
+    { n: 2, label: "Lumpy sausage" },
+    { n: 3, label: "Cracked sausage" },
+    { n: 4, label: "Smooth sausage" },
+    { n: 5, label: "Soft blobs" },
+    { n: 6, label: "Mushy" },
+    { n: 7, label: "Liquid" },
+  ];
+  return (
+    <>
+      <StatusBar />
+      <div className="px-6 pt-4 flex items-center gap-2">
+        <p className="text-[13px] font-extrabold">Bathroom log</p>
+        {store.flowActive && store.currentStepIdx != null && (
+          <span className="ml-auto rounded-full bg-sand px-2.5 py-1 text-[10px] font-extrabold text-taupe">
+            Step {store.currentStepIdx + 1} of {FLOW_STEPS.length}
+          </span>
+        )}
+      </div>
+      <div className="px-6 mt-3">
+        <h1 className="text-[24px] font-black leading-tight">Bowel movement today?</h1>
+        <p className="mt-1.5 text-[12px] font-bold text-taupe">Bristol scale — pick what's closest</p>
+
+        <div className="mt-4 space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
+          {bristol.map((b) => {
+            const on = type === b.n;
+            return (
+              <button
+                key={b.n}
+                onClick={() => setType(b.n)}
+                className={`w-full flex items-center gap-3 rounded-[16px] p-2.5 text-left transition ${
+                  on ? "bg-coral text-cream" : "bg-white border border-hairline text-espresso"
+                }`}
+              >
+                <span className={`h-8 w-8 rounded-full flex items-center justify-center text-[13px] font-black ${on ? "bg-cream text-coral-deep" : "bg-sand text-espresso"}`}>{b.n}</span>
+                <span className="text-[13px] font-extrabold">{b.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="mt-4 text-[13px] font-extrabold">How was it?</p>
+        <div className="mt-2 flex gap-2 flex-wrap">
+          {(["Normal", "Urgent", "Held back"] as const).map((u) => (
+            <button
+              key={u}
+              onClick={() => setUrgency(u)}
+              className={`rounded-full px-3 py-2 text-[12px] font-extrabold ${urgency === u ? "bg-espresso text-cream" : "bg-white border border-hairline text-espresso"}`}
+            >
+              {u}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="absolute inset-x-6 bottom-16">
+        <PrimaryBtn onClick={() => { store.addRumbles(15); store.flowActive ? store.finishCurrentStep() : store.go("home"); }}>Log it</PrimaryBtn>
+        <button onClick={() => store.flowActive ? store.finishCurrentStep() : store.go("home")} className="mt-2 w-full text-center text-[12px] font-bold text-taupe">Nothing today</button>
+      </div>
+      <HomeIndicator />
+    </>
+  );
+}
+
 /* silence unused-import warnings safely */
 const _keep = { useRef };
 void _keep;
