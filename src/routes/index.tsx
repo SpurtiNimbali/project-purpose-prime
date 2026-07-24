@@ -486,15 +486,13 @@ function SplashScreen() {
 function WelcomeScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-peach">
+      <div className="absolute inset-0 bg-peach" />
+      <div className="relative">
         <StatusBar />
-      </div>
-      <div className="relative pt-10">
         <div className="flex justify-center pt-6">
-          <img src={borbyWave} alt="" className="h-52 w-52 object-contain relative z-10" />
+          <img src={borbyWave} alt="" className="h-52 w-52 object-contain" />
         </div>
-        <div className="relative -mt-6 z-0"><CurveDivider /></div>
-        <div className="px-6 -mt-2">
+        <div className="px-6 mt-4">
           <h1 className="text-[28px] leading-[1.05] font-black tracking-tight">Let's listen to your gut</h1>
           <p className="mt-3 text-[14px] font-semibold text-taupe leading-snug">
             One week. Four short recordings a day. Your phone is the whole device.
@@ -990,9 +988,21 @@ function PreGateScreen({ store }: { store: Store }) {
   );
 }
 
+type SymptomKey = "pain" | "bloat" | "gurgle" | "cramp" | "nausea";
+const SYMPTOMS: { k: SymptomKey; label: string; emoji: string }[] = [
+  { k: "gurgle", label: "Gurgle", emoji: "🌊" },
+  { k: "bloat",  label: "Bloat",  emoji: "🎈" },
+  { k: "pain",   label: "Pain",   emoji: "⚡" },
+  { k: "cramp",  label: "Cramp",  emoji: "🌀" },
+  { k: "nausea", label: "Nausea", emoji: "💫" },
+];
+
 function RecordingScreen({ store }: { store: Store }) {
   const [elapsed, setElapsed] = useState(0);
   const total = 15; // sped up for prototype
+  const [markers, setMarkers] = useState<{ k: SymptomKey; t: number }[]>([]);
+  const [flash, setFlash] = useState<SymptomKey | null>(null);
+
   useEffect(() => {
     if (elapsed >= total) { store.go("sideSwitch"); return; }
     const t = setTimeout(() => setElapsed((e) => e + 1), 200);
@@ -1001,6 +1011,14 @@ function RecordingScreen({ store }: { store: Store }) {
 
   const mm = Math.floor((elapsed * 12) / 60);
   const ss = String((elapsed * 12) % 60).padStart(2, "0");
+
+  const logSymptom = (k: SymptomKey) => {
+    const seconds = (elapsed * 12);
+    setMarkers((m) => [...m, { k, t: seconds }]);
+    setFlash(k);
+    if (navigator.vibrate) navigator.vibrate(15);
+    setTimeout(() => setFlash((f) => (f === k ? null : f)), 500);
+  };
 
   return (
     <>
@@ -1011,29 +1029,65 @@ function RecordingScreen({ store }: { store: Store }) {
           <div className="flex-1 py-1.5 text-center opacity-80">Left side</div>
         </div>
       </div>
-      <div className="flex flex-col items-center pt-6">
-        <div className="relative flex h-52 w-52 items-center justify-center">
+      <div className="flex flex-col items-center pt-4">
+        <div className="relative flex h-40 w-40 items-center justify-center">
           <span className="absolute inset-0 rounded-full bg-white/10 animate-pulse" />
           <span className="absolute inset-4 rounded-full bg-white/10" />
-          <img src={borbyMeditate} alt="" className="relative h-40 w-40 object-contain" />
+          <img src={borbyMeditate} alt="" className="relative h-32 w-32 object-contain" />
         </div>
-        <p className="mt-4 text-[46px] font-black text-cream leading-none tracking-tight tabular-nums">
-          {mm}:{ss}
+        <p className="mt-3 text-[40px] font-black text-cream leading-none tracking-tight tabular-nums">
+          {mm}:{String(ss).padStart(2, "0")}
         </p>
-        <p className="mt-2 text-[12px] font-bold text-cream/80">of 3:00 · hold still, breathe normally</p>
-        <div className="mt-5 flex h-12 items-end gap-[3px] px-6">
+        <p className="mt-1.5 text-[11px] font-bold text-cream/80">of 3:00 · hold still, breathe normally</p>
+        <div className="mt-3 flex h-8 items-end gap-[3px] px-6">
           {Array.from({ length: 34 }).map((_, i) => {
             const active = i / 34 < elapsed / total;
-            const h = 8 + Math.abs(Math.sin(i * 0.9 + elapsed * 0.3)) * 32 + (i % 3) * 4;
-            return <span key={i} className={`w-[3px] rounded-full ${active ? "bg-cream" : "bg-cream/40"}`} style={{ height: `${Math.min(h, 46)}px` }} />;
+            const h = 6 + Math.abs(Math.sin(i * 0.9 + elapsed * 0.3)) * 22 + (i % 3) * 3;
+            return <span key={i} className={`w-[3px] rounded-full ${active ? "bg-cream" : "bg-cream/40"}`} style={{ height: `${Math.min(h, 32)}px` }} />;
           })}
         </div>
       </div>
-      <div className="absolute inset-x-6 bottom-20">
-        <button onClick={() => store.go("sideSwitch")} className="w-full rounded-full bg-cream text-coral-deep py-3.5 text-[14px] font-extrabold">
+
+      {/* Symptom logger — big tap targets, phone-on-belly friendly */}
+      <div className="absolute inset-x-4 bottom-[132px]">
+        <div className="flex items-center justify-between px-2 mb-2">
+          <p className="text-[11px] font-extrabold uppercase tracking-wider text-cream/80">
+            Feel something? Tap it
+          </p>
+          <p className="text-[11px] font-extrabold text-cream/80 tabular-nums">
+            {markers.length} logged
+          </p>
+        </div>
+        <div className="grid grid-cols-5 gap-1.5">
+          {SYMPTOMS.map((s) => {
+            const count = markers.filter((m) => m.k === s.k).length;
+            const isFlash = flash === s.k;
+            return (
+              <button
+                key={s.k}
+                onClick={() => logSymptom(s.k)}
+                className={`relative flex flex-col items-center justify-center rounded-2xl py-3 transition-all active:scale-95 ${
+                  isFlash ? "bg-cream text-coral-deep scale-105" : "bg-white/15 text-cream"
+                }`}
+              >
+                <span className="text-[22px] leading-none">{s.emoji}</span>
+                <span className="mt-1 text-[10px] font-extrabold">{s.label}</span>
+                {count > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-cream text-coral-deep text-[10px] font-black flex items-center justify-center">
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="absolute inset-x-6 bottom-16">
+        <button onClick={() => store.go("sideSwitch")} className="w-full rounded-full bg-cream text-coral-deep py-3 text-[13px] font-extrabold">
           Stop early
         </button>
-        <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-bold text-cream/85">
+        <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] font-bold text-cream/85">
           <ShieldIcon color="#F7F3EA" />
           Case off · bare skin · quiet room
         </div>
