@@ -1011,12 +1011,29 @@ function PreGateScreen({ store }: { store: Store }) {
 }
 
 type SymptomKey = "pain" | "bloat" | "gurgle" | "cramp" | "nausea";
-const SYMPTOMS: { k: SymptomKey; label: string; emoji: string }[] = [
-  { k: "gurgle", label: "Gurgle", emoji: "🌊" },
-  { k: "bloat",  label: "Bloat",  emoji: "🎈" },
-  { k: "pain",   label: "Pain",   emoji: "⚡" },
-  { k: "cramp",  label: "Cramp",  emoji: "🌀" },
-  { k: "nausea", label: "Nausea", emoji: "💫" },
+
+function SymGurgle({ color = "currentColor" }: { color?: string } = {}) {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2" /><path d="M3 18c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2" /><circle cx="8" cy="7" r="1.4" /><circle cx="14" cy="5.5" r="1" /></svg>);
+}
+function SymBloat({ color = "currentColor" }: { color?: string } = {}) {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="12" rx="8" ry="6.5" /><path d="M9 11c.5.6 1.2 1 2 1M15 11c-.5.6-1.2 1-2 1" /><path d="M12 18c0 1.5-1 2.5-2 3M12 18c0 1.5 1 2.5 2 3" /></svg>);
+}
+function SymPain({ color = "currentColor" }: { color?: string } = {}) {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L5 14h6l-2 8 8-12h-6l2-8z" /></svg>);
+}
+function SymCramp({ color = "currentColor" }: { color?: string } = {}) {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a9 9 0 109 9 6 6 0 01-6-6 3 3 0 01-3-3z" /><path d="M12 8a4 4 0 104 4" /></svg>);
+}
+function SymNausea({ color = "currentColor" }: { color?: string } = {}) {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8 15c1-1.5 2.5-1.5 4 0s3 1.5 4 0" /><path d="M8 9.5l2 1M16 9.5l-2 1" /></svg>);
+}
+
+const SYMPTOMS: { k: SymptomKey; label: string; Icon: (p?: { color?: string }) => React.ReactElement }[] = [
+  { k: "gurgle", label: "Gurgle", Icon: SymGurgle },
+  { k: "bloat",  label: "Bloat",  Icon: SymBloat  },
+  { k: "pain",   label: "Pain",   Icon: SymPain   },
+  { k: "cramp",  label: "Cramp",  Icon: SymCramp  },
+  { k: "nausea", label: "Nausea", Icon: SymNausea },
 ];
 
 function RecordingScreen({ store }: { store: Store }) {
