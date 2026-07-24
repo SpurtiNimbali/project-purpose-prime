@@ -623,7 +623,7 @@ function ScheduleScreen({ store }: { store: Store }) {
 function PracticeScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[296px] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[296px] bg-peach rounded-b-[32px]">
         <StatusBar />
         <div className="flex justify-center pt-6">
           <img src={borbyMeditate} alt="" className="h-36 w-36 object-contain" />
@@ -704,7 +704,7 @@ function HomeScreen({ store }: { store: Store }) {
 function HomeIdle({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-peach rounded-b-[32px]">
         <StatusBar />
         <div className="flex justify-center mt-6">
           <img src={borbySleep} alt="" className="h-36 w-36 object-contain" />
@@ -731,7 +731,7 @@ function HomeActive({ store }: { store: Store }) {
   const remaining = store.totalSessions - store.sessions;
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[343px] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[343px] bg-peach rounded-b-[32px]">
         <StatusBar />
         <div className="flex items-center gap-2 px-4 pt-3">
           <button onClick={() => store.go("profile")} className="h-9 w-9 rounded-xl bg-white overflow-hidden flex items-center justify-center">
@@ -1011,12 +1011,29 @@ function PreGateScreen({ store }: { store: Store }) {
 }
 
 type SymptomKey = "pain" | "bloat" | "gurgle" | "cramp" | "nausea";
-const SYMPTOMS: { k: SymptomKey; label: string; emoji: string }[] = [
-  { k: "gurgle", label: "Gurgle", emoji: "🌊" },
-  { k: "bloat",  label: "Bloat",  emoji: "🎈" },
-  { k: "pain",   label: "Pain",   emoji: "⚡" },
-  { k: "cramp",  label: "Cramp",  emoji: "🌀" },
-  { k: "nausea", label: "Nausea", emoji: "💫" },
+
+function SymGurgle({ color = "currentColor" }: { color?: string } = {}) {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2" /><path d="M3 18c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2" /><circle cx="8" cy="7" r="1.4" /><circle cx="14" cy="5.5" r="1" /></svg>);
+}
+function SymBloat({ color = "currentColor" }: { color?: string } = {}) {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="12" rx="8" ry="6.5" /><path d="M9 11c.5.6 1.2 1 2 1M15 11c-.5.6-1.2 1-2 1" /><path d="M12 18c0 1.5-1 2.5-2 3M12 18c0 1.5 1 2.5 2 3" /></svg>);
+}
+function SymPain({ color = "currentColor" }: { color?: string } = {}) {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L5 14h6l-2 8 8-12h-6l2-8z" /></svg>);
+}
+function SymCramp({ color = "currentColor" }: { color?: string } = {}) {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a9 9 0 109 9 6 6 0 01-6-6 3 3 0 01-3-3z" /><path d="M12 8a4 4 0 104 4" /></svg>);
+}
+function SymNausea({ color = "currentColor" }: { color?: string } = {}) {
+  return (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8 15c1-1.5 2.5-1.5 4 0s3 1.5 4 0" /><path d="M8 9.5l2 1M16 9.5l-2 1" /></svg>);
+}
+
+const SYMPTOMS: { k: SymptomKey; label: string; Icon: (p?: { color?: string }) => React.ReactElement }[] = [
+  { k: "gurgle", label: "Gurgle", Icon: SymGurgle },
+  { k: "bloat",  label: "Bloat",  Icon: SymBloat  },
+  { k: "pain",   label: "Pain",   Icon: SymPain   },
+  { k: "cramp",  label: "Cramp",  Icon: SymCramp  },
+  { k: "nausea", label: "Nausea", Icon: SymNausea },
 ];
 
 function RecordingScreen({ store }: { store: Store }) {
@@ -1070,13 +1087,13 @@ function RecordingScreen({ store }: { store: Store }) {
         </div>
       </div>
 
-      {/* Symptom logger — big tap targets, phone-on-belly friendly */}
-      <div className="absolute inset-x-4 bottom-[132px]">
-        <div className="flex items-center justify-between px-2 mb-2">
-          <p className="text-[11px] font-extrabold uppercase tracking-wider text-cream/80">
-            Feel something? Tap it
+      {/* Bottom sheet — symptom logger + stop, grouped as one production surface */}
+      <div className="absolute inset-x-3 bottom-3 rounded-[26px] bg-black/15 backdrop-blur-sm p-3">
+        <div className="flex items-center justify-between px-1 mb-2">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-cream/85">
+            Feel something · tap
           </p>
-          <p className="text-[11px] font-extrabold text-cream/80 tabular-nums">
+          <p className="text-[10px] font-extrabold text-cream tabular-nums bg-white/15 rounded-full px-2 py-0.5">
             {markers.length} logged
           </p>
         </div>
@@ -1084,18 +1101,19 @@ function RecordingScreen({ store }: { store: Store }) {
           {SYMPTOMS.map((s) => {
             const count = markers.filter((m) => m.k === s.k).length;
             const isFlash = flash === s.k;
+            const Icon = s.Icon;
             return (
               <button
                 key={s.k}
                 onClick={() => logSymptom(s.k)}
-                className={`relative flex flex-col items-center justify-center rounded-2xl py-3 transition-all active:scale-95 ${
-                  isFlash ? "bg-cream text-coral-deep scale-105" : "bg-white/15 text-cream"
+                className={`relative flex flex-col items-center justify-center rounded-2xl h-[62px] transition-all active:scale-95 ${
+                  isFlash ? "bg-cream text-coral-deep scale-[1.04]" : "bg-white/12 text-cream"
                 }`}
               >
-                <span className="text-[22px] leading-none">{s.emoji}</span>
-                <span className="mt-1 text-[10px] font-extrabold">{s.label}</span>
+                <Icon color={isFlash ? "#B84A1F" : "#F7F3EA"} />
+                <span className="mt-1 text-[9.5px] font-extrabold tracking-wide">{s.label}</span>
                 {count > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-cream text-coral-deep text-[10px] font-black flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 rounded-full bg-cream text-coral-deep text-[10px] font-black flex items-center justify-center ring-2 ring-coral">
                     {count}
                   </span>
                 )}
@@ -1103,10 +1121,7 @@ function RecordingScreen({ store }: { store: Store }) {
             );
           })}
         </div>
-      </div>
-
-      <div className="absolute inset-x-6 bottom-16">
-        <button onClick={() => store.go("sideSwitch")} className="w-full rounded-full bg-cream text-coral-deep py-3 text-[13px] font-extrabold">
+        <button onClick={() => store.go("sideSwitch")} className="mt-3 w-full rounded-full bg-cream text-coral-deep py-3 text-[13px] font-extrabold">
           Stop early
         </button>
         <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] font-bold text-cream/85">
@@ -1185,7 +1200,7 @@ function PassedScreen({ store }: { store: Store }) {
   useEffect(() => { store.completeSession(); store.addRumbles(40); }, []);
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-olive">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-olive rounded-b-[32px]">
         <StatusBar tint="cream" />
         <div className="flex flex-col items-center pt-2">
           <p className="text-[140px] font-black text-white leading-none tracking-tight">96</p>
@@ -1236,7 +1251,7 @@ function SignalRow({ label, value, tone = "olive" }: { label: string; value: str
 function FlaggedScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-coral">
+      <div className="absolute inset-x-0 top-0 h-[328px] bg-coral rounded-b-[32px]">
         <StatusBar tint="cream" />
         <div className="flex flex-col items-center pt-2">
           <p className="text-[140px] font-black text-white leading-none tracking-tight">41</p>
@@ -1451,7 +1466,7 @@ function SleepScreen({ store }: { store: Store }) {
 function DayCompleteScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[360px] bg-peach">
+      <div className="absolute inset-x-0 top-0 h-[360px] bg-peach rounded-b-[32px]">
         <StatusBar />
         <div className="flex justify-center mt-6">
           <img src={borbySleep} alt="" className="h-40 w-40 object-contain" />
@@ -1490,7 +1505,7 @@ function StreakScreen({ store }: { store: Store }) {
   const pct = Math.min(100, Math.round((store.rumbles / 580) * 100));
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[280px] bg-espresso">
+      <div className="absolute inset-x-0 top-0 h-[280px] bg-espresso rounded-b-[32px]">
         <StatusBar tint="cream" />
         <div className="flex justify-center mt-4">
           <img src={borbyFire} alt="" className="h-32 w-32 object-contain" />
