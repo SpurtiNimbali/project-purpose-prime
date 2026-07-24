@@ -781,75 +781,162 @@ function HomeActive({ store }: { store: Store }) {
    Screens — Chat
 ================================================================= */
 
+type ChatMsg =
+  | { who: "borby"; text: string; protocol?: string }
+  | { who: "me"; text: string }
+  | { who: "cta"; label: string; sub: string; onOpen: ScreenKey };
+
 function ChatScreen({ store }: { store: Store }) {
-  const [msgs, setMsgs] = useState<{ who: "borby" | "me"; text: string }[]>([
+  const [msgs, setMsgs] = useState<ChatMsg[]>([
     { who: "borby", text: "Morning. Before water, food, or standing up — let's catch the quiet window." },
+    { who: "cta", label: "Start fasted recording", sub: "Closes in 48 min", onOpen: "preGate" },
   ]);
   const [input, setInput] = useState("");
+  const [typing, setTyping] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [msgs, typing]);
+
+  function reply(text: string) {
+    const t = text.toLowerCase();
+    if (t.includes("water") || t.includes("drink") || t.includes("sip")) {
+      return { text: "Hold off — water starts contractions we'd read as baseline. Record first, then drink all you want. Four minutes.", protocol: "Protocol 2.1" };
+    }
+    if (t.includes("skip") || t.includes("cancel")) {
+      return { text: "You can skip today without breaking your streak. Want me to log it as a protocol skip?", protocol: "Protocol 3.3" };
+    }
+    if (t.includes("week") || t.includes("progress")) {
+      return { text: "You're day 3 of 7, with 200 rumbles banked. Nice pace — $25 unlocked so far." };
+    }
+    if (t.includes("next") || t.includes("what")) {
+      return { text: "Your fasted window closes at 7:28. After that: breakfast log, then water. I'll walk you through." };
+    }
+    return { text: "Got it. I'll factor that into today's read." };
+  }
 
   function send(text: string) {
     if (!text.trim()) return;
     setMsgs((m) => [...m, { who: "me", text }]);
     setInput("");
+    setTyping(true);
     setTimeout(() => {
-      setMsgs((m) => [
-        ...m,
-        { who: "borby", text: "Hold off — water starts contractions we'd read as baseline. Record first, then drink all you want." },
-      ]);
-    }, 700);
+      const r = reply(text);
+      setTyping(false);
+      setMsgs((m) => [...m, { who: "borby", ...r }]);
+    }, 800);
   }
 
   return (
     <>
       <StatusBar />
-      <div className="flex items-center gap-3 px-5 pt-3 pb-3 border-b border-hairline">
-        <button onClick={() => store.go("home")} className="h-9 w-9 rounded-full bg-peach flex items-center justify-center overflow-hidden">
-          <img src={borbyWave} alt="" className="h-8 w-8 object-contain" />
+      {/* Header */}
+      <div className="flex items-center gap-3 px-5 pt-3 pb-3">
+        <button onClick={() => store.go("home")} className="h-10 w-10 rounded-full bg-peach flex items-center justify-center overflow-hidden shrink-0">
+          <img src={borbyWave} alt="" className="h-9 w-9 object-contain" />
         </button>
-        <div className="flex-1">
-          <p className="text-[15px] font-black">Borby</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-[16px] font-black text-espresso leading-tight">Borby</p>
           <p className="text-[11px] font-bold text-taupe">Day {store.streak} of 7 · always here</p>
         </div>
+        <button aria-label="More" className="h-9 w-9 rounded-full flex items-center justify-center text-taupe">
+          <DotsIcon />
+        </button>
       </div>
-      <div className="absolute inset-x-0 top-[92px] bottom-[132px] overflow-y-auto px-5 py-4 space-y-3">
-        {msgs.map((m, i) => (
-          <div key={i} className={`flex ${m.who === "me" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[78%] rounded-[18px] px-3.5 py-2.5 text-[13px] font-semibold leading-snug ${
-              m.who === "me" ? "bg-espresso text-cream" : "bg-white border border-hairline text-espresso"
-            }`}>
-              {m.text}
+
+      {/* Messages */}
+      <div ref={scrollRef} className="absolute inset-x-0 top-[92px] bottom-[136px] overflow-y-auto px-4 py-3 space-y-3">
+        {msgs.map((m, i) => {
+          if (m.who === "me") {
+            return (
+              <div key={i} className="flex justify-end">
+                <div className="max-w-[78%] rounded-[20px] rounded-br-[6px] bg-espresso text-cream px-4 py-2.5 text-[14px] font-semibold leading-snug">
+                  {m.text}
+                </div>
+              </div>
+            );
+          }
+          if (m.who === "cta") {
+            return (
+              <div key={i} className="rounded-[22px] bg-coral p-3">
+                <div className="flex items-center gap-1.5 px-1 text-cream/90 text-[11px] font-extrabold">
+                  <ClockIcon color="#F7F3EA" /> {m.sub}
+                </div>
+                <button
+                  onClick={() => store.go(m.onOpen)}
+                  className="mt-2 w-full rounded-[16px] bg-cream text-espresso py-3 text-[14px] font-black active:scale-[0.99] transition"
+                >
+                  {m.label}
+                </button>
+              </div>
+            );
+          }
+          return (
+            <div key={i} className="flex justify-start">
+              <div className="max-w-[82%] rounded-[20px] rounded-bl-[6px] bg-white border border-hairline px-4 py-3 text-[14px] font-semibold leading-snug text-espresso shadow-[0_2px_10px_-6px_rgba(60,30,10,0.15)]">
+                {m.text}
+                {m.protocol && (
+                  <div className="mt-2 flex items-center gap-1.5 text-[11px] font-extrabold text-taupe">
+                    <DocIcon color="#8A8175" /> {m.protocol}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {typing && (
+          <div className="flex justify-start">
+            <div className="rounded-[20px] rounded-bl-[6px] bg-white border border-hairline px-4 py-3 flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-taupe/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-taupe/60 animate-bounce" style={{ animationDelay: "120ms" }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-taupe/60 animate-bounce" style={{ animationDelay: "240ms" }} />
             </div>
           </div>
-        ))}
-        <div className="rounded-[18px] bg-coral text-cream p-3">
-          <p className="text-[11px] font-extrabold opacity-90">Closes in 48 min</p>
-          <button onClick={() => store.go("preGate")} className="mt-2 w-full rounded-full bg-cream text-coral-deep py-2 text-[13px] font-extrabold">
-            Start fasted recording
-          </button>
-        </div>
+        )}
       </div>
-      <div className="absolute inset-x-0 bottom-12 px-4">
-        <div className="flex gap-2 mb-2">
-          {["My week", "What's next", "Skip today"].map((s) => (
-            <button key={s} onClick={() => send(s)} className="rounded-full bg-white border border-hairline px-3 py-1.5 text-[11px] font-extrabold text-espresso">
-              {s}
+
+      {/* Composer */}
+      <div className="absolute inset-x-0 bottom-10 px-3">
+        <div className="flex gap-1.5 mb-2 px-1 overflow-x-auto no-scrollbar">
+          {[
+            { label: "My week", tone: "sage" },
+            { label: "What's next", tone: "sage" },
+            { label: "Skip today", tone: "peach" },
+          ].map((c) => (
+            <button
+              key={c.label}
+              onClick={() => send(c.label)}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-extrabold ${
+                c.tone === "peach" ? "bg-peach text-coral-deep" : "bg-sage/60 text-espresso"
+              }`}
+            >
+              {c.label}
             </button>
           ))}
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex gap-2">
+        <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex items-center gap-2 rounded-full bg-white border border-hairline pl-4 pr-1.5 py-1.5">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask Borby anything"
-            className="flex-1 rounded-full bg-white border border-hairline px-4 py-2.5 text-[13px] font-semibold placeholder:text-taupe focus:outline-none focus:border-coral"
+            className="flex-1 bg-transparent text-[14px] font-semibold placeholder:text-taupe focus:outline-none"
           />
-          <button type="submit" className="rounded-full bg-coral text-cream px-4 text-[13px] font-extrabold">Send</button>
+          <button
+            type="submit"
+            aria-label="Send"
+            disabled={!input.trim()}
+            className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 transition ${input.trim() ? "bg-coral" : "bg-hairline"}`}
+          >
+            <SendIcon />
+          </button>
         </form>
       </div>
       <HomeIndicator />
     </>
   );
 }
+
 
 /* =================================================================
    Screens — Pre-gate + recording
