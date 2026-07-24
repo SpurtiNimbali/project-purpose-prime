@@ -257,7 +257,6 @@ function PhoneShell({ children, screen }: { children: React.ReactNode; screen: S
     "home",
     "practice",
     "reward",
-    "streak",
     "dayComplete",
     "dailyFlow",
   ];
@@ -268,9 +267,11 @@ function PhoneShell({ children, screen }: { children: React.ReactNode; screen: S
         ? "#5C7A3D"
         : screen === "flagged"
           ? "#DB6A3A"
-          : peachScreens.includes(screen)
-            ? "#FBE0C8"
-            : "#F7F3EA";
+          : screen === "streak"
+            ? "#2B2620"
+            : peachScreens.includes(screen)
+              ? "#FBE0C8"
+              : "#F7F3EA";
   return (
     <div
       className="relative rounded-[46px] p-[6px] shadow-[0_30px_60px_-30px_rgba(43,38,32,0.35)]"
