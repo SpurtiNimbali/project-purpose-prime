@@ -1599,11 +1599,12 @@ function WaterScreen({ store }: { store: Store }) {
           <button onClick={() => setGlasses((g) => Math.min(20, g + 1))} className="h-12 w-12 rounded-full bg-coral text-cream text-[24px] font-black">+</button>
         </div>
 
-        <div className="mt-6 flex justify-center gap-1.5">
+        <div className="mt-6 flex justify-center gap-1.5 text-coral">
           {Array.from({ length: Math.min(glasses, 12) }).map((_, i) => (
-            <span key={i} className="text-[22px]">💧</span>
+            <DropletIcon key={i} color="#DB6A3A" size={22} />
           ))}
         </div>
+
 
         <div className="mt-6 rounded-[18px] bg-sand p-3 flex items-center gap-3">
           <img src={borbyWave} alt="" className="h-10 w-10 object-contain" loading="lazy" />
