@@ -486,15 +486,13 @@ function SplashScreen() {
 function WelcomeScreen({ store }: { store: Store }) {
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[328px] bg-peach">
+      <div className="absolute inset-0 bg-peach" />
+      <div className="relative">
         <StatusBar />
-      </div>
-      <div className="relative pt-10">
         <div className="flex justify-center pt-6">
-          <img src={borbyWave} alt="" className="h-52 w-52 object-contain relative z-10" />
+          <img src={borbyWave} alt="" className="h-52 w-52 object-contain" />
         </div>
-        <div className="relative -mt-6 z-0"><CurveDivider /></div>
-        <div className="px-6 -mt-2">
+        <div className="px-6 mt-4">
           <h1 className="text-[28px] leading-[1.05] font-black tracking-tight">Let's listen to your gut</h1>
           <p className="mt-3 text-[14px] font-semibold text-taupe leading-snug">
             One week. Four short recordings a day. Your phone is the whole device.
