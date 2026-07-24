@@ -257,7 +257,6 @@ function PhoneShell({ children, screen }: { children: React.ReactNode; screen: S
     "home",
     "practice",
     "reward",
-    "streak",
     "dayComplete",
     "dailyFlow",
   ];
@@ -268,9 +267,11 @@ function PhoneShell({ children, screen }: { children: React.ReactNode; screen: S
         ? "#5C7A3D"
         : screen === "flagged"
           ? "#DB6A3A"
-          : peachScreens.includes(screen)
-            ? "#FBE0C8"
-            : "#F7F3EA";
+          : screen === "streak"
+            ? "#2B2620"
+            : peachScreens.includes(screen)
+              ? "#FBE0C8"
+              : "#F7F3EA";
   return (
     <div
       className="relative rounded-[46px] p-[6px] shadow-[0_30px_60px_-30px_rgba(43,38,32,0.35)]"
@@ -1505,22 +1506,19 @@ function StreakScreen({ store }: { store: Store }) {
   const pct = Math.min(100, Math.round((store.rumbles / 580) * 100));
   return (
     <>
-      <div className="absolute inset-x-0 top-0 h-[280px] bg-espresso rounded-b-[32px]">
-        <StatusBar tint="cream" />
-        <div className="flex justify-center mt-4">
+      <StatusBar tint="cream" />
+      <div className="flex flex-col h-full pb-[96px]">
+        <div className="flex justify-center pt-4">
           <img src={borbyFire} alt="" className="h-32 w-32 object-contain" />
         </div>
-      </div>
-      <div className="relative pt-[280px]">
-        <CurveDivider />
-        <div className="px-5 -mt-1">
+        <div className="mt-4 flex-1 rounded-t-[28px] bg-peach px-5 pt-5 overflow-y-auto">
           <h1 className="text-[26px] font-black leading-tight">Three days lit</h1>
           <p className="mt-1 text-[13px] font-bold text-taupe">Keep it going through Sunday</p>
           <div className="mt-4 flex justify-between">
             {states.map((s, i) => (
               <div key={i} className="flex flex-col items-center gap-1.5">
                 <div className={`h-9 w-9 rounded-full flex items-center justify-center ${
-                  s === "lit" ? "bg-coral text-cream" : s === "today" ? "bg-peach text-coral-deep" : "bg-hairline text-taupe"
+                  s === "lit" ? "bg-coral text-cream" : s === "today" ? "bg-white text-coral-deep" : "bg-white/50 text-taupe"
                 }`}><FlameIcon /></div>
                 <span className="text-[10px] font-extrabold text-taupe">{labels[i]}</span>
               </div>
@@ -1536,9 +1534,9 @@ function StreakScreen({ store }: { store: Store }) {
             <span className="text-[13px] font-extrabold">Rumbles</span>
             <span className="text-[26px] font-black text-coral leading-none">{store.rumbles}</span>
           </div>
-          <div className="mt-3 rounded-[20px] border-[1.5px] border-hairline p-3">
+          <div className="mt-3 rounded-[20px] border-[1.5px] border-white/70 bg-white/50 p-3">
             <p className="text-[12px] font-extrabold">Study compensation</p>
-            <div className="mt-2 h-2 rounded-full bg-hairline overflow-hidden">
+            <div className="mt-2 h-2 rounded-full bg-white overflow-hidden">
               <div className="h-full bg-coral" style={{ width: `${pct}%` }} />
             </div>
             <div className="mt-1.5 flex justify-between text-[11px] font-bold text-taupe">
