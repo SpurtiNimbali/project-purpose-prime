@@ -265,9 +265,9 @@ function PhoneShell({ children, screen }: { children: React.ReactNode; screen: S
     screen === "recording" || screen === "sideSwitch"
       ? "#DB6A3A"
       : screen === "passed"
-        ? "#EEF1E4"
+        ? "#5C7A3D"
         : screen === "flagged"
-          ? "#FBE0D6"
+          ? "#DB6A3A"
           : peachScreens.includes(screen)
             ? "#FBE0C8"
             : "#F7F3EA";
