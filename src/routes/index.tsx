@@ -1500,7 +1500,7 @@ function DailyFlowScreen({ store }: { store: Store }) {
               onClick={() => store.openStep(activeIdx)}
               className="mt-5 w-full rounded-[16px] bg-coral text-cream py-3.5 text-[15px] font-black active:scale-[0.99] transition flex items-center justify-center gap-2"
             >
-              Start this step <ArrowRight color="#F7F3EA" />
+              Start this step <ArrowRight />
             </button>
             <button
               onClick={() => { store.completedSteps[current.id] = true; store.finishCurrentStep(); }}
