@@ -1582,7 +1582,7 @@ function DailyFlowScreen({ store }: { store: Store }) {
                       : "bg-cream text-taupe border border-hairline"
                   }`}
                 >
-                  {isDone ? "✓" : i + 1}
+                  {isDone ? <CheckIcon color="#F7F3EA" /> : i + 1}
                 </button>
               );
             })}
