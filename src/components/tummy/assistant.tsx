@@ -145,7 +145,8 @@ export function AssistantSheet({ store }: { store: TummyStore }) {
     setTyping(true);
     window.setTimeout(() => {
       setTyping(false);
-      setMsgs((m) => [...m, ...reply(store, value)]);
+      const answer = reply(store, value);
+      setMsgs((m) => [...m, ...answer]);
       inputRef.current?.focus();
     }, 600);
   }
