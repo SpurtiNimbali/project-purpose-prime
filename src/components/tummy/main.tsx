@@ -391,13 +391,6 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
 }
 
 
-function LogDone({ store, text }: { store: TummyStore; text: string }) {
-  return (
-    <StickyFooter>
-      <Btn onClick={() => store.go("logHub")}>{text}</Btn>
-    </StickyFooter>
-  );
-}
 
 export function LogMealScreen({ store }: { store: TummyStore }) {
   const [photo, setPhoto] = useState(false);
