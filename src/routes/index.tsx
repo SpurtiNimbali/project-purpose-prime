@@ -102,6 +102,7 @@ function TummyApp() {
   };
 
   const dark = DARK_SCREENS.includes(s);
+  const showAssistant = !ONBOARD_SCREENS.includes(s) && s !== "recording";
 
   return (
     <main className="flex min-h-screen w-full items-center justify-center bg-wash p-0 sm:bg-mint-soft sm:p-8">
@@ -110,7 +111,14 @@ function TummyApp() {
         style={{ backgroundColor: dark ? "#143029" : "#E7F1EC" }}
       >
         <div className="flex min-h-0 flex-1 flex-col">{screens[s]}</div>
+        {showAssistant ? (
+          <AssistantButton
+            store={store}
+            dark={dark}
+          />
+        ) : null}
         {TAB_SCREENS.includes(s) ? <TabBar store={store} /> : null}
+        {showAssistant ? <AssistantSheet store={store} /> : null}
       </div>
     </main>
   );
