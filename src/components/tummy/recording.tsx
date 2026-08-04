@@ -7,7 +7,6 @@ import {
   Card,
   Note,
   Choice,
-  Severity,
   Mascot,
   MascotSays,
   StickyFooter,
