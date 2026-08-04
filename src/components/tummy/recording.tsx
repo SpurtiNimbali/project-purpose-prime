@@ -555,15 +555,13 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       {/* symptom taps at TOP — bottom of the phone is against the mic */}
       <div className="shrink-0 px-4 pt-3">
         <p className="mb-2 text-[15px] font-extrabold text-mint">
-          Feel something? Tap it — buttons are up here so your taps stay away from the
-          microphone.
+          Feel something? Tap it — buttons are up here, away from the microphone.
         </p>
         <div className="grid grid-cols-3 gap-2">
           {SYMPTOMS.map(({ key, label, Icon }) => (
             <button
               key={key}
               onClick={() => {
-                setSeverity(3);
                 setPending({ key, label, at: TOTAL - left });
                 if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(18);
               }}
@@ -581,34 +579,40 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center">
-        <svg width="196" height="196" viewBox="0 0 196 196">
-          <circle cx="98" cy="98" r={R} stroke="rgba(255,255,255,0.16)" strokeWidth="12" fill="none" />
-          <circle
-            cx="98"
-            cy="98"
-            r={R}
-            stroke="#8FC9AC"
-            strokeWidth="12"
-            fill="none"
-            strokeLinecap="round"
-            strokeDasharray={C}
-            strokeDashoffset={C * (1 - pct)}
-            transform="rotate(-90 98 98)"
-          />
-        </svg>
-        <div className="-mt-[130px] flex flex-col items-center">
-          <span className="text-mint">
-            <IconMic width={30} height={30} />
-          </span>
-          <p className="mt-1 text-[42px] font-extrabold leading-none tracking-tight text-surface">
-            {mmss}
-          </p>
-          <p className="mt-1 text-[15px] font-bold text-mint">
-            {store.side === "right" ? "Right side" : "Left side"} · {store.region} abdomen
-          </p>
+      {/* timer */}
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
+        <div className="relative h-[212px] w-[212px]">
+          <svg width="212" height="212" viewBox="0 0 212 212" className="absolute inset-0">
+            <circle cx="106" cy="106" r={R} stroke="rgba(255,255,255,0.14)" strokeWidth="10" fill="none" />
+            <circle
+              cx="106"
+              cy="106"
+              r={R}
+              stroke="#8FC9AC"
+              strokeWidth="10"
+              fill="none"
+              strokeLinecap="round"
+              strokeDasharray={C}
+              strokeDashoffset={C * (1 - pct)}
+              transform="rotate(-90 106 106)"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-mint/20 text-mint">
+              <IconMic width={20} height={20} />
+            </span>
+            <p className="mt-2 text-[46px] font-extrabold leading-none tracking-tight text-surface tabular-nums">
+              {mmss}
+            </p>
+            <p className="mt-1 text-[13px] font-extrabold uppercase tracking-[0.14em] text-mint">
+              remaining
+            </p>
+          </div>
         </div>
-        <p className="mt-[86px] text-[15px] font-bold text-mint">
+        <p className="mt-5 text-[16px] font-bold text-mint">
+          {store.side === "right" ? "Right side" : "Left side"} · {store.region} abdomen
+        </p>
+        <p className="mt-1 text-[15px] font-bold text-surface/70">
           {store.marks.length} symptom {store.marks.length === 1 ? "mark" : "marks"} recorded
         </p>
       </div>
@@ -630,44 +634,69 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
         )}
       </div>
 
+      {/* severity picker — top sheet, saves on tap */}
       {pending ? (
-        <div className="absolute inset-0 z-20 flex items-end bg-pine/70 backdrop-blur-sm">
-          <div className="w-full rounded-t-[32px] bg-pine p-5 pb-8 ring-1 ring-surface/15">
+        <div className="absolute inset-0 z-20 flex flex-col bg-pine/70 backdrop-blur-sm">
+          <div className="rounded-b-[32px] bg-pine px-5 pb-6 pt-14 ring-1 ring-surface/15">
             <div className="flex items-start gap-3">
-              <div className="flex-1">
-                <p className="text-[20px] font-extrabold text-surface">{pending.label}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[22px] font-extrabold text-surface">
+                  {pending.label}
+                </p>
                 <p className="text-[15px] font-bold text-mint">
-                  Marked at {String(Math.floor(pending.at / 60)).padStart(2, "0")}:
-                  {String(pending.at % 60).padStart(2, "0")} into the recording
+                  At {String(Math.floor(pending.at / 60)).padStart(2, "0")}:
+                  {String(pending.at % 60).padStart(2, "0")} · how strong is it?
                 </p>
               </div>
               <button
                 onClick={() => setPending(null)}
                 aria-label="Cancel"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-surface/15 text-surface"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface"
               >
                 <IconX width={22} height={22} />
               </button>
             </div>
-            <p className="mt-4 text-[16px] font-extrabold text-surface">How strong is it?</p>
-            <div className="mt-2">
-              <Severity value={severity} onChange={setSeverity} dark />
+            <div className="mt-4 flex gap-2">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => {
+                    store.addMark({ ...pending, severity: n });
+                    setPending(null);
+                    setToast(`${pending.label} · ${SEV_LABELS[n - 1]} saved`);
+                    if (typeof navigator !== "undefined" && navigator.vibrate)
+                      navigator.vibrate(12);
+                  }}
+                  className="flex h-[72px] flex-1 flex-col items-center justify-center rounded-2xl border-2 border-surface/25 bg-surface/10 text-surface active:border-mint active:bg-mint active:text-pine"
+                >
+                  <span className="text-[22px] font-extrabold leading-none">{n}</span>
+                </button>
+              ))}
             </div>
-            <div className="mt-4">
-              <Btn
-                onClick={() => {
-                  store.addMark({ ...pending, severity });
-                  setPending(null);
-                }}
-              >
-                Save mark
-              </Btn>
+            <div className="mt-2 flex justify-between text-[14px] font-bold text-mint">
+              <span>Very mild</span>
+              <span>Very strong</span>
             </div>
+            <p className="mt-3 text-center text-[14px] font-bold text-surface/60">
+              Tap a number — it saves straight away.
+            </p>
           </div>
+          <button
+            className="flex-1"
+            aria-label="Cancel"
+            onClick={() => setPending(null)}
+          />
+        </div>
+      ) : null}
+
+      {toast ? (
+        <div className="pointer-events-none absolute inset-x-5 top-[92px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
+          {toast}
         </div>
       ) : null}
     </Screen>
   );
+
 }
 
 /* ---------------- post-recording metadata (chat) ---------------- */
