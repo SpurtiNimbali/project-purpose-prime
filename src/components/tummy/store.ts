@@ -154,5 +154,13 @@ export function useTummyStore(): TummyStore {
     completeSession: (id) =>
       setSessions((prev) => prev.map((s) => (s.id === id ? { ...s, done: true } : s))),
     day: 3,
+    entries,
+    addEntry: (kind, label, detail) =>
+      setEntries((prev) => [
+        ...prev,
+        { id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, kind, label, detail, time: nowLabel() },
+      ]),
+    chatOpen,
+    setChatOpen,
   };
 }
