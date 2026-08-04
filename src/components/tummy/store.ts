@@ -101,7 +101,11 @@ const INITIAL_SESSIONS: Session[] = [
 ];
 
 export function useTummyStore(): TummyStore {
-  const [stack, setStack] = useState<ScreenKey[]>(["welcome"]);
+  const [stack, setStack] = useState<ScreenKey[]>(() =>
+    typeof window !== "undefined" && window.location.hash.startsWith("#screen=")
+      ? ["welcome", window.location.hash.slice(8) as ScreenKey]
+      : ["welcome"],
+  );
 
   const [track, setTrack] = useState<Track>("fasting");
   const [meal, setMeal] = useState<Meal>("breakfast");
