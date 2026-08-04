@@ -43,7 +43,26 @@ export type Meal = "breakfast" | "lunch" | "dinner";
 
 export type SymptomMark = { key: string; label: string; at: number; severity: number };
 
-export type Session = { id: string; label: string; done: boolean };
+export type Session = {
+  id: string;
+  label: string;
+  done: boolean;
+  /** minutes from midnight for the scheduled window */
+  at: number;
+  window: string;
+};
+
+export type NextTask = {
+  tag: string;
+  title: string;
+  sub: string;
+  cta: string;
+  screen: ScreenKey;
+  state: "due" | "soon" | "clear";
+  minsUntil: number | null;
+  sessionId?: string;
+};
+
 
 export type LogKind =
   | "meal"
