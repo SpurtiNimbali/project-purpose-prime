@@ -105,7 +105,9 @@ export type TummyStore = {
   addEntry: (kind: LogKind, label: string, detail?: string) => void;
   chatOpen: boolean;
   setChatOpen: (open: boolean) => void;
+  nextTask: NextTask;
 };
+
 
 export function nowLabel() {
   return new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
