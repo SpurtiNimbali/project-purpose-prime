@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTummyStore, type ScreenKey } from "@/components/tummy/store";
 import { TabBar } from "@/components/tummy/ui";
@@ -65,7 +66,7 @@ function TummyApp() {
   const store = useTummyStore();
   const s = store.screen;
 
-  const screens: Record<ScreenKey, JSX.Element> = {
+  const screens: Record<ScreenKey, ReactElement> = {
     welcome: <WelcomeScreen store={store} />,
     subjectId: <SubjectIdScreen store={store} />,
     studyIntro: <StudyIntroScreen store={store} />,
