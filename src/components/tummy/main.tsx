@@ -40,7 +40,7 @@ import {
   IconPhone,
   IconList,
 } from "./icons";
-import type { LogKind, ScreenKey, TummyStore } from "./store";
+import { clockLabel, type LogKind, type ScreenKey, type TummyStore } from "./store";
 import { AssistantHint } from "./assistant";
 import { cn } from "@/lib/utils";
 
