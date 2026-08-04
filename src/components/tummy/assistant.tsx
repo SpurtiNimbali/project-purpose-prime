@@ -92,20 +92,16 @@ function reply(store: TummyStore, raw: string): Msg[] {
     });
   }
   if (/next|what.*do|todo|left/.test(t)) {
-    const next = store.sessions.find((s) => !s.done);
-    return say(
-      next
-        ? `Next up is ${next.label}, then a few questions about your morning. Everything else can wait.`
-        : "All your recordings are done. Before bed, finish the daily questions and you're set.",
-      {
-        label: "See today's plan",
-        run: () => {
-          store.setChatOpen(false);
-          store.go("home");
-        },
+    const task = store.nextTask;
+    return say(`${task.title}. ${task.sub}`, {
+      label: task.cta,
+      run: () => {
+        store.setChatOpen(false);
+        store.go(task.screen);
       },
-    );
+    });
   }
+
   if (/case|position|9 ?cm|belly/.test(t)) {
     return say(
       "Case off, bare phone on bare skin, about 9 cm from your belly button — right side first, then left.",
