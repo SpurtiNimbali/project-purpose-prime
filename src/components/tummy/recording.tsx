@@ -697,7 +697,7 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       ) : null}
 
       {toast ? (
-        <div className="pointer-events-none absolute inset-x-5 top-[92px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
+        <div className="pointer-events-none absolute inset-x-5 top-[350px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
           {toast}
         </div>
       ) : null}
