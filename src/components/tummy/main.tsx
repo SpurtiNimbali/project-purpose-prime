@@ -436,7 +436,17 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
           </Field>
         </div>
       </ScreenBody>
-      <LogDone store={store} text="Save meal" />
+      <StickyFooter>
+        <Btn
+          disabled={!which}
+          onClick={() => {
+            store.addEntry("meal", which || "Meal", desc || (photo ? "Photo added" : undefined));
+            store.go("logHub");
+          }}
+        >
+          Save meal
+        </Btn>
+      </StickyFooter>
     </Screen>
   );
 }
@@ -484,7 +494,13 @@ export function LogSymptomScreen({ store }: { store: TummyStore }) {
         ) : null}
       </ScreenBody>
       <StickyFooter>
-        <Btn disabled={!type} onClick={() => store.go("logHub")}>
+        <Btn
+          disabled={!type}
+          onClick={() => {
+            store.addEntry("symptom", type, `Severity ${sev} of 5`);
+            store.go("logHub");
+          }}
+        >
           Save symptom
         </Btn>
       </StickyFooter>
@@ -544,7 +560,18 @@ export function LogSleepScreen({ store }: { store: TummyStore }) {
           )}
         </div>
       </ScreenBody>
-      {done ? <LogDone store={store} text="Done" /> : null}
+      {done ? (
+        <StickyFooter>
+          <Btn
+            onClick={() => {
+              store.addEntry("sleep", "Sleep", answers.join(" · "));
+              store.go("logHub");
+            }}
+          >
+            Done
+          </Btn>
+        </StickyFooter>
+      ) : null}
     </Screen>
   );
 }
@@ -575,7 +602,13 @@ export function LogActivityScreen({ store }: { store: TummyStore }) {
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn disabled={!kind} onClick={() => store.go("logHub")}>
+        <Btn
+          disabled={!kind}
+          onClick={() => {
+            store.addEntry("activity", kind, mins ? `${mins}` : undefined);
+            store.go("logHub");
+          }}
+        >
           Save activity
         </Btn>
       </StickyFooter>
@@ -625,7 +658,16 @@ export function LogHydrationScreen({ store }: { store: TummyStore }) {
           </Field>
         </div>
       </ScreenBody>
-      <LogDone store={store} text="Save hydration" />
+      <StickyFooter>
+        <Btn
+          onClick={() => {
+            store.addEntry("hydration", kind, `${glasses} ${glasses === 1 ? "glass" : "glasses"}`);
+            store.go("logHub");
+          }}
+        >
+          Save hydration
+        </Btn>
+      </StickyFooter>
     </Screen>
   );
 }
@@ -688,7 +730,20 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
           </Field>
         </div>
       </ScreenBody>
-      <LogDone store={store} text="Save entry" />
+      <StickyFooter>
+        <Btn
+          onClick={() => {
+            store.addEntry(
+              "toilet",
+              "Toilet habits",
+              `Consistency ${consistency || "—"}${urgency ? ` · urgency: ${urgency.toLowerCase()}` : ""}`,
+            );
+            store.go("logHub");
+          }}
+        >
+          Save entry
+        </Btn>
+      </StickyFooter>
     </Screen>
   );
 }
