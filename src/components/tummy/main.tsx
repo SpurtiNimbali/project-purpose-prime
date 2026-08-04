@@ -102,7 +102,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
         </div>
       </div>
 
-      <ScreenBody className="pt-3">
+      <ScreenBody className="pb-[180px] pt-3">
         <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">Next up</p>
         <div
           className={cn(
