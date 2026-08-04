@@ -7,19 +7,24 @@
 @theme {
   --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
 
-  --color-cream: #F7F3EA;
-  --color-peach: #FBE0C8;
-  --color-espresso: #2B2620;
-  --color-coral: #DB6A3A;
-  --color-coral-deep: #C25E30;
-  --color-olive: #5C7A3D;
-  --color-sage: #E4EBDA;
-  --color-sand: #EFE4D6;
-  --color-taupe: #8A8175;
-  --color-hairline: #F0EDE7;
-  --color-borby: #F2A87F;
-  --color-borby-belly: #F7CBAE;
+  /* Tummy study palette — calming clinical green-blue */
+  --color-wash: #e7f1ec;
+  --color-teal: #2e7d6b;
+  --color-teal-deep: #235f52;
+  --color-blue: #3e8ea8;
+  --color-sage: #5ba88f;
+  --color-mint: #8fc9ac;
+  --color-mint-soft: #d7ecdf;
+  --color-pine: #143029;
+  --color-pine-soft: #4a6a5f;
+  --color-line: #cfe3d8;
+  --color-amber: #e8a33d;
+  --color-amber-soft: #fbf0dc;
+  --color-coral: #d95757;
+  --color-coral-soft: #fbe4e4;
+  --color-surface: #ffffff;
 }
+
 
 /*
  * Design system definition.
