@@ -157,7 +157,6 @@ export function useTummyStore(): TummyStore {
   ]);
   const [chatOpen, setChatOpen] = useState(false);
 
-
   const go = useCallback((s: ScreenKey) => {
     setStack((prev) => [...prev, s]);
     if (typeof window !== "undefined") window.scrollTo(0, 0);
@@ -167,7 +166,11 @@ export function useTummyStore(): TummyStore {
     [],
   );
 
+  const nextTask = computeNextTask(sessions, entries);
+
   return {
+    nextTask,
+
     screen: stack[stack.length - 1],
     go,
     back,
