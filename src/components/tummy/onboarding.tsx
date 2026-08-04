@@ -449,10 +449,11 @@ export function SurveyScreen({ store }: { store: TummyStore }) {
             <div className="space-y-2">
               {SYMPTOM_ROWS.map((row) => (
                 <ScaleRow
-                  key={row}
-                  label={row}
-                  value={scale[row] ?? 0}
-                  onChange={(v) => setScale((s) => ({ ...s, [row]: v }))}
+                  key={row.label}
+                  label={row.label}
+                  info={row.info}
+                  value={scale[row.label] ?? 0}
+                  onChange={(v) => setScale((s) => ({ ...s, [row.label]: v }))}
                 />
               ))}
             </div>
