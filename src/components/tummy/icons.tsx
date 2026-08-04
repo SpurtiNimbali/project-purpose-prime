@@ -220,3 +220,21 @@ export const IconSend = (p: P) => (
     <path d="M4 12 20 5l-7 15-2.2-6z" />
   </Base>
 );
+
+export const IconChat = (p: P) => (
+  <Base {...p}>
+    <path d="M20.5 12.5c0 3.9-3.8 7-8.5 7-1 0-2-.15-2.9-.42L4 20.5l1.5-3.6C4.2 15.7 3.5 14.2 3.5 12.5c0-3.9 3.8-7 8.5-7s8.5 3.1 8.5 7Z" />
+  </Base>
+);
+
+export const IconPlus = (p: P) => (
+  <Base {...p}>
+    <path d="M12 5v14M5 12h14" />
+  </Base>
+);
+
+export const IconList = (p: P) => (
+  <Base {...p}>
+    <path d="M8.5 7h11M8.5 12h11M8.5 17h11M4.5 7h.01M4.5 12h.01M4.5 17h.01" />
+  </Base>
+);
