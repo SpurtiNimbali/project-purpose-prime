@@ -7,7 +7,6 @@ import {
   Card,
   Note,
   Choice,
-  Severity,
   Mascot,
   MascotSays,
   StickyFooter,
@@ -37,141 +36,140 @@ import { cn } from "@/lib/utils";
 
 /* ---------------- session hub ---------------- */
 
+const PLAN: {
+  id: string;
+  title: string;
+  due: string;
+  track: "fasting" | "postMeal";
+  offset?: 30 | 90 | 210;
+  Icon: typeof IconSun;
+}[] = [
+  { id: "fasting", title: "Fasting", due: "7:30 am", track: "fasting", Icon: IconSun },
+  { id: "m30", title: "Meal + 30 min", due: "9:05 am", track: "postMeal", offset: 30, Icon: IconBowl },
+  { id: "m90", title: "Meal + 90 min", due: "10:05 am", track: "postMeal", offset: 90, Icon: IconClock },
+  { id: "m210", title: "Meal + 3.5 hrs", due: "12:05 pm", track: "postMeal", offset: 210, Icon: IconSunset },
+];
+
 export function SessionHubScreen({ store }: { store: TummyStore }) {
-  const offsets: { v: 30 | 90 | 210; label: string; sub: string; done: boolean }[] = [
-    { v: 30, label: "Record at 30 min", sub: "Due 9:05 am", done: true },
-    { v: 90, label: "Record at 90 min", sub: "Due 10:05 am", done: false },
-    { v: 210, label: "Record at 3.5 hrs", sub: "Due 12:05 pm", done: false },
-  ];
+  const doneMap = Object.fromEntries(store.sessions.map((s) => [s.id, s.done]));
+  const doneCount = PLAN.filter((p) => doneMap[p.id]).length;
+  const next = PLAN.find((p) => !doneMap[p.id]);
+
+  const start = (p: (typeof PLAN)[number]) => {
+    store.setTrack(p.track);
+    if (p.offset) store.setOffset(p.offset);
+    store.go("caseReminder");
+  };
+
   return (
     <Screen>
-      <TopBar title="Today's recordings" onBack={store.back} />
-      <ScreenBody>
-        <Card>
-          <p className="text-[17px] font-extrabold text-pine">Recording instructions</p>
-          <ul className="mt-3 space-y-2">
-            {[
-              "Find a quiet environment, away from TV and fans.",
-              "Sit still and upright — don't stand or lie down.",
-              "No talking, laughing or eating during the recording.",
-            ].map((t) => (
-              <li key={t} className="flex gap-3">
-                <span className="mt-[3px] shrink-0 text-teal">
-                  <IconCheck width={20} height={20} />
-                </span>
-                <span className="text-[16px] font-semibold leading-snug text-pine-soft">{t}</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-
-        <div className="mt-4">
-          <Note tone="amber" title="Take your iPhone case off before recording">
-            The case holds the microphone away from your skin and muffles the sounds.
-          </Note>
-        </div>
-
-        <h2 className="mt-6 text-[15px] font-extrabold uppercase tracking-[0.12em] text-teal">
-          Morning track
-        </h2>
-        <div className="mt-2">
-          <Card>
-            <div className="flex items-center gap-3">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
-                <IconSun width={26} height={26} />
-              </span>
-              <div className="flex-1">
-                <p className="text-[18px] font-extrabold text-pine">
-                  Record bowel sound (fasting)
-                </p>
-                <p className="text-[15px] font-semibold text-pine-soft">
-                  Soon after waking — before food, drink or activity.
-                </p>
-              </div>
-            </div>
-            <div className="mt-4">
-              <Btn
-                onClick={() => {
-                  store.setTrack("fasting");
-                  store.go("caseReminder");
-                }}
-              >
-                Start fasting recording
-              </Btn>
-            </div>
-          </Card>
-        </div>
-
-        <h2 className="mt-6 text-[15px] font-extrabold uppercase tracking-[0.12em] text-teal">
-          Post-meal track
-        </h2>
-        <div className="mt-2 space-y-3">
-          <Card>
-            <div className="flex items-center gap-3">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
-                <IconCamera width={26} height={26} />
-              </span>
-              <div className="flex-1">
-                <p className="text-[18px] font-extrabold text-pine">Start with your meal</p>
-                <p className="text-[15px] font-semibold text-pine-soft">
-                  This anchors the three timers.
-                </p>
-              </div>
-            </div>
-            <div className="mt-4">
-              <Btn
-                onClick={() => {
-                  store.setTrack("postMeal");
-                  store.go("whichMeal");
-                }}
-              >
-                Upload photo or description of the meal
-              </Btn>
-            </div>
-          </Card>
-
-          {offsets.map((o) => (
-            <button
-              key={o.v}
-              onClick={() => {
-                store.setTrack("postMeal");
-                store.setOffset(o.v);
-                store.go("caseReminder");
-              }}
-              className="flex min-h-[76px] w-full items-center gap-3 rounded-3xl border border-line bg-surface px-4 text-left"
-            >
+      <TopBar title="Today's recordings" onBack={store.back} step={`Day ${store.day} of 7`} />
+      <div className="flex min-h-0 flex-1 flex-col px-5 pb-5">
+        {/* progress */}
+        <div className="flex items-center gap-3">
+          <div className="flex flex-1 gap-2">
+            {PLAN.map((p) => (
               <span
+                key={p.id}
                 className={cn(
-                  "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
-                  o.done ? "bg-teal text-surface" : "bg-mint-soft text-teal",
+                  "h-[10px] flex-1 rounded-full",
+                  doneMap[p.id] ? "bg-teal" : p.id === next?.id ? "bg-teal/40" : "bg-line",
                 )}
-              >
-                {o.done ? <IconCheck width={24} height={24} /> : <IconMic width={24} height={24} />}
-              </span>
-              <span className="flex-1">
-                <span className="block text-[17px] font-extrabold text-pine">
-                  Record bowel sound
-                </span>
-                <span className="block text-[15px] font-semibold text-pine-soft">
-                  {o.label} · {o.done ? "done" : o.sub}
-                </span>
-              </span>
-            </button>
-          ))}
-
-          <Note tone="coral" title="Set alarms for 30, 90 and 210 minutes">
-            The timing is what makes the data usable. We strongly recommend setting three
-            alarms as soon as you finish your meal.
-          </Note>
-          <Note tone="amber" title="Skip a recording if you snacked">
-            If you've had any snack or drink since the target meal, skip that recording
-            rather than record it.
-          </Note>
+              />
+            ))}
+          </div>
+          <span className="shrink-0 text-[15px] font-extrabold text-pine-soft">
+            {doneCount}/4 done
+          </span>
         </div>
-      </ScreenBody>
+
+        {/* next session hero */}
+        {next ? (
+          <div className="mt-4 rounded-[28px] bg-teal p-5 text-surface">
+            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-mint">
+              Up next
+            </p>
+            <div className="mt-2 flex items-center gap-3">
+              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-surface/15">
+                <next.Icon width={30} height={30} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[24px] font-extrabold leading-tight">
+                  {next.title}
+                </p>
+                <p className="text-[16px] font-bold text-mint">Due {next.due} · 8 min</p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <Btn variant="secondary" onClick={() => start(next)}>
+                Start this recording
+              </Btn>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4 rounded-[28px] bg-teal p-5 text-center text-surface">
+            <p className="text-[22px] font-extrabold">All four done today</p>
+            <p className="mt-1 text-[16px] font-bold text-mint">
+              Nothing more to record until tomorrow morning.
+            </p>
+          </div>
+        )}
+
+        {/* remaining sessions, compact */}
+        <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto">
+          {PLAN.filter((p) => p.id !== next?.id).map((p) => {
+            const done = doneMap[p.id];
+            return (
+              <button
+                key={p.id}
+                disabled={done}
+                onClick={() => start(p)}
+                className="flex min-h-[62px] w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 text-left disabled:opacity-70"
+              >
+                <span
+                  className={cn(
+                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
+                    done ? "bg-teal text-surface" : "bg-mint-soft text-teal",
+                  )}
+                >
+                  {done ? <IconCheck width={20} height={20} /> : <p.Icon width={20} height={20} />}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[17px] font-extrabold text-pine">
+                    {p.title}
+                  </span>
+                  <span className="block text-[15px] font-semibold text-pine-soft">
+                    {done ? "Recorded" : `Due ${p.due}`}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* one-line setup reminder */}
+        <button
+          onClick={() => {
+            store.setTrack("postMeal");
+            store.go("whichMeal");
+          }}
+          className="mt-3 flex min-h-[58px] w-full items-center gap-3 rounded-2xl border-2 border-line bg-surface px-4 text-left"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-mint-soft text-teal">
+            <IconCamera width={20} height={20} />
+          </span>
+          <span className="min-w-0 flex-1 text-[16px] font-extrabold text-pine">
+            Log the meal that anchors these timers
+          </span>
+        </button>
+        <p className="mt-3 text-center text-[15px] font-bold text-pine-soft">
+          Case off · quiet room · sit still, no talking
+        </p>
+      </div>
     </Screen>
   );
 }
+
 
 /* ---------------- case reminder ---------------- */
 
@@ -512,11 +510,12 @@ const SYMPTOMS = [
 ];
 
 const TOTAL = 480; // 8 minutes
+const SEV_LABELS = ["very mild", "mild", "moderate", "strong", "very strong"];
 
 export function RecordingScreen({ store }: { store: TummyStore }) {
   const [left, setLeft] = useState(TOTAL);
   const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
-  const [severity, setSeverity] = useState(3);
+  const [toast, setToast] = useState<string | null>(null);
   const startedRef = useRef(false);
 
   useEffect(() => {
@@ -530,10 +529,17 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
     return () => clearInterval(t);
   }, []);
 
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 1800);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   const mmss = `${String(Math.floor(left / 60)).padStart(2, "0")}:${String(left % 60).padStart(2, "0")}`;
   const pct = 1 - left / TOTAL;
-  const R = 78;
+  const R = 90;
   const C = 2 * Math.PI * R;
+
 
   const counts = store.marks.reduce<Record<string, number>>((acc, m) => {
     acc[m.key] = (acc[m.key] ?? 0) + 1;
@@ -556,15 +562,13 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       {/* symptom taps at TOP — bottom of the phone is against the mic */}
       <div className="shrink-0 px-4 pt-3">
         <p className="mb-2 text-[15px] font-extrabold text-mint">
-          Feel something? Tap it — buttons are up here so your taps stay away from the
-          microphone.
+          Feel something? Tap it — buttons are up here, away from the microphone.
         </p>
         <div className="grid grid-cols-3 gap-2">
           {SYMPTOMS.map(({ key, label, Icon }) => (
             <button
               key={key}
               onClick={() => {
-                setSeverity(3);
                 setPending({ key, label, at: TOTAL - left });
                 if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(18);
               }}
@@ -582,34 +586,40 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center">
-        <svg width="196" height="196" viewBox="0 0 196 196">
-          <circle cx="98" cy="98" r={R} stroke="rgba(255,255,255,0.16)" strokeWidth="12" fill="none" />
-          <circle
-            cx="98"
-            cy="98"
-            r={R}
-            stroke="#8FC9AC"
-            strokeWidth="12"
-            fill="none"
-            strokeLinecap="round"
-            strokeDasharray={C}
-            strokeDashoffset={C * (1 - pct)}
-            transform="rotate(-90 98 98)"
-          />
-        </svg>
-        <div className="-mt-[130px] flex flex-col items-center">
-          <span className="text-mint">
-            <IconMic width={30} height={30} />
-          </span>
-          <p className="mt-1 text-[42px] font-extrabold leading-none tracking-tight text-surface">
-            {mmss}
-          </p>
-          <p className="mt-1 text-[15px] font-bold text-mint">
-            {store.side === "right" ? "Right side" : "Left side"} · {store.region} abdomen
-          </p>
+      {/* timer */}
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
+        <div className="relative h-[212px] w-[212px]">
+          <svg width="212" height="212" viewBox="0 0 212 212" className="absolute inset-0">
+            <circle cx="106" cy="106" r={R} stroke="rgba(255,255,255,0.14)" strokeWidth="10" fill="none" />
+            <circle
+              cx="106"
+              cy="106"
+              r={R}
+              stroke="#8FC9AC"
+              strokeWidth="10"
+              fill="none"
+              strokeLinecap="round"
+              strokeDasharray={C}
+              strokeDashoffset={C * (1 - pct)}
+              transform="rotate(-90 106 106)"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-mint/20 text-mint">
+              <IconMic width={20} height={20} />
+            </span>
+            <p className="mt-2 text-[46px] font-extrabold leading-none tracking-tight text-surface tabular-nums">
+              {mmss}
+            </p>
+            <p className="mt-1 text-[13px] font-extrabold uppercase tracking-[0.14em] text-mint">
+              remaining
+            </p>
+          </div>
         </div>
-        <p className="mt-[86px] text-[15px] font-bold text-mint">
+        <p className="mt-5 text-[16px] font-bold text-mint">
+          {store.side === "right" ? "Right side" : "Left side"} · {store.region} abdomen
+        </p>
+        <p className="mt-1 text-[15px] font-bold text-surface/70">
           {store.marks.length} symptom {store.marks.length === 1 ? "mark" : "marks"} recorded
         </p>
       </div>
@@ -631,44 +641,69 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
         )}
       </div>
 
+      {/* severity picker — top sheet, saves on tap */}
       {pending ? (
-        <div className="absolute inset-0 z-20 flex items-end bg-pine/70 backdrop-blur-sm">
-          <div className="w-full rounded-t-[32px] bg-pine p-5 pb-8 ring-1 ring-surface/15">
+        <div className="absolute inset-0 z-20 flex flex-col bg-pine/70 backdrop-blur-sm">
+          <div className="rounded-b-[32px] bg-pine px-5 pb-6 pt-14 ring-1 ring-surface/15">
             <div className="flex items-start gap-3">
-              <div className="flex-1">
-                <p className="text-[20px] font-extrabold text-surface">{pending.label}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[22px] font-extrabold text-surface">
+                  {pending.label}
+                </p>
                 <p className="text-[15px] font-bold text-mint">
-                  Marked at {String(Math.floor(pending.at / 60)).padStart(2, "0")}:
-                  {String(pending.at % 60).padStart(2, "0")} into the recording
+                  At {String(Math.floor(pending.at / 60)).padStart(2, "0")}:
+                  {String(pending.at % 60).padStart(2, "0")} · how strong is it?
                 </p>
               </div>
               <button
                 onClick={() => setPending(null)}
                 aria-label="Cancel"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-surface/15 text-surface"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface"
               >
                 <IconX width={22} height={22} />
               </button>
             </div>
-            <p className="mt-4 text-[16px] font-extrabold text-surface">How strong is it?</p>
-            <div className="mt-2">
-              <Severity value={severity} onChange={setSeverity} dark />
+            <div className="mt-4 flex gap-2">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => {
+                    store.addMark({ ...pending, severity: n });
+                    setPending(null);
+                    setToast(`${pending.label} · ${SEV_LABELS[n - 1]} saved`);
+                    if (typeof navigator !== "undefined" && navigator.vibrate)
+                      navigator.vibrate(12);
+                  }}
+                  className="flex h-[72px] flex-1 flex-col items-center justify-center rounded-2xl border-2 border-surface/25 bg-surface/10 text-surface active:border-mint active:bg-mint active:text-pine"
+                >
+                  <span className="text-[22px] font-extrabold leading-none">{n}</span>
+                </button>
+              ))}
             </div>
-            <div className="mt-4">
-              <Btn
-                onClick={() => {
-                  store.addMark({ ...pending, severity });
-                  setPending(null);
-                }}
-              >
-                Save mark
-              </Btn>
+            <div className="mt-2 flex justify-between text-[14px] font-bold text-mint">
+              <span>Very mild</span>
+              <span>Very strong</span>
             </div>
+            <p className="mt-3 text-center text-[14px] font-bold text-surface/60">
+              Tap a number — it saves straight away.
+            </p>
           </div>
+          <button
+            className="flex-1"
+            aria-label="Cancel"
+            onClick={() => setPending(null)}
+          />
+        </div>
+      ) : null}
+
+      {toast ? (
+        <div className="pointer-events-none absolute inset-x-5 top-[350px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
+          {toast}
         </div>
       ) : null}
     </Screen>
   );
+
 }
 
 /* ---------------- post-recording metadata (chat) ---------------- */

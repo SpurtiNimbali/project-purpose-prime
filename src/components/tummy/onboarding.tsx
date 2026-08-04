@@ -215,93 +215,175 @@ export function VideoScreen({ store }: { store: TummyStore }) {
 const QUIZ = [
   {
     q: "Where should the phone sit during a recording?",
-    options: [
-      "On top of my shirt",
-      "Directly on bare skin, case off",
-      "In my pocket",
-    ],
+    options: ["On top of my shirt", "Directly on bare skin, case off", "In my pocket"],
     answer: 1,
+    why: "Clothing and cases hold the microphone away from your skin, and gut sounds are far too quiet to survive that gap.",
   },
   {
     q: "You had a coffee 20 minutes ago. Can you do the fasting recording?",
     options: ["Yes, coffee doesn't count", "No, that breaks the fast"],
     answer: 1,
+    why: "Anything other than a sip of water changes your gut activity, so the recording would no longer be a fasting one.",
   },
   {
     q: "How long after your target meal are the three recordings?",
     options: ["30 min, 90 min, 3.5 hrs", "1 hr, 2 hrs, 3 hrs", "Whenever I remember"],
     answer: 0,
+    why: "Those three moments capture the early, middle and late stages of digestion, which is what makes the data comparable.",
   },
 ];
 
 export function QuizScreen({ store }: { store: TummyStore }) {
+  const [qi, setQi] = useState(0);
   const [picks, setPicks] = useState<(number | null)[]>([null, null, null]);
-  const allRight = picks.every((p, i) => p === QUIZ[i].answer);
-  const answered = picks.every((p) => p !== null);
+  const item = QUIZ[qi];
+  const pick = picks[qi];
+  const correct = pick === item.answer;
+  const last = qi === QUIZ.length - 1;
+
   return (
     <Screen>
       <TopBar title="Quick check" onBack={store.back} step="Step 4 of 9" />
-      <ScreenBody>
-        <MascotSays src={MASCOT.calm} size={72}>
-          Three questions so I know the instructions landed. Wrong answers are fine — I'll
-          just explain again.
-        </MascotSays>
-        <div className="mt-5 space-y-5">
-          {QUIZ.map((item, qi) => (
-            <div key={item.q}>
-              <p className="mb-2 text-[17px] font-extrabold text-pine">{item.q}</p>
-              <div className="space-y-2">
-                {item.options.map((opt, oi) => {
-                  const picked = picks[qi] === oi;
-                  const wrong = picked && oi !== item.answer;
-                  return (
-                    <button
-                      key={opt}
-                      onClick={() =>
-                        setPicks((p) => p.map((v, i) => (i === qi ? oi : v)))
-                      }
-                      className={cn(
-                        "flex min-h-[60px] w-full items-center gap-3 rounded-2xl border-2 bg-surface px-4 text-left text-[16px] font-bold text-pine",
-                        picked && !wrong && "border-teal bg-mint-soft",
-                        wrong && "border-coral bg-coral-soft",
-                        !picked && "border-line",
-                      )}
-                    >
-                      {opt}
-                    </button>
-                  );
-                })}
-              </div>
-              {picks[qi] !== null && picks[qi] !== item.answer ? (
-                <p className="mt-2 text-[15px] font-bold text-coral">
-                  Not quite — have another look at that one.
-                </p>
-              ) : null}
-            </div>
+      <ScreenBody className="flex flex-col">
+        {/* progress rail */}
+        <div className="flex items-center gap-2">
+          {QUIZ.map((_, i) => (
+            <span
+              key={i}
+              className={cn(
+                "h-[8px] flex-1 rounded-full",
+                i < qi || (i === qi && correct)
+                  ? "bg-teal"
+                  : i === qi
+                    ? "bg-teal/40"
+                    : "bg-line",
+              )}
+            />
           ))}
+          <span className="ml-1 shrink-0 text-[14px] font-extrabold text-pine-soft">
+            {qi + 1}/{QUIZ.length}
+          </span>
+        </div>
+
+        <div className="mt-5 rounded-[28px] border border-line bg-surface p-5">
+          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+            Question {qi + 1}
+          </p>
+          <h2 className="mt-1 text-[22px] font-extrabold leading-tight text-pine">
+            {item.q}
+          </h2>
+
+          <div className="mt-4 space-y-2">
+            {item.options.map((opt, oi) => {
+              const picked = pick === oi;
+              const isRight = oi === item.answer;
+              const state =
+                pick === null
+                  ? "idle"
+                  : picked && isRight
+                    ? "right"
+                    : picked
+                      ? "wrong"
+                      : isRight && !correct
+                        ? "reveal"
+                        : "muted";
+              return (
+                <button
+                  key={opt}
+                  disabled={pick !== null}
+                  onClick={() => setPicks((p) => p.map((v, i) => (i === qi ? oi : v)))}
+                  className={cn(
+                    "flex min-h-[64px] w-full items-center gap-3 rounded-2xl border-2 px-3 py-2 text-left text-[16px] font-bold",
+                    state === "idle" && "border-line bg-wash text-pine",
+                    state === "right" && "border-teal bg-mint-soft text-pine",
+                    state === "wrong" && "border-coral bg-coral-soft text-pine",
+                    state === "reveal" && "border-teal bg-surface text-pine",
+                    state === "muted" && "border-line bg-surface text-pine-soft opacity-60",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[16px] font-black",
+                      state === "right" || state === "reveal"
+                        ? "bg-teal text-surface"
+                        : state === "wrong"
+                          ? "bg-coral text-surface"
+                          : "bg-surface text-pine-soft",
+                    )}
+                  >
+                    {state === "right" || state === "reveal" ? (
+                      <IconCheck width={20} height={20} />
+                    ) : (
+                      "ABC"[oi]
+                    )}
+                  </span>
+                  <span className="min-w-0 flex-1">{opt}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {pick !== null ? (
+            <div
+              className={cn(
+                "mt-4 rounded-2xl border-2 p-4",
+                correct ? "border-mint bg-mint-soft" : "border-amber/40 bg-amber-soft",
+              )}
+            >
+              <p className="text-[16px] font-extrabold text-pine">
+                {correct ? "That's right" : "Not quite — here's why"}
+              </p>
+              <p className="mt-1 text-[15px] font-semibold leading-snug text-pine-soft">
+                {item.why}
+              </p>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="mt-4">
+          <MascotSays src={MASCOT.calm} size={64}>
+            Wrong answers are completely fine — I'll explain, and you can keep going.
+          </MascotSays>
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("survey")} disabled={!answered || !allRight}>
-          {answered && !allRight ? "Fix the highlighted answers" : "Continue"}
+        <Btn
+          disabled={pick === null}
+          onClick={() => (last ? store.go("survey") : setQi(qi + 1))}
+        >
+          {pick === null ? "Pick an answer" : last ? "Continue" : "Next question"}
         </Btn>
       </StickyFooter>
     </Screen>
   );
 }
 
+
 /* ---------------- background survey ---------------- */
 
-const SYMPTOM_ROWS = [
-  "Audible stomach or gut sound",
-  "Bloating",
-  "Nausea",
-  "Abdominal pain",
-  "Gas or flatulence",
-  "Belching",
-  "Vomiting",
-  "Sense of urgency",
+const SYMPTOM_ROWS: { label: string; info: string }[] = [
+  {
+    label: "Rumbling or gurgling you can hear",
+    info: "Noises coming from your stomach or gut that you or people near you can actually hear.",
+  },
+  {
+    label: "Bloating",
+    info: "A full, tight or swollen feeling in your belly, often worse after eating.",
+  },
+  { label: "Feeling sick to your stomach", info: "Nausea — feeling like you might be sick." },
+  {
+    label: "Stomach pain or cramps",
+    info: "Any ache, sharp pain or squeezing feeling anywhere in your belly.",
+  },
+  { label: "Passing wind", info: "Gas released from the back passage — also called flatulence." },
+  { label: "Burping", info: "Bringing up air through your mouth — also called belching." },
+  { label: "Being sick", info: "Vomiting — actually throwing up, not just feeling like it." },
+  {
+    label: "Sudden rush to the toilet",
+    info: "A strong, urgent need to go that is hard to hold in.",
+  },
 ];
+
 
 export function SurveyScreen({ store }: { store: TummyStore }) {
   const [gender, setGender] = useState("");
@@ -367,10 +449,11 @@ export function SurveyScreen({ store }: { store: TummyStore }) {
             <div className="space-y-2">
               {SYMPTOM_ROWS.map((row) => (
                 <ScaleRow
-                  key={row}
-                  label={row}
-                  value={scale[row] ?? 0}
-                  onChange={(v) => setScale((s) => ({ ...s, [row]: v }))}
+                  key={row.label}
+                  label={row.label}
+                  info={row.info}
+                  value={scale[row.label] ?? 0}
+                  onChange={(v) => setScale((s) => ({ ...s, [row.label]: v }))}
                 />
               ))}
             </div>
