@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Screen,
   ScreenBody,
@@ -38,8 +38,10 @@ import {
   IconDizzy,
   IconWind,
   IconPhone,
+  IconList,
 } from "./icons";
-import type { ScreenKey, TummyStore } from "./store";
+import type { LogKind, ScreenKey, TummyStore } from "./store";
+import { AssistantHint } from "./assistant";
 import { cn } from "@/lib/utils";
 
 /* ---------------- home ---------------- */
