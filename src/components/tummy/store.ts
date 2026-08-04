@@ -111,13 +111,26 @@ export function nowLabel() {
   return new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
+export function clockLabel(mins: number) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const ampm = h >= 12 ? "pm" : "am";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+}
+
+export function minutesNow() {
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes();
+}
 
 const INITIAL_SESSIONS: Session[] = [
-  { id: "fasting", label: "Fasting (morning)", done: true },
-  { id: "m30", label: "Breakfast + 30 min", done: true },
-  { id: "m90", label: "Breakfast + 90 min", done: false },
-  { id: "m210", label: "Breakfast + 3.5 hrs", done: false },
+  { id: "fasting", label: "Fasting (morning)", done: true, at: 7 * 60 + 30, window: "6:30 – 8:30 am" },
+  { id: "m30", label: "Breakfast + 30 min", done: true, at: 8 * 60 + 35, window: "30 min after breakfast" },
+  { id: "m90", label: "Breakfast + 90 min", done: false, at: 9 * 60 + 35, window: "90 min after breakfast" },
+  { id: "m210", label: "Breakfast + 3.5 hrs", done: false, at: 11 * 60 + 35, window: "3.5 hrs after breakfast" },
 ];
+
 
 export function useTummyStore(): TummyStore {
   const [stack, setStack] = useState<ScreenKey[]>(["welcome"]);
