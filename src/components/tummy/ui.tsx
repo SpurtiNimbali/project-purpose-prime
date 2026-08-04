@@ -262,15 +262,37 @@ export function ScaleRow({
   value,
   onChange,
   max = 5,
+  info,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   max?: number;
+  info?: string;
 }) {
+  const [open, setOpen] = useState(false);
   return (
     <div className="rounded-2xl border border-line bg-surface p-4">
-      <p className="text-[16px] font-extrabold text-pine">{label}</p>
+      <div className="flex items-start gap-2">
+        <p className="min-w-0 flex-1 text-[16px] font-extrabold text-pine">{label}</p>
+        {info ? (
+          <button
+            onClick={() => setOpen((v) => !v)}
+            aria-label={`What does ${label} mean?`}
+            className={cn(
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-[15px] font-black",
+              open ? "border-teal bg-teal text-surface" : "border-line text-pine-soft",
+            )}
+          >
+            i
+          </button>
+        ) : null}
+      </div>
+      {info && open ? (
+        <p className="mt-2 rounded-xl bg-mint-soft px-3 py-2 text-[15px] font-semibold leading-snug text-pine">
+          {info}
+        </p>
+      ) : null}
       <div className="mt-3 flex gap-2">
         {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
           <button
