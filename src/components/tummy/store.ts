@@ -43,7 +43,25 @@ export type Meal = "breakfast" | "lunch" | "dinner";
 
 export type SymptomMark = { key: string; label: string; at: number; severity: number };
 
-export type Session = { id: string; label: string; done: boolean };
+export type Session = {
+  id: string;
+  label: string;
+  done: boolean;
+  /** minutes from midnight for the scheduled window */
+  at: number;
+  window: string;
+};
+
+export type NextTask = {
+  tag: string;
+  title: string;
+  sub: string;
+  cta: string;
+  screen: ScreenKey;
+  state: "due" | "soon" | "clear";
+  minsUntil: number | null;
+  sessionId?: string;
+};
 
 export type LogKind =
   | "meal"
@@ -86,19 +104,126 @@ export type TummyStore = {
   addEntry: (kind: LogKind, label: string, detail?: string) => void;
   chatOpen: boolean;
   setChatOpen: (open: boolean) => void;
+  nextTask: NextTask;
 };
 
 export function nowLabel() {
   return new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
+export function clockLabel(mins: number) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const ampm = h >= 12 ? "pm" : "am";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+}
+
+export function minutesNow() {
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes();
+}
 
 const INITIAL_SESSIONS: Session[] = [
-  { id: "fasting", label: "Fasting (morning)", done: true },
-  { id: "m30", label: "Breakfast + 30 min", done: true },
-  { id: "m90", label: "Breakfast + 90 min", done: false },
-  { id: "m210", label: "Breakfast + 3.5 hrs", done: false },
+  {
+    id: "fasting",
+    label: "Fasting (morning)",
+    done: true,
+    at: 7 * 60 + 30,
+    window: "6:30 – 8:30 am",
+  },
+  {
+    id: "m30",
+    label: "Breakfast + 30 min",
+    done: true,
+    at: 8 * 60 + 35,
+    window: "30 min after breakfast",
+  },
+  {
+    id: "m90",
+    label: "Breakfast + 90 min",
+    done: false,
+    at: 9 * 60 + 35,
+    window: "90 min after breakfast",
+  },
+  {
+    id: "m210",
+    label: "Breakfast + 3.5 hrs",
+    done: false,
+    at: 11 * 60 + 35,
+    window: "3.5 hrs after breakfast",
+  },
 ];
+
+/** Single source of truth for "what should I do right now". */
+export function computeNextTask(sessions: Session[], entries: LogEntry[]): NextTask {
+  const now = minutesNow();
+  const mealLogged = entries.some((e) => e.kind === "meal");
+  const pending = sessions.filter((s) => !s.done);
+  const upcoming = pending[0];
+
+  if (upcoming) {
+    const mins = upcoming.at - now;
+    if (mins <= 10) {
+      return {
+        tag: "Gut sound recording",
+        title: upcoming.label,
+        sub:
+          mins < -30
+            ? "This window is closing — record now or mark it missed."
+            : "Case off, quiet room, sit still.",
+        cta: "Start recording",
+        screen: "sessionHub",
+        state: "due",
+        minsUntil: null,
+        sessionId: upcoming.id,
+      };
+    }
+    if (!mealLogged) {
+      return {
+        tag: "Meal or snack",
+        title: "Describe the meal your timers run from",
+        sub: "The post-meal recordings are timed off this.",
+        cta: "Add the meal",
+        screen: "logMeal",
+        state: "due",
+        minsUntil: null,
+      };
+    }
+    return {
+      tag: "Gut sound recording",
+      title: upcoming.label,
+      sub: `You're clear until ${clockLabel(upcoming.at)}.`,
+      cta: "Open today's recordings",
+      screen: "sessionHub",
+      state: "soon",
+      minsUntil: mins,
+      sessionId: upcoming.id,
+    };
+  }
+
+  if (now >= 17 * 60) {
+    return {
+      tag: "Before bed",
+      title: "A few questions about your day",
+      sub: "Sleep, symptoms and toilet habits — about two minutes.",
+      cta: "Answer now",
+      screen: "logSleep",
+      state: "due",
+      minsUntil: null,
+    };
+  }
+
+  return {
+    tag: "All caught up",
+    title: "Nothing due right now",
+    sub: "Your evening questions open at 5:00 pm.",
+    cta: "Log something anyway",
+    screen: "logHub",
+    state: "clear",
+    minsUntil: null,
+  };
+}
 
 export function useTummyStore(): TummyStore {
   const [stack, setStack] = useState<ScreenKey[]>(["welcome"]);
@@ -123,7 +248,6 @@ export function useTummyStore(): TummyStore {
   ]);
   const [chatOpen, setChatOpen] = useState(false);
 
-
   const go = useCallback((s: ScreenKey) => {
     setStack((prev) => [...prev, s]);
     if (typeof window !== "undefined") window.scrollTo(0, 0);
@@ -133,7 +257,11 @@ export function useTummyStore(): TummyStore {
     [],
   );
 
+  const nextTask = computeNextTask(sessions, entries);
+
   return {
+    nextTask,
+
     screen: stack[stack.length - 1],
     go,
     back,
@@ -158,7 +286,13 @@ export function useTummyStore(): TummyStore {
     addEntry: (kind, label, detail) =>
       setEntries((prev) => [
         ...prev,
-        { id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, kind, label, detail, time: nowLabel() },
+        {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          kind,
+          label,
+          detail,
+          time: nowLabel(),
+        },
       ]),
     chatOpen,
     setChatOpen,

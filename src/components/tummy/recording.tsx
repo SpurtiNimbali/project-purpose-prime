@@ -31,7 +31,7 @@ import {
   IconLock,
   IconX,
 } from "./icons";
-import type { TummyStore } from "./store";
+import { minutesNow, type TummyStore } from "./store";
 import { cn } from "@/lib/utils";
 
 /* ---------------- session hub ---------------- */
@@ -45,15 +45,64 @@ const PLAN: {
   Icon: typeof IconSun;
 }[] = [
   { id: "fasting", title: "Fasting", due: "7:30 am", track: "fasting", Icon: IconSun },
-  { id: "m30", title: "Meal + 30 min", due: "9:05 am", track: "postMeal", offset: 30, Icon: IconBowl },
-  { id: "m90", title: "Meal + 90 min", due: "10:05 am", track: "postMeal", offset: 90, Icon: IconClock },
-  { id: "m210", title: "Meal + 3.5 hrs", due: "12:05 pm", track: "postMeal", offset: 210, Icon: IconSunset },
+  {
+    id: "m30",
+    title: "Meal + 30 min",
+    due: "9:05 am",
+    track: "postMeal",
+    offset: 30,
+    Icon: IconBowl,
+  },
+  {
+    id: "m90",
+    title: "Meal + 90 min",
+    due: "10:05 am",
+    track: "postMeal",
+    offset: 90,
+    Icon: IconClock,
+  },
+  {
+    id: "m210",
+    title: "Meal + 3.5 hrs",
+    due: "12:05 pm",
+    track: "postMeal",
+    offset: 210,
+    Icon: IconSunset,
+  },
 ];
+
+function ProgressRing({ done, total }: { done: number; total: number }) {
+  const r = 20;
+  const c = 2 * Math.PI * r;
+  return (
+    <span className="relative flex h-[52px] w-[52px] shrink-0 items-center justify-center">
+      <svg width="52" height="52" viewBox="0 0 52 52" className="-rotate-90">
+        <circle cx="26" cy="26" r={r} fill="none" stroke="#CFE3D8" strokeWidth="6" />
+        <circle
+          cx="26"
+          cy="26"
+          r={r}
+          fill="none"
+          stroke="#2E7D6B"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - done / total)}
+        />
+      </svg>
+      <span className="absolute text-[15px] font-extrabold tabular-nums text-pine">
+        {done}/{total}
+      </span>
+    </span>
+  );
+}
 
 export function SessionHubScreen({ store }: { store: TummyStore }) {
   const doneMap = Object.fromEntries(store.sessions.map((s) => [s.id, s.done]));
   const doneCount = PLAN.filter((p) => doneMap[p.id]).length;
   const next = PLAN.find((p) => !doneMap[p.id]);
+  const mealEntry = store.entries.find((e) => e.kind === "meal");
+  const now = minutesNow();
 
   const start = (p: (typeof PLAN)[number]) => {
     store.setTrack(p.track);
@@ -63,113 +112,146 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
 
   return (
     <Screen>
-      <TopBar title="Today's recordings" onBack={store.back} step={`Day ${store.day} of 7`} />
-      <div className="flex min-h-0 flex-1 flex-col px-5 pb-5">
-        {/* progress */}
-        <div className="flex items-center gap-3">
-          <div className="flex flex-1 gap-2">
-            {PLAN.map((p) => (
-              <span
-                key={p.id}
-                className={cn(
-                  "h-[10px] flex-1 rounded-full",
-                  doneMap[p.id] ? "bg-teal" : p.id === next?.id ? "bg-teal/40" : "bg-line",
-                )}
-              />
-            ))}
-          </div>
-          <span className="shrink-0 text-[15px] font-extrabold text-pine-soft">
-            {doneCount}/4 done
-          </span>
-        </div>
-
-        {/* next session hero */}
-        {next ? (
-          <div className="mt-4 rounded-[28px] bg-teal p-5 text-surface">
-            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-mint">
-              Up next
-            </p>
-            <div className="mt-2 flex items-center gap-3">
-              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-surface/15">
-                <next.Icon width={30} height={30} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[24px] font-extrabold leading-tight">
-                  {next.title}
-                </p>
-                <p className="text-[16px] font-bold text-mint">Due {next.due} · 8 min</p>
-              </div>
-            </div>
-            <div className="mt-4">
-              <Btn variant="secondary" onClick={() => start(next)}>
-                Start this recording
-              </Btn>
-            </div>
+      <TopBar
+        title="Today's recordings"
+        onBack={store.back}
+        step={`Day ${store.day} of 7`}
+        right={<ProgressRing done={doneCount} total={PLAN.length} />}
+      />
+      <div className="flex min-h-0 flex-1 flex-col px-5 pb-4">
+        {/* anchor meal — the timers mean nothing without it */}
+        {mealEntry ? (
+          <div className="flex min-h-[56px] items-center gap-3 rounded-2xl border border-line bg-surface px-4">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-mint-soft text-teal">
+              <IconBowl width={20} height={20} />
+            </span>
+            <span className="min-w-0 flex-1 truncate text-[16px] font-bold text-pine">
+              Timers run from {mealEntry.label.toLowerCase()}, {mealEntry.time}
+            </span>
+            <button
+              onClick={() => store.go("logMeal")}
+              className="shrink-0 text-[15px] font-extrabold text-teal"
+            >
+              Edit
+            </button>
           </div>
         ) : (
-          <div className="mt-4 rounded-[28px] bg-teal p-5 text-center text-surface">
-            <p className="text-[22px] font-extrabold">All four done today</p>
-            <p className="mt-1 text-[16px] font-bold text-mint">
-              Nothing more to record until tomorrow morning.
-            </p>
-          </div>
+          <button
+            onClick={() => {
+              store.setTrack("postMeal");
+              store.go("whichMeal");
+            }}
+            className="flex min-h-[72px] w-full items-center gap-3 rounded-2xl border-2 border-teal bg-mint-soft px-4 text-left"
+          >
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal text-surface">
+              <IconCamera width={22} height={22} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[17px] font-extrabold text-pine">
+                Log the meal these timers run from
+              </span>
+              <span className="block text-[15px] font-semibold text-pine-soft">
+                Needed before the post-meal recordings
+              </span>
+            </span>
+          </button>
         )}
 
-        {/* remaining sessions, compact */}
-        <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto">
-          {PLAN.filter((p) => p.id !== next?.id).map((p) => {
+        {/* session timeline */}
+        <div className="mt-3 min-h-0 flex-1 overflow-y-auto">
+          {PLAN.map((p, i) => {
             const done = doneMap[p.id];
+            const isNext = p.id === next?.id;
+            const session = store.sessions.find((s) => s.id === p.id);
+            const late = !done && session ? now - session.at > 45 : false;
             return (
-              <button
-                key={p.id}
-                disabled={done}
-                onClick={() => start(p)}
-                className="flex min-h-[62px] w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 text-left disabled:opacity-70"
-              >
-                <span
-                  className={cn(
-                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
-                    done ? "bg-teal text-surface" : "bg-mint-soft text-teal",
-                  )}
-                >
-                  {done ? <IconCheck width={20} height={20} /> : <p.Icon width={20} height={20} />}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[17px] font-extrabold text-pine">
-                    {p.title}
-                  </span>
-                  <span className="block text-[15px] font-semibold text-pine-soft">
-                    {done ? "Recorded" : `Due ${p.due}`}
-                  </span>
-                </span>
-              </button>
+              <div key={p.id} className="relative flex gap-3 pb-2">
+                <div className="flex w-[24px] shrink-0 flex-col items-center">
+                  <span
+                    className={cn(
+                      "mt-4 h-[16px] w-[16px] shrink-0 rounded-full border-[3px]",
+                      done
+                        ? "border-teal bg-teal"
+                        : isNext
+                          ? "border-teal bg-surface"
+                          : "border-line bg-surface",
+                    )}
+                  />
+                  {i < PLAN.length - 1 ? (
+                    <span className={cn("w-[3px] flex-1", done ? "bg-teal" : "bg-line")} />
+                  ) : null}
+                </div>
+
+                {isNext ? (
+                  <div className="min-w-0 flex-1 rounded-2xl bg-teal p-4 text-surface">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface/15">
+                        <p.Icon width={22} height={22} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[19px] font-extrabold leading-tight">
+                          {p.title}
+                        </p>
+                        <p className="truncate text-[15px] font-bold text-mint">
+                          {late ? "Window closing" : `Due ${p.due}`} · 8 min
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => start(p)}
+                      className="mt-3 flex min-h-[56px] w-full items-center justify-center rounded-xl bg-surface text-[17px] font-extrabold text-teal active:scale-[0.99]"
+                    >
+                      Start this recording
+                    </button>
+                    {late ? (
+                      <button
+                        onClick={() => store.completeSession(p.id)}
+                        className="mt-2 min-h-[48px] w-full text-[15px] font-extrabold text-amber-soft"
+                      >
+                        Mark as missed
+                      </button>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="flex min-h-[56px] min-w-0 flex-1 items-center gap-3 rounded-2xl border border-line bg-surface px-4">
+                    <span
+                      className={cn(
+                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
+                        done ? "bg-teal text-surface" : "bg-wash text-pine-soft",
+                      )}
+                    >
+                      {done ? (
+                        <IconCheck width={18} height={18} />
+                      ) : (
+                        <p.Icon width={18} height={18} />
+                      )}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-[16px] font-extrabold text-pine">
+                      {p.title}
+                    </span>
+                    <span className="shrink-0 text-[15px] font-bold text-pine-soft">
+                      {done ? "Recorded" : p.due}
+                    </span>
+                  </div>
+                )}
+              </div>
             );
           })}
+
+          {!next ? (
+            <p className="mt-2 rounded-2xl bg-mint-soft px-4 py-4 text-center text-[16px] font-bold text-pine">
+              All four done today. Nothing more until tomorrow morning.
+            </p>
+          ) : null}
         </div>
 
-        {/* one-line setup reminder */}
-        <button
-          onClick={() => {
-            store.setTrack("postMeal");
-            store.go("whichMeal");
-          }}
-          className="mt-3 flex min-h-[58px] w-full items-center gap-3 rounded-2xl border-2 border-line bg-surface px-4 text-left"
-        >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-mint-soft text-teal">
-            <IconCamera width={20} height={20} />
-          </span>
-          <span className="min-w-0 flex-1 text-[16px] font-extrabold text-pine">
-            Log the meal that anchors these timers
-          </span>
-        </button>
-        <p className="mt-3 text-center text-[15px] font-bold text-pine-soft">
+        <p className="pt-2 text-center text-[15px] font-bold text-pine-soft">
           Case off · quiet room · sit still, no talking
         </p>
       </div>
     </Screen>
   );
 }
-
 
 /* ---------------- case reminder ---------------- */
 
@@ -199,8 +281,8 @@ export function CaseReminderScreen({ store }: { store: TummyStore }) {
         </button>
         {why ? (
           <Note tone="amber" title="Why the case matters">
-            A case creates a gap between the microphone and your skin. Gut sounds are quiet
-            and low, so even a couple of millimetres of air loses most of the signal.
+            A case creates a gap between the microphone and your skin. Gut sounds are quiet and low,
+            so even a couple of millimetres of air loses most of the signal.
           </Note>
         ) : null}
       </ScreenBody>
@@ -253,8 +335,8 @@ export function WhichMealScreen({ store }: { store: TummyStore }) {
       <TopBar title="Which meal?" onBack={store.back} />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Pick the meal these recordings will follow. Your three timers start from the
-          moment you finish eating.
+          Pick the meal these recordings will follow. Your three timers start from the moment you
+          finish eating.
         </p>
         <div className="mt-5 space-y-3">
           {meals.map(({ k, label, Icon }) => (
@@ -344,8 +426,8 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
             Please confirm you haven't had any snacks or drinks after that target meal
           </h2>
           <p className="mt-3 text-center text-[17px] font-semibold leading-snug text-pine-soft">
-            Anything eaten in between changes what we hear, so we'd rather skip the session
-            than record it.
+            Anything eaten in between changes what we hear, so we'd rather skip the session than
+            record it.
           </p>
         </div>
       </ScreenBody>
@@ -365,17 +447,17 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- positioning ---------------- */
 
-function AbdomenGuide({
-  side,
-  region,
-}: {
-  side: "right" | "left";
-  region: "upper" | "lower";
-}) {
+function AbdomenGuide({ side, region }: { side: "right" | "left"; region: "upper" | "lower" }) {
   const x = side === "right" ? 74 : 126;
   const y = region === "upper" ? 96 : 132;
   return (
-    <svg viewBox="0 0 200 220" width="100%" height="230" role="img" aria-label="Phone placement guide">
+    <svg
+      viewBox="0 0 200 220"
+      width="100%"
+      height="230"
+      role="img"
+      aria-label="Phone placement guide"
+    >
       {/* torso */}
       <path
         d="M62 26c0-8 12-14 38-14s38 6 38 14c6 26 8 60 4 96-3 28-10 50-14 66H72c-4-16-11-38-14-66-4-36-2-70 4-96z"
@@ -395,15 +477,7 @@ function AbdomenGuide({
         belly button
       </text>
       {/* measure line */}
-      <line
-        x1="100"
-        y1={y}
-        x2={x}
-        y2={y}
-        stroke="#E8A33D"
-        strokeWidth="2"
-        strokeDasharray="4 4"
-      />
+      <line x1="100" y1={y} x2={x} y2={y} stroke="#E8A33D" strokeWidth="2" strokeDasharray="4 4" />
       <text
         x={(100 + x) / 2}
         y={y - 8}
@@ -437,12 +511,12 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
         <div className="mt-2 space-y-2">
           <p className="text-[18px] font-extrabold leading-snug text-surface">
             Lift your shirt and place the microphone exactly 9 cm to the{" "}
-            {store.side === "right" ? "right" : "left"} of your belly button, perpendicular
-            to your skin.
+            {store.side === "right" ? "right" : "left"} of your belly button, perpendicular to your
+            skin.
           </p>
           <p className="text-[16px] font-semibold leading-snug text-mint">
-            Bottom of the phone — the microphone side — pressed onto bare skin. Case off.
-            Sit upright and stay still.
+            Bottom of the phone — the microphone side — pressed onto bare skin. Case off. Sit
+            upright and stay still.
           </p>
         </div>
 
@@ -540,7 +614,6 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
   const R = 90;
   const C = 2 * Math.PI * R;
 
-
   const counts = store.marks.reduce<Record<string, number>>((acc, m) => {
     acc[m.key] = (acc[m.key] ?? 0) + 1;
     return acc;
@@ -590,7 +663,14 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
         <div className="relative h-[212px] w-[212px]">
           <svg width="212" height="212" viewBox="0 0 212 212" className="absolute inset-0">
-            <circle cx="106" cy="106" r={R} stroke="rgba(255,255,255,0.14)" strokeWidth="10" fill="none" />
+            <circle
+              cx="106"
+              cy="106"
+              r={R}
+              stroke="rgba(255,255,255,0.14)"
+              strokeWidth="10"
+              fill="none"
+            />
             <circle
               cx="106"
               cy="106"
@@ -647,9 +727,7 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
           <div className="rounded-b-[32px] bg-pine px-5 pb-6 pt-14 ring-1 ring-surface/15">
             <div className="flex items-start gap-3">
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[22px] font-extrabold text-surface">
-                  {pending.label}
-                </p>
+                <p className="truncate text-[22px] font-extrabold text-surface">{pending.label}</p>
                 <p className="text-[15px] font-bold text-mint">
                   At {String(Math.floor(pending.at / 60)).padStart(2, "0")}:
                   {String(pending.at % 60).padStart(2, "0")} · how strong is it?
@@ -688,11 +766,7 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
               Tap a number — it saves straight away.
             </p>
           </div>
-          <button
-            className="flex-1"
-            aria-label="Cancel"
-            onClick={() => setPending(null)}
-          />
+          <button className="flex-1" aria-label="Cancel" onClick={() => setPending(null)} />
         </div>
       ) : null}
 
@@ -703,7 +777,6 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       ) : null}
     </Screen>
   );
-
 }
 
 /* ---------------- post-recording metadata (chat) ---------------- */
@@ -834,9 +907,7 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
     <Screen>
       <ScreenBody className="flex flex-col justify-center pt-14 text-center">
         <Mascot src={MASCOT.cheer} size={170} className="mx-auto" />
-        <h1 className="mt-4 text-[26px] font-extrabold leading-tight text-pine">
-          Session saved
-        </h1>
+        <h1 className="mt-4 text-[26px] font-extrabold leading-tight text-pine">Session saved</h1>
         <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
           Both sides uploaded, with {store.marks.length} symptom{" "}
           {store.marks.length === 1 ? "mark" : "marks"} timestamped against the audio.

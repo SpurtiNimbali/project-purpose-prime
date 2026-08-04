@@ -41,8 +41,8 @@ export function WelcomeScreen({ store }: { store: TummyStore }) {
           Stanford School of Medicine
         </p>
         <p className="mt-4 text-[17px] font-semibold leading-relaxed text-pine-soft">
-          A one-week study listening to the sounds your gut makes. I'll walk you through
-          every step, and nothing here is a test.
+          A one-week study listening to the sounds your gut makes. I'll walk you through every step,
+          and nothing here is a test.
         </p>
       </div>
       <StickyFooter>
@@ -69,8 +69,8 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
       <TopBar title="Your subject ID" onBack={store.back} step="Step 1 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Enter the ID printed on the card your study coordinator gave you. We check it
-          against the study database — your name is never stored in this app.
+          Enter the ID printed on the card your study coordinator gave you. We check it against the
+          study database — your name is never stored in this app.
         </p>
         <div className="mt-5 space-y-3">
           <Field label="Subject ID">
@@ -84,9 +84,7 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
               autoCapitalize="characters"
             />
           </Field>
-          {state === "checking" ? (
-            <Note tone="blue">Checking the study database…</Note>
-          ) : null}
+          {state === "checking" ? <Note tone="blue">Checking the study database…</Note> : null}
           {state === "ok" ? (
             <Note tone="green" title="ID confirmed">
               Matched to cohort B, healthy group. Day 1 starts tomorrow morning.
@@ -186,15 +184,17 @@ export function VideoScreen({ store }: { store: TummyStore }) {
           </button>
           <div className="absolute bottom-0 left-0 h-1.5 w-full bg-surface/20">
             <div
-              className={cn("h-full bg-mint transition-all duration-700", watched ? "w-full" : "w-0")}
+              className={cn(
+                "h-full bg-mint transition-all duration-700",
+                watched ? "w-full" : "w-0",
+              )}
             />
           </div>
         </div>
         <div className="mt-4 space-y-3">
           <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
             The video shows exactly how to place the phone, how still to sit, and what a good
-            recording sounds like. There's a short quiz afterwards so we know the setup is
-            clear.
+            recording sounds like. There's a short quiz afterwards so we know the setup is clear.
           </p>
           <Note tone="blue" title="Captions and transcript">
             Tap the transcript button in the player if you'd rather read along.
@@ -234,130 +234,88 @@ const QUIZ = [
 ];
 
 export function QuizScreen({ store }: { store: TummyStore }) {
-  const [qi, setQi] = useState(0);
   const [picks, setPicks] = useState<(number | null)[]>([null, null, null]);
-  const item = QUIZ[qi];
-  const pick = picks[qi];
-  const correct = pick === item.answer;
-  const last = qi === QUIZ.length - 1;
+  const allAnswered = picks.every((p) => p !== null);
 
   return (
     <Screen>
       <TopBar title="Quick check" onBack={store.back} step="Step 4 of 9" />
-      <ScreenBody className="flex flex-col">
-        {/* progress rail */}
-        <div className="flex items-center gap-2">
-          {QUIZ.map((_, i) => (
-            <span
-              key={i}
-              className={cn(
-                "h-[8px] flex-1 rounded-full",
-                i < qi || (i === qi && correct)
-                  ? "bg-teal"
-                  : i === qi
-                    ? "bg-teal/40"
-                    : "bg-line",
-              )}
-            />
-          ))}
-          <span className="ml-1 shrink-0 text-[14px] font-extrabold text-pine-soft">
-            {qi + 1}/{QUIZ.length}
-          </span>
-        </div>
-
-        <div className="mt-5 rounded-[28px] border border-line bg-surface p-5">
-          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-            Question {qi + 1}
-          </p>
-          <h2 className="mt-1 text-[22px] font-extrabold leading-tight text-pine">
-            {item.q}
-          </h2>
-
-          <div className="mt-4 space-y-2">
-            {item.options.map((opt, oi) => {
-              const picked = pick === oi;
-              const isRight = oi === item.answer;
-              const state =
-                pick === null
-                  ? "idle"
-                  : picked && isRight
-                    ? "right"
-                    : picked
-                      ? "wrong"
-                      : isRight && !correct
-                        ? "reveal"
-                        : "muted";
-              return (
-                <button
-                  key={opt}
-                  disabled={pick !== null}
-                  onClick={() => setPicks((p) => p.map((v, i) => (i === qi ? oi : v)))}
-                  className={cn(
-                    "flex min-h-[64px] w-full items-center gap-3 rounded-2xl border-2 px-3 py-2 text-left text-[16px] font-bold",
-                    state === "idle" && "border-line bg-wash text-pine",
-                    state === "right" && "border-teal bg-mint-soft text-pine",
-                    state === "wrong" && "border-coral bg-coral-soft text-pine",
-                    state === "reveal" && "border-teal bg-surface text-pine",
-                    state === "muted" && "border-line bg-surface text-pine-soft opacity-60",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[16px] font-black",
-                      state === "right" || state === "reveal"
-                        ? "bg-teal text-surface"
-                        : state === "wrong"
-                          ? "bg-coral text-surface"
-                          : "bg-surface text-pine-soft",
-                    )}
-                  >
-                    {state === "right" || state === "reveal" ? (
-                      <IconCheck width={20} height={20} />
-                    ) : (
-                      "ABC"[oi]
-                    )}
-                  </span>
-                  <span className="min-w-0 flex-1">{opt}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {pick !== null ? (
-            <div
-              className={cn(
-                "mt-4 rounded-2xl border-2 p-4",
-                correct ? "border-mint bg-mint-soft" : "border-amber/40 bg-amber-soft",
-              )}
-            >
-              <p className="text-[16px] font-extrabold text-pine">
-                {correct ? "That's right" : "Not quite — here's why"}
-              </p>
-              <p className="mt-1 text-[15px] font-semibold leading-snug text-pine-soft">
-                {item.why}
-              </p>
-            </div>
-          ) : null}
-        </div>
-
-        <div className="mt-4">
-          <MascotSays src={MASCOT.calm} size={64}>
-            Wrong answers are completely fine — I'll explain, and you can keep going.
-          </MascotSays>
+      <ScreenBody>
+        <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
+          Three quick questions so we know the setup is clear. Wrong answers are fine — I'll explain
+          either way.
+        </p>
+        <div className="mt-5 space-y-5">
+          {QUIZ.map((item, qi) => {
+            const pick = picks[qi];
+            const correct = pick === item.answer;
+            return (
+              <Card key={item.q}>
+                <p className="text-[16px] font-extrabold leading-snug text-pine">
+                  {qi + 1}. {item.q}
+                </p>
+                <div className="mt-3 space-y-2">
+                  {item.options.map((opt, oi) => {
+                    const picked = pick === oi;
+                    const isRight = oi === item.answer;
+                    return (
+                      <button
+                        key={opt}
+                        disabled={pick !== null}
+                        onClick={() => setPicks((p) => p.map((v, i) => (i === qi ? oi : v)))}
+                        className={cn(
+                          "flex min-h-[56px] w-full items-center gap-3 rounded-2xl border-2 px-3 py-2 text-left text-[16px] font-bold",
+                          pick === null
+                            ? "border-line bg-wash text-pine"
+                            : picked && isRight
+                              ? "border-teal bg-mint-soft text-pine"
+                              : picked
+                                ? "border-amber/60 bg-amber-soft text-pine"
+                                : isRight
+                                  ? "border-teal bg-surface text-pine"
+                                  : "border-line bg-surface text-pine-soft opacity-60",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[16px] font-black",
+                            pick !== null && isRight
+                              ? "bg-teal text-surface"
+                              : "bg-wash text-pine-soft",
+                          )}
+                        >
+                          {pick !== null && isRight ? (
+                            <IconCheck width={20} height={20} />
+                          ) : (
+                            "ABC"[oi]
+                          )}
+                        </span>
+                        <span className="min-w-0 flex-1">{opt}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {pick !== null ? (
+                  <p className="mt-3 text-[15px] font-semibold leading-snug text-pine-soft">
+                    <span className="font-extrabold text-pine">
+                      {correct ? "That's right. " : "Not quite. "}
+                    </span>
+                    {item.why}
+                  </p>
+                ) : null}
+              </Card>
+            );
+          })}
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn
-          disabled={pick === null}
-          onClick={() => (last ? store.go("survey") : setQi(qi + 1))}
-        >
-          {pick === null ? "Pick an answer" : last ? "Continue" : "Next question"}
+        <Btn disabled={!allAnswered} onClick={() => store.go("survey")}>
+          {allAnswered ? "Continue" : "Answer all three"}
         </Btn>
       </StickyFooter>
     </Screen>
   );
 }
-
 
 /* ---------------- background survey ---------------- */
 
@@ -384,8 +342,10 @@ const SYMPTOM_ROWS: { label: string; info: string }[] = [
   },
 ];
 
+const SURVEY_SECTIONS = ["About you", "Your gut", "Eating", "Sleep"] as const;
 
 export function SurveyScreen({ store }: { store: TummyStore }) {
+  const [step, setStep] = useState(0);
   const [gender, setGender] = useState("");
   const [gi, setGi] = useState<string>("");
   const [scale, setScale] = useState<Record<string, number>>({});
@@ -396,53 +356,102 @@ export function SurveyScreen({ store }: { store: TummyStore }) {
   const [sleepReg, setSleepReg] = useState("");
   const [sleepEnough, setSleepEnough] = useState("");
 
+  const remaining =
+    step === 0
+      ? (gender ? 0 : 1) + (gi ? 0 : 1)
+      : step === 1
+        ? SYMPTOM_ROWS.filter((r) => !scale[r.label]).length
+        : step === 2
+          ? (eating ? 0 : 1) + (snacks ? 0 : 1)
+          : (sleepReg ? 0 : 1) + (sleepEnough ? 0 : 1);
+
+  const last = step === SURVEY_SECTIONS.length - 1;
+  const next = () => (last ? store.go("protocolIntro") : setStep(step + 1));
+  const back = () => (step === 0 ? store.back() : setStep(step - 1));
+
   return (
     <Screen>
-      <TopBar title="Background survey" onBack={store.back} step="Step 5 of 9" />
-      <ScreenBody>
-        <Note tone="green" title="Completely anonymous">
-          Your answers are stored against your subject ID only. No names, no contact
-          details, nothing that identifies you.
-        </Note>
-
-        <div className="mt-4">
-          <MascotSays src={MASCOT.calm} size={78}>
-            These help me understand the data context. You won't have to do this again —
-            it's a one-time survey.
-          </MascotSays>
+      <TopBar
+        title={SURVEY_SECTIONS[step]}
+        onBack={back}
+        step={`Background survey · ${step + 1} of ${SURVEY_SECTIONS.length}`}
+      />
+      <div className="shrink-0 px-5 pb-1">
+        <div className="flex gap-2">
+          {SURVEY_SECTIONS.map((s, i) => (
+            <span
+              key={s}
+              className={cn(
+                "h-[8px] flex-1 rounded-full",
+                i < step ? "bg-teal" : i === step ? "bg-teal/45" : "bg-line",
+              )}
+            />
+          ))}
         </div>
+      </div>
 
-        <div className="mt-6 space-y-6">
-          <Field label="Gender">
-            <div className="space-y-2">
-              {["Woman", "Man", "Non-binary", "Prefer not to say"].map((g) => (
-                <Choice key={g} label={g} selected={gender === g} onClick={() => setGender(g)} />
-              ))}
+      <ScreenBody className="pt-4">
+        {step === 0 ? (
+          <div className="space-y-5">
+            <Note tone="green" title="Completely anonymous">
+              Your answers are stored against your subject ID only. No names, no contact details,
+              nothing that identifies you.
+            </Note>
+            <MascotSays src={MASCOT.calm} size={72}>
+              A one-time survey, four short sections. It gives your recordings context.
+            </MascotSays>
+            <Field label="Gender">
+              <div className="space-y-2">
+                {["Woman", "Man", "Non-binary", "Prefer not to say"].map((g) => (
+                  <Choice key={g} label={g} selected={gender === g} onClick={() => setGender(g)} />
+                ))}
+              </div>
+            </Field>
+            <Field label="Do you have any diagnosed gut conditions?">
+              <div className="flex gap-3">
+                {["Yes", "No"].map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setGi(v)}
+                    className={cn(
+                      "min-h-[60px] flex-1 rounded-2xl border-2 text-[17px] font-extrabold",
+                      gi === v
+                        ? "border-teal bg-teal text-surface"
+                        : "border-line bg-surface text-pine",
+                    )}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </Field>
+            <Field
+              label="Medications affecting bowel function"
+              hint="Optional. Include anything regular, like laxatives or antacids."
+            >
+              <TextInput
+                value={meds}
+                onChange={(e) => setMeds(e.target.value)}
+                placeholder="Type here, or leave blank"
+              />
+            </Field>
+          </div>
+        ) : null}
+
+        {step === 1 ? (
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-mint-soft px-3 py-1.5 text-[13px] font-extrabold uppercase tracking-[0.1em] text-teal">
+                Anonymous
+              </span>
+              <span className="text-[15px] font-bold text-pine-soft">
+                {SYMPTOM_ROWS.length - remaining}/{SYMPTOM_ROWS.length} rated
+              </span>
             </div>
-          </Field>
-
-          <Field label="Do you have any diagnosed GI conditions?">
-            <div className="flex gap-3">
-              {["Yes", "No"].map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setGi(v)}
-                  className={cn(
-                    "min-h-[60px] flex-1 rounded-2xl border-2 text-[17px] font-extrabold",
-                    gi === v ? "border-teal bg-teal text-surface" : "border-line bg-surface text-pine",
-                  )}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
-          </Field>
-
-          <Field
-            label="How often do you notice each of these?"
-            hint="1 is never, 5 is very frequently."
-          >
-            <div className="mb-2 flex justify-between px-1 text-[14px] font-bold text-pine-soft">
+            <p className="mt-3 text-[17px] font-extrabold text-pine">
+              How often do you notice each of these?
+            </p>
+            <div className="sticky top-0 z-10 -mx-1 mt-2 flex justify-between bg-wash px-1 py-2 text-[14px] font-bold text-pine-soft">
               <span>1 · never</span>
               <span>5 · very frequently</span>
             </div>
@@ -457,147 +466,152 @@ export function SurveyScreen({ store }: { store: TummyStore }) {
                 />
               ))}
             </div>
-          </Field>
+          </div>
+        ) : null}
 
-          <Field
-            label="Medications affecting bowel function"
-            hint="Optional. Include anything regular, like laxatives or antacids."
-          >
-            <TextInput
-              value={meds}
-              onChange={(e) => setMeds(e.target.value)}
-              placeholder="Type here, or leave blank"
-            />
-          </Field>
+        {step === 2 ? (
+          <div className="space-y-5">
+            <Field label="Your eating schedule">
+              <div className="space-y-2">
+                <Choice
+                  label="I eat at similar times"
+                  sub="Within about an hour each day"
+                  selected={eating === "similar"}
+                  onClick={() => setEating("similar")}
+                />
+                <Choice
+                  label="It changes often"
+                  sub="Meal times move around a lot"
+                  selected={eating === "changes"}
+                  onClick={() => setEating("changes")}
+                />
+              </div>
+            </Field>
+            <Field label="Regular meal times">
+              <div className="space-y-2">
+                {[
+                  { k: "breakfast", label: "Breakfast", def: "08:00", Icon: IconSun },
+                  { k: "lunch", label: "Lunch", def: "12:30", Icon: IconBowl },
+                  { k: "dinner", label: "Dinner", def: "19:00", Icon: IconSunset },
+                ].map(({ k, label, def, Icon }) => (
+                  <div key={k} className="rounded-2xl border border-line bg-surface p-4">
+                    <div className="flex items-center gap-3">
+                      <span className="shrink-0 text-teal">
+                        <Icon width={24} height={24} />
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold text-pine">
+                        {label}
+                      </span>
+                      <input
+                        type="time"
+                        defaultValue={def}
+                        disabled={skip[k]}
+                        className="min-h-[52px] shrink-0 rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine disabled:opacity-40"
+                      />
+                    </div>
+                    <button
+                      onClick={() => setSkip((s) => ({ ...s, [k]: !s[k] }))}
+                      className="mt-3 flex min-h-[48px] w-full items-center gap-3 text-left"
+                    >
+                      <span
+                        className={cn(
+                          "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-[3px]",
+                          skip[k] ? "border-teal bg-teal text-surface" : "border-line",
+                        )}
+                      >
+                        {skip[k] ? <IconCheck width={16} height={16} /> : null}
+                      </span>
+                      <span className="text-[16px] font-bold text-pine-soft">
+                        I skip {label.toLowerCase()}
+                      </span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </Field>
+            <Field label="Do you snack between meals?">
+              <div className="flex gap-3">
+                {["Yes", "No"].map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setSnacks(v)}
+                    className={cn(
+                      "min-h-[60px] flex-1 rounded-2xl border-2 text-[17px] font-extrabold",
+                      snacks === v
+                        ? "border-teal bg-teal text-surface"
+                        : "border-line bg-surface text-pine",
+                    )}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </Field>
+          </div>
+        ) : null}
 
-          <Field label="Your eating schedule">
-            <div className="space-y-2">
-              <Choice
-                label="I eat at similar times"
-                sub="Within about an hour each day"
-                selected={eating === "similar"}
-                onClick={() => setEating("similar")}
-              />
-              <Choice
-                label="It changes often"
-                sub="Meal times move around a lot"
-                selected={eating === "changes"}
-                onClick={() => setEating("changes")}
-              />
-            </div>
-          </Field>
-
-          <Field label="Regular meal times">
-            <div className="space-y-2">
-              {[
-                { k: "breakfast", label: "Breakfast", def: "08:00", Icon: IconSun },
-                { k: "lunch", label: "Lunch", def: "12:30", Icon: IconBowl },
-                { k: "dinner", label: "Dinner", def: "19:00", Icon: IconSunset },
-              ].map(({ k, label, def, Icon }) => (
-                <div key={k} className="rounded-2xl border border-line bg-surface p-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-teal">
-                      <Icon width={24} height={24} />
+        {step === 3 ? (
+          <div className="space-y-5">
+            <Field label="Your sleep schedule">
+              <div className="space-y-2">
+                <Choice
+                  label="Regular"
+                  selected={sleepReg === "regular"}
+                  onClick={() => setSleepReg("regular")}
+                />
+                <Choice
+                  label="Irregular"
+                  selected={sleepReg === "irregular"}
+                  onClick={() => setSleepReg("irregular")}
+                />
+              </div>
+              <div className="mt-3 flex gap-3">
+                {[
+                  { label: "Usual sleep", def: "23:00", Icon: IconMoon },
+                  { label: "Usual wake", def: "07:00", Icon: IconSun },
+                ].map(({ label, def, Icon }) => (
+                  <div
+                    key={label}
+                    className="min-w-0 flex-1 rounded-2xl border border-line bg-surface p-3"
+                  >
+                    <span className="flex items-center gap-2 text-[15px] font-extrabold text-pine-soft">
+                      <span className="shrink-0 text-teal">
+                        <Icon width={20} height={20} />
+                      </span>
+                      <span className="truncate">{label}</span>
                     </span>
-                    <span className="flex-1 text-[17px] font-extrabold text-pine">{label}</span>
                     <input
                       type="time"
                       defaultValue={def}
-                      disabled={skip[k]}
-                      className="min-h-[52px] rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine disabled:opacity-40"
+                      className="mt-2 min-h-[52px] w-full rounded-xl border-2 border-line bg-wash px-2 text-[17px] font-extrabold text-pine"
                     />
                   </div>
-                  <button
-                    onClick={() => setSkip((s) => ({ ...s, [k]: !s[k] }))}
-                    className="mt-3 flex min-h-[48px] w-full items-center gap-3 text-left"
-                  >
-                    <span
-                      className={cn(
-                        "flex h-7 w-7 items-center justify-center rounded-lg border-[3px]",
-                        skip[k] ? "border-teal bg-teal text-surface" : "border-line",
-                      )}
-                    >
-                      {skip[k] ? <IconCheck width={16} height={16} /> : null}
-                    </span>
-                    <span className="text-[16px] font-bold text-pine-soft">
-                      I skip {label.toLowerCase()}
-                    </span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </Field>
-
-          <Field label="Do you snack between meals?">
-            <div className="flex gap-3">
-              {["Yes", "No"].map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setSnacks(v)}
-                  className={cn(
-                    "min-h-[60px] flex-1 rounded-2xl border-2 text-[17px] font-extrabold",
-                    snacks === v
-                      ? "border-teal bg-teal text-surface"
-                      : "border-line bg-surface text-pine",
-                  )}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
-          </Field>
-
-          <Field label="Your sleep schedule">
-            <div className="space-y-2">
-              <Choice
-                label="Regular"
-                selected={sleepReg === "regular"}
-                onClick={() => setSleepReg("regular")}
-              />
-              <Choice
-                label="Irregular"
-                selected={sleepReg === "irregular"}
-                onClick={() => setSleepReg("irregular")}
-              />
-            </div>
-            <div className="mt-3 flex gap-3">
-              {[
-                { label: "Usual sleep", def: "23:00", Icon: IconMoon },
-                { label: "Usual wake", def: "07:00", Icon: IconSun },
-              ].map(({ label, def, Icon }) => (
-                <div key={label} className="flex-1 rounded-2xl border border-line bg-surface p-3">
-                  <span className="flex items-center gap-2 text-[15px] font-extrabold text-pine-soft">
-                    <span className="text-teal">
-                      <Icon width={20} height={20} />
-                    </span>
-                    {label}
-                  </span>
-                  <input
-                    type="time"
-                    defaultValue={def}
-                    className="mt-2 min-h-[52px] w-full rounded-xl border-2 border-line bg-wash px-2 text-[17px] font-extrabold text-pine"
+                ))}
+              </div>
+            </Field>
+            <Field label="Do you usually get enough sleep?">
+              <div className="space-y-2">
+                {["Enough", "Not enough", "More than I need"].map((v) => (
+                  <Choice
+                    key={v}
+                    label={v}
+                    selected={sleepEnough === v}
+                    onClick={() => setSleepEnough(v)}
                   />
-                </div>
-              ))}
-            </div>
-          </Field>
-
-          <Field label="Do you usually get enough sleep?">
-            <div className="space-y-2">
-              {["Enough", "Not enough", "More than I need"].map((v) => (
-                <Choice
-                  key={v}
-                  label={v}
-                  selected={sleepEnough === v}
-                  onClick={() => setSleepEnough(v)}
-                />
-              ))}
-            </div>
-          </Field>
-        </div>
+                ))}
+              </div>
+            </Field>
+          </div>
+        ) : null}
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("protocolIntro")}>Complete survey</Btn>
+        <Btn onClick={next} disabled={remaining > 0}>
+          {remaining > 0
+            ? `${remaining} left in this section`
+            : last
+              ? "Complete survey"
+              : "Continue"}
+        </Btn>
       </StickyFooter>
     </Screen>
   );
@@ -611,8 +625,8 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
       <TopBar title="How a day works" onBack={store.back} step="Step 6 of 9" />
       <ScreenBody>
         <MascotSays size={78}>
-          Every day has the same shape. Once you've done it twice it takes about as much
-          thought as brushing your teeth.
+          Every day has the same shape. Once you've done it twice it takes about as much thought as
+          brushing your teeth.
         </MascotSays>
         <div className="mt-5 space-y-3">
           {[
@@ -652,8 +666,8 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="amber" title="Take your phone case off">
-            A case leaves a gap between the microphone and your skin, and that gap loses
-            most of the sound we're listening for.
+            A case leaves a gap between the microphone and your skin, and that gap loses most of the
+            sound we're listening for.
           </Note>
         </div>
       </ScreenBody>
@@ -675,8 +689,8 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
       <TopBar title="Technical Setup" onBack={store.back} step="Step 7 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Different phones hear slightly differently. Recording your hardware lets us
-          standardise the audio across everyone in the study.
+          Different phones hear slightly differently. Recording your hardware lets us standardise
+          the audio across everyone in the study.
         </p>
         <div className="mt-5 space-y-5">
           <Field label="Phone model">
@@ -745,7 +759,12 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
   const [granted, setGranted] = useState<Record<string, boolean>>({});
   const items = [
     { k: "mic", label: "Microphone", sub: "To capture gut sounds", Icon: IconMic },
-    { k: "notif", label: "Reminders", sub: "For your 30, 90 and 210 minute alarms", Icon: IconPhone },
+    {
+      k: "notif",
+      label: "Reminders",
+      sub: "For your 30, 90 and 210 minute alarms",
+      Icon: IconPhone,
+    },
     { k: "dnd", label: "Do not disturb", sub: "Silences calls during a recording", Icon: IconLock },
   ];
   const all = items.every((i) => granted[i.k]);
@@ -754,8 +773,8 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
       <TopBar title="Permissions" onBack={store.back} step="Step 8 of 9" />
       <ScreenBody>
         <Note tone="green" title="Audio stays private">
-          Recordings are encrypted and labelled with your subject ID only. No one on the
-          study team can link them back to you by name.
+          Recordings are encrypted and labelled with your subject ID only. No one on the study team
+          can link them back to you by name.
         </Note>
         <div className="mt-4 space-y-3">
           {items.map(({ k, label, sub, Icon }) => (
@@ -808,8 +827,8 @@ export function PracticeScreen({ store }: { store: TummyStore }) {
       <TopBar title="Practice recording" onBack={store.back} step="Step 9 of 9" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.calm}>
-          Let's test your room. Twenty seconds of listening — no need to lift your shirt for
-          this one.
+          Let's test your room. Twenty seconds of listening — no need to lift your shirt for this
+          one.
         </MascotSays>
 
         <div className="mt-6 flex flex-col items-center">
@@ -840,8 +859,8 @@ export function PracticeScreen({ store }: { store: TummyStore }) {
         {phase === "noisy" ? (
           <div className="mt-5">
             <Note tone="amber" title="Background noise detected">
-              We picked up a TV or fan. Move somewhere quieter, or turn it off, then try
-              again. We'll keep looping until it's clear.
+              We picked up a TV or fan. Move somewhere quieter, or turn it off, then try again.
+              We'll keep looping until it's clear.
             </Note>
           </div>
         ) : null}
@@ -874,8 +893,8 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
       <TopBar title="Set your daily times" onBack={store.back} step="Last step" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.cheer}>
-          Last one. Tell me when you usually eat and sleep, and I'll place your reminders
-          around your life instead of the other way round.
+          Last one. Tell me when you usually eat and sleep, and I'll place your reminders around
+          your life instead of the other way round.
         </MascotSays>
         <div className="mt-5 space-y-3">
           {[
@@ -903,8 +922,8 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="blue" title="You can change these any day">
-            If a day looks different, adjust the times from your profile and the reminders
-            move with you.
+            If a day looks different, adjust the times from your profile and the reminders move with
+            you.
           </Note>
         </div>
       </ScreenBody>
@@ -924,8 +943,8 @@ export function OnboardDoneScreen({ store }: { store: TummyStore }) {
           You're all set up
         </h1>
         <p className="mt-3 text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Day 1 begins with your fasting recording tomorrow morning. I'll nudge you shortly
-          after your wake-up time.
+          Day 1 begins with your fasting recording tomorrow morning. I'll nudge you shortly after
+          your wake-up time.
         </p>
       </div>
       <StickyFooter>

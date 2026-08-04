@@ -40,64 +40,48 @@ import {
   IconPhone,
   IconList,
 } from "./icons";
-import type { LogKind, ScreenKey, TummyStore } from "./store";
+import { clockLabel, type LogKind, type ScreenKey, type TummyStore } from "./store";
 import { AssistantHint } from "./assistant";
 import { cn } from "@/lib/utils";
 
 /* ---------------- home ---------------- */
 
-function useCountdown(seconds: number) {
-  const [left, setLeft] = useState(seconds);
+function useTick() {
+  const [, set] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setLeft((l) => (l > 0 ? l - 1 : 0)), 1000);
+    const t = setInterval(() => set((n) => n + 1), 30_000);
     return () => clearInterval(t);
   }, []);
-  const m = Math.floor(left / 60);
-  const s = left % 60;
-  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-const HOME_LOGS: { k: ScreenKey; label: string; Icon: typeof IconBowl }[] = [
-  { k: "logMeal", label: "Meal or snack", Icon: IconBowl },
-  { k: "logToilet", label: "Toilet habits", Icon: IconToilet },
-  { k: "logSymptom", label: "Symptom", Icon: IconWave },
-  { k: "logHydration", label: "Drink", Icon: IconDroplet },
+function untilLabel(mins: number) {
+  if (mins >= 60) {
+    const h = Math.floor(mins / 60);
+    return `${h} hr ${mins % 60} min`;
+  }
+  return `${mins} min`;
+}
+
+const HOME_LOGS: {
+  k: ScreenKey;
+  label: string;
+  kind: LogKind;
+  Icon: typeof IconBowl;
+}[] = [
+  { k: "logMeal", label: "Meal", kind: "meal", Icon: IconBowl },
+  { k: "logHydration", label: "Drink", kind: "hydration", Icon: IconDroplet },
+  { k: "logToilet", label: "Toilet", kind: "toilet", Icon: IconToilet },
+  { k: "logSymptom", label: "Symptom", kind: "symptom", Icon: IconWave },
 ];
 
 export function HomeScreen({ store }: { store: TummyStore }) {
+  useTick();
   const done = store.sessions.filter((s) => s.done).length;
-  const nextSession = store.sessions.find((s) => !s.done);
-  const mealLogged = store.entries.some((e) => e.kind === "meal");
-  const countdown = useCountdown(28 * 60);
+  const task = store.nextTask;
   const hour = new Date().getHours();
   const eveningReady = hour >= 17;
-
-  const nextUp = nextSession
-    ? {
-        tag: "Gut sound",
-        title: nextSession.label,
-        Icon: IconMic,
-        cta: "Start recording",
-        go: "sessionHub" as ScreenKey,
-        countdown,
-      }
-    : !mealLogged
-      ? {
-          tag: "Meal or snack",
-          title: "Describe the meal you're recording around",
-          Icon: IconCamera,
-          cta: "Add the meal",
-          go: "logMeal" as ScreenKey,
-          countdown: null,
-        }
-      : {
-          tag: "Answer questions",
-          title: "A few questions about your day",
-          Icon: IconWave,
-          cta: "Answer now",
-          go: "logSleep" as ScreenKey,
-          countdown: null,
-        };
+  const recent = store.entries.slice(-3).reverse();
+  const due = task.state === "due";
 
   return (
     <Screen>
@@ -105,118 +89,242 @@ export function HomeScreen({ store }: { store: TummyStore }) {
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
           <Mascot size={48} />
           <div className="min-w-0">
-            <p className="text-[14px] font-bold text-pine-soft">Good morning</p>
-            <h1 className="truncate text-[21px] font-extrabold leading-tight text-pine">
+            <p className="text-[15px] font-bold text-pine-soft">
+              {hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening"}
+            </p>
+            <h1 className="truncate text-[20px] font-extrabold leading-tight text-pine">
               Day {store.day} of 7
             </h1>
           </div>
-          <span className="shrink-0 rounded-full bg-mint-soft px-3 py-2 text-[14px] font-extrabold text-teal">
-            {done}/4 today
+          <span className="shrink-0 rounded-full bg-mint-soft px-3 py-2 text-[15px] font-extrabold text-teal">
+            {done}/4
           </span>
         </div>
       </div>
 
-      <ScreenBody className="pt-3">
-        {/* next up — changes with what's coming */}
-        <p className="text-[14px] font-extrabold uppercase tracking-[0.14em] text-teal">
-          Next up
-        </p>
-        <div className="mt-2 rounded-[28px] bg-teal p-5 text-surface">
+      <ScreenBody className="pb-[180px] pt-3">
+        <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">Next up</p>
+        <div
+          className={cn(
+            "mt-2 rounded-[28px] p-5",
+            due ? "bg-teal text-surface" : "border border-line bg-surface text-pine",
+          )}
+        >
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-surface/15">
-              <nextUp.Icon width={26} height={26} />
+            <span
+              className={cn(
+                "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
+                due ? "bg-surface/15" : "bg-mint-soft text-teal",
+              )}
+            >
+              {task.tag.startsWith("Gut") ? (
+                <IconMic width={26} height={26} />
+              ) : task.tag === "Meal or snack" ? (
+                <IconCamera width={26} height={26} />
+              ) : task.tag === "Before bed" ? (
+                <IconMoon width={26} height={26} />
+              ) : (
+                <IconCheck width={26} height={26} />
+              )}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[14px] font-extrabold uppercase tracking-[0.12em] text-mint">
-                {nextUp.tag}
+              <p
+                className={cn(
+                  "text-[13px] font-extrabold uppercase tracking-[0.12em]",
+                  due ? "text-mint" : "text-teal",
+                )}
+              >
+                {task.tag}
               </p>
-              <p className="text-[20px] font-extrabold leading-tight">{nextUp.title}</p>
+              <p className="text-[20px] font-extrabold leading-tight">{task.title}</p>
             </div>
           </div>
 
-          {nextUp.countdown ? (
-            <div className="mt-4 flex items-center gap-3 rounded-2xl bg-surface/12 px-4 py-3">
-              <IconClock width={22} height={22} />
-              <p className="flex-1 text-[15px] font-bold text-mint">Time until recording</p>
-              <p className="text-[26px] font-extrabold leading-none tabular-nums">
-                {nextUp.countdown}
+          <p
+            className={cn(
+              "mt-3 text-[16px] font-semibold leading-snug",
+              due ? "text-mint" : "text-pine-soft",
+            )}
+          >
+            {task.sub}
+          </p>
+
+          {task.minsUntil !== null ? (
+            <div className="mt-4 flex items-center gap-3 rounded-2xl bg-mint-soft px-4 py-3 text-pine">
+              <span className="shrink-0 text-teal">
+                <IconClock width={22} height={22} />
+              </span>
+              <p className="min-w-0 flex-1 truncate text-[15px] font-bold text-pine-soft">
+                Starts in
+              </p>
+              <p className="shrink-0 text-[20px] font-extrabold leading-none tabular-nums">
+                {untilLabel(task.minsUntil)}
               </p>
             </div>
           ) : null}
 
           <button
-            onClick={() => store.go(nextUp.go)}
-            className="mt-4 flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl bg-surface text-[18px] font-extrabold text-teal active:scale-[0.99]"
+            onClick={() => store.go(task.screen)}
+            className={cn(
+              "mt-4 flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl text-[18px] font-extrabold active:scale-[0.99]",
+              due ? "bg-surface text-teal" : "bg-teal text-surface",
+            )}
           >
-            {nextUp.cta}
+            {task.cta}
           </button>
         </div>
 
-        <div className="mt-5 flex items-center gap-3">
-          <Dots states={store.sessions.map((s) => s.done)} />
-          <span className="text-[15px] font-bold text-pine-soft">
-            {done} of 4 recordings done
-          </span>
-        </div>
-
-        {/* log */}
-        <div className="mt-5 border-t border-line pt-5">
-          <div className="flex items-end justify-between">
-            <p className="text-[14px] font-extrabold uppercase tracking-[0.14em] text-teal">
-              Log
+        {/* day rail */}
+        <div className="mt-5 rounded-3xl border border-line bg-surface px-4 py-4">
+          <div className="flex items-end justify-between gap-3">
+            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+              Today's rail
             </p>
             <button
-              onClick={() => store.go("logHub")}
-              className="text-[15px] font-extrabold text-teal"
+              onClick={() => store.go("sessionHub")}
+              className="shrink-0 text-[15px] font-extrabold text-teal"
             >
-              Today's log
+              Open
             </button>
           </div>
-          <div className="mt-2 grid grid-cols-2 gap-3">
-            {HOME_LOGS.map(({ k, label, Icon }) => (
+          <div className="mt-3 flex items-start">
+            {store.sessions.map((s, i) => (
               <button
-                key={k}
-                onClick={() => store.go(k)}
-                className="flex min-h-[88px] flex-col items-start justify-center gap-2 rounded-3xl border border-line bg-surface p-4"
+                key={s.id}
+                onClick={() => store.go("sessionHub")}
+                className="relative flex min-w-0 flex-1 flex-col items-center gap-1.5"
               >
-                <span className="text-teal">
-                  <Icon width={26} height={26} />
+                {i > 0 ? (
+                  <span
+                    className={cn(
+                      "absolute left-[-50%] top-[9px] h-[3px] w-full",
+                      s.done || store.sessions[i - 1].done ? "bg-teal" : "bg-line",
+                    )}
+                  />
+                ) : null}
+                <span
+                  className={cn(
+                    "relative z-10 h-[20px] w-[20px] rounded-full border-[3px]",
+                    s.done
+                      ? "border-teal bg-teal"
+                      : task.sessionId === s.id
+                        ? "border-teal bg-surface"
+                        : "border-line bg-surface",
+                  )}
+                />
+                <span className="w-full truncate text-center text-[13px] font-bold text-pine-soft">
+                  {clockLabel(s.at)}
                 </span>
-                <span className="text-[16px] font-extrabold text-pine">{label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* before bed */}
-        <div className="mt-5 border-t border-line pt-5">
-          <p className="text-[14px] font-extrabold uppercase tracking-[0.14em] text-teal">
-            Before bed
-          </p>
-          <button
-            disabled={!eveningReady}
-            onClick={() => store.go("logSleep")}
-            className={cn(
-              "mt-2 flex min-h-[80px] w-full items-center gap-4 rounded-3xl border border-line px-5 text-left",
-              eveningReady ? "bg-surface" : "bg-surface/50 opacity-55",
-            )}
-          >
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
-              <IconMoon width={26} height={26} />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[17px] font-extrabold text-pine">
-                Complete your log and questions
-              </span>
-              <span className="block text-[15px] font-semibold text-pine-soft">
-                {eveningReady ? "Ready now" : "Opens at 5:00 pm"}
-              </span>
-            </span>
-          </button>
+        {/* quick log */}
+        <div className="mt-5">
+          <div className="flex items-end justify-between gap-3">
+            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+              Quick log
+            </p>
+            <button
+              onClick={() => store.go("logHub")}
+              className="shrink-0 text-[15px] font-extrabold text-teal"
+            >
+              More
+            </button>
+          </div>
+          <div className="mt-2 grid grid-cols-4 gap-2">
+            {HOME_LOGS.map(({ k, label, kind, Icon }) => {
+              const count = store.entries.filter((e) => e.kind === kind).length;
+              return (
+                <button
+                  key={k}
+                  onClick={() => store.go(k)}
+                  className="relative flex min-h-[86px] flex-col items-center justify-center gap-1.5 rounded-2xl border border-line bg-surface px-1 active:scale-[0.98]"
+                >
+                  {count > 0 ? (
+                    <span className="absolute right-1.5 top-1.5 flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-mint-soft px-1 text-[13px] font-extrabold text-teal">
+                      {count}
+                    </span>
+                  ) : null}
+                  <span className="text-teal">
+                    <Icon width={26} height={26} />
+                  </span>
+                  <span className="w-full truncate text-center text-[14px] font-extrabold text-pine">
+                    {label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="mt-5">
-          <AssistantHint store={store} />
+        {/* before bed / recent */}
+        <div className="mt-5 border-t border-line pt-5">
+          {eveningReady ? (
+            <>
+              <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+                Before bed
+              </p>
+              <button
+                onClick={() => store.go("logSleep")}
+                className="mt-2 flex min-h-[80px] w-full items-center gap-4 rounded-3xl border border-line bg-surface px-5 text-left"
+              >
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+                  <IconMoon width={26} height={26} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[17px] font-extrabold text-pine">
+                    Complete your log and questions
+                  </span>
+                  <span className="block text-[15px] font-semibold text-pine-soft">Ready now</span>
+                </span>
+                <span className="shrink-0 text-teal">
+                  <IconArrowRight width={22} height={22} />
+                </span>
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+                Logged today
+              </p>
+              {recent.length ? (
+                <div className="mt-2 space-y-2">
+                  {recent.map((e) => (
+                    <div
+                      key={e.id}
+                      className="flex min-h-[60px] items-center gap-3 rounded-2xl border border-line bg-surface px-4"
+                    >
+                      <span className="shrink-0 text-teal">
+                        <IconCheck width={20} height={20} />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[16px] font-extrabold text-pine">
+                          {e.label}
+                        </span>
+                        {e.detail ? (
+                          <span className="block truncate text-[15px] font-semibold text-pine-soft">
+                            {e.detail}
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="shrink-0 text-[15px] font-bold text-pine-soft">
+                        {e.time}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-2 rounded-2xl border border-dashed border-line px-4 py-5 text-center text-[16px] font-semibold text-pine-soft">
+                  Nothing logged yet today.
+                </p>
+              )}
+              <p className="mt-3 text-[15px] font-semibold text-pine-soft">
+                Your evening questions open at 5:00 pm.
+              </p>
+            </>
+          )}
         </div>
       </ScreenBody>
     </Screen>
@@ -232,12 +340,42 @@ const LOG_ITEMS: {
   Icon: typeof IconBowl;
   kind: LogKind;
 }[] = [
-  { k: "logMeal", label: "Meal or snack", sub: "Photo or description", Icon: IconBowl, kind: "meal" },
-  { k: "logHydration", label: "Drinks", sub: "Water, tea, anything fizzy", Icon: IconDroplet, kind: "hydration" },
-  { k: "logSymptom", label: "Symptom", sub: "Type and how strong", Icon: IconWave, kind: "symptom" },
-  { k: "logToilet", label: "Toilet habits", sub: "Timing and consistency", Icon: IconToilet, kind: "toilet" },
+  {
+    k: "logMeal",
+    label: "Meal or snack",
+    sub: "Photo or description",
+    Icon: IconBowl,
+    kind: "meal",
+  },
+  {
+    k: "logHydration",
+    label: "Drinks",
+    sub: "Water, tea, anything fizzy",
+    Icon: IconDroplet,
+    kind: "hydration",
+  },
+  {
+    k: "logSymptom",
+    label: "Symptom",
+    sub: "Type and how strong",
+    Icon: IconWave,
+    kind: "symptom",
+  },
+  {
+    k: "logToilet",
+    label: "Toilet habits",
+    sub: "Timing and consistency",
+    Icon: IconToilet,
+    kind: "toilet",
+  },
   { k: "logSleep", label: "Sleep", sub: "Last night's rest", Icon: IconMoon, kind: "sleep" },
-  { k: "logActivity", label: "Activity", sub: "Walks, workouts, rest", Icon: IconRun, kind: "activity" },
+  {
+    k: "logActivity",
+    label: "Activity",
+    sub: "Walks, workouts, rest",
+    Icon: IconRun,
+    kind: "activity",
+  },
 ];
 
 const KIND_ICON: Record<LogKind, typeof IconBowl> = {
@@ -314,13 +452,11 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
         ) : (
           <>
             <div className="grid grid-cols-3 gap-3">
-              {(
-                [
-                  { kind: "meal" as LogKind, label: "Meals" },
-                  { kind: "hydration" as LogKind, label: "Drinks" },
-                  { kind: "symptom" as LogKind, label: "Symptoms" },
-                ]
-              ).map(({ kind, label }) => (
+              {[
+                { kind: "meal" as LogKind, label: "Meals" },
+                { kind: "hydration" as LogKind, label: "Drinks" },
+                { kind: "symptom" as LogKind, label: "Symptoms" },
+              ].map(({ kind, label }) => (
                 <div
                   key={kind}
                   className="rounded-3xl border border-line bg-surface p-3 text-center"
@@ -389,8 +525,6 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
     </Screen>
   );
 }
-
-
 
 export function LogMealScreen({ store }: { store: TummyStore }) {
   const [photo, setPhoto] = useState(false);
@@ -673,8 +807,7 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
       <TopBar title="Log toilet habits" onBack={store.back} />
       <ScreenBody>
         <Note tone="green" title="Only your subject ID is attached">
-          This is routine research data. Nothing here is shared with anyone outside the
-          study team.
+          This is routine research data. Nothing here is shared with anyone outside the study team.
         </Note>
         <div className="mt-4 space-y-4">
           <Field label="When was it?">
@@ -783,8 +916,8 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               <div>
                 <p className="text-[17px] font-extrabold text-pine">Streak freeze available</p>
                 <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-                  Miss one day and your streak stays intact. Life happens — this is a study,
-                  not a competition.
+                  Miss one day and your streak stays intact. Life happens — this is a study, not a
+                  competition.
                 </p>
               </div>
             </div>
@@ -800,9 +933,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
             <div className="mt-4 h-5 w-full overflow-hidden rounded-full bg-wash">
               <div className="h-full w-[43%] rounded-full bg-sage" />
             </div>
-            <p className="mt-2 text-[16px] font-extrabold text-teal">
-              12 of 28 sessions complete
-            </p>
+            <p className="mt-2 text-[16px] font-extrabold text-teal">12 of 28 sessions complete</p>
           </Card>
         </div>
 
@@ -833,7 +964,12 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
   const rows: { label: string; sub: string; Icon: typeof IconUser; to?: ScreenKey }[] = [
     { label: "Subject ID", sub: "STF-0142 · cohort B", Icon: IconUser },
     { label: "Daily times", sub: "Meals, sleep and wake", Icon: IconClock, to: "scheduling" },
-    { label: "Technical Setup", sub: "iPhone 14 · bottom microphone", Icon: IconPhone, to: "technicalSetup" },
+    {
+      label: "Technical Setup",
+      sub: "iPhone 14 · bottom microphone",
+      Icon: IconPhone,
+      to: "technicalSetup",
+    },
     { label: "Setup guide", sub: "Rewatch the instruction video", Icon: IconMic, to: "video" },
   ];
   return (
@@ -873,8 +1009,8 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
 
         <div className="mt-4">
           <Note tone="green" title="Your data is anonymous">
-            Recordings and logs are stored against your subject ID. Contact your coordinator
-            at (650) 555-0134 with any questions.
+            Recordings and logs are stored against your subject ID. Contact your coordinator at
+            (650) 555-0134 with any questions.
           </Note>
         </div>
 
