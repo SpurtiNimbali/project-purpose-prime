@@ -45,6 +45,23 @@ export type SymptomMark = { key: string; label: string; at: number; severity: nu
 
 export type Session = { id: string; label: string; done: boolean };
 
+export type LogKind =
+  | "meal"
+  | "symptom"
+  | "sleep"
+  | "activity"
+  | "hydration"
+  | "toilet"
+  | "recording";
+
+export type LogEntry = {
+  id: string;
+  kind: LogKind;
+  label: string;
+  detail?: string;
+  time: string;
+};
+
 export type TummyStore = {
   screen: ScreenKey;
   go: (s: ScreenKey) => void;
@@ -65,7 +82,16 @@ export type TummyStore = {
   sessions: Session[];
   completeSession: (id: string) => void;
   day: number;
+  entries: LogEntry[];
+  addEntry: (kind: LogKind, label: string, detail?: string) => void;
+  chatOpen: boolean;
+  setChatOpen: (open: boolean) => void;
 };
+
+export function nowLabel() {
+  return new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
 
 const INITIAL_SESSIONS: Session[] = [
   { id: "fasting", label: "Fasting (morning)", done: true },
