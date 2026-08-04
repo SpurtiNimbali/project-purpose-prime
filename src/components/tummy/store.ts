@@ -133,6 +133,77 @@ const INITIAL_SESSIONS: Session[] = [
   { id: "m210", label: "Breakfast + 3.5 hrs", done: false, at: 11 * 60 + 35, window: "3.5 hrs after breakfast" },
 ];
 
+/** Single source of truth for "what should I do right now". */
+export function computeNextTask(sessions: Session[], entries: LogEntry[]): NextTask {
+  const now = minutesNow();
+  const mealLogged = entries.some((e) => e.kind === "meal");
+  const pending = sessions.filter((s) => !s.done);
+  const upcoming = pending[0];
+
+  if (upcoming) {
+    const mins = upcoming.at - now;
+    if (mins <= 10) {
+      return {
+        tag: "Gut sound recording",
+        title: upcoming.label,
+        sub:
+          mins < -30
+            ? "This window is closing — record now or mark it missed."
+            : "Case off, quiet room, sit still.",
+        cta: "Start recording",
+        screen: "sessionHub",
+        state: "due",
+        minsUntil: null,
+        sessionId: upcoming.id,
+      };
+    }
+    if (!mealLogged) {
+      return {
+        tag: "Meal or snack",
+        title: "Describe the meal your timers run from",
+        sub: "The post-meal recordings are timed off this.",
+        cta: "Add the meal",
+        screen: "logMeal",
+        state: "due",
+        minsUntil: null,
+      };
+    }
+    return {
+      tag: "Gut sound recording",
+      title: upcoming.label,
+      sub: `You're clear until ${clockLabel(upcoming.at)}.`,
+      cta: "Open today's recordings",
+      screen: "sessionHub",
+      state: "soon",
+      minsUntil: mins,
+      sessionId: upcoming.id,
+    };
+  }
+
+  if (now >= 17 * 60) {
+    return {
+      tag: "Before bed",
+      title: "A few questions about your day",
+      sub: "Sleep, symptoms and toilet habits — about two minutes.",
+      cta: "Answer now",
+      screen: "logSleep",
+      state: "due",
+      minsUntil: null,
+    };
+  }
+
+  return {
+    tag: "All caught up",
+    title: "Nothing due right now",
+    sub: "Your evening questions open at 5:00 pm.",
+    cta: "Log something anyway",
+    screen: "logHub",
+    state: "clear",
+    minsUntil: null,
+  };
+}
+
+
 
 export function useTummyStore(): TummyStore {
   const [stack, setStack] = useState<ScreenKey[]>(["welcome"]);
