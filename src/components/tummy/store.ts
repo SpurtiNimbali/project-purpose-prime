@@ -110,6 +110,19 @@ export function useTummyStore(): TummyStore {
   const [region, setRegion] = useState<"upper" | "lower">("lower");
   const [marks, setMarks] = useState<SymptomMark[]>([]);
   const [sessions, setSessions] = useState<Session[]>(INITIAL_SESSIONS);
+  const [entries, setEntries] = useState<LogEntry[]>([
+    { id: "seed-1", kind: "sleep", label: "Sleep", detail: "7 hrs · slept well", time: "7:10 am" },
+    {
+      id: "seed-2",
+      kind: "recording",
+      label: "Gut sound recording",
+      detail: "Fasting · both sides",
+      time: "7:35 am",
+    },
+    { id: "seed-3", kind: "meal", label: "Breakfast", detail: "Oats and berries", time: "8:05 am" },
+  ]);
+  const [chatOpen, setChatOpen] = useState(false);
+
 
   const go = useCallback((s: ScreenKey) => {
     setStack((prev) => [...prev, s]);
