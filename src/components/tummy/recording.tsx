@@ -31,7 +31,7 @@ import {
   IconLock,
   IconX,
 } from "./icons";
-import type { TummyStore } from "./store";
+import { minutesNow, type TummyStore } from "./store";
 import { cn } from "@/lib/utils";
 
 /* ---------------- session hub ---------------- */
