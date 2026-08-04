@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTummyStore, type ScreenKey } from "@/components/tummy/store";
 import { TabBar } from "@/components/tummy/ui";
+import { AssistantButton, AssistantSheet } from "@/components/tummy/assistant";
 import {
   WelcomeScreen,
   SubjectIdScreen,
@@ -61,6 +62,20 @@ export const Route = createFileRoute("/")({
 
 const TAB_SCREENS: ScreenKey[] = ["home", "logHub", "progress", "profile"];
 const DARK_SCREENS: ScreenKey[] = ["positioning", "recording"];
+const ONBOARD_SCREENS: ScreenKey[] = [
+  "welcome",
+  "studyIntro",
+  "subjectId",
+  "survey",
+  "protocolIntro",
+  "video",
+  "quiz",
+  "technicalSetup",
+  "permissions",
+  "practice",
+  "scheduling",
+  "onboardDone",
+];
 
 function TummyApp() {
   const store = useTummyStore();
@@ -102,6 +117,9 @@ function TummyApp() {
   };
 
   const dark = DARK_SCREENS.includes(s);
+  const showAssistant = !ONBOARD_SCREENS.includes(s) && s !== "recording";
+  const showAssistantButton =
+    showAssistant && (TAB_SCREENS.includes(s) || s === "sessionHub");
 
   return (
     <main className="flex min-h-screen w-full items-center justify-center bg-wash p-0 sm:bg-mint-soft sm:p-8">
@@ -110,7 +128,9 @@ function TummyApp() {
         style={{ backgroundColor: dark ? "#143029" : "#E7F1EC" }}
       >
         <div className="flex min-h-0 flex-1 flex-col">{screens[s]}</div>
+        {showAssistantButton ? <AssistantButton store={store} dark={dark} /> : null}
         {TAB_SCREENS.includes(s) ? <TabBar store={store} /> : null}
+        {showAssistant ? <AssistantSheet store={store} /> : null}
       </div>
     </main>
   );
