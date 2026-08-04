@@ -63,7 +63,6 @@ export type NextTask = {
   sessionId?: string;
 };
 
-
 export type LogKind =
   | "meal"
   | "symptom"
@@ -108,7 +107,6 @@ export type TummyStore = {
   nextTask: NextTask;
 };
 
-
 export function nowLabel() {
   return new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
@@ -127,10 +125,34 @@ export function minutesNow() {
 }
 
 const INITIAL_SESSIONS: Session[] = [
-  { id: "fasting", label: "Fasting (morning)", done: true, at: 7 * 60 + 30, window: "6:30 – 8:30 am" },
-  { id: "m30", label: "Breakfast + 30 min", done: true, at: 8 * 60 + 35, window: "30 min after breakfast" },
-  { id: "m90", label: "Breakfast + 90 min", done: false, at: 9 * 60 + 35, window: "90 min after breakfast" },
-  { id: "m210", label: "Breakfast + 3.5 hrs", done: false, at: 11 * 60 + 35, window: "3.5 hrs after breakfast" },
+  {
+    id: "fasting",
+    label: "Fasting (morning)",
+    done: true,
+    at: 7 * 60 + 30,
+    window: "6:30 – 8:30 am",
+  },
+  {
+    id: "m30",
+    label: "Breakfast + 30 min",
+    done: true,
+    at: 8 * 60 + 35,
+    window: "30 min after breakfast",
+  },
+  {
+    id: "m90",
+    label: "Breakfast + 90 min",
+    done: false,
+    at: 9 * 60 + 35,
+    window: "90 min after breakfast",
+  },
+  {
+    id: "m210",
+    label: "Breakfast + 3.5 hrs",
+    done: false,
+    at: 11 * 60 + 35,
+    window: "3.5 hrs after breakfast",
+  },
 ];
 
 /** Single source of truth for "what should I do right now". */
@@ -203,8 +225,6 @@ export function computeNextTask(sessions: Session[], entries: LogEntry[]): NextT
   };
 }
 
-
-
 export function useTummyStore(): TummyStore {
   const [stack, setStack] = useState<ScreenKey[]>(["welcome"]);
 
@@ -266,7 +286,13 @@ export function useTummyStore(): TummyStore {
     addEntry: (kind, label, detail) =>
       setEntries((prev) => [
         ...prev,
-        { id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, kind, label, detail, time: nowLabel() },
+        {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          kind,
+          label,
+          detail,
+          time: nowLabel(),
+        },
       ]),
     chatOpen,
     setChatOpen,

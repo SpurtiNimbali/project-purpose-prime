@@ -41,8 +41,8 @@ export function WelcomeScreen({ store }: { store: TummyStore }) {
           Stanford School of Medicine
         </p>
         <p className="mt-4 text-[17px] font-semibold leading-relaxed text-pine-soft">
-          A one-week study listening to the sounds your gut makes. I'll walk you through
-          every step, and nothing here is a test.
+          A one-week study listening to the sounds your gut makes. I'll walk you through every step,
+          and nothing here is a test.
         </p>
       </div>
       <StickyFooter>
@@ -69,8 +69,8 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
       <TopBar title="Your subject ID" onBack={store.back} step="Step 1 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Enter the ID printed on the card your study coordinator gave you. We check it
-          against the study database — your name is never stored in this app.
+          Enter the ID printed on the card your study coordinator gave you. We check it against the
+          study database — your name is never stored in this app.
         </p>
         <div className="mt-5 space-y-3">
           <Field label="Subject ID">
@@ -84,9 +84,7 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
               autoCapitalize="characters"
             />
           </Field>
-          {state === "checking" ? (
-            <Note tone="blue">Checking the study database…</Note>
-          ) : null}
+          {state === "checking" ? <Note tone="blue">Checking the study database…</Note> : null}
           {state === "ok" ? (
             <Note tone="green" title="ID confirmed">
               Matched to cohort B, healthy group. Day 1 starts tomorrow morning.
@@ -186,15 +184,17 @@ export function VideoScreen({ store }: { store: TummyStore }) {
           </button>
           <div className="absolute bottom-0 left-0 h-1.5 w-full bg-surface/20">
             <div
-              className={cn("h-full bg-mint transition-all duration-700", watched ? "w-full" : "w-0")}
+              className={cn(
+                "h-full bg-mint transition-all duration-700",
+                watched ? "w-full" : "w-0",
+              )}
             />
           </div>
         </div>
         <div className="mt-4 space-y-3">
           <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
             The video shows exactly how to place the phone, how still to sit, and what a good
-            recording sounds like. There's a short quiz afterwards so we know the setup is
-            clear.
+            recording sounds like. There's a short quiz afterwards so we know the setup is clear.
           </p>
           <Note tone="blue" title="Captions and transcript">
             Tap the transcript button in the player if you'd rather read along.
@@ -242,8 +242,8 @@ export function QuizScreen({ store }: { store: TummyStore }) {
       <TopBar title="Quick check" onBack={store.back} step="Step 4 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Three quick questions so we know the setup is clear. Wrong answers are fine —
-          I'll explain either way.
+          Three quick questions so we know the setup is clear. Wrong answers are fine — I'll explain
+          either way.
         </p>
         <div className="mt-5 space-y-5">
           {QUIZ.map((item, qi) => {
@@ -262,9 +262,7 @@ export function QuizScreen({ store }: { store: TummyStore }) {
                       <button
                         key={opt}
                         disabled={pick !== null}
-                        onClick={() =>
-                          setPicks((p) => p.map((v, i) => (i === qi ? oi : v)))
-                        }
+                        onClick={() => setPicks((p) => p.map((v, i) => (i === qi ? oi : v)))}
                         className={cn(
                           "flex min-h-[56px] w-full items-center gap-3 rounded-2xl border-2 px-3 py-2 text-left text-[16px] font-bold",
                           pick === null
@@ -319,8 +317,6 @@ export function QuizScreen({ store }: { store: TummyStore }) {
   );
 }
 
-
-
 /* ---------------- background survey ---------------- */
 
 const SYMPTOM_ROWS: { label: string; info: string }[] = [
@@ -345,7 +341,6 @@ const SYMPTOM_ROWS: { label: string; info: string }[] = [
     info: "A strong, urgent need to go that is hard to hold in.",
   },
 ];
-
 
 const SURVEY_SECTIONS = ["About you", "Your gut", "Eating", "Sleep"] as const;
 
@@ -399,8 +394,8 @@ export function SurveyScreen({ store }: { store: TummyStore }) {
         {step === 0 ? (
           <div className="space-y-5">
             <Note tone="green" title="Completely anonymous">
-              Your answers are stored against your subject ID only. No names, no contact
-              details, nothing that identifies you.
+              Your answers are stored against your subject ID only. No names, no contact details,
+              nothing that identifies you.
             </Note>
             <MascotSays src={MASCOT.calm} size={72}>
               A one-time survey, four short sections. It gives your recordings context.
@@ -408,12 +403,7 @@ export function SurveyScreen({ store }: { store: TummyStore }) {
             <Field label="Gender">
               <div className="space-y-2">
                 {["Woman", "Man", "Non-binary", "Prefer not to say"].map((g) => (
-                  <Choice
-                    key={g}
-                    label={g}
-                    selected={gender === g}
-                    onClick={() => setGender(g)}
-                  />
+                  <Choice key={g} label={g} selected={gender === g} onClick={() => setGender(g)} />
                 ))}
               </div>
             </Field>
@@ -627,7 +617,6 @@ export function SurveyScreen({ store }: { store: TummyStore }) {
   );
 }
 
-
 /* ---------------- protocol intro ---------------- */
 
 export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
@@ -636,8 +625,8 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
       <TopBar title="How a day works" onBack={store.back} step="Step 6 of 9" />
       <ScreenBody>
         <MascotSays size={78}>
-          Every day has the same shape. Once you've done it twice it takes about as much
-          thought as brushing your teeth.
+          Every day has the same shape. Once you've done it twice it takes about as much thought as
+          brushing your teeth.
         </MascotSays>
         <div className="mt-5 space-y-3">
           {[
@@ -677,8 +666,8 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="amber" title="Take your phone case off">
-            A case leaves a gap between the microphone and your skin, and that gap loses
-            most of the sound we're listening for.
+            A case leaves a gap between the microphone and your skin, and that gap loses most of the
+            sound we're listening for.
           </Note>
         </div>
       </ScreenBody>
@@ -700,8 +689,8 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
       <TopBar title="Technical Setup" onBack={store.back} step="Step 7 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Different phones hear slightly differently. Recording your hardware lets us
-          standardise the audio across everyone in the study.
+          Different phones hear slightly differently. Recording your hardware lets us standardise
+          the audio across everyone in the study.
         </p>
         <div className="mt-5 space-y-5">
           <Field label="Phone model">
@@ -770,7 +759,12 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
   const [granted, setGranted] = useState<Record<string, boolean>>({});
   const items = [
     { k: "mic", label: "Microphone", sub: "To capture gut sounds", Icon: IconMic },
-    { k: "notif", label: "Reminders", sub: "For your 30, 90 and 210 minute alarms", Icon: IconPhone },
+    {
+      k: "notif",
+      label: "Reminders",
+      sub: "For your 30, 90 and 210 minute alarms",
+      Icon: IconPhone,
+    },
     { k: "dnd", label: "Do not disturb", sub: "Silences calls during a recording", Icon: IconLock },
   ];
   const all = items.every((i) => granted[i.k]);
@@ -779,8 +773,8 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
       <TopBar title="Permissions" onBack={store.back} step="Step 8 of 9" />
       <ScreenBody>
         <Note tone="green" title="Audio stays private">
-          Recordings are encrypted and labelled with your subject ID only. No one on the
-          study team can link them back to you by name.
+          Recordings are encrypted and labelled with your subject ID only. No one on the study team
+          can link them back to you by name.
         </Note>
         <div className="mt-4 space-y-3">
           {items.map(({ k, label, sub, Icon }) => (
@@ -833,8 +827,8 @@ export function PracticeScreen({ store }: { store: TummyStore }) {
       <TopBar title="Practice recording" onBack={store.back} step="Step 9 of 9" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.calm}>
-          Let's test your room. Twenty seconds of listening — no need to lift your shirt for
-          this one.
+          Let's test your room. Twenty seconds of listening — no need to lift your shirt for this
+          one.
         </MascotSays>
 
         <div className="mt-6 flex flex-col items-center">
@@ -865,8 +859,8 @@ export function PracticeScreen({ store }: { store: TummyStore }) {
         {phase === "noisy" ? (
           <div className="mt-5">
             <Note tone="amber" title="Background noise detected">
-              We picked up a TV or fan. Move somewhere quieter, or turn it off, then try
-              again. We'll keep looping until it's clear.
+              We picked up a TV or fan. Move somewhere quieter, or turn it off, then try again.
+              We'll keep looping until it's clear.
             </Note>
           </div>
         ) : null}
@@ -899,8 +893,8 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
       <TopBar title="Set your daily times" onBack={store.back} step="Last step" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.cheer}>
-          Last one. Tell me when you usually eat and sleep, and I'll place your reminders
-          around your life instead of the other way round.
+          Last one. Tell me when you usually eat and sleep, and I'll place your reminders around
+          your life instead of the other way round.
         </MascotSays>
         <div className="mt-5 space-y-3">
           {[
@@ -928,8 +922,8 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="blue" title="You can change these any day">
-            If a day looks different, adjust the times from your profile and the reminders
-            move with you.
+            If a day looks different, adjust the times from your profile and the reminders move with
+            you.
           </Note>
         </div>
       </ScreenBody>
@@ -949,8 +943,8 @@ export function OnboardDoneScreen({ store }: { store: TummyStore }) {
           You're all set up
         </h1>
         <p className="mt-3 text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Day 1 begins with your fasting recording tomorrow morning. I'll nudge you shortly
-          after your wake-up time.
+          Day 1 begins with your fasting recording tomorrow morning. I'll nudge you shortly after
+          your wake-up time.
         </p>
       </div>
       <StickyFooter>

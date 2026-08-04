@@ -41,16 +41,13 @@ function reply(store: TummyStore, raw: string): Msg[] {
     });
   }
   if (/meal|breakfast|lunch|dinner|snack|ate|eat/.test(t)) {
-    return say(
-      "Let's log that meal. A photo is ideal, but a short description works too.",
-      {
-        label: "Log the meal",
-        run: () => {
-          store.setChatOpen(false);
-          store.go("logMeal");
-        },
+    return say("Let's log that meal. A photo is ideal, but a short description works too.", {
+      label: "Log the meal",
+      run: () => {
+        store.setChatOpen(false);
+        store.go("logMeal");
       },
-    );
+    });
   }
   if (/record|gut sound|session|mic/.test(t)) {
     return say(

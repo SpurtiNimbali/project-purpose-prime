@@ -45,9 +45,30 @@ const PLAN: {
   Icon: typeof IconSun;
 }[] = [
   { id: "fasting", title: "Fasting", due: "7:30 am", track: "fasting", Icon: IconSun },
-  { id: "m30", title: "Meal + 30 min", due: "9:05 am", track: "postMeal", offset: 30, Icon: IconBowl },
-  { id: "m90", title: "Meal + 90 min", due: "10:05 am", track: "postMeal", offset: 90, Icon: IconClock },
-  { id: "m210", title: "Meal + 3.5 hrs", due: "12:05 pm", track: "postMeal", offset: 210, Icon: IconSunset },
+  {
+    id: "m30",
+    title: "Meal + 30 min",
+    due: "9:05 am",
+    track: "postMeal",
+    offset: 30,
+    Icon: IconBowl,
+  },
+  {
+    id: "m90",
+    title: "Meal + 90 min",
+    due: "10:05 am",
+    track: "postMeal",
+    offset: 90,
+    Icon: IconClock,
+  },
+  {
+    id: "m210",
+    title: "Meal + 3.5 hrs",
+    due: "12:05 pm",
+    track: "postMeal",
+    offset: 210,
+    Icon: IconSunset,
+  },
 ];
 
 function ProgressRing({ done, total }: { done: number; total: number }) {
@@ -157,9 +178,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                     )}
                   />
                   {i < PLAN.length - 1 ? (
-                    <span
-                      className={cn("w-[3px] flex-1", done ? "bg-teal" : "bg-line")}
-                    />
+                    <span className={cn("w-[3px] flex-1", done ? "bg-teal" : "bg-line")} />
                   ) : null}
                 </div>
 
@@ -234,8 +253,6 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
   );
 }
 
-
-
 /* ---------------- case reminder ---------------- */
 
 export function CaseReminderScreen({ store }: { store: TummyStore }) {
@@ -264,8 +281,8 @@ export function CaseReminderScreen({ store }: { store: TummyStore }) {
         </button>
         {why ? (
           <Note tone="amber" title="Why the case matters">
-            A case creates a gap between the microphone and your skin. Gut sounds are quiet
-            and low, so even a couple of millimetres of air loses most of the signal.
+            A case creates a gap between the microphone and your skin. Gut sounds are quiet and low,
+            so even a couple of millimetres of air loses most of the signal.
           </Note>
         ) : null}
       </ScreenBody>
@@ -318,8 +335,8 @@ export function WhichMealScreen({ store }: { store: TummyStore }) {
       <TopBar title="Which meal?" onBack={store.back} />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Pick the meal these recordings will follow. Your three timers start from the
-          moment you finish eating.
+          Pick the meal these recordings will follow. Your three timers start from the moment you
+          finish eating.
         </p>
         <div className="mt-5 space-y-3">
           {meals.map(({ k, label, Icon }) => (
@@ -409,8 +426,8 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
             Please confirm you haven't had any snacks or drinks after that target meal
           </h2>
           <p className="mt-3 text-center text-[17px] font-semibold leading-snug text-pine-soft">
-            Anything eaten in between changes what we hear, so we'd rather skip the session
-            than record it.
+            Anything eaten in between changes what we hear, so we'd rather skip the session than
+            record it.
           </p>
         </div>
       </ScreenBody>
@@ -430,17 +447,17 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- positioning ---------------- */
 
-function AbdomenGuide({
-  side,
-  region,
-}: {
-  side: "right" | "left";
-  region: "upper" | "lower";
-}) {
+function AbdomenGuide({ side, region }: { side: "right" | "left"; region: "upper" | "lower" }) {
   const x = side === "right" ? 74 : 126;
   const y = region === "upper" ? 96 : 132;
   return (
-    <svg viewBox="0 0 200 220" width="100%" height="230" role="img" aria-label="Phone placement guide">
+    <svg
+      viewBox="0 0 200 220"
+      width="100%"
+      height="230"
+      role="img"
+      aria-label="Phone placement guide"
+    >
       {/* torso */}
       <path
         d="M62 26c0-8 12-14 38-14s38 6 38 14c6 26 8 60 4 96-3 28-10 50-14 66H72c-4-16-11-38-14-66-4-36-2-70 4-96z"
@@ -460,15 +477,7 @@ function AbdomenGuide({
         belly button
       </text>
       {/* measure line */}
-      <line
-        x1="100"
-        y1={y}
-        x2={x}
-        y2={y}
-        stroke="#E8A33D"
-        strokeWidth="2"
-        strokeDasharray="4 4"
-      />
+      <line x1="100" y1={y} x2={x} y2={y} stroke="#E8A33D" strokeWidth="2" strokeDasharray="4 4" />
       <text
         x={(100 + x) / 2}
         y={y - 8}
@@ -502,12 +511,12 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
         <div className="mt-2 space-y-2">
           <p className="text-[18px] font-extrabold leading-snug text-surface">
             Lift your shirt and place the microphone exactly 9 cm to the{" "}
-            {store.side === "right" ? "right" : "left"} of your belly button, perpendicular
-            to your skin.
+            {store.side === "right" ? "right" : "left"} of your belly button, perpendicular to your
+            skin.
           </p>
           <p className="text-[16px] font-semibold leading-snug text-mint">
-            Bottom of the phone — the microphone side — pressed onto bare skin. Case off.
-            Sit upright and stay still.
+            Bottom of the phone — the microphone side — pressed onto bare skin. Case off. Sit
+            upright and stay still.
           </p>
         </div>
 
@@ -605,7 +614,6 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
   const R = 90;
   const C = 2 * Math.PI * R;
 
-
   const counts = store.marks.reduce<Record<string, number>>((acc, m) => {
     acc[m.key] = (acc[m.key] ?? 0) + 1;
     return acc;
@@ -655,7 +663,14 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
         <div className="relative h-[212px] w-[212px]">
           <svg width="212" height="212" viewBox="0 0 212 212" className="absolute inset-0">
-            <circle cx="106" cy="106" r={R} stroke="rgba(255,255,255,0.14)" strokeWidth="10" fill="none" />
+            <circle
+              cx="106"
+              cy="106"
+              r={R}
+              stroke="rgba(255,255,255,0.14)"
+              strokeWidth="10"
+              fill="none"
+            />
             <circle
               cx="106"
               cy="106"
@@ -712,9 +727,7 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
           <div className="rounded-b-[32px] bg-pine px-5 pb-6 pt-14 ring-1 ring-surface/15">
             <div className="flex items-start gap-3">
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[22px] font-extrabold text-surface">
-                  {pending.label}
-                </p>
+                <p className="truncate text-[22px] font-extrabold text-surface">{pending.label}</p>
                 <p className="text-[15px] font-bold text-mint">
                   At {String(Math.floor(pending.at / 60)).padStart(2, "0")}:
                   {String(pending.at % 60).padStart(2, "0")} · how strong is it?
@@ -753,11 +766,7 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
               Tap a number — it saves straight away.
             </p>
           </div>
-          <button
-            className="flex-1"
-            aria-label="Cancel"
-            onClick={() => setPending(null)}
-          />
+          <button className="flex-1" aria-label="Cancel" onClick={() => setPending(null)} />
         </div>
       ) : null}
 
@@ -768,7 +777,6 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       ) : null}
     </Screen>
   );
-
 }
 
 /* ---------------- post-recording metadata (chat) ---------------- */
@@ -899,9 +907,7 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
     <Screen>
       <ScreenBody className="flex flex-col justify-center pt-14 text-center">
         <Mascot src={MASCOT.cheer} size={170} className="mx-auto" />
-        <h1 className="mt-4 text-[26px] font-extrabold leading-tight text-pine">
-          Session saved
-        </h1>
+        <h1 className="mt-4 text-[26px] font-extrabold leading-tight text-pine">Session saved</h1>
         <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
           Both sides uploaded, with {store.marks.length} symptom{" "}
           {store.marks.length === 1 ? "mark" : "marks"} timestamped against the audio.

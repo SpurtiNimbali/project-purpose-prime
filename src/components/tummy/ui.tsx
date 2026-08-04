@@ -40,16 +40,8 @@ export function Screen({
   );
 }
 
-export function ScreenBody({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn("flex-1 overflow-y-auto px-5 pb-8", className)}>{children}</div>
-  );
+export function ScreenBody({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={cn("flex-1 overflow-y-auto px-5 pb-8", className)}>{children}</div>;
 }
 
 export function TopBar({
@@ -88,9 +80,7 @@ export function TopBar({
       )}
       <div className="min-w-0 flex-1">
         {step ? (
-          <p className={cn("text-[13px] font-bold", dark ? "text-mint" : "text-teal")}>
-            {step}
-          </p>
+          <p className={cn("text-[13px] font-bold", dark ? "text-mint" : "text-teal")}>{step}</p>
         ) : null}
         {title ? (
           <h1 className="truncate text-[19px] font-extrabold leading-tight">{title}</h1>
@@ -119,7 +109,8 @@ export function Btn({
   icon?: ReactNode;
 }) {
   const styles: Record<string, string> = {
-    primary: "bg-teal text-surface shadow-[0_6px_0_0_var(--color-teal-deep)] active:translate-y-[3px] active:shadow-[0_3px_0_0_var(--color-teal-deep)]",
+    primary:
+      "bg-teal text-surface shadow-[0_6px_0_0_var(--color-teal-deep)] active:translate-y-[3px] active:shadow-[0_3px_0_0_var(--color-teal-deep)]",
     blue: "bg-blue text-surface shadow-[0_6px_0_0_#2f6f85] active:translate-y-[3px]",
     secondary: "bg-surface text-pine border-2 border-line",
     ghost: "bg-transparent text-teal",
@@ -243,9 +234,7 @@ export function Choice({
       {icon ? <span className="shrink-0 text-teal">{icon}</span> : null}
       <span className="min-w-0 flex-1">
         <span className="block text-[17px] font-extrabold text-pine">{label}</span>
-        {sub ? (
-          <span className="block text-[15px] font-semibold text-pine-soft">{sub}</span>
-        ) : null}
+        {sub ? <span className="block text-[15px] font-semibold text-pine-soft">{sub}</span> : null}
       </span>
       <span
         className={cn(

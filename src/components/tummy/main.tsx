@@ -103,9 +103,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
       </div>
 
       <ScreenBody className="pt-3">
-        <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-          Next up
-        </p>
+        <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">Next up</p>
         <div
           className={cn(
             "mt-2 rounded-[28px] p-5",
@@ -279,9 +277,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                   <span className="block text-[17px] font-extrabold text-pine">
                     Complete your log and questions
                   </span>
-                  <span className="block text-[15px] font-semibold text-pine-soft">
-                    Ready now
-                  </span>
+                  <span className="block text-[15px] font-semibold text-pine-soft">Ready now</span>
                 </span>
                 <span className="shrink-0 text-teal">
                   <IconArrowRight width={22} height={22} />
@@ -335,7 +331,6 @@ export function HomeScreen({ store }: { store: TummyStore }) {
   );
 }
 
-
 /* ---------------- logging hub ---------------- */
 
 const LOG_ITEMS: {
@@ -345,12 +340,42 @@ const LOG_ITEMS: {
   Icon: typeof IconBowl;
   kind: LogKind;
 }[] = [
-  { k: "logMeal", label: "Meal or snack", sub: "Photo or description", Icon: IconBowl, kind: "meal" },
-  { k: "logHydration", label: "Drinks", sub: "Water, tea, anything fizzy", Icon: IconDroplet, kind: "hydration" },
-  { k: "logSymptom", label: "Symptom", sub: "Type and how strong", Icon: IconWave, kind: "symptom" },
-  { k: "logToilet", label: "Toilet habits", sub: "Timing and consistency", Icon: IconToilet, kind: "toilet" },
+  {
+    k: "logMeal",
+    label: "Meal or snack",
+    sub: "Photo or description",
+    Icon: IconBowl,
+    kind: "meal",
+  },
+  {
+    k: "logHydration",
+    label: "Drinks",
+    sub: "Water, tea, anything fizzy",
+    Icon: IconDroplet,
+    kind: "hydration",
+  },
+  {
+    k: "logSymptom",
+    label: "Symptom",
+    sub: "Type and how strong",
+    Icon: IconWave,
+    kind: "symptom",
+  },
+  {
+    k: "logToilet",
+    label: "Toilet habits",
+    sub: "Timing and consistency",
+    Icon: IconToilet,
+    kind: "toilet",
+  },
   { k: "logSleep", label: "Sleep", sub: "Last night's rest", Icon: IconMoon, kind: "sleep" },
-  { k: "logActivity", label: "Activity", sub: "Walks, workouts, rest", Icon: IconRun, kind: "activity" },
+  {
+    k: "logActivity",
+    label: "Activity",
+    sub: "Walks, workouts, rest",
+    Icon: IconRun,
+    kind: "activity",
+  },
 ];
 
 const KIND_ICON: Record<LogKind, typeof IconBowl> = {
@@ -427,13 +452,11 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
         ) : (
           <>
             <div className="grid grid-cols-3 gap-3">
-              {(
-                [
-                  { kind: "meal" as LogKind, label: "Meals" },
-                  { kind: "hydration" as LogKind, label: "Drinks" },
-                  { kind: "symptom" as LogKind, label: "Symptoms" },
-                ]
-              ).map(({ kind, label }) => (
+              {[
+                { kind: "meal" as LogKind, label: "Meals" },
+                { kind: "hydration" as LogKind, label: "Drinks" },
+                { kind: "symptom" as LogKind, label: "Symptoms" },
+              ].map(({ kind, label }) => (
                 <div
                   key={kind}
                   className="rounded-3xl border border-line bg-surface p-3 text-center"
@@ -502,8 +525,6 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
     </Screen>
   );
 }
-
-
 
 export function LogMealScreen({ store }: { store: TummyStore }) {
   const [photo, setPhoto] = useState(false);
@@ -786,8 +807,7 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
       <TopBar title="Log toilet habits" onBack={store.back} />
       <ScreenBody>
         <Note tone="green" title="Only your subject ID is attached">
-          This is routine research data. Nothing here is shared with anyone outside the
-          study team.
+          This is routine research data. Nothing here is shared with anyone outside the study team.
         </Note>
         <div className="mt-4 space-y-4">
           <Field label="When was it?">
@@ -896,8 +916,8 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               <div>
                 <p className="text-[17px] font-extrabold text-pine">Streak freeze available</p>
                 <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-                  Miss one day and your streak stays intact. Life happens — this is a study,
-                  not a competition.
+                  Miss one day and your streak stays intact. Life happens — this is a study, not a
+                  competition.
                 </p>
               </div>
             </div>
@@ -913,9 +933,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
             <div className="mt-4 h-5 w-full overflow-hidden rounded-full bg-wash">
               <div className="h-full w-[43%] rounded-full bg-sage" />
             </div>
-            <p className="mt-2 text-[16px] font-extrabold text-teal">
-              12 of 28 sessions complete
-            </p>
+            <p className="mt-2 text-[16px] font-extrabold text-teal">12 of 28 sessions complete</p>
           </Card>
         </div>
 
@@ -946,7 +964,12 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
   const rows: { label: string; sub: string; Icon: typeof IconUser; to?: ScreenKey }[] = [
     { label: "Subject ID", sub: "STF-0142 · cohort B", Icon: IconUser },
     { label: "Daily times", sub: "Meals, sleep and wake", Icon: IconClock, to: "scheduling" },
-    { label: "Technical Setup", sub: "iPhone 14 · bottom microphone", Icon: IconPhone, to: "technicalSetup" },
+    {
+      label: "Technical Setup",
+      sub: "iPhone 14 · bottom microphone",
+      Icon: IconPhone,
+      to: "technicalSetup",
+    },
     { label: "Setup guide", sub: "Rewatch the instruction video", Icon: IconMic, to: "video" },
   ];
   return (
@@ -986,8 +1009,8 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
 
         <div className="mt-4">
           <Note tone="green" title="Your data is anonymous">
-            Recordings and logs are stored against your subject ID. Contact your coordinator
-            at (650) 555-0134 with any questions.
+            Recordings and logs are stored against your subject ID. Contact your coordinator at
+            (650) 555-0134 with any questions.
           </Note>
         </div>
 
