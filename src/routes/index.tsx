@@ -118,8 +118,7 @@ function TummyApp() {
 
   const dark = DARK_SCREENS.includes(s);
   const showAssistant = !ONBOARD_SCREENS.includes(s) && s !== "recording";
-  const showAssistantButton =
-    showAssistant && (TAB_SCREENS.includes(s) || s === "sessionHub");
+  const showAssistantButton = showAssistant && (TAB_SCREENS.includes(s) || s === "sessionHub");
 
   return (
     <main className="flex min-h-screen w-full items-center justify-center bg-wash p-0 sm:bg-mint-soft sm:p-8">
