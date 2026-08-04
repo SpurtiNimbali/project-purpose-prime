@@ -511,11 +511,12 @@ const SYMPTOMS = [
 ];
 
 const TOTAL = 480; // 8 minutes
+const SEV_LABELS = ["very mild", "mild", "moderate", "strong", "very strong"];
 
 export function RecordingScreen({ store }: { store: TummyStore }) {
   const [left, setLeft] = useState(TOTAL);
   const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
-  const [severity, setSeverity] = useState(3);
+  const [toast, setToast] = useState<string | null>(null);
   const startedRef = useRef(false);
 
   useEffect(() => {
@@ -529,10 +530,17 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
     return () => clearInterval(t);
   }, []);
 
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 1800);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   const mmss = `${String(Math.floor(left / 60)).padStart(2, "0")}:${String(left % 60).padStart(2, "0")}`;
   const pct = 1 - left / TOTAL;
-  const R = 78;
+  const R = 90;
   const C = 2 * Math.PI * R;
+
 
   const counts = store.marks.reduce<Record<string, number>>((acc, m) => {
     acc[m.key] = (acc[m.key] ?? 0) + 1;
