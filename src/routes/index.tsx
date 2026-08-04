@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTummyStore, type ScreenKey } from "@/components/tummy/store";
 import { TabBar } from "@/components/tummy/ui";
+import { AssistantButton, AssistantSheet } from "@/components/tummy/assistant";
 import {
   WelcomeScreen,
   SubjectIdScreen,
@@ -61,6 +62,20 @@ export const Route = createFileRoute("/")({
 
 const TAB_SCREENS: ScreenKey[] = ["home", "logHub", "progress", "profile"];
 const DARK_SCREENS: ScreenKey[] = ["positioning", "recording"];
+const ONBOARD_SCREENS: ScreenKey[] = [
+  "welcome",
+  "studyIntro",
+  "subjectId",
+  "survey",
+  "protocolIntro",
+  "video",
+  "quiz",
+  "technicalSetup",
+  "permissions",
+  "practice",
+  "scheduling",
+  "onboardDone",
+];
 
 function TummyApp() {
   const store = useTummyStore();
