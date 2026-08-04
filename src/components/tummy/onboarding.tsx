@@ -361,16 +361,29 @@ export function QuizScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- background survey ---------------- */
 
-const SYMPTOM_ROWS = [
-  "Audible stomach or gut sound",
-  "Bloating",
-  "Nausea",
-  "Abdominal pain",
-  "Gas or flatulence",
-  "Belching",
-  "Vomiting",
-  "Sense of urgency",
+const SYMPTOM_ROWS: { label: string; info: string }[] = [
+  {
+    label: "Rumbling or gurgling you can hear",
+    info: "Noises coming from your stomach or gut that you or people near you can actually hear.",
+  },
+  {
+    label: "Bloating",
+    info: "A full, tight or swollen feeling in your belly, often worse after eating.",
+  },
+  { label: "Feeling sick to your stomach", info: "Nausea — feeling like you might be sick." },
+  {
+    label: "Stomach pain or cramps",
+    info: "Any ache, sharp pain or squeezing feeling anywhere in your belly.",
+  },
+  { label: "Passing wind", info: "Gas released from the back passage — also called flatulence." },
+  { label: "Burping", info: "Bringing up air through your mouth — also called belching." },
+  { label: "Being sick", info: "Vomiting — actually throwing up, not just feeling like it." },
+  {
+    label: "Sudden rush to the toilet",
+    info: "A strong, urgent need to go that is hard to hold in.",
+  },
 ];
+
 
 export function SurveyScreen({ store }: { store: TummyStore }) {
   const [gender, setGender] = useState("");
