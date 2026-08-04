@@ -226,7 +226,7 @@ export function computeNextTask(sessions: Session[], entries: LogEntry[]): NextT
 }
 
 export function useTummyStore(): TummyStore {
-  const [stack, setStack] = useState<ScreenKey[]>(["home"]);
+  const [stack, setStack] = useState<ScreenKey[]>(["quiz"]);
 
   const [track, setTrack] = useState<Track>("fasting");
   const [meal, setMeal] = useState<Meal>("breakfast");
