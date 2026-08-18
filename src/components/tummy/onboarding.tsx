@@ -885,16 +885,16 @@ export function PracticeScreen({ store }: { store: TummyStore }) {
   );
 }
 
-/* ---------------- scheduling (last) ---------------- */
+/* ---------------- daily schedule ---------------- */
 
 export function SchedulingScreen({ store }: { store: TummyStore }) {
   return (
     <Screen>
-      <TopBar title="Set your daily times" onBack={store.back} step="Last step" />
+      <TopBar title="Daily schedule" onBack={store.back} step="Step 6 of 8" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.cheer}>
-          Last one. Tell me when you usually eat and sleep, and I'll place your reminders around
-          your life instead of the other way round.
+          Tell me when you usually eat and sleep, and I'll place your reminders around your life
+          instead of the other way round.
         </MascotSays>
         <div className="mt-5 space-y-3">
           {[
@@ -902,7 +902,7 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
             { label: "Breakfast", def: "08:00", Icon: IconBowl },
             { label: "Lunch", def: "12:30", Icon: IconBowl },
             { label: "Dinner", def: "19:00", Icon: IconSunset },
-            { label: "Bedtime", def: "23:00", Icon: IconMoon },
+            { label: "Go to bed", def: "23:00", Icon: IconMoon },
           ].map(({ label, def, Icon }) => (
             <div
               key={label}
@@ -911,28 +911,29 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
                 <Icon width={24} height={24} />
               </span>
-              <span className="flex-1 text-[17px] font-extrabold text-pine">{label}</span>
+              <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold text-pine">
+                {label}
+              </span>
               <input
                 type="time"
                 defaultValue={def}
-                className="min-h-[52px] rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine"
+                className="min-h-[52px] shrink-0 rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine"
               />
             </div>
           ))}
         </div>
-        <div className="mt-4">
-          <Note tone="blue" title="You can change these any day">
-            If a day looks different, adjust the times from your profile and the reminders move with
-            you.
-          </Note>
-        </div>
+        <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-pine-soft">
+          These times are for reminders only — no worries at all if they move around from day to
+          day.
+        </p>
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("onboardDone")}>Save my schedule</Btn>
+        <Btn onClick={() => store.go("technicalSetup")}>Save my schedule</Btn>
       </StickyFooter>
     </Screen>
   );
 }
+
 
 export function OnboardDoneScreen({ store }: { store: TummyStore }) {
   return (
