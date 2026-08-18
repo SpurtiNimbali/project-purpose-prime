@@ -810,7 +810,7 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
   );
 }
 
-/* ---------------- practice recording ---------------- */
+/* ---------------- practice part 1: sound check ---------------- */
 
 export function PracticeScreen({ store }: { store: TummyStore }) {
   const [phase, setPhase] = useState<"idle" | "listening" | "noisy" | "clear">("idle");
@@ -824,11 +824,11 @@ export function PracticeScreen({ store }: { store: TummyStore }) {
   };
   return (
     <Screen>
-      <TopBar title="Practice recording" onBack={store.back} step="Step 9 of 9" />
+      <TopBar title="Sound check" onBack={store.back} step="Step 8 of 8 · part 1 of 2" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.calm}>
-          Let's test your room. Twenty seconds of listening — no need to lift your shirt for this
-          one.
+          First a sound check, then a short practice recording. Twenty seconds of listening — no
+          need to lift your shirt for this one.
         </MascotSays>
 
         <div className="mt-6 flex flex-col items-center">
@@ -874,16 +874,121 @@ export function PracticeScreen({ store }: { store: TummyStore }) {
       </ScreenBody>
       <StickyFooter>
         {phase === "clear" ? (
-          <Btn onClick={() => store.go("scheduling")}>Continue</Btn>
+          <Btn onClick={() => store.go("practiceRun")}>Continue to the practice recording</Btn>
         ) : (
           <Btn onClick={phase === "noisy" ? retry : run} disabled={phase === "listening"}>
-            {phase === "noisy" ? "Try again" : "Start noise check"}
+            {phase === "noisy" ? "Try again" : "Start sound check"}
           </Btn>
         )}
       </StickyFooter>
     </Screen>
   );
 }
+
+/* ---------------- practice part 2: dry run recording ---------------- */
+
+const COACH_STEPS = [
+  "Do not disturb stays on and you shouldn't leave this screen while recording.",
+  "The time remaining is always shown here, inside the circle.",
+  "Feel something? Tap the symptom, then pick how strong it is. Buttons are up top, away from the microphone.",
+  "You can always finish early if you need to. Nothing breaks.",
+];
+
+export function PracticeRunScreen({ store }: { store: TummyStore }) {
+  const TOTAL = 45;
+  const [left, setLeft] = useState(TOTAL);
+  const [coach, setCoach] = useState(0);
+
+  useEffect(() => {
+    if (coach < COACH_STEPS.length) return;
+    const t = setInterval(() => setLeft((l) => (l > 0 ? l - 1 : 0)), 1000);
+    return () => clearInterval(t);
+  }, [coach]);
+
+  const mmss = `${String(Math.floor(left / 60)).padStart(2, "0")}:${String(left % 60).padStart(2, "0")}`;
+  const coaching = coach < COACH_STEPS.length;
+  const finished = left === 0;
+
+  return (
+    <Screen dark className="relative">
+      <TopBar title="Practice recording" onBack={store.back} dark step="Step 8 of 8 · part 2 of 2" />
+
+      <div className="shrink-0 px-5">
+        <div className="flex items-center gap-2 rounded-2xl bg-surface/10 px-4 py-3">
+          <span className="text-mint">
+            <IconLock width={20} height={20} />
+          </span>
+          <p className="flex-1 text-[15px] font-extrabold text-surface">
+            Dry run · nothing is uploaded
+          </p>
+        </div>
+      </div>
+
+      <div className="shrink-0 px-5 pt-4">
+        <div className="grid grid-cols-3 gap-2">
+          {["Gurgle", "Bloating", "Pain"].map((s) => (
+            <div
+              key={s}
+              className="flex h-[68px] items-center justify-center rounded-2xl border-2 border-surface/20 bg-surface/10 text-[15px] font-extrabold text-surface"
+            >
+              {s}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
+        <div className="flex h-[190px] w-[190px] flex-col items-center justify-center rounded-full border-[10px] border-mint/40">
+          <p className="text-[44px] font-extrabold leading-none tabular-nums text-surface">
+            {mmss}
+          </p>
+          <p className="mt-1 text-[13px] font-extrabold uppercase tracking-[0.14em] text-mint">
+            remaining
+          </p>
+        </div>
+      </div>
+
+      <div className="shrink-0 px-5 pb-7">
+        <Btn variant="secondary" onClick={() => setLeft(0)} disabled={coaching || finished}>
+          {finished ? "Practice complete" : "Finish early"}
+        </Btn>
+      </div>
+
+      {coaching ? (
+        <div className="absolute inset-0 z-20 flex flex-col justify-end bg-pine/70 px-5 pb-10 backdrop-blur-md">
+          <div className="flex items-end gap-3">
+            <Mascot src={MASCOT.calm} size={84} />
+            <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[17px] font-semibold leading-snug text-pine">
+              {COACH_STEPS[coach]}
+            </p>
+          </div>
+          <div className="mt-5">
+            <Btn onClick={() => setCoach((c) => c + 1)}>
+              {coach === COACH_STEPS.length - 1 ? "Start the practice run" : "Next"}
+            </Btn>
+          </div>
+        </div>
+      ) : null}
+
+      {finished ? (
+        <div className="absolute inset-0 z-20 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
+          <div className="rounded-[28px] bg-surface p-6 text-center">
+            <Mascot src={MASCOT.cheer} size={140} className="mx-auto" />
+            <h2 className="mt-3 text-[24px] font-extrabold text-pine">Successful session</h2>
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
+              After a real recording you'll be asked a few short questions. That's all there is to
+              it — you're set.
+            </p>
+            <div className="mt-5">
+              <Btn onClick={() => store.go("onboardDone")}>Continue</Btn>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </Screen>
+  );
+}
+
 
 /* ---------------- daily schedule ---------------- */
 
