@@ -107,6 +107,8 @@ export type TummyStore = {
   addEntry: (kind: LogKind, label: string, detail?: string) => void;
   chatOpen: boolean;
   setChatOpen: (open: boolean) => void;
+  questions: { morning: boolean; night: boolean };
+  markQuestions: (when: "morning" | "night") => void;
   nextTask: NextTask;
 };
 
