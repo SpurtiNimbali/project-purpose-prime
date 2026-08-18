@@ -159,16 +159,65 @@ const INITIAL_SESSIONS: Session[] = [
 ];
 
 /** Single source of truth for "what should I do right now". */
-export function computeNextTask(sessions: Session[], entries: LogEntry[]): NextTask {
+export function computeNextTask(
+  sessions: Session[],
+  entries: LogEntry[],
+  questions: { morning: boolean; night: boolean } = { morning: false, night: false },
+): NextTask {
   const now = minutesNow();
   const mealLogged = entries.some((e) => e.kind === "meal");
+  const fasting = sessions.find((s) => s.id === "fasting");
   const pending = sessions.filter((s) => !s.done);
   const upcoming = pending[0];
+
+  // 1 — fasting recording comes first, before anything else
+  if (fasting && !fasting.done) {
+    return {
+      kind: "recording",
+      tag: "Gut sound recording",
+      title: "Fasting recording",
+      sub: "Before any food, drink or activity. Case off, quiet room, sit still.",
+      cta: "Start recording",
+      screen: "caseReminder",
+      state: "due",
+      minsUntil: null,
+      sessionId: "fasting",
+    };
+  }
+
+  // 2 — morning questions, right after the fasting recording
+  if (!questions.morning) {
+    return {
+      kind: "questions",
+      tag: "Morning questions",
+      title: "A few questions about your morning",
+      sub: "Sleep, symptoms and toilet habits — about two minutes.",
+      cta: "Answer questions",
+      screen: "logSleep",
+      state: "due",
+      minsUntil: null,
+    };
+  }
+
+  // 3 — the anchor meal the post-meal recordings run from
+  if (!mealLogged) {
+    return {
+      kind: "meal",
+      tag: "Meal logging",
+      title: "Log the meal your timers run from",
+      sub: "Type it or record it — the three recordings are timed from this meal.",
+      cta: "Log the meal",
+      screen: "logMeal",
+      state: "due",
+      minsUntil: null,
+    };
+  }
 
   if (upcoming) {
     const mins = upcoming.at - now;
     if (mins <= 10) {
       return {
+        kind: "recording",
         tag: "Gut sound recording",
         title: upcoming.label,
         sub:
@@ -176,27 +225,18 @@ export function computeNextTask(sessions: Session[], entries: LogEntry[]): NextT
             ? "This window is closing — record now or mark it missed."
             : "Case off, quiet room, sit still.",
         cta: "Start recording",
-        screen: "sessionHub",
+        screen: "caseReminder",
         state: "due",
         minsUntil: null,
         sessionId: upcoming.id,
       };
     }
-    if (!mealLogged) {
-      return {
-        tag: "Meal or snack",
-        title: "Describe the meal your timers run from",
-        sub: "The post-meal recordings are timed off this.",
-        cta: "Add the meal",
-        screen: "logMeal",
-        state: "due",
-        minsUntil: null,
-      };
-    }
     return {
-      tag: "Gut sound recording",
+      kind: "waiting",
+      tag: "Waiting",
       title: upcoming.label,
       sub: `You're clear until ${clockLabel(upcoming.at)}.`,
+      note: "No food, snacks or drinks other than water for the 3 hours after your meal. If you want water, have it in the 5 minutes right after a recording.",
       cta: "Open today's recordings",
       screen: "sessionHub",
       state: "soon",
@@ -205,28 +245,32 @@ export function computeNextTask(sessions: Session[], entries: LogEntry[]): NextT
     };
   }
 
-  if (now >= 17 * 60) {
+  // 4 — end of day questions
+  if (!questions.night) {
     return {
-      tag: "Before bed",
+      kind: "questions",
+      tag: "Evening questions",
       title: "A few questions about your day",
       sub: "Sleep, symptoms and toilet habits — about two minutes.",
-      cta: "Answer now",
+      cta: "Answer questions",
       screen: "logSleep",
-      state: "due",
-      minsUntil: null,
+      state: now >= 17 * 60 ? "due" : "soon",
+      minsUntil: now >= 17 * 60 ? null : 17 * 60 - now,
     };
   }
 
   return {
+    kind: "waiting",
     tag: "All caught up",
     title: "Nothing due right now",
-    sub: "Your evening questions open at 5:00 pm.",
+    sub: "Everything for today is recorded and logged.",
     cta: "Log something anyway",
     screen: "logHub",
     state: "clear",
     minsUntil: null,
   };
 }
+
 
 export function useTummyStore(): TummyStore {
   const [stack, setStack] = useState<ScreenKey[]>(["welcome"]);
