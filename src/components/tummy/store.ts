@@ -296,6 +296,7 @@ export function useTummyStore(): TummyStore {
     { id: "seed-3", kind: "meal", label: "Breakfast", detail: "Oats and berries", time: "8:05 am" },
   ]);
   const [chatOpen, setChatOpen] = useState(false);
+  const [questions, setQuestions] = useState({ morning: true, night: false });
 
   const go = useCallback((s: ScreenKey) => {
     setStack((prev) => [...prev, s]);
@@ -306,10 +307,13 @@ export function useTummyStore(): TummyStore {
     [],
   );
 
-  const nextTask = computeNextTask(sessions, entries);
+  const nextTask = computeNextTask(sessions, entries, questions);
 
   return {
     nextTask,
+    questions,
+    markQuestions: (when) => setQuestions((q) => ({ ...q, [when]: true })),
+
 
     screen: stack[stack.length - 1],
     go,
