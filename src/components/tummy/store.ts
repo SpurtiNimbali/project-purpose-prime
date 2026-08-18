@@ -53,14 +53,17 @@ export type Session = {
 };
 
 export type NextTask = {
+  kind: "recording" | "waiting" | "meal" | "questions";
   tag: string;
   title: string;
   sub: string;
+  note?: string;
   cta: string;
   screen: ScreenKey;
   state: "due" | "soon" | "clear";
   minsUntil: number | null;
   sessionId?: string;
+
 };
 
 export type LogKind =
