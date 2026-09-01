@@ -42,6 +42,7 @@ import {
 } from "./icons";
 import {
   clockLabel,
+  computeNextTask,
   untilLabel,
   type LogKind,
   type ScreenKey,
@@ -75,7 +76,7 @@ const HOME_LOGS: {
 
 export function HomeScreen({ store }: { store: TummyStore }) {
   useTick();
-  const task = store.nextTask;
+  const task = computeNextTask(store.plan);
   const hour = new Date().getHours();
   const due = task.state === "due";
   const doneCount = store.plan.filter((p) => p.done).length;
