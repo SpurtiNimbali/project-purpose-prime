@@ -13,81 +13,147 @@ type Msg = {
 };
 
 const CHIPS = [
-  "Log a meal",
-  "Add a glass of water",
-  "Log a symptom",
-  "Start a recording",
+  "I just had a protein bar",
+  "I drank a glass of water",
+  "Bloating, quite bad",
+  "I went to the toilet",
   "What's next?",
-  "Toilet habits",
 ];
 
 let seq = 0;
 const uid = () => `m${++seq}`;
+
+const SEV_WORDS: [RegExp, number][] = [
+  [/very (bad|strong|severe)|terrible|awful|unbearable/, 5],
+  [/(quite|really|pretty) (bad|strong)|severe|strong/, 4],
+  [/moderate|medium|so-so|okay-ish/, 3],
+  [/mild|a bit|slight|light|little/, 2],
+  [/very mild|barely|hardly/, 1],
+];
+const SEV_LABELS = ["", "very mild", "mild", "moderate", "strong", "very strong"];
+
+function severityFrom(t: string) {
+  for (const [re, n] of SEV_WORDS) if (re.test(t)) return n;
+  return 3;
+}
+
+/** Pull the food description out of "I just had a protein bar" style sentences. */
+function foodFrom(raw: string) {
+  const m = raw.match(
+    /(?:had|ate|eaten|eating|having|just|log(?:ged)?(?: a| my)?)\s+(?:a |an |some |my )?(.+)/i,
+  );
+  const text = (m ? m[1] : raw).replace(/\bfor (breakfast|lunch|dinner)\b.*/i, "").trim();
+  return text.replace(/[.!]+$/, "") || "Meal";
+}
+
+function mealSlot(t: string): "Breakfast" | "Lunch" | "Dinner" | "Snack" {
+  if (/breakfast/.test(t)) return "Breakfast";
+  if (/lunch/.test(t)) return "Lunch";
+  if (/dinner|supper/.test(t)) return "Dinner";
+  if (/snack|bar|biscuit|cookie|fruit|coffee|tea/.test(t)) return "Snack";
+  const h = new Date().getHours();
+  return h < 11 ? "Breakfast" : h < 16 ? "Lunch" : "Dinner";
+}
+
+const SYMPTOM_WORDS: [RegExp, string, string][] = [
+  [/bloat/, "bloat", "Bloating"],
+  [/cramp/, "cramp", "Cramp"],
+  [/naus|sick/, "nausea", "Nausea"],
+  [/gas|wind|belch|burp/, "gas", "Gas"],
+  [/gurgl|rumbl|noise/, "gurgle", "Gurgle"],
+  [/pain|ache|hurt|sore/, "pain", "Pain"],
+];
 
 function reply(store: TummyStore, raw: string): Msg[] {
   const t = raw.toLowerCase();
   const say = (text: string, action?: Msg["action"]): Msg[] => [
     { id: uid(), from: "tummy", text, action },
   ];
+  const openLog = (label = "See today's log"): Msg["action"] => ({
+    label,
+    run: () => {
+      store.setChatOpen(false);
+      store.go("logHub");
+    },
+  });
 
-  if (/water|drink|hydrat|glass/.test(t)) {
-    store.addEntry("hydration", "Water", "1 glass");
-    return say("Added one glass of water to today's log. That's it — nothing else needed.", {
-      label: "Open hydration log",
-      run: () => {
-        store.setChatOpen(false);
-        store.go("logHydration");
-      },
-    });
-  }
-  if (/meal|breakfast|lunch|dinner|snack|ate|eat/.test(t)) {
-    return say("Let's log that meal. A photo is ideal, but a short description works too.", {
-      label: "Log the meal",
-      run: () => {
-        store.setChatOpen(false);
-        store.go("logMeal");
-      },
-    });
-  }
-  if (/record|gut sound|session|mic/.test(t)) {
+  // hydration — logged automatically
+  if (/water|drink|drank|hydrat|glass|sip/.test(t) && !/food|ate|meal/.test(t)) {
+    const glasses = Number((t.match(/(\d+)\s*(glass|cup)/) || [])[1] || 1);
+    store.addEntry("hydration", "Water", `${glasses} glass${glasses > 1 ? "es" : ""}`);
     return say(
-      "Your next gut sound recording is Breakfast + 90 min. Take the case off and sit somewhere quiet first.",
+      `Logged — ${glasses} glass${glasses > 1 ? "es" : ""} of water at ${nowLabel()}. Nothing else needed.`,
+      openLog(),
+    );
+  }
+
+  // symptoms — logged automatically with a severity guess
+  const sym = SYMPTOM_WORDS.find(([re]) => re.test(t));
+  if (sym) {
+    const sev = severityFrom(t);
+    store.addEntry("symptom", sym[2], `${SEV_LABELS[sev]} · ${nowLabel()}`);
+    return say(
+      `Logged ${sym[2].toLowerCase()} as ${SEV_LABELS[sev]} at ${nowLabel()}. Tap below if you'd like to change the strength.`,
       {
-        label: "Start recording",
+        label: "Adjust this symptom",
         run: () => {
           store.setChatOpen(false);
-          store.go("sessionHub");
+          store.go("logSymptom");
         },
       },
     );
   }
-  if (/toilet|bowel|stool|poo/.test(t)) {
-    return say("Noted. I'll open the toilet habits log — it's four quick taps.", {
-      label: "Log toilet habits",
-      run: () => {
-        store.setChatOpen(false);
-        store.go("logToilet");
-      },
-    });
+
+  // meals — logged automatically from the description
+  if (/meal|breakfast|lunch|dinner|snack|ate|eat|had|bar|toast|coffee|banana/.test(t)) {
+    const slot = mealSlot(t);
+    const food = foodFrom(raw);
+    store.addEntry("meal", slot, food);
+    const planItem = store.plan.find(
+      (p) => p.kind === "meal" && !p.done && p.label.toLowerCase() === slot.toLowerCase(),
+    );
+    if (planItem) store.completeItem(planItem.id);
+    return say(
+      planItem
+        ? `Logged ${slot.toLowerCase()}: "${food}" at ${nowLabel()}. Your next three recordings are now timed from this meal.`
+        : `Logged as a ${slot.toLowerCase()}: "${food}" at ${nowLabel()}.`,
+      openLog(),
+    );
   }
-  if (/symptom|pain|bloat|cramp|nausea|gas|gurgl/.test(t)) {
-    return say("Sorry to hear that. Tell me which one and how strong it feels.", {
-      label: "Log a symptom",
-      run: () => {
-        store.setChatOpen(false);
-        store.go("logSymptom");
-      },
-    });
+
+  if (/toilet|bowel|stool|poo|bathroom/.test(t)) {
+    const type = /loose|diarr|watery/.test(t)
+      ? "Loose"
+      : /hard|constip/.test(t)
+        ? "Hard"
+        : "Normal";
+    store.addEntry("toilet", "Toilet visit", `${type} · ${nowLabel()}`);
+    return say(
+      `Logged a toilet visit (${type.toLowerCase()}) at ${nowLabel()}. I'll count it towards today's total.`,
+      openLog(),
+    );
   }
-  if (/sleep|slept|bed/.test(t)) {
-    return say("I can log last night's sleep in three taps.", {
-      label: "Log sleep",
-      run: () => {
-        store.setChatOpen(false);
-        store.go("logSleep");
-      },
-    });
+
+  if (/sleep|slept|bed|woke/.test(t)) {
+    const hrs = (t.match(/(\d+(?:\.\d+)?)\s*(hr|hour)/) || [])[1];
+    const quality = /bad|poor|badly|rough|awful/.test(t) ? "slept poorly" : "slept well";
+    store.addEntry("sleep", "Sleep", `${hrs ? `${hrs} hrs · ` : ""}${quality}`);
+    return say(`Logged last night's sleep${hrs ? ` — ${hrs} hours` : ""}, ${quality}.`, openLog());
   }
+
+  if (/record|gut sound|session|mic/.test(t)) {
+    return say(
+      "Recordings I can't do for you — take the case off, sit somewhere quiet and I'll run the two minutes with you.",
+      {
+        label: "Start recording",
+        run: () => {
+          store.setChatOpen(false);
+          store.go("caseReminder");
+        },
+      },
+    );
+  }
+
   if (/next|what.*do|todo|left/.test(t)) {
     const task = store.nextTask;
     return say(`${task.title}. ${task.sub}`, {
@@ -101,13 +167,14 @@ function reply(store: TummyStore, raw: string): Msg[] {
 
   if (/case|position|9 ?cm|belly/.test(t)) {
     return say(
-      "Case off, bare phone on bare skin, about 9 cm from your belly button. One two-minute recording, that's it.",
+      "Case off, bare phone on bare skin, about 9 cm below and to the right of your belly button. One two-minute recording, that's it.",
     );
   }
   return say(
-    "I can log meals, drinks, symptoms, sleep and toilet habits, or start a gut sound recording. Just tell me what happened.",
+    "Tell me what happened in plain words — \"I had a protein bar\", \"two glasses of water\", \"bloating, quite bad\" — and I'll log it straight away.",
   );
 }
+
 
 export function AssistantSheet({ store }: { store: TummyStore }) {
   const [msgs, setMsgs] = useState<Msg[]>([
