@@ -40,7 +40,13 @@ import {
   IconPhone,
   IconList,
 } from "./icons";
-import { clockLabel, type LogKind, type ScreenKey, type TummyStore } from "./store";
+import {
+  clockLabel,
+  untilLabel,
+  type LogKind,
+  type ScreenKey,
+  type TummyStore,
+} from "./store";
 import { AssistantHint } from "./assistant";
 import { cn } from "@/lib/utils";
 
@@ -54,13 +60,6 @@ function useTick() {
   }, []);
 }
 
-function untilLabel(mins: number) {
-  if (mins >= 60) {
-    const h = Math.floor(mins / 60);
-    return `${h} hr ${mins % 60} min`;
-  }
-  return `${mins} min`;
-}
 
 const HOME_LOGS: {
   k: ScreenKey;
