@@ -722,7 +722,6 @@ export function SeveritySheet({
 
 const TOTAL = 120; // 2 minutes
 
-const SEV_LABELS = ["very mild", "mild", "moderate", "strong", "very strong"];
 
 export function RecordingScreen({ store }: { store: TummyStore }) {
   const [left, setLeft] = useState(TOTAL);
