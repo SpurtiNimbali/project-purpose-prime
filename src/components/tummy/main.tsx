@@ -699,8 +699,10 @@ export function LogSleepScreen({ store }: { store: TummyStore }) {
           <Btn
             onClick={() => {
               store.addEntry("sleep", "Sleep", answers.join(" · "));
-              store.go("logHub");
+              store.markQuestions(new Date().getHours() < 15 ? "morning" : "night");
+              store.go("home");
             }}
+
           >
             Done
           </Btn>
