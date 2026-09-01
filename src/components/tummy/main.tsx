@@ -76,11 +76,26 @@ const HOME_LOGS: {
 
 export function HomeScreen({ store }: { store: TummyStore }) {
   useTick();
-  const done = store.sessions.filter((s) => s.done).length;
   const task = store.nextTask;
   const hour = new Date().getHours();
-  const recent = store.entries.slice(-3).reverse();
   const due = task.state === "due";
+  const doneCount = store.plan.filter((p) => p.done).length;
+
+  const TaskIcon =
+    task.kind === "recording"
+      ? IconMic
+      : task.kind === "meal"
+        ? IconBowl
+        : task.kind === "questions"
+          ? IconList
+          : task.kind === "done"
+            ? IconCheck
+            : IconClock;
+
+  const startTask = () => {
+    if (task.itemId) store.startItem(task.itemId);
+    store.go(task.screen);
+  };
 
   return (
     <Screen>
@@ -96,7 +111,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             </h1>
           </div>
           <span className="shrink-0 rounded-full bg-mint-soft px-3 py-2 text-[15px] font-extrabold text-teal">
-            {done}/4
+            {doneCount}/{store.plan.length}
           </span>
         </div>
       </div>
@@ -116,15 +131,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 due ? "bg-surface/15" : "bg-mint-soft text-teal",
               )}
             >
-              {task.kind === "recording" ? (
-                <IconMic width={26} height={26} />
-              ) : task.kind === "meal" ? (
-                <IconCamera width={26} height={26} />
-              ) : task.kind === "questions" ? (
-                <IconList width={26} height={26} />
-              ) : (
-                <IconClock width={26} height={26} />
-              )}
+              <TaskIcon width={26} height={26} />
             </span>
             <div className="min-w-0 flex-1">
               <p
@@ -174,7 +181,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           ) : null}
 
           <button
-            onClick={() => store.go(task.screen)}
+            onClick={startTask}
             className={cn(
               "mt-4 flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl text-[18px] font-extrabold active:scale-[0.99]",
               due ? "bg-surface text-teal" : "bg-teal text-surface",
@@ -184,7 +191,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           </button>
         </div>
 
-        {/* day rail */}
+        {/* day rail — recordings, meals and question blocks */}
         <div className="mt-5 rounded-3xl border border-line bg-surface px-4 py-4">
           <div className="flex items-end justify-between gap-3">
             <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
@@ -198,35 +205,42 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             </button>
           </div>
           <div className="mt-3 flex items-start">
-            {store.sessions.map((s, i) => (
-              <button
-                key={s.id}
-                onClick={() => store.go("sessionHub")}
-                className="relative flex min-w-0 flex-1 flex-col items-center gap-1.5"
-              >
-                {i > 0 ? (
+            {store.plan.map((p, i) => {
+              const RailIcon =
+                p.kind === "recording" ? IconMic : p.kind === "meal" ? IconBowl : IconList;
+              const current = task.itemId === p.id;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => store.go("sessionHub")}
+                  className="relative flex min-w-0 flex-1 flex-col items-center gap-1.5"
+                >
+                  {i > 0 ? (
+                    <span
+                      className={cn(
+                        "absolute left-[-50%] top-[13px] h-[3px] w-full",
+                        p.done || store.plan[i - 1].done ? "bg-teal" : "bg-line",
+                      )}
+                    />
+                  ) : null}
                   <span
                     className={cn(
-                      "absolute left-[-50%] top-[9px] h-[3px] w-full",
-                      s.done || store.sessions[i - 1].done ? "bg-teal" : "bg-line",
+                      "relative z-10 flex h-[28px] w-[28px] items-center justify-center rounded-full border-2",
+                      p.done
+                        ? "border-teal bg-teal text-surface"
+                        : current
+                          ? "border-teal bg-surface text-teal"
+                          : "border-line bg-surface text-pine-soft",
                     )}
-                  />
-                ) : null}
-                <span
-                  className={cn(
-                    "relative z-10 h-[20px] w-[20px] rounded-full border-[3px]",
-                    s.done
-                      ? "border-teal bg-teal"
-                      : task.sessionId === s.id
-                        ? "border-teal bg-surface"
-                        : "border-line bg-surface",
-                  )}
-                />
-                <span className="w-full truncate text-center text-[13px] font-bold text-pine-soft">
-                  {clockLabel(s.at)}
-                </span>
-              </button>
-            ))}
+                  >
+                    <RailIcon width={15} height={15} />
+                  </span>
+                  <span className="w-full truncate text-center text-[12px] font-bold text-pine-soft">
+                    {clockLabel(p.at).replace(" ", "")}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -268,46 +282,11 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             })}
           </div>
         </div>
-
-        {/* logged today */}
-        <div className="mt-5 border-t border-line pt-5">
-          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-            Logged today
-          </p>
-          {recent.length ? (
-            <div className="mt-2 space-y-2">
-              {recent.map((e) => (
-                <div
-                  key={e.id}
-                  className="flex min-h-[60px] items-center gap-3 rounded-2xl border border-line bg-surface px-4"
-                >
-                  <span className="shrink-0 text-teal">
-                    <IconCheck width={20} height={20} />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[16px] font-extrabold text-pine">
-                      {e.label}
-                    </span>
-                    {e.detail ? (
-                      <span className="block truncate text-[15px] font-semibold text-pine-soft">
-                        {e.detail}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="shrink-0 text-[15px] font-bold text-pine-soft">{e.time}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-2 rounded-2xl border border-dashed border-line px-4 py-5 text-center text-[16px] font-semibold text-pine-soft">
-              Nothing logged yet today.
-            </p>
-          )}
-        </div>
       </ScreenBody>
     </Screen>
   );
 }
+
 
 /* ---------------- logging hub ---------------- */
 
