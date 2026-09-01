@@ -802,7 +802,20 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
       </ScreenBody>
       {done ? (
         <StickyFooter>
-          <Btn onClick={() => store.go("uploadDone")}>Finish session</Btn>
+          <Btn
+            onClick={() => {
+              if (store.activeItemId) store.completeItem(store.activeItemId);
+              store.addEntry(
+                "recording",
+                "Gut sound recording",
+                store.track === "fasting" ? "Fasting" : "Post-meal",
+              );
+              store.go("uploadDone");
+            }}
+          >
+            Finish session
+          </Btn>
+
         </StickyFooter>
       ) : null}
     </Screen>
