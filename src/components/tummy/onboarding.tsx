@@ -25,7 +25,9 @@ import {
   IconSunset,
   IconMoon,
 } from "./icons";
+import { AbdomenGuide, RecordTimer, SymptomGrid, SeveritySheet } from "./recording";
 import type { TummyStore } from "./store";
+
 import { cn } from "@/lib/utils";
 
 /* ---------------- welcome ---------------- */
