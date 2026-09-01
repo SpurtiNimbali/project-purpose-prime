@@ -270,7 +270,7 @@ export function WhichMealScreen({ store }: { store: TummyStore }) {
   const meals = [
     { k: "breakfast", label: "Breakfast", Icon: IconSun },
     { k: "lunch", label: "Lunch", Icon: IconBowl },
-    { k: "dinner", label: "Dinner", Icon: IconSunset },
+    { k: "dinner", label: "Dinner", Icon: IconClock },
   ] as const;
   return (
     <Screen>
