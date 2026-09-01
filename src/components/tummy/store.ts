@@ -52,6 +52,7 @@ export type PlanItem = {
   /** minutes from midnight */
   at: number;
   done: boolean;
+  missed?: boolean;
   window: string;
   /** recordings only */
   fasting?: boolean;
@@ -116,6 +117,7 @@ export type TummyStore = {
   activeItemId: string | null;
   startItem: (id: string) => void;
   completeItem: (id: string) => void;
+  missItem: (id: string) => void;
   completeSession: (id: string) => void;
   day: number;
   entries: LogEntry[];
@@ -414,6 +416,22 @@ export function useTummyStore(): TummyStore {
     });
   }, []);
 
+  const missItem = useCallback((id: string) => {
+    setPlan((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, done: true, missed: true } : p)),
+    );
+    setEntries((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}-miss`,
+        kind: "recording",
+        label: "Recording missed",
+        detail: "Marked as missed",
+        time: nowLabel(),
+      },
+    ]);
+  }, []);
+
   const startItem = useCallback(
     (id: string) => {
       setActiveItemId(id);
@@ -454,6 +472,7 @@ export function useTummyStore(): TummyStore {
     activeItemId,
     startItem,
     completeItem,
+    missItem,
     completeSession: completeItem,
     day: 3,
     entries,
