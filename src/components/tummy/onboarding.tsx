@@ -678,97 +678,223 @@ export function PracticeScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- practice part 2: dry run recording ---------------- */
 
-const COACH_STEPS = [
-  "Do not disturb stays on and you shouldn't leave this screen while recording.",
-  "The time remaining is always shown here, inside the circle.",
-  "Feel something? Tap the symptom, then pick how strong it is. Buttons are up top, away from the microphone.",
-  "You can always finish early if you need to. Nothing breaks.",
-];
+type Coach = { id: string; text: string; cta: string };
 
 export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const TOTAL = 45;
+  const [stage, setStage] = useState<"case" | "position" | "record">("case");
   const [left, setLeft] = useState(TOTAL);
-  const [coach, setCoach] = useState(0);
+  const [marks, setMarks] = useState<{ key: string; label: string; severity: number }[]>([]);
+  const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [seen, setSeen] = useState<string[]>([]);
+  const [coach, setCoach] = useState<Coach | null>(null);
 
+  const show = (c: Coach) => {
+    setSeen((s) => (s.includes(c.id) ? s : [...s, c.id]));
+    setCoach(c);
+  };
+  const notSeen = (id: string) => !seen.includes(id);
+
+  /* the clock only runs while nothing is being explained */
   useEffect(() => {
-    if (coach < COACH_STEPS.length) return;
+    if (stage !== "record" || coach || pending) return;
     const t = setInterval(() => setLeft((l) => (l > 0 ? l - 1 : 0)), 1000);
     return () => clearInterval(t);
-  }, [coach]);
+  }, [stage, coach, pending]);
 
-  const mmss = `${String(Math.floor(left / 60)).padStart(2, "0")}:${String(left % 60).padStart(2, "0")}`;
-  const coaching = coach < COACH_STEPS.length;
+  /* incremental coaching, revealed as the run unfolds */
+  useEffect(() => {
+    if (stage !== "record" || coach || pending) return;
+    const elapsed = TOTAL - left;
+    if (notSeen("dnd")) {
+      show({
+        id: "dnd",
+        text: "You're recording now. Do not disturb is on for this session only, and it switches off the moment the recording ends.",
+        cta: "Got it",
+      });
+    } else if (elapsed >= 4 && notSeen("timer")) {
+      show({
+        id: "timer",
+        text: "The time left is always in the middle of the ring. The ring fills as the recording runs, so you can see progress at a glance.",
+        cta: "Makes sense",
+      });
+    } else if (elapsed >= 9 && notSeen("symptom")) {
+      show({
+        id: "symptom",
+        text: "Feel a gurgle, a cramp, anything? Tap its icon up top — try one now. The buttons sit away from the microphone end.",
+        cta: "Let me try",
+      });
+    } else if (left <= 15 && left > 0 && notSeen("timeleft")) {
+      show({
+        id: "timeleft",
+        text: "Under fifteen seconds left. When it hits zero the recording saves itself and a few short questions follow.",
+        cta: "Okay",
+      });
+    }
+  }, [stage, left, coach, pending, seen]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 1800);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const counts = marks.reduce<Record<string, number>>((acc, m) => {
+    acc[m.key] = (acc[m.key] ?? 0) + 1;
+    return acc;
+  }, {});
   const finished = left === 0;
 
+  const banner = (
+    <div className="shrink-0 px-4 pt-3">
+      <div className="flex items-center gap-2 rounded-2xl bg-surface/10 px-4 py-3">
+        <span className="text-mint">
+          <IconLock width={20} height={20} />
+        </span>
+        <p className="flex-1 text-[15px] font-extrabold text-surface">
+          Dry run · nothing is uploaded
+        </p>
+      </div>
+    </div>
+  );
+
+  /* stage 1 — case off, exactly like the real thing */
+  if (stage === "case") {
+    return (
+      <Screen dark className="relative">
+        <TopBar
+          title="Practice recording"
+          onBack={store.back}
+          dark
+          step="Step 9 of 9 · part 2 of 2"
+        />
+        {banner}
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center">
+          <span className="flex h-[132px] w-[132px] items-center justify-center rounded-full bg-surface/10 text-mint">
+            <IconPhone width={72} height={72} />
+          </span>
+          <h2 className="mt-5 text-[24px] font-extrabold leading-tight text-surface">
+            Take your phone case off
+          </h2>
+          <p className="mt-2 text-[16px] font-semibold leading-snug text-mint">
+            Every real recording starts here. Bare phone against bare skin — a case holds the
+            microphone away from you.
+          </p>
+        </div>
+        <div className="shrink-0 px-5 pb-7">
+          <Btn onClick={() => setStage("position")}>My case is off</Btn>
+        </div>
+      </Screen>
+    );
+  }
+
+  /* stage 2 — positioning guide, exactly like the real thing */
+  if (stage === "position") {
+    return (
+      <Screen dark className="relative">
+        <TopBar title="Positioning guide" onBack={() => setStage("case")} dark step="Practice" />
+        {banner}
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 pt-2">
+          <AbdomenGuide height={220} />
+          <p className="text-[17px] font-extrabold leading-snug text-surface">
+            Lift your shirt and put the bottom of the phone 9 cm below and to the right of your
+            belly button, flat on bare skin.
+          </p>
+          <p className="mt-2 text-[15px] font-semibold leading-snug text-mint">
+            Microphone end onto the skin. Sit upright, breathe normally, no talking.
+          </p>
+        </div>
+        <div className="shrink-0 px-5 pb-7 pt-3">
+          <Btn onClick={() => setStage("record")}>I'm in position</Btn>
+        </div>
+      </Screen>
+    );
+  }
+
+  /* stage 3 — the run itself, identical UI to a real recording */
   return (
     <Screen dark className="relative">
-      <TopBar title="Practice recording" onBack={store.back} dark step="Step 9 of 9 · part 2 of 2" />
+      {banner}
 
-      <div className="shrink-0 px-5">
-        <div className="flex items-center gap-2 rounded-2xl bg-surface/10 px-4 py-3">
-          <span className="text-mint">
-            <IconLock width={20} height={20} />
-          </span>
-          <p className="flex-1 text-[15px] font-extrabold text-surface">
-            Dry run · nothing is uploaded
-          </p>
-        </div>
-      </div>
-
-      <div className="shrink-0 px-5 pt-4">
-        <div className="grid grid-cols-3 gap-2">
-          {["Gurgle", "Bloating", "Pain"].map((s) => (
-            <div
-              key={s}
-              className="flex h-[68px] items-center justify-center rounded-2xl border-2 border-surface/20 bg-surface/10 text-[15px] font-extrabold text-surface"
-            >
-              {s}
-            </div>
-          ))}
-        </div>
-      </div>
+      <SymptomGrid
+        counts={counts}
+        onPick={(key, label) => setPending({ key, label, at: TOTAL - left })}
+      />
 
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
-        <div className="flex h-[190px] w-[190px] flex-col items-center justify-center rounded-full border-[10px] border-mint/40">
-          <p className="text-[44px] font-extrabold leading-none tabular-nums text-surface">
-            {mmss}
-          </p>
-          <p className="mt-1 text-[13px] font-extrabold uppercase tracking-[0.14em] text-mint">
-            remaining
-          </p>
-        </div>
+        <RecordTimer left={left} total={TOTAL} />
+        <p className="mt-5 text-[16px] font-bold text-mint">Keep still until the ring empties</p>
+        <p className="mt-1 text-[15px] font-bold text-surface/70">
+          {marks.length} symptom {marks.length === 1 ? "mark" : "marks"} recorded
+        </p>
       </div>
 
       <div className="shrink-0 px-5 pb-7">
-        <Btn variant="secondary" onClick={() => setLeft(0)} disabled={coaching || finished}>
+        <Btn variant="secondary" onClick={() => setLeft(0)} disabled={finished}>
           {finished ? "Practice complete" : "Finish early"}
         </Btn>
       </div>
 
-      {coaching ? (
-        <div className="absolute inset-0 z-20 flex flex-col justify-end bg-pine/70 px-5 pb-10 backdrop-blur-md">
+      {pending ? (
+        <>
+          <SeveritySheet
+            pending={pending}
+            onCancel={() => setPending(null)}
+            onPick={(n) => {
+              setMarks((m) => [...m, { key: pending.key, label: pending.label, severity: n }]);
+              setPending(null);
+              setToast(`${pending.label} saved at level ${n}`);
+            }}
+          />
+          {notSeen("severity") ? (
+            <div className="absolute inset-x-0 bottom-0 top-[300px] z-30 flex flex-col justify-end bg-pine/70 px-5 pb-10 backdrop-blur-md">
+              <div className="flex items-end gap-3">
+                <Mascot src={MASCOT.calm} size={78} />
+                <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[16px] font-semibold leading-snug text-pine">
+                  Now say how strong it is, 1 to 5. It saves the moment you tap a number — no save
+                  button, and the time is stamped for you.
+                </p>
+              </div>
+              <div className="mt-4">
+                <Btn onClick={() => setSeen((s) => [...s, "severity"])}>Got it</Btn>
+              </div>
+            </div>
+          ) : null}
+        </>
+      ) : null}
+
+      {toast ? (
+        <div className="pointer-events-none absolute inset-x-5 top-[360px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
+          {toast}
+        </div>
+      ) : null}
+
+      {coach ? (
+        <div className="absolute inset-0 z-40 flex flex-col justify-end bg-pine/70 px-5 pb-10 backdrop-blur-md">
           <div className="flex items-end gap-3">
             <Mascot src={MASCOT.calm} size={84} />
             <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[17px] font-semibold leading-snug text-pine">
-              {COACH_STEPS[coach]}
+              {coach.text}
             </p>
           </div>
           <div className="mt-5">
-            <Btn onClick={() => setCoach((c) => c + 1)}>
-              {coach === COACH_STEPS.length - 1 ? "Start the practice run" : "Next"}
-            </Btn>
+            <Btn onClick={() => setCoach(null)}>{coach.cta}</Btn>
           </div>
         </div>
       ) : null}
 
       {finished ? (
-        <div className="absolute inset-0 z-20 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
+        <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
           <div className="rounded-[28px] bg-surface p-6 text-center">
             <Mascot src={MASCOT.cheer} size={140} className="mx-auto" />
             <h2 className="mt-3 text-[24px] font-extrabold text-pine">Successful session</h2>
             <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
-              After a real recording you'll be asked a few short questions. That's all there is to
-              it — you're set.
+              {marks.length > 0
+                ? `You logged ${marks.length} symptom ${marks.length === 1 ? "mark" : "marks"}. `
+                : ""}
+              After a real recording you'll be asked a few short questions. That's all there is to it
+              — you're set.
             </p>
             <div className="mt-5">
               <Btn onClick={() => store.go("onboardDone")}>Continue</Btn>
@@ -779,6 +905,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
     </Screen>
   );
 }
+
 
 
 /* ---------------- daily schedule ---------------- */
