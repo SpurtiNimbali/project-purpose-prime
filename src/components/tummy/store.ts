@@ -43,17 +43,27 @@ export type Meal = "breakfast" | "lunch" | "dinner";
 
 export type SymptomMark = { key: string; label: string; at: number; severity: number };
 
-export type Session = {
+export type PlanKind = "recording" | "meal" | "questions";
+
+export type PlanItem = {
   id: string;
+  kind: PlanKind;
   label: string;
-  done: boolean;
-  /** minutes from midnight for the scheduled window */
+  /** minutes from midnight */
   at: number;
+  done: boolean;
   window: string;
+  /** recordings only */
+  fasting?: boolean;
+  /** meals only */
+  meal?: Meal;
 };
 
+/** Kept for older call sites — recordings only. */
+export type Session = PlanItem;
+
 export type NextTask = {
-  kind: "recording" | "waiting" | "meal" | "questions";
+  kind: "recording" | "waiting" | "meal" | "questions" | "done";
   tag: string;
   title: string;
   sub: string;
@@ -62,8 +72,9 @@ export type NextTask = {
   screen: ScreenKey;
   state: "due" | "soon" | "clear";
   minsUntil: number | null;
+  itemId?: string;
   sessionId?: string;
-
+  fasting?: boolean;
 };
 
 export type LogKind =
@@ -100,7 +111,11 @@ export type TummyStore = {
   marks: SymptomMark[];
   addMark: (m: SymptomMark) => void;
   resetMarks: () => void;
-  sessions: Session[];
+  plan: PlanItem[];
+  sessions: PlanItem[];
+  activeItemId: string | null;
+  startItem: (id: string) => void;
+  completeItem: (id: string) => void;
   completeSession: (id: string) => void;
   day: number;
   entries: LogEntry[];
@@ -129,150 +144,214 @@ export function minutesNow() {
   return d.getHours() * 60 + d.getMinutes();
 }
 
-const INITIAL_SESSIONS: Session[] = [
+export function untilLabel(mins: number) {
+  if (mins <= 0) return "now";
+  if (mins >= 60) {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m ? `${h} hr ${m} min` : `${h} hr`;
+  }
+  return `${mins} min`;
+}
+
+const WATER_NOTE =
+  "No food, snacks or drinks other than water for the 3 hours after your meal. If you want water, have it in the 5 minutes right after a recording.";
+
+const INITIAL_PLAN: PlanItem[] = [
   {
     id: "fasting",
-    label: "Fasting (morning)",
-    done: true,
+    kind: "recording",
+    label: "Fasting recording",
     at: 7 * 60 + 30,
+    done: true,
     window: "6:30 – 8:30 am",
+    fasting: true,
+  },
+  {
+    id: "breakfast",
+    kind: "meal",
+    label: "Breakfast",
+    at: 8 * 60 + 5,
+    done: true,
+    window: "After the fasting recording",
+    meal: "breakfast",
   },
   {
     id: "m30",
+    kind: "recording",
     label: "Breakfast + 30 min",
-    done: true,
     at: 8 * 60 + 35,
+    done: true,
     window: "30 min after breakfast",
   },
   {
     id: "m90",
+    kind: "recording",
     label: "Breakfast + 90 min",
-    done: false,
     at: 9 * 60 + 35,
+    done: false,
     window: "90 min after breakfast",
   },
   {
     id: "m180",
+    kind: "recording",
     label: "Breakfast + 3 hrs",
-    done: false,
     at: 11 * 60 + 5,
+    done: false,
     window: "3 hrs after breakfast",
+  },
+  {
+    id: "qMorning",
+    kind: "questions",
+    label: "Morning questions",
+    at: 11 * 60 + 20,
+    done: false,
+    window: "After the morning recordings",
+  },
+  {
+    id: "lunch",
+    kind: "meal",
+    label: "Lunch",
+    at: 13 * 60,
+    done: false,
+    window: "Whenever you eat",
+    meal: "lunch",
+  },
+  {
+    id: "dinner",
+    kind: "meal",
+    label: "Dinner",
+    at: 19 * 60,
+    done: false,
+    window: "Whenever you eat",
+    meal: "dinner",
+  },
+  {
+    id: "qNight",
+    kind: "questions",
+    label: "End of day questions",
+    at: 21 * 60,
+    done: false,
+    window: "Before bed",
   },
 ];
 
 /** Single source of truth for "what should I do right now". */
-export function computeNextTask(
-  sessions: Session[],
-  entries: LogEntry[],
-  questions: { morning: boolean; night: boolean } = { morning: false, night: false },
-): NextTask {
+export function computeNextTask(plan: PlanItem[]): NextTask {
   const now = minutesNow();
-  const mealLogged = entries.some((e) => e.kind === "meal");
-  const fasting = sessions.find((s) => s.id === "fasting");
-  const pending = sessions.filter((s) => !s.done);
-  const upcoming = pending[0];
+  const item = plan.find((p) => !p.done);
 
-  // 1 — fasting recording comes first, before anything else
-  if (fasting && !fasting.done) {
+  if (!item) {
     return {
-      kind: "recording",
-      tag: "Gut sound recording",
-      title: "Fasting recording",
-      sub: "Before any food, drink or activity. Case off, quiet room, sit still.",
-      cta: "Start recording",
-      screen: "caseReminder",
-      state: "due",
-      minsUntil: null,
-      sessionId: "fasting",
-    };
-  }
-
-  // 2 — morning questions, right after the fasting recording
-  if (!questions.morning) {
-    return {
-      kind: "questions",
-      tag: "Morning questions",
-      title: "A few questions about your morning",
-      sub: "Sleep, symptoms and toilet habits — about two minutes.",
-      cta: "Answer questions",
-      screen: "logSleep",
-      state: "due",
+      kind: "done",
+      tag: "All done",
+      title: "Everything is done for today",
+      sub: "Nothing more until tomorrow morning's fasting recording.",
+      cta: "Open today's log",
+      screen: "logHub",
+      state: "clear",
       minsUntil: null,
     };
   }
 
-  // 3 — the anchor meal the post-meal recordings run from
-  if (!mealLogged) {
-    return {
-      kind: "meal",
-      tag: "Meal logging",
-      title: "Log the meal your timers run from",
-      sub: "Type it or record it — the three recordings are timed from this meal.",
-      cta: "Log the meal",
-      screen: "logMeal",
-      state: "due",
-      minsUntil: null,
-    };
-  }
+  const mins = item.at - now;
+  const due = mins <= 10;
 
-  if (upcoming) {
-    const mins = upcoming.at - now;
-    if (mins <= 10) {
+  if (item.kind === "recording") {
+    if (due) {
       return {
         kind: "recording",
         tag: "Gut sound recording",
-        title: upcoming.label,
-        sub:
-          mins < -30
+        title: item.label,
+        sub: item.fasting
+          ? "Before any food, drink or activity. Case off, quiet room, sit still."
+          : mins < -30
             ? "This window is closing — record now or mark it missed."
-            : "Case off, quiet room, sit still.",
+            : "Case off, quiet room, sit still. Two minutes.",
         cta: "Start recording",
         screen: "caseReminder",
         state: "due",
         minsUntil: null,
-        sessionId: upcoming.id,
+        itemId: item.id,
+        sessionId: item.id,
+        fasting: item.fasting,
       };
     }
     return {
       kind: "waiting",
       tag: "Waiting",
-      title: upcoming.label,
-      sub: `You're clear until ${clockLabel(upcoming.at)}.`,
-      note: "No food, snacks or drinks other than water for the 3 hours after your meal. If you want water, have it in the 5 minutes right after a recording.",
-      cta: "Open today's recordings",
+      title: item.label,
+      sub: `You're clear until ${clockLabel(item.at)}.`,
+      note: WATER_NOTE,
+      cta: "Open today's plan",
       screen: "sessionHub",
       state: "soon",
       minsUntil: mins,
-      sessionId: upcoming.id,
+      itemId: item.id,
+      sessionId: item.id,
+      fasting: item.fasting,
     };
   }
 
-  // 4 — end of day questions
-  if (!questions.night) {
+  if (item.kind === "meal") {
+    if (due) {
+      return {
+        kind: "meal",
+        tag: "Meal logging",
+        title: `Log your ${item.label.toLowerCase()}`,
+        sub:
+          item.meal === "breakfast"
+            ? "Type it or record it — the three recordings are timed from this meal."
+            : "Type it or record it. A photo helps but isn't required.",
+        cta: `Log ${item.label.toLowerCase()}`,
+        screen: "logMeal",
+        state: "due",
+        minsUntil: null,
+        itemId: item.id,
+      };
+    }
+    return {
+      kind: "waiting",
+      tag: "Waiting",
+      title: item.label,
+      sub: `Nothing due until around ${clockLabel(item.at)}.`,
+      cta: "Open today's plan",
+      screen: "sessionHub",
+      state: "soon",
+      minsUntil: mins,
+      itemId: item.id,
+    };
+  }
+
+  // questions
+  if (due) {
     return {
       kind: "questions",
-      tag: "Evening questions",
-      title: "A few questions about your day",
+      tag: item.id === "qNight" ? "Evening questions" : "Morning questions",
+      title:
+        item.id === "qNight"
+          ? "A few questions about your day"
+          : "A few questions about your morning",
       sub: "Sleep, symptoms and toilet habits — about two minutes.",
       cta: "Answer questions",
       screen: "logSleep",
-      state: now >= 17 * 60 ? "due" : "soon",
-      minsUntil: now >= 17 * 60 ? null : 17 * 60 - now,
+      state: "due",
+      minsUntil: null,
+      itemId: item.id,
     };
   }
-
   return {
     kind: "waiting",
-    tag: "All caught up",
-    title: "Nothing due right now",
-    sub: "Everything for today is recorded and logged.",
-    cta: "Log something anyway",
-    screen: "logHub",
-    state: "clear",
-    minsUntil: null,
+    tag: "Waiting",
+    title: item.label,
+    sub: `Nothing due until around ${clockLabel(item.at)}.`,
+    cta: "Open today's plan",
+    screen: "sessionHub",
+    state: "soon",
+    minsUntil: mins,
+    itemId: item.id,
   };
 }
-
 
 export function useTummyStore(): TummyStore {
   const [stack, setStack] = useState<ScreenKey[]>(["welcome"]);
@@ -283,20 +362,28 @@ export function useTummyStore(): TummyStore {
   const [side, setSide] = useState<"right" | "left">("right");
   const [region, setRegion] = useState<"upper" | "lower">("lower");
   const [marks, setMarks] = useState<SymptomMark[]>([]);
-  const [sessions, setSessions] = useState<Session[]>(INITIAL_SESSIONS);
+  const [plan, setPlan] = useState<PlanItem[]>(INITIAL_PLAN);
+  const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const [entries, setEntries] = useState<LogEntry[]>([
     { id: "seed-1", kind: "sleep", label: "Sleep", detail: "7 hrs · slept well", time: "7:10 am" },
     {
       id: "seed-2",
       kind: "recording",
       label: "Gut sound recording",
-      detail: "Fasting · both sides",
+      detail: "Fasting",
       time: "7:35 am",
     },
     { id: "seed-3", kind: "meal", label: "Breakfast", detail: "Oats and berries", time: "8:05 am" },
+    {
+      id: "seed-4",
+      kind: "recording",
+      label: "Gut sound recording",
+      detail: "Breakfast + 30 min",
+      time: "8:35 am",
+    },
   ]);
   const [chatOpen, setChatOpen] = useState(false);
-  const [questions, setQuestions] = useState({ morning: true, night: false });
+  const [questions, setQuestions] = useState({ morning: false, night: false });
 
   const go = useCallback((s: ScreenKey) => {
     setStack((prev) => [...prev, s]);
@@ -307,13 +394,28 @@ export function useTummyStore(): TummyStore {
     [],
   );
 
-  const nextTask = computeNextTask(sessions, entries, questions);
+  const completeItem = useCallback((id: string) => {
+    setPlan((prev) => prev.map((p) => (p.id === id ? { ...p, done: true } : p)));
+  }, []);
+
+  const startItem = useCallback(
+    (id: string) => {
+      setActiveItemId(id);
+      const item = plan.find((p) => p.id === id);
+      if (item?.kind === "recording") setTrack(item.fasting ? "fasting" : "postMeal");
+    },
+    [plan],
+  );
+
+  const nextTask = computeNextTask(plan);
 
   return {
     nextTask,
     questions,
-    markQuestions: (when) => setQuestions((q) => ({ ...q, [when]: true })),
-
+    markQuestions: (when) => {
+      setQuestions((q) => ({ ...q, [when]: true }));
+      completeItem(when === "morning" ? "qMorning" : "qNight");
+    },
 
     screen: stack[stack.length - 1],
     go,
@@ -331,9 +433,12 @@ export function useTummyStore(): TummyStore {
     marks,
     addMark: (m) => setMarks((prev) => [...prev, m]),
     resetMarks: () => setMarks([]),
-    sessions,
-    completeSession: (id) =>
-      setSessions((prev) => prev.map((s) => (s.id === id ? { ...s, done: true } : s))),
+    plan,
+    sessions: plan.filter((p) => p.kind === "recording"),
+    activeItemId,
+    startItem,
+    completeItem,
+    completeSession: completeItem,
     day: 3,
     entries,
     addEntry: (kind, label, detail) =>
