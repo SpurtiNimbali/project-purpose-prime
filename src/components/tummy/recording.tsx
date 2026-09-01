@@ -544,7 +544,7 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- recording ---------------- */
 
-const SYMPTOMS = [
+export const SYMPTOMS = [
   { key: "gurgle", label: "Gurgle", Icon: IconWave },
   { key: "bloat", label: "Bloating", Icon: IconBalloon },
   { key: "pain", label: "Pain", Icon: IconBolt },
@@ -553,7 +553,175 @@ const SYMPTOMS = [
   { key: "gas", label: "Gas", Icon: IconWind },
 ];
 
+export const SEV_LABELS = ["very mild", "mild", "moderate", "strong", "very strong"];
+
+/** Big, legible countdown ring shared by the real recording and the dry run. */
+export function RecordTimer({ left, total }: { left: number; total: number }) {
+  const mm = String(Math.floor(left / 60)).padStart(2, "0");
+  const ss = String(left % 60).padStart(2, "0");
+  const pct = 1 - left / total;
+  const R = 92;
+  const C = 2 * Math.PI * R;
+  const ticks = Array.from({ length: 60 }, (_, i) => i);
+
+  return (
+    <div className="relative h-[224px] w-[224px]">
+      <svg width="224" height="224" viewBox="0 0 224 224" className="absolute inset-0">
+        <circle cx="112" cy="112" r="104" fill="rgba(143,201,172,0.06)" />
+        {ticks.map((i) => {
+          const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
+          const on = i / 60 <= pct;
+          const r1 = 106;
+          const r2 = i % 5 === 0 ? 97 : 101;
+          return (
+            <line
+              key={i}
+              x1={112 + Math.cos(a) * r1}
+              y1={112 + Math.sin(a) * r1}
+              x2={112 + Math.cos(a) * r2}
+              y2={112 + Math.sin(a) * r2}
+              stroke={on ? "#8FC9AC" : "rgba(255,255,255,0.16)"}
+              strokeWidth={i % 5 === 0 ? 2.4 : 1.4}
+              strokeLinecap="round"
+            />
+          );
+        })}
+        <circle
+          cx="112"
+          cy="112"
+          r={R}
+          stroke="rgba(255,255,255,0.12)"
+          strokeWidth="8"
+          fill="none"
+        />
+        <circle
+          cx="112"
+          cy="112"
+          r={R}
+          stroke="#8FC9AC"
+          strokeWidth="8"
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={C}
+          strokeDashoffset={C * (1 - pct)}
+          transform="rotate(-90 112 112)"
+          style={{ transition: "stroke-dashoffset 1s linear" }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+        <span className="flex items-center gap-1.5 rounded-full bg-mint/15 px-3 py-1 text-mint">
+          <span className="h-[7px] w-[7px] animate-pulse rounded-full bg-mint" />
+          <span className="text-[12px] font-extrabold uppercase tracking-[0.16em]">recording</span>
+        </span>
+        <p className="mt-2 flex items-baseline justify-center text-surface tabular-nums">
+          <span className="text-[52px] font-extrabold leading-none tracking-tight">{mm}</span>
+          <span className="px-0.5 text-[40px] font-extrabold leading-none">:</span>
+          <span className="text-[52px] font-extrabold leading-none tracking-tight">{ss}</span>
+        </p>
+        <p className="mt-1.5 text-[13px] font-extrabold uppercase tracking-[0.16em] text-mint">
+          left of {Math.round(total / 60)} min
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function SymptomGrid({
+  counts,
+  onPick,
+  disabled,
+}: {
+  counts: Record<string, number>;
+  onPick: (key: string, label: string) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="shrink-0 px-4 pt-3">
+      <p className="mb-2 text-[15px] font-extrabold text-mint">
+        Feel something? Tap it — buttons are up here, away from the microphone.
+      </p>
+      <div className="grid grid-cols-3 gap-2">
+        {SYMPTOMS.map(({ key, label, Icon }) => (
+          <button
+            key={key}
+            disabled={disabled}
+            onClick={() => {
+              onPick(key, label);
+              if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(18);
+            }}
+            className="relative flex h-[76px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-surface/20 bg-surface/10 text-surface active:bg-mint active:text-pine"
+          >
+            <Icon width={26} height={26} />
+            <span className="text-[14px] font-extrabold">{label}</span>
+            {counts[key] ? (
+              <span className="absolute right-2 top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-mint px-1 text-[13px] font-extrabold text-pine">
+                {counts[key]}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function SeveritySheet({
+  pending,
+  onPick,
+  onCancel,
+}: {
+  pending: { key: string; label: string; at: number };
+  onPick: (n: number) => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="absolute inset-0 z-20 flex flex-col bg-pine/70 backdrop-blur-sm">
+      <div className="rounded-b-[32px] bg-pine px-5 pb-6 pt-14 ring-1 ring-surface/15">
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[22px] font-extrabold text-surface">{pending.label}</p>
+            <p className="text-[15px] font-bold text-mint">
+              At {String(Math.floor(pending.at / 60)).padStart(2, "0")}:
+              {String(pending.at % 60).padStart(2, "0")} · how strong is it?
+            </p>
+          </div>
+          <button
+            onClick={onCancel}
+            aria-label="Cancel"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface"
+          >
+            <IconX width={22} height={22} />
+          </button>
+        </div>
+        <div className="mt-4 flex gap-2">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              onClick={() => {
+                onPick(n);
+                if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(12);
+              }}
+              className="flex h-[72px] flex-1 flex-col items-center justify-center rounded-2xl border-2 border-surface/25 bg-surface/10 text-surface active:border-mint active:bg-mint active:text-pine"
+            >
+              <span className="text-[22px] font-extrabold leading-none">{n}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mt-2 flex justify-between text-[14px] font-bold text-mint">
+          <span>Very mild</span>
+          <span>Very strong</span>
+        </div>
+        <p className="mt-3 text-center text-[14px] font-bold text-surface/60">
+          Tap a number — it saves straight away.
+        </p>
+      </div>
+      <button className="flex-1" aria-label="Cancel" onClick={onCancel} />
+    </div>
+  );
+}
+
 const TOTAL = 120; // 2 minutes
+
 const SEV_LABELS = ["very mild", "mild", "moderate", "strong", "very strong"];
 
 export function RecordingScreen({ store }: { store: TummyStore }) {
