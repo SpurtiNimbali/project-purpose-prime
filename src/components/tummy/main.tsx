@@ -79,7 +79,6 @@ export function HomeScreen({ store }: { store: TummyStore }) {
   const done = store.sessions.filter((s) => s.done).length;
   const task = store.nextTask;
   const hour = new Date().getHours();
-  const eveningReady = hour >= 17;
   const recent = store.entries.slice(-3).reverse();
   const due = task.state === "due";
 
@@ -117,14 +116,14 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 due ? "bg-surface/15" : "bg-mint-soft text-teal",
               )}
             >
-              {task.tag.startsWith("Gut") ? (
+              {task.kind === "recording" ? (
                 <IconMic width={26} height={26} />
-              ) : task.tag === "Meal or snack" ? (
+              ) : task.kind === "meal" ? (
                 <IconCamera width={26} height={26} />
-              ) : task.tag === "Before bed" ? (
-                <IconMoon width={26} height={26} />
+              ) : task.kind === "questions" ? (
+                <IconList width={26} height={26} />
               ) : (
-                <IconCheck width={26} height={26} />
+                <IconClock width={26} height={26} />
               )}
             </span>
             <div className="min-w-0 flex-1">
@@ -148,6 +147,17 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           >
             {task.sub}
           </p>
+
+          {task.note ? (
+            <div className="mt-3 flex gap-3 rounded-2xl bg-amber-soft px-4 py-3">
+              <span className="shrink-0 text-teal">
+                <IconDroplet width={22} height={22} />
+              </span>
+              <p className="min-w-0 flex-1 text-[15px] font-semibold leading-snug text-pine">
+                {task.note}
+              </p>
+            </div>
+          ) : null}
 
           {task.minsUntil !== null ? (
             <div className="mt-4 flex items-center gap-3 rounded-2xl bg-mint-soft px-4 py-3 text-pine">
@@ -259,71 +269,39 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           </div>
         </div>
 
-        {/* before bed / recent */}
+        {/* logged today */}
         <div className="mt-5 border-t border-line pt-5">
-          {eveningReady ? (
-            <>
-              <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-                Before bed
-              </p>
-              <button
-                onClick={() => store.go("logSleep")}
-                className="mt-2 flex min-h-[80px] w-full items-center gap-4 rounded-3xl border border-line bg-surface px-5 text-left"
-              >
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
-                  <IconMoon width={26} height={26} />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[17px] font-extrabold text-pine">
-                    Complete your log and questions
+          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+            Logged today
+          </p>
+          {recent.length ? (
+            <div className="mt-2 space-y-2">
+              {recent.map((e) => (
+                <div
+                  key={e.id}
+                  className="flex min-h-[60px] items-center gap-3 rounded-2xl border border-line bg-surface px-4"
+                >
+                  <span className="shrink-0 text-teal">
+                    <IconCheck width={20} height={20} />
                   </span>
-                  <span className="block text-[15px] font-semibold text-pine-soft">Ready now</span>
-                </span>
-                <span className="shrink-0 text-teal">
-                  <IconArrowRight width={22} height={22} />
-                </span>
-              </button>
-            </>
-          ) : (
-            <>
-              <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-                Logged today
-              </p>
-              {recent.length ? (
-                <div className="mt-2 space-y-2">
-                  {recent.map((e) => (
-                    <div
-                      key={e.id}
-                      className="flex min-h-[60px] items-center gap-3 rounded-2xl border border-line bg-surface px-4"
-                    >
-                      <span className="shrink-0 text-teal">
-                        <IconCheck width={20} height={20} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[16px] font-extrabold text-pine">
+                      {e.label}
+                    </span>
+                    {e.detail ? (
+                      <span className="block truncate text-[15px] font-semibold text-pine-soft">
+                        {e.detail}
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[16px] font-extrabold text-pine">
-                          {e.label}
-                        </span>
-                        {e.detail ? (
-                          <span className="block truncate text-[15px] font-semibold text-pine-soft">
-                            {e.detail}
-                          </span>
-                        ) : null}
-                      </span>
-                      <span className="shrink-0 text-[15px] font-bold text-pine-soft">
-                        {e.time}
-                      </span>
-                    </div>
-                  ))}
+                    ) : null}
+                  </span>
+                  <span className="shrink-0 text-[15px] font-bold text-pine-soft">{e.time}</span>
                 </div>
-              ) : (
-                <p className="mt-2 rounded-2xl border border-dashed border-line px-4 py-5 text-center text-[16px] font-semibold text-pine-soft">
-                  Nothing logged yet today.
-                </p>
-              )}
-              <p className="mt-3 text-[15px] font-semibold text-pine-soft">
-                Your evening questions open at 5:00 pm.
-              </p>
-            </>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-2 rounded-2xl border border-dashed border-line px-4 py-5 text-center text-[16px] font-semibold text-pine-soft">
+              Nothing logged yet today.
+            </p>
           )}
         </div>
       </ScreenBody>
@@ -530,6 +508,8 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
   const [photo, setPhoto] = useState(false);
   const [which, setWhich] = useState("");
   const [desc, setDesc] = useState("");
+  const [mode, setMode] = useState<"type" | "voice">("type");
+  const [recorded, setRecorded] = useState(false);
   return (
     <Screen>
       <TopBar title="Log a meal" onBack={store.back} />
@@ -554,12 +534,56 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
               ))}
             </div>
           </Field>
-          <Field label="What was in it?" hint="Optional if you added a photo.">
-            <TextInput
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-              placeholder="Chicken salad and a roll"
-            />
+          <Field label="What was in it?" hint="Type it out, or just say it out loud.">
+            <div className="mb-2 flex rounded-2xl bg-surface p-1">
+              {(
+                [
+                  { k: "type", label: "Type it" },
+                  { k: "voice", label: "Record it" },
+                ] as const
+              ).map(({ k, label }) => (
+                <button
+                  key={k}
+                  onClick={() => setMode(k)}
+                  className={cn(
+                    "min-h-[52px] flex-1 rounded-xl text-[16px] font-extrabold",
+                    mode === k ? "bg-teal text-surface" : "text-pine-soft",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {mode === "type" ? (
+              <TextInput
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                placeholder="Chicken salad and a roll"
+              />
+            ) : (
+              <button
+                onClick={() => {
+                  setRecorded((v) => !v);
+                  setDesc(recorded ? "" : "Voice note · 12 sec");
+                }}
+                className={cn(
+                  "flex min-h-[96px] w-full items-center gap-4 rounded-2xl border-2 px-5 text-left",
+                  recorded ? "border-teal bg-mint-soft" : "border-dashed border-line bg-surface",
+                )}
+              >
+                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-teal text-surface">
+                  <IconMic width={26} height={26} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[17px] font-extrabold text-pine">
+                    {recorded ? "Voice note saved · 12 sec" : "Hold to describe your meal"}
+                  </span>
+                  <span className="block text-[15px] font-semibold text-pine-soft">
+                    {recorded ? "Tap to record again" : "We transcribe it for you"}
+                  </span>
+                </span>
+              </button>
+            )}
           </Field>
         </div>
       </ScreenBody>
