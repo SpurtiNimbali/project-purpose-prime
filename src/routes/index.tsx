@@ -9,11 +9,11 @@ import {
   StudyIntroScreen,
   VideoScreen,
   QuizScreen,
-  SurveyScreen,
   ProtocolIntroScreen,
   TechnicalSetupScreen,
   PermissionsScreen,
   PracticeScreen,
+  PracticeRunScreen,
   SchedulingScreen,
   OnboardDoneScreen,
 } from "@/components/tummy/onboarding";
@@ -61,18 +61,18 @@ export const Route = createFileRoute("/")({
 });
 
 const TAB_SCREENS: ScreenKey[] = ["home", "logHub", "progress", "profile"];
-const DARK_SCREENS: ScreenKey[] = ["positioning", "recording"];
+const DARK_SCREENS: ScreenKey[] = ["positioning", "recording", "practiceRun"];
 const ONBOARD_SCREENS: ScreenKey[] = [
   "welcome",
   "studyIntro",
   "subjectId",
-  "survey",
   "protocolIntro",
   "video",
   "quiz",
   "technicalSetup",
   "permissions",
   "practice",
+  "practiceRun",
   "scheduling",
   "onboardDone",
 ];
@@ -87,11 +87,11 @@ function TummyApp() {
     studyIntro: <StudyIntroScreen store={store} />,
     video: <VideoScreen store={store} />,
     quiz: <QuizScreen store={store} />,
-    survey: <SurveyScreen store={store} />,
     protocolIntro: <ProtocolIntroScreen store={store} />,
     technicalSetup: <TechnicalSetupScreen store={store} />,
     permissions: <PermissionsScreen store={store} />,
     practice: <PracticeScreen store={store} />,
+    practiceRun: <PracticeRunScreen store={store} />,
     scheduling: <SchedulingScreen store={store} />,
     onboardDone: <OnboardDoneScreen store={store} />,
     home: <HomeScreen store={store} />,

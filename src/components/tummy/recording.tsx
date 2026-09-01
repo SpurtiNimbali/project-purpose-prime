@@ -44,10 +44,10 @@ const PLAN: {
   offset?: 30 | 90 | 210;
   Icon: typeof IconSun;
 }[] = [
-  { id: "fasting", title: "Fasting", due: "7:30 am", track: "fasting", Icon: IconSun },
+  { id: "fasting", title: "Fasting recording", due: "7:30 am", track: "fasting", Icon: IconSun },
   {
     id: "m30",
-    title: "Meal + 30 min",
+    title: "Breakfast + 30 min",
     due: "9:05 am",
     track: "postMeal",
     offset: 30,
@@ -55,16 +55,16 @@ const PLAN: {
   },
   {
     id: "m90",
-    title: "Meal + 90 min",
+    title: "Breakfast + 90 min",
     due: "10:05 am",
     track: "postMeal",
     offset: 90,
     Icon: IconClock,
   },
   {
-    id: "m210",
-    title: "Meal + 3.5 hrs",
-    due: "12:05 pm",
+    id: "m180",
+    title: "Breakfast + 3 hrs",
+    due: "11:05 am",
     track: "postMeal",
     offset: 210,
     Icon: IconSunset,
@@ -193,7 +193,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                           {p.title}
                         </p>
                         <p className="truncate text-[15px] font-bold text-mint">
-                          {late ? "Window closing" : `Due ${p.due}`} · 8 min
+                          {late ? "Window closing" : `Due ${p.due}`} · 2 min
                         </p>
                       </div>
                     </div>
@@ -394,7 +394,7 @@ export function MealCaptureScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="blue" title="We'll set the three timers for you">
-            Once you save, reminders land at 30 minutes, 90 minutes and 3.5 hours from now.
+            Once you save, reminders land at 30 minutes, 90 minutes and 3 hours from now. Only water in between, taken right after a recording.
           </Note>
         </div>
       </ScreenBody>
@@ -447,9 +447,9 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- positioning ---------------- */
 
-function AbdomenGuide({ side, region }: { side: "right" | "left"; region: "upper" | "lower" }) {
-  const x = side === "right" ? 74 : 126;
-  const y = region === "upper" ? 96 : 132;
+function AbdomenGuide() {
+  const x = 74;
+  const y = 132;
   return (
     <svg
       viewBox="0 0 200 220"
@@ -501,68 +501,39 @@ function AbdomenGuide({ side, region }: { side: "right" | "left"; region: "upper
 }
 
 export function PositioningScreen({ store }: { store: TummyStore }) {
-  const sideLabel = store.side === "right" ? "RIGHT SIDE" : "LEFT SIDE";
   return (
     <Screen dark>
-      <TopBar title="Positioning guide" onBack={store.back} dark step={sideLabel} />
+      <TopBar title="Positioning guide" onBack={store.back} dark step="Placement" />
       <div className="flex-1 overflow-y-auto px-5 pb-6">
-        <AbdomenGuide side={store.side} region={store.region} />
+        <AbdomenGuide />
 
         <div className="mt-2 space-y-2">
           <p className="text-[18px] font-extrabold leading-snug text-surface">
-            Lift your shirt and place the microphone exactly 9 cm to the{" "}
-            {store.side === "right" ? "right" : "left"} of your belly button, perpendicular to your
-            skin.
+            Lift your shirt and place the bottom of the phone 9 cm below and to the right of your
+            belly button, flat against bare skin.
           </p>
           <p className="text-[16px] font-semibold leading-snug text-mint">
-            Bottom of the phone — the microphone side — pressed onto bare skin. Case off. Sit
-            upright and stay still.
+            Microphone end onto the skin. Case off. Sit upright, breathe normally and stay still —
+            the whole recording is two minutes.
           </p>
         </div>
 
-        <div className="mt-5 space-y-3">
-          <div>
-            <p className="mb-2 text-[15px] font-extrabold uppercase tracking-[0.1em] text-mint">
-              Side
-            </p>
-            <div className="flex gap-2">
-              {(["right", "left"] as const).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => store.setSide(s)}
-                  className={cn(
-                    "min-h-[56px] flex-1 rounded-2xl border-2 text-[16px] font-extrabold",
-                    store.side === s
-                      ? "border-mint bg-mint text-pine"
-                      : "border-surface/25 bg-surface/10 text-surface",
-                  )}
-                >
-                  {s === "right" ? "Right side" : "Left side"}
-                </button>
-              ))}
+        <div className="mt-5 space-y-2">
+          {[
+            "Case off, nothing between the phone and your skin",
+            "Quiet room, TV and fans off",
+            "Sitting upright, no talking",
+          ].map((t) => (
+            <div
+              key={t}
+              className="flex min-h-[56px] items-center gap-3 rounded-2xl bg-surface/10 px-4 text-surface"
+            >
+              <span className="shrink-0 text-mint">
+                <IconCheck width={20} height={20} />
+              </span>
+              <span className="min-w-0 flex-1 text-[16px] font-bold">{t}</span>
             </div>
-          </div>
-          <div>
-            <p className="mb-2 text-[15px] font-extrabold uppercase tracking-[0.1em] text-mint">
-              Position on the abdomen
-            </p>
-            <div className="flex gap-2">
-              {(["upper", "lower"] as const).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => store.setRegion(r)}
-                  className={cn(
-                    "min-h-[56px] flex-1 rounded-2xl border-2 text-[16px] font-extrabold",
-                    store.region === r
-                      ? "border-mint bg-mint text-pine"
-                      : "border-surface/25 bg-surface/10 text-surface",
-                  )}
-                >
-                  {r === "upper" ? "Upper" : "Lower"}
-                </button>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       </div>
       <div className="shrink-0 px-5 pb-7 pt-3">
@@ -583,7 +554,7 @@ const SYMPTOMS = [
   { key: "gas", label: "Gas", Icon: IconWind },
 ];
 
-const TOTAL = 480; // 8 minutes
+const TOTAL = 120; // 2 minutes
 const SEV_LABELS = ["very mild", "mild", "moderate", "strong", "very strong"];
 
 export function RecordingScreen({ store }: { store: TummyStore }) {
@@ -696,29 +667,16 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
             </p>
           </div>
         </div>
-        <p className="mt-5 text-[16px] font-bold text-mint">
-          {store.side === "right" ? "Right side" : "Left side"} · {store.region} abdomen
-        </p>
+        <p className="mt-5 text-[16px] font-bold text-mint">Keep still until the circle empties</p>
         <p className="mt-1 text-[15px] font-bold text-surface/70">
           {store.marks.length} symptom {store.marks.length === 1 ? "mark" : "marks"} recorded
         </p>
       </div>
 
       <div className="shrink-0 px-5 pb-7">
-        {store.side === "right" ? (
-          <Btn
-            variant="secondary"
-            onClick={() => {
-              store.setSide("left");
-              setLeft(TOTAL);
-              store.go("positioning");
-            }}
-          >
-            Finish right side, switch to left
-          </Btn>
-        ) : (
-          <Btn onClick={() => store.go("postMeta")}>Finish recording</Btn>
-        )}
+        <Btn variant="secondary" onClick={() => store.go("postMeta")}>
+          {left === 0 ? "Continue to the questions" : "Finish early"}
+        </Btn>
       </div>
 
       {/* severity picker — top sheet, saves on tap */}
@@ -785,7 +743,7 @@ type Turn = { from: "bot" | "you"; text: string };
 
 export function PostMetaScreen({ store }: { store: TummyStore }) {
   const morning = store.track === "fasting";
-  const questions = [
+  const questions: { q: string; options?: string[]; open?: boolean }[] = [
     {
       q: "Nicely done. Where were you for that recording?",
       options: ["Home", "Office", "Other — hotel or travel"],
@@ -806,6 +764,10 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
           },
         ]
       : []),
+    {
+      q: "Last one — in your own words, how did your stomach feel during those two minutes?",
+      open: true,
+    },
   ];
 
   const [step, setStep] = useState(0);
@@ -847,7 +809,7 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
 
   return (
     <Screen>
-      <TopBar title="A few quick details" onBack={store.back} />
+      <TopBar title="Post-recording questions" onBack={store.back} />
       <ScreenBody>
         <div className="space-y-3">
           {turns.map((t, i) =>
@@ -869,25 +831,30 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
           )}
         </div>
 
-        {!done && !needNote ? (
+        {!done && !needNote && !questions[step].open ? (
           <div className="mt-4 space-y-2">
-            {questions[step].options.map((o) => (
+            {(questions[step].options ?? []).map((o) => (
               <Choice key={o} label={o} onClick={() => answer(o)} />
             ))}
           </div>
         ) : null}
 
-        {needNote ? (
+        {!done && (needNote || questions[step].open) ? (
           <div className="mt-4 space-y-2">
             <TextInput
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="My neighbour's dog started barking"
+              placeholder="Type your answer, or record it instead"
             />
-            <Btn onClick={submitNote}>Send</Btn>
+            <Btn onClick={submitNote} disabled={note.trim().length === 0}>
+              Send
+            </Btn>
             <Btn variant="secondary" onClick={submitNote} icon={<IconMic width={22} height={22} />}>
               Record a voice note instead
             </Btn>
+            <p className="text-center text-[15px] font-semibold text-pine-soft">
+              Longer questions can always be answered out loud.
+            </p>
           </div>
         ) : null}
       </ScreenBody>
@@ -909,7 +876,7 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
         <Mascot src={MASCOT.cheer} size={170} className="mx-auto" />
         <h1 className="mt-4 text-[26px] font-extrabold leading-tight text-pine">Session saved</h1>
         <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
-          Both sides uploaded, with {store.marks.length} symptom{" "}
+          Two minutes uploaded, with {store.marks.length} symptom{" "}
           {store.marks.length === 1 ? "mark" : "marks"} timestamped against the audio.
         </p>
         <div className="mt-5 rounded-3xl border border-line bg-surface p-5 text-left">
@@ -917,9 +884,9 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
             <IconClock width={22} height={22} />
             <p className="text-[16px] font-extrabold">Next recording</p>
           </div>
-          <p className="mt-1 text-[19px] font-extrabold text-pine">In 1 hour · 90 min mark</p>
+          <p className="mt-1 text-[19px] font-extrabold text-pine">In 1 hr 40 min</p>
           <p className="mt-1 text-[16px] font-semibold text-pine-soft">
-            No food or drink until then, or we'll skip that one.
+            No food, snacks or drinks other than water until then. If you want water, have it in\n            the 5 minutes right after a recording.
           </p>
         </div>
       </ScreenBody>

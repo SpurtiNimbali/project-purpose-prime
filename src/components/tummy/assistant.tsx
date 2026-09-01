@@ -101,7 +101,7 @@ function reply(store: TummyStore, raw: string): Msg[] {
 
   if (/case|position|9 ?cm|belly/.test(t)) {
     return say(
-      "Case off, bare phone on bare skin, about 9 cm from your belly button — right side first, then left.",
+      "Case off, bare phone on bare skin, about 9 cm from your belly button. One two-minute recording, that's it.",
     );
   }
   return say(

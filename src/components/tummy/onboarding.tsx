@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Screen,
   ScreenBody,
@@ -7,7 +7,6 @@ import {
   Card,
   Note,
   Choice,
-  ScaleRow,
   Field,
   TextInput,
   MascotSays,
@@ -118,11 +117,11 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
 const INTRO_POINTS = [
   {
     title: "One week, four-plus sessions a day",
-    body: "One fasting recording after you wake, then three recordings following one meal.",
+    body: "A fasting recording after you wake, then recordings across the three hours after a meal.",
   },
   {
-    title: "Each recording is 8 minutes",
-    body: "You sit still with the phone against your skin. Right side first, then left side.",
+    title: "Each recording is 2 minutes",
+    body: "You sit still with the phone held against the skin of your belly. That's the whole thing.",
   },
   {
     title: "You also log a little context",
@@ -227,7 +226,7 @@ const QUIZ = [
   },
   {
     q: "How long after your target meal are the three recordings?",
-    options: ["30 min, 90 min, 3.5 hrs", "1 hr, 2 hrs, 3 hrs", "Whenever I remember"],
+    options: ["30 min, 90 min, 3 hrs", "1 hr, 2 hrs, 4 hrs", "Whenever I remember"],
     answer: 0,
     why: "Those three moments capture the early, middle and late stages of digestion, which is what makes the data comparable.",
   },
@@ -239,7 +238,7 @@ export function QuizScreen({ store }: { store: TummyStore }) {
 
   return (
     <Screen>
-      <TopBar title="Quick check" onBack={store.back} step="Step 4 of 9" />
+      <TopBar title="Attention check" onBack={store.back} step="Step 4 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
           Three quick questions so we know the setup is clear. Wrong answers are fine — I'll explain
@@ -309,308 +308,8 @@ export function QuizScreen({ store }: { store: TummyStore }) {
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn disabled={!allAnswered} onClick={() => store.go("survey")}>
+        <Btn disabled={!allAnswered} onClick={() => store.go("protocolIntro")}>
           {allAnswered ? "Continue" : "Answer all three"}
-        </Btn>
-      </StickyFooter>
-    </Screen>
-  );
-}
-
-/* ---------------- background survey ---------------- */
-
-const SYMPTOM_ROWS: { label: string; info: string }[] = [
-  {
-    label: "Rumbling or gurgling you can hear",
-    info: "Noises coming from your stomach or gut that you or people near you can actually hear.",
-  },
-  {
-    label: "Bloating",
-    info: "A full, tight or swollen feeling in your belly, often worse after eating.",
-  },
-  { label: "Feeling sick to your stomach", info: "Nausea — feeling like you might be sick." },
-  {
-    label: "Stomach pain or cramps",
-    info: "Any ache, sharp pain or squeezing feeling anywhere in your belly.",
-  },
-  { label: "Passing wind", info: "Gas released from the back passage — also called flatulence." },
-  { label: "Burping", info: "Bringing up air through your mouth — also called belching." },
-  { label: "Being sick", info: "Vomiting — actually throwing up, not just feeling like it." },
-  {
-    label: "Sudden rush to the toilet",
-    info: "A strong, urgent need to go that is hard to hold in.",
-  },
-];
-
-const SURVEY_SECTIONS = ["About you", "Your gut", "Eating", "Sleep"] as const;
-
-export function SurveyScreen({ store }: { store: TummyStore }) {
-  const [step, setStep] = useState(0);
-  const [gender, setGender] = useState("");
-  const [gi, setGi] = useState<string>("");
-  const [scale, setScale] = useState<Record<string, number>>({});
-  const [meds, setMeds] = useState("");
-  const [eating, setEating] = useState("");
-  const [skip, setSkip] = useState<Record<string, boolean>>({});
-  const [snacks, setSnacks] = useState("");
-  const [sleepReg, setSleepReg] = useState("");
-  const [sleepEnough, setSleepEnough] = useState("");
-
-  const remaining =
-    step === 0
-      ? (gender ? 0 : 1) + (gi ? 0 : 1)
-      : step === 1
-        ? SYMPTOM_ROWS.filter((r) => !scale[r.label]).length
-        : step === 2
-          ? (eating ? 0 : 1) + (snacks ? 0 : 1)
-          : (sleepReg ? 0 : 1) + (sleepEnough ? 0 : 1);
-
-  const last = step === SURVEY_SECTIONS.length - 1;
-  const next = () => (last ? store.go("protocolIntro") : setStep(step + 1));
-  const back = () => (step === 0 ? store.back() : setStep(step - 1));
-
-  return (
-    <Screen>
-      <TopBar
-        title={SURVEY_SECTIONS[step]}
-        onBack={back}
-        step={`Background survey · ${step + 1} of ${SURVEY_SECTIONS.length}`}
-      />
-      <div className="shrink-0 px-5 pb-1">
-        <div className="flex gap-2">
-          {SURVEY_SECTIONS.map((s, i) => (
-            <span
-              key={s}
-              className={cn(
-                "h-[8px] flex-1 rounded-full",
-                i < step ? "bg-teal" : i === step ? "bg-teal/45" : "bg-line",
-              )}
-            />
-          ))}
-        </div>
-      </div>
-
-      <ScreenBody className="pt-4">
-        {step === 0 ? (
-          <div className="space-y-5">
-            <Note tone="green" title="Completely anonymous">
-              Your answers are stored against your subject ID only. No names, no contact details,
-              nothing that identifies you.
-            </Note>
-            <MascotSays src={MASCOT.calm} size={72}>
-              A one-time survey, four short sections. It gives your recordings context.
-            </MascotSays>
-            <Field label="Gender">
-              <div className="space-y-2">
-                {["Woman", "Man", "Non-binary", "Prefer not to say"].map((g) => (
-                  <Choice key={g} label={g} selected={gender === g} onClick={() => setGender(g)} />
-                ))}
-              </div>
-            </Field>
-            <Field label="Do you have any diagnosed gut conditions?">
-              <div className="flex gap-3">
-                {["Yes", "No"].map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => setGi(v)}
-                    className={cn(
-                      "min-h-[60px] flex-1 rounded-2xl border-2 text-[17px] font-extrabold",
-                      gi === v
-                        ? "border-teal bg-teal text-surface"
-                        : "border-line bg-surface text-pine",
-                    )}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            </Field>
-            <Field
-              label="Medications affecting bowel function"
-              hint="Optional. Include anything regular, like laxatives or antacids."
-            >
-              <TextInput
-                value={meds}
-                onChange={(e) => setMeds(e.target.value)}
-                placeholder="Type here, or leave blank"
-              />
-            </Field>
-          </div>
-        ) : null}
-
-        {step === 1 ? (
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full bg-mint-soft px-3 py-1.5 text-[13px] font-extrabold uppercase tracking-[0.1em] text-teal">
-                Anonymous
-              </span>
-              <span className="text-[15px] font-bold text-pine-soft">
-                {SYMPTOM_ROWS.length - remaining}/{SYMPTOM_ROWS.length} rated
-              </span>
-            </div>
-            <p className="mt-3 text-[17px] font-extrabold text-pine">
-              How often do you notice each of these?
-            </p>
-            <div className="sticky top-0 z-10 -mx-1 mt-2 flex justify-between bg-wash px-1 py-2 text-[14px] font-bold text-pine-soft">
-              <span>1 · never</span>
-              <span>5 · very frequently</span>
-            </div>
-            <div className="space-y-2">
-              {SYMPTOM_ROWS.map((row) => (
-                <ScaleRow
-                  key={row.label}
-                  label={row.label}
-                  info={row.info}
-                  value={scale[row.label] ?? 0}
-                  onChange={(v) => setScale((s) => ({ ...s, [row.label]: v }))}
-                />
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {step === 2 ? (
-          <div className="space-y-5">
-            <Field label="Your eating schedule">
-              <div className="space-y-2">
-                <Choice
-                  label="I eat at similar times"
-                  sub="Within about an hour each day"
-                  selected={eating === "similar"}
-                  onClick={() => setEating("similar")}
-                />
-                <Choice
-                  label="It changes often"
-                  sub="Meal times move around a lot"
-                  selected={eating === "changes"}
-                  onClick={() => setEating("changes")}
-                />
-              </div>
-            </Field>
-            <Field label="Regular meal times">
-              <div className="space-y-2">
-                {[
-                  { k: "breakfast", label: "Breakfast", def: "08:00", Icon: IconSun },
-                  { k: "lunch", label: "Lunch", def: "12:30", Icon: IconBowl },
-                  { k: "dinner", label: "Dinner", def: "19:00", Icon: IconSunset },
-                ].map(({ k, label, def, Icon }) => (
-                  <div key={k} className="rounded-2xl border border-line bg-surface p-4">
-                    <div className="flex items-center gap-3">
-                      <span className="shrink-0 text-teal">
-                        <Icon width={24} height={24} />
-                      </span>
-                      <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold text-pine">
-                        {label}
-                      </span>
-                      <input
-                        type="time"
-                        defaultValue={def}
-                        disabled={skip[k]}
-                        className="min-h-[52px] shrink-0 rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine disabled:opacity-40"
-                      />
-                    </div>
-                    <button
-                      onClick={() => setSkip((s) => ({ ...s, [k]: !s[k] }))}
-                      className="mt-3 flex min-h-[48px] w-full items-center gap-3 text-left"
-                    >
-                      <span
-                        className={cn(
-                          "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-[3px]",
-                          skip[k] ? "border-teal bg-teal text-surface" : "border-line",
-                        )}
-                      >
-                        {skip[k] ? <IconCheck width={16} height={16} /> : null}
-                      </span>
-                      <span className="text-[16px] font-bold text-pine-soft">
-                        I skip {label.toLowerCase()}
-                      </span>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </Field>
-            <Field label="Do you snack between meals?">
-              <div className="flex gap-3">
-                {["Yes", "No"].map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => setSnacks(v)}
-                    className={cn(
-                      "min-h-[60px] flex-1 rounded-2xl border-2 text-[17px] font-extrabold",
-                      snacks === v
-                        ? "border-teal bg-teal text-surface"
-                        : "border-line bg-surface text-pine",
-                    )}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            </Field>
-          </div>
-        ) : null}
-
-        {step === 3 ? (
-          <div className="space-y-5">
-            <Field label="Your sleep schedule">
-              <div className="space-y-2">
-                <Choice
-                  label="Regular"
-                  selected={sleepReg === "regular"}
-                  onClick={() => setSleepReg("regular")}
-                />
-                <Choice
-                  label="Irregular"
-                  selected={sleepReg === "irregular"}
-                  onClick={() => setSleepReg("irregular")}
-                />
-              </div>
-              <div className="mt-3 flex gap-3">
-                {[
-                  { label: "Usual sleep", def: "23:00", Icon: IconMoon },
-                  { label: "Usual wake", def: "07:00", Icon: IconSun },
-                ].map(({ label, def, Icon }) => (
-                  <div
-                    key={label}
-                    className="min-w-0 flex-1 rounded-2xl border border-line bg-surface p-3"
-                  >
-                    <span className="flex items-center gap-2 text-[15px] font-extrabold text-pine-soft">
-                      <span className="shrink-0 text-teal">
-                        <Icon width={20} height={20} />
-                      </span>
-                      <span className="truncate">{label}</span>
-                    </span>
-                    <input
-                      type="time"
-                      defaultValue={def}
-                      className="mt-2 min-h-[52px] w-full rounded-xl border-2 border-line bg-wash px-2 text-[17px] font-extrabold text-pine"
-                    />
-                  </div>
-                ))}
-              </div>
-            </Field>
-            <Field label="Do you usually get enough sleep?">
-              <div className="space-y-2">
-                {["Enough", "Not enough", "More than I need"].map((v) => (
-                  <Choice
-                    key={v}
-                    label={v}
-                    selected={sleepEnough === v}
-                    onClick={() => setSleepEnough(v)}
-                  />
-                ))}
-              </div>
-            </Field>
-          </div>
-        ) : null}
-      </ScreenBody>
-      <StickyFooter>
-        <Btn onClick={next} disabled={remaining > 0}>
-          {remaining > 0
-            ? `${remaining} left in this section`
-            : last
-              ? "Complete survey"
-              : "Continue"}
         </Btn>
       </StickyFooter>
     </Screen>
@@ -622,7 +321,7 @@ export function SurveyScreen({ store }: { store: TummyStore }) {
 export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
   return (
     <Screen>
-      <TopBar title="How a day works" onBack={store.back} step="Step 6 of 9" />
+      <TopBar title="How a day works" onBack={store.back} step="Step 5 of 9" />
       <ScreenBody>
         <MascotSays size={78}>
           Every day has the same shape. Once you've done it twice it takes about as much thought as
@@ -631,23 +330,23 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
         <div className="mt-5 space-y-3">
           {[
             {
-              t: "Morning · fasting recording",
-              b: "Soon after waking, before any food, drink or activity.",
+              t: "1 · Fasting recording",
+              b: "Soon after waking, before any food, drink or activity. Two minutes.",
               Icon: IconSun,
             },
             {
-              t: "Pick one meal and capture it",
-              b: "A photo or short description of what you ate.",
+              t: "2 · Log your meal",
+              b: "Usually breakfast. Type it or record it out loud — your timers run from here.",
               Icon: IconBowl,
             },
             {
-              t: "Three recordings after that meal",
-              b: "At 30 minutes, 90 minutes and 3.5 hours. Set alarms — they matter.",
+              t: "3 · Recordings across the next 3 hours",
+              b: "A short recording at each reminder. Only water in between, taken right after a recording.",
               Icon: IconMic,
             },
             {
-              t: "Before bed",
-              b: "A short sleep and symptom log. Two minutes at most.",
+              t: "4 · A few questions",
+              b: "Once after your morning recording, and once at the end of the day.",
               Icon: IconMoon,
             },
           ].map(({ t, b, Icon }) => (
@@ -672,7 +371,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("technicalSetup")}>Continue</Btn>
+        <Btn onClick={() => store.go("scheduling")}>Continue</Btn>
       </StickyFooter>
     </Screen>
   );
@@ -680,36 +379,86 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- technical setup ---------------- */
 
+const PHONE_MODELS: Record<"apple" | "android", string[]> = {
+  apple: [
+    "iPhone 12",
+    "iPhone 13",
+    "iPhone 14",
+    "iPhone 15",
+    "iPhone 16",
+    "iPhone SE",
+    "Other iPhone",
+  ],
+  android: [
+    "Samsung Galaxy S23",
+    "Samsung Galaxy S24",
+    "Google Pixel 7",
+    "Google Pixel 8",
+    "OnePlus 12",
+    "Other Android phone",
+  ],
+};
+
 export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
-  const [model, setModel] = useState("iPhone 14");
-  const [mic, setMic] = useState("Bottom microphone");
+  const [platform, setPlatform] = useState<"apple" | "android" | "">("");
+  const [model, setModel] = useState("");
   const [caseOff, setCaseOff] = useState(false);
   return (
     <Screen>
-      <TopBar title="Technical Setup" onBack={store.back} step="Step 7 of 9" />
+      <TopBar title="Technical setup" onBack={store.back} step="Step 7 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Different phones hear slightly differently. Recording your hardware lets us standardise
+          Different phones hear slightly differently. Telling us your handset lets us standardise
           the audio across everyone in the study.
         </p>
         <div className="mt-5 space-y-5">
-          <Field label="Phone model">
-            <div className="space-y-2">
-              {["iPhone 14", "iPhone 15", "iPhone 16", "Other model"].map((m) => (
-                <Choice key={m} label={m} selected={model === m} onClick={() => setModel(m)} />
+          <Field label="Which kind of phone do you have?">
+            <div className="flex gap-3">
+              {(
+                [
+                  { k: "apple", label: "Apple" },
+                  { k: "android", label: "Android" },
+                ] as const
+              ).map(({ k, label }) => (
+                <button
+                  key={k}
+                  onClick={() => {
+                    setPlatform(k);
+                    setModel("");
+                  }}
+                  className={cn(
+                    "min-h-[68px] flex-1 rounded-2xl border-2 text-[18px] font-extrabold",
+                    platform === k
+                      ? "border-teal bg-teal text-surface"
+                      : "border-line bg-surface text-pine",
+                  )}
+                >
+                  {label}
+                </button>
               ))}
             </div>
           </Field>
-          <Field
-            label="Microphone used for capture"
-            hint="We default to the bottom microphone, the one nearest the charging port."
-          >
-            <div className="space-y-2">
-              {["Bottom microphone", "Top microphone", "External clip mic"].map((m) => (
-                <Choice key={m} label={m} selected={mic === m} onClick={() => setMic(m)} />
-              ))}
-            </div>
-          </Field>
+          {platform ? (
+            <Field label="Phone model" hint="Pick the closest match from the list.">
+              <div className="relative">
+                <select
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                  className="min-h-[64px] w-full appearance-none rounded-2xl border-2 border-line bg-surface px-4 pr-12 text-[17px] font-extrabold text-pine"
+                >
+                  <option value="">Select your model</option>
+                  {PHONE_MODELS[platform].map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[16px] font-extrabold text-teal">
+                  ▾
+                </span>
+              </div>
+            </Field>
+          ) : null}
           <Card>
             <div className="flex items-center gap-3">
               <span className="text-teal">
@@ -745,7 +494,7 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("permissions")} disabled={!caseOff}>
+        <Btn onClick={() => store.go("permissions")} disabled={!caseOff || !model}>
           Save setup
         </Btn>
       </StickyFooter>
@@ -765,7 +514,12 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
       sub: "For your 30, 90 and 210 minute alarms",
       Icon: IconPhone,
     },
-    { k: "dnd", label: "Do not disturb", sub: "Silences calls during a recording", Icon: IconLock },
+    {
+      k: "dnd",
+      label: "Do not disturb",
+      sub: "Switched on only for the 2 minutes of a recording session — never the rest of the day",
+      Icon: IconLock,
+    },
   ];
   const all = items.every((i) => granted[i.k]);
   return (
@@ -776,6 +530,13 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
           Recordings are encrypted and labelled with your subject ID only. No one on the study team
           can link them back to you by name.
         </Note>
+        <div className="mt-3">
+          <Note tone="blue" title="Do not disturb is only for recordings">
+            We turn it on when a recording session starts and turn it straight back off when the
+            session ends. Calls and messages come through normally at every other moment of the
+            day.
+          </Note>
+        </div>
         <div className="mt-4 space-y-3">
           {items.map(({ k, label, sub, Icon }) => (
             <Card key={k}>
@@ -824,7 +585,7 @@ export function PracticeScreen({ store }: { store: TummyStore }) {
   };
   return (
     <Screen>
-      <TopBar title="Sound check" onBack={store.back} step="Step 8 of 8 · part 1 of 2" />
+      <TopBar title="Sound check" onBack={store.back} step="Step 9 of 9 · part 1 of 2" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.calm}>
           First a sound check, then a short practice recording. Twenty seconds of listening — no
@@ -911,7 +672,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
 
   return (
     <Screen dark className="relative">
-      <TopBar title="Practice recording" onBack={store.back} dark step="Step 8 of 8 · part 2 of 2" />
+      <TopBar title="Practice recording" onBack={store.back} dark step="Step 9 of 9 · part 2 of 2" />
 
       <div className="shrink-0 px-5">
         <div className="flex items-center gap-2 rounded-2xl bg-surface/10 px-4 py-3">
@@ -995,7 +756,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
 export function SchedulingScreen({ store }: { store: TummyStore }) {
   return (
     <Screen>
-      <TopBar title="Daily schedule" onBack={store.back} step="Step 6 of 8" />
+      <TopBar title="Daily schedule" onBack={store.back} step="Step 6 of 9" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.cheer}>
           Tell me when you usually eat and sleep, and I'll place your reminders around your life

@@ -152,11 +152,11 @@ const INITIAL_SESSIONS: Session[] = [
     window: "90 min after breakfast",
   },
   {
-    id: "m210",
-    label: "Breakfast + 3.5 hrs",
+    id: "m180",
+    label: "Breakfast + 3 hrs",
     done: false,
-    at: 11 * 60 + 35,
-    window: "3.5 hrs after breakfast",
+    at: 11 * 60 + 5,
+    window: "3 hrs after breakfast",
   },
 ];
 
