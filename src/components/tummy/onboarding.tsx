@@ -217,20 +217,24 @@ const QUIZ = [
     options: ["On top of my shirt", "Directly on bare skin, case off", "In my pocket"],
     answer: 1,
     why: "Clothing and cases hold the microphone away from your skin, and gut sounds are far too quiet to survive that gap.",
+    hint: "Think about what has to touch your skin for a very quiet sound to be picked up.",
   },
   {
     q: "You had a coffee 20 minutes ago. Can you do the fasting recording?",
     options: ["Yes, coffee doesn't count", "No, that breaks the fast"],
     answer: 1,
     why: "Anything other than a sip of water changes your gut activity, so the recording would no longer be a fasting one.",
+    hint: "Fasting means nothing at all in your stomach except water.",
   },
   {
     q: "How long after your target meal are the three recordings?",
     options: ["30 min, 90 min, 3 hrs", "1 hr, 2 hrs, 4 hrs", "Whenever I remember"],
     answer: 0,
     why: "Those three moments capture the early, middle and late stages of digestion, which is what makes the data comparable.",
+    hint: "The last one is 3 hours after the meal, and the first is well within the first hour.",
   },
 ];
+
 
 export function QuizScreen({ store }: { store: TummyStore }) {
   const [qi, setQi] = useState(0);
