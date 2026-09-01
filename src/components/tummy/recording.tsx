@@ -31,45 +31,10 @@ import {
   IconLock,
   IconX,
 } from "./icons";
-import { minutesNow, type TummyStore } from "./store";
+import { clockLabel, minutesNow, untilLabel, type PlanItem, type TummyStore } from "./store";
 import { cn } from "@/lib/utils";
 
 /* ---------------- session hub ---------------- */
-
-const PLAN: {
-  id: string;
-  title: string;
-  due: string;
-  track: "fasting" | "postMeal";
-  offset?: 30 | 90 | 210;
-  Icon: typeof IconSun;
-}[] = [
-  { id: "fasting", title: "Fasting recording", due: "7:30 am", track: "fasting", Icon: IconSun },
-  {
-    id: "m30",
-    title: "Breakfast + 30 min",
-    due: "9:05 am",
-    track: "postMeal",
-    offset: 30,
-    Icon: IconBowl,
-  },
-  {
-    id: "m90",
-    title: "Breakfast + 90 min",
-    due: "10:05 am",
-    track: "postMeal",
-    offset: 90,
-    Icon: IconClock,
-  },
-  {
-    id: "m180",
-    title: "Breakfast + 3 hrs",
-    due: "11:05 am",
-    track: "postMeal",
-    offset: 210,
-    Icon: IconSunset,
-  },
-];
 
 function ProgressRing({ done, total }: { done: number; total: number }) {
   const r = 20;
@@ -97,88 +62,60 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
   );
 }
 
+function planIcon(p: PlanItem) {
+  if (p.kind === "meal") return IconBowl;
+  if (p.kind === "questions") return IconList;
+  return p.fasting ? IconSun : IconMic;
+}
+
 export function SessionHubScreen({ store }: { store: TummyStore }) {
-  const doneMap = Object.fromEntries(store.sessions.map((s) => [s.id, s.done]));
-  const doneCount = PLAN.filter((p) => doneMap[p.id]).length;
-  const next = PLAN.find((p) => !doneMap[p.id]);
-  const mealEntry = store.entries.find((e) => e.kind === "meal");
+  const plan = store.plan;
+  const doneCount = plan.filter((p) => p.done).length;
+  const next = plan.find((p) => !p.done);
   const now = minutesNow();
 
-  const start = (p: (typeof PLAN)[number]) => {
-    store.setTrack(p.track);
-    if (p.offset) store.setOffset(p.offset);
-    store.go("caseReminder");
+  const open = (p: PlanItem) => {
+    store.startItem(p.id);
+    if (p.kind === "recording") {
+      store.setTrack(p.fasting ? "fasting" : "postMeal");
+      store.go("caseReminder");
+    } else if (p.kind === "meal") {
+      store.go("logMeal");
+    } else {
+      store.go("logSleep");
+    }
   };
 
   return (
     <Screen>
       <TopBar
-        title="Today's recordings"
+        title="Today's plan"
         onBack={store.back}
         step={`Day ${store.day} of 7`}
-        right={<ProgressRing done={doneCount} total={PLAN.length} />}
+        right={<ProgressRing done={doneCount} total={plan.length} />}
       />
       <div className="flex min-h-0 flex-1 flex-col px-5 pb-4">
-        {/* anchor meal — the timers mean nothing without it */}
-        {mealEntry ? (
-          <div className="flex min-h-[56px] items-center gap-3 rounded-2xl border border-line bg-surface px-4">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-mint-soft text-teal">
-              <IconBowl width={20} height={20} />
-            </span>
-            <span className="min-w-0 flex-1 truncate text-[16px] font-bold text-pine">
-              Timers run from {mealEntry.label.toLowerCase()}, {mealEntry.time}
-            </span>
-            <button
-              onClick={() => store.go("logMeal")}
-              className="shrink-0 text-[15px] font-extrabold text-teal"
-            >
-              Edit
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => {
-              store.setTrack("postMeal");
-              store.go("whichMeal");
-            }}
-            className="flex min-h-[72px] w-full items-center gap-3 rounded-2xl border-2 border-teal bg-mint-soft px-4 text-left"
-          >
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal text-surface">
-              <IconCamera width={22} height={22} />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[17px] font-extrabold text-pine">
-                Log the meal these timers run from
-              </span>
-              <span className="block text-[15px] font-semibold text-pine-soft">
-                Needed before the post-meal recordings
-              </span>
-            </span>
-          </button>
-        )}
-
-        {/* session timeline */}
-        <div className="mt-3 min-h-0 flex-1 overflow-y-auto">
-          {PLAN.map((p, i) => {
-            const done = doneMap[p.id];
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {plan.map((p, i) => {
             const isNext = p.id === next?.id;
-            const session = store.sessions.find((s) => s.id === p.id);
-            const late = !done && session ? now - session.at > 45 : false;
+            const late = !p.done && now - p.at > 45;
+            const Icon = planIcon(p);
+            const mins = p.at - now;
             return (
               <div key={p.id} className="relative flex gap-3 pb-2">
                 <div className="flex w-[24px] shrink-0 flex-col items-center">
                   <span
                     className={cn(
                       "mt-4 h-[16px] w-[16px] shrink-0 rounded-full border-[3px]",
-                      done
+                      p.done
                         ? "border-teal bg-teal"
                         : isNext
                           ? "border-teal bg-surface"
                           : "border-line bg-surface",
                     )}
                   />
-                  {i < PLAN.length - 1 ? (
-                    <span className={cn("w-[3px] flex-1", done ? "bg-teal" : "bg-line")} />
+                  {i < plan.length - 1 ? (
+                    <span className={cn("w-[3px] flex-1", p.done ? "bg-teal" : "bg-line")} />
                   ) : null}
                 </div>
 
@@ -186,26 +123,34 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                   <div className="min-w-0 flex-1 rounded-2xl bg-teal p-4 text-surface">
                     <div className="flex items-center gap-3">
                       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface/15">
-                        <p.Icon width={22} height={22} />
+                        <Icon width={22} height={22} />
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-[19px] font-extrabold leading-tight">
-                          {p.title}
+                          {p.label}
                         </p>
                         <p className="truncate text-[15px] font-bold text-mint">
-                          {late ? "Window closing" : `Due ${p.due}`} · 2 min
+                          {late
+                            ? "Window closing"
+                            : mins > 10
+                              ? `In ${untilLabel(mins)} · ${clockLabel(p.at)}`
+                              : `Due now · ${clockLabel(p.at)}`}
                         </p>
                       </div>
                     </div>
                     <button
-                      onClick={() => start(p)}
+                      onClick={() => open(p)}
                       className="mt-3 flex min-h-[56px] w-full items-center justify-center rounded-xl bg-surface text-[17px] font-extrabold text-teal active:scale-[0.99]"
                     >
-                      Start this recording
+                      {p.kind === "recording"
+                        ? "Start this recording"
+                        : p.kind === "meal"
+                          ? `Log ${p.label.toLowerCase()}`
+                          : "Answer questions"}
                     </button>
-                    {late ? (
+                    {late && p.kind === "recording" ? (
                       <button
-                        onClick={() => store.completeSession(p.id)}
+                        onClick={() => store.completeItem(p.id)}
                         className="mt-2 min-h-[48px] w-full text-[15px] font-extrabold text-amber-soft"
                       >
                         Mark as missed
@@ -217,20 +162,16 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                     <span
                       className={cn(
                         "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
-                        done ? "bg-teal text-surface" : "bg-wash text-pine-soft",
+                        p.done ? "bg-teal text-surface" : "bg-wash text-pine-soft",
                       )}
                     >
-                      {done ? (
-                        <IconCheck width={18} height={18} />
-                      ) : (
-                        <p.Icon width={18} height={18} />
-                      )}
+                      {p.done ? <IconCheck width={18} height={18} /> : <Icon width={18} height={18} />}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-[16px] font-extrabold text-pine">
-                      {p.title}
+                      {p.label}
                     </span>
                     <span className="shrink-0 text-[15px] font-bold text-pine-soft">
-                      {done ? "Recorded" : p.due}
+                      {p.done ? "Done" : clockLabel(p.at)}
                     </span>
                   </div>
                 )}
@@ -240,18 +181,19 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
 
           {!next ? (
             <p className="mt-2 rounded-2xl bg-mint-soft px-4 py-4 text-center text-[16px] font-bold text-pine">
-              All four done today. Nothing more until tomorrow morning.
+              Everything is done today. Nothing more until tomorrow morning.
             </p>
           ) : null}
         </div>
 
         <p className="pt-2 text-center text-[15px] font-bold text-pine-soft">
-          Case off · quiet room · sit still, no talking
+          No food or drinks other than water for 3 hours after your meal
         </p>
       </div>
     </Screen>
   );
 }
+
 
 /* ---------------- case reminder ---------------- */
 
