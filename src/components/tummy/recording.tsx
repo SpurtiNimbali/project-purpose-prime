@@ -623,52 +623,17 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
 
       {/* severity picker — top sheet, saves on tap */}
       {pending ? (
-        <div className="absolute inset-0 z-20 flex flex-col bg-pine/70 backdrop-blur-sm">
-          <div className="rounded-b-[32px] bg-pine px-5 pb-6 pt-14 ring-1 ring-surface/15">
-            <div className="flex items-start gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[22px] font-extrabold text-surface">{pending.label}</p>
-                <p className="text-[15px] font-bold text-mint">
-                  At {String(Math.floor(pending.at / 60)).padStart(2, "0")}:
-                  {String(pending.at % 60).padStart(2, "0")} · how strong is it?
-                </p>
-              </div>
-              <button
-                onClick={() => setPending(null)}
-                aria-label="Cancel"
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface"
-              >
-                <IconX width={22} height={22} />
-              </button>
-            </div>
-            <div className="mt-4 flex gap-2">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  onClick={() => {
-                    store.addMark({ ...pending, severity: n });
-                    setPending(null);
-                    setToast(`${pending.label} · ${SEV_LABELS[n - 1]} saved`);
-                    if (typeof navigator !== "undefined" && navigator.vibrate)
-                      navigator.vibrate(12);
-                  }}
-                  className="flex h-[72px] flex-1 flex-col items-center justify-center rounded-2xl border-2 border-surface/25 bg-surface/10 text-surface active:border-mint active:bg-mint active:text-pine"
-                >
-                  <span className="text-[22px] font-extrabold leading-none">{n}</span>
-                </button>
-              ))}
-            </div>
-            <div className="mt-2 flex justify-between text-[14px] font-bold text-mint">
-              <span>Very mild</span>
-              <span>Very strong</span>
-            </div>
-            <p className="mt-3 text-center text-[14px] font-bold text-surface/60">
-              Tap a number — it saves straight away.
-            </p>
-          </div>
-          <button className="flex-1" aria-label="Cancel" onClick={() => setPending(null)} />
-        </div>
+        <SeveritySheet
+          pending={pending}
+          onCancel={() => setPending(null)}
+          onPick={(n) => {
+            store.addMark({ ...pending, severity: n });
+            setPending(null);
+            setToast(`${pending.label} · ${SEV_LABELS[n - 1]} saved`);
+          }}
+        />
       ) : null}
+
 
       {toast ? (
         <div className="pointer-events-none absolute inset-x-5 top-[350px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
