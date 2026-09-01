@@ -819,18 +819,18 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
               className="min-h-[58px] w-full rounded-2xl border-2 border-line bg-surface px-4 text-[17px] font-extrabold text-pine"
             />
           </Field>
-          <Field label="How many times today?">
-            <div className="flex gap-2">
-              {[1, 2, 3, "4+"].map((n) => (
-                <button
-                  key={String(n)}
-                  className="min-h-[60px] flex-1 rounded-2xl border-2 border-line bg-surface text-[18px] font-extrabold text-pine focus:border-teal"
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-          </Field>
+          <div className="flex min-h-[60px] items-center gap-3 rounded-2xl bg-mint-soft px-4">
+            <span className="shrink-0 text-teal">
+              <IconList width={20} height={20} />
+            </span>
+            <p className="min-w-0 flex-1 text-[15px] font-bold text-pine">
+              Counted automatically from your logs
+            </p>
+            <p className="shrink-0 text-[20px] font-extrabold tabular-nums text-teal">
+              {store.entries.filter((e) => e.kind === "toilet").length + 1}
+            </p>
+          </div>
+
           <Field label="Consistency" hint="1 is hard and lumpy, 7 is entirely liquid.">
             <div className="flex gap-1.5">
               {[1, 2, 3, 4, 5, 6, 7].map((n) => (
