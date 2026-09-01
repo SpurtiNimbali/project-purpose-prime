@@ -389,58 +389,115 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- positioning ---------------- */
 
-function AbdomenGuide() {
-  const x = 74;
-  const y = 132;
+export function AbdomenGuide({ height = 250 }: { height?: number }) {
   return (
     <svg
-      viewBox="0 0 200 220"
+      viewBox="0 0 240 268"
       width="100%"
-      height="230"
+      height={height}
       role="img"
-      aria-label="Phone placement guide"
+      aria-label="Where to place the phone: below and to the right of the belly button"
     >
-      {/* torso */}
+      <defs>
+        <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#2A5C4E" />
+          <stop offset="100%" stopColor="#1C4438" />
+        </linearGradient>
+        <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3E8EA8" />
+          <stop offset="100%" stopColor="#2E7D6B" />
+        </linearGradient>
+      </defs>
+
+      {/* torso / skin */}
       <path
-        d="M62 26c0-8 12-14 38-14s38 6 38 14c6 26 8 60 4 96-3 28-10 50-14 66H72c-4-16-11-38-14-66-4-36-2-70 4-96z"
-        fill="#1d4a3f"
+        d="M62 44c0-16 26-26 58-26s58 10 58 26l10 46c3 26-1 62-9 104-4 22-9 38-13 48H74c-4-10-9-26-13-48-8-42-12-78-9-104z"
+        fill="url(#skin)"
         stroke="#8FC9AC"
         strokeWidth="2.5"
+        strokeLinejoin="round"
       />
-      {/* lifted shirt hem */}
+
+      {/* soft abdominal contours */}
       <path
-        d="M56 74c14 10 30 14 44 14s30-4 44-14c3 6 5 10 5 14-16 12-32 17-49 17s-33-5-49-17c0-4 2-8 5-14z"
-        fill="#2E7D6B"
-        opacity="0.85"
+        d="M92 120c10 6 46 6 56 0M88 152c12 8 52 8 64 0"
+        stroke="#8FC9AC"
+        strokeWidth="1.6"
+        opacity="0.35"
+        fill="none"
+        strokeLinecap="round"
       />
+      <path
+        d="M120 104v54"
+        stroke="#8FC9AC"
+        strokeWidth="1.4"
+        opacity="0.25"
+        strokeLinecap="round"
+      />
+
+      {/* lifted shirt with rolled hem */}
+      <path
+        d="M62 44c0-16 26-26 58-26s58 10 58 26l10 46c-20 16-42 22-68 22s-48-6-68-22z"
+        fill="url(#shirt)"
+      />
+      <path
+        d="M52 90c20 18 42 24 68 24s48-6 68-24l4 16c-21 19-45 26-72 26s-51-7-72-26z"
+        fill="#2E7D6B"
+        stroke="#8FC9AC"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+
       {/* navel */}
-      <circle cx="100" cy="120" r="4.5" fill="#8FC9AC" />
-      <text x="100" y="146" textAnchor="middle" fontSize="9" fill="#8FC9AC" fontWeight="700">
+      <ellipse cx="120" cy="158" rx="5" ry="6" fill="#0F2B23" />
+      <ellipse cx="120" cy="156.5" rx="2.4" ry="2.8" fill="#8FC9AC" opacity="0.55" />
+      <line x1="128" y1="158" x2="152" y2="150" stroke="#8FC9AC" strokeWidth="1.4" />
+      <text x="155" y="153" fontSize="10.5" fill="#8FC9AC" fontWeight="800">
         belly button
       </text>
-      {/* measure line */}
-      <line x1="100" y1={y} x2={x} y2={y} stroke="#E8A33D" strokeWidth="2" strokeDasharray="4 4" />
-      <text
-        x={(100 + x) / 2}
-        y={y - 8}
-        textAnchor="middle"
-        fontSize="10"
-        fill="#E8A33D"
-        fontWeight="800"
-      >
+
+      {/* measurement from navel down-right (participant's right = viewer's left) */}
+      <line
+        x1="120"
+        y1="164"
+        x2="86"
+        y2="198"
+        stroke="#E8A33D"
+        strokeWidth="2.2"
+        strokeDasharray="5 5"
+        strokeLinecap="round"
+      />
+      <rect x="52" y="160" width="46" height="22" rx="11" fill="#E8A33D" />
+      <text x="75" y="175" textAnchor="middle" fontSize="12" fill="#143029" fontWeight="900">
         9 cm
       </text>
-      {/* phone */}
-      <g transform={`translate(${x - 13} ${y - 30})`}>
-        <rect width="26" height="52" rx="6" fill="#E7F1EC" stroke="#143029" strokeWidth="2" />
-        <rect x="8" y="45" width="10" height="3" rx="1.5" fill="#2E7D6B" />
-        <text x="13" y="28" textAnchor="middle" fontSize="7" fill="#2E7D6B" fontWeight="800">
+
+      {/* phone, mic end onto the skin */}
+      <g transform="translate(60 190) rotate(-6)">
+        <rect
+          x="0"
+          y="0"
+          width="52"
+          height="96"
+          rx="12"
+          fill="#E7F1EC"
+          stroke="#143029"
+          strokeWidth="2.5"
+        />
+        <rect x="6" y="6" width="40" height="72" rx="7" fill="#CFE3D8" />
+        <rect x="19" y="9" width="14" height="4" rx="2" fill="#8FC9AC" />
+        <circle cx="26" cy="86" r="4.5" fill="#2E7D6B" />
+        <text x="26" y="48" textAnchor="middle" fontSize="10" fill="#2E7D6B" fontWeight="900">
           mic
+        </text>
+        <text x="26" y="60" textAnchor="middle" fontSize="8" fill="#5C8574" fontWeight="700">
+          end down
         </text>
       </g>
     </svg>
   );
 }
+
 
 export function PositioningScreen({ store }: { store: TummyStore }) {
   return (
