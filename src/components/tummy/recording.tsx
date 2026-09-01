@@ -603,74 +603,17 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       </div>
 
       {/* symptom taps at TOP — bottom of the phone is against the mic */}
-      <div className="shrink-0 px-4 pt-3">
-        <p className="mb-2 text-[15px] font-extrabold text-mint">
-          Feel something? Tap it — buttons are up here, away from the microphone.
-        </p>
-        <div className="grid grid-cols-3 gap-2">
-          {SYMPTOMS.map(({ key, label, Icon }) => (
-            <button
-              key={key}
-              onClick={() => {
-                setPending({ key, label, at: TOTAL - left });
-                if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(18);
-              }}
-              className="relative flex h-[76px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-surface/20 bg-surface/10 text-surface active:bg-mint active:text-pine"
-            >
-              <Icon width={26} height={26} />
-              <span className="text-[14px] font-extrabold">{label}</span>
-              {counts[key] ? (
-                <span className="absolute right-2 top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-mint px-1 text-[13px] font-extrabold text-pine">
-                  {counts[key]}
-                </span>
-              ) : null}
-            </button>
-          ))}
-        </div>
-      </div>
+      <SymptomGrid counts={counts} onPick={(key, label) => setPending({ key, label, at: TOTAL - left })} />
 
       {/* timer */}
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
-        <div className="relative h-[212px] w-[212px]">
-          <svg width="212" height="212" viewBox="0 0 212 212" className="absolute inset-0">
-            <circle
-              cx="106"
-              cy="106"
-              r={R}
-              stroke="rgba(255,255,255,0.14)"
-              strokeWidth="10"
-              fill="none"
-            />
-            <circle
-              cx="106"
-              cy="106"
-              r={R}
-              stroke="#8FC9AC"
-              strokeWidth="10"
-              fill="none"
-              strokeLinecap="round"
-              strokeDasharray={C}
-              strokeDashoffset={C * (1 - pct)}
-              transform="rotate(-90 106 106)"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-mint/20 text-mint">
-              <IconMic width={20} height={20} />
-            </span>
-            <p className="mt-2 text-[46px] font-extrabold leading-none tracking-tight text-surface tabular-nums">
-              {mmss}
-            </p>
-            <p className="mt-1 text-[13px] font-extrabold uppercase tracking-[0.14em] text-mint">
-              remaining
-            </p>
-          </div>
-        </div>
-        <p className="mt-5 text-[16px] font-bold text-mint">Keep still until the circle empties</p>
+        <RecordTimer left={left} total={TOTAL} />
+        <p className="mt-5 text-[16px] font-bold text-mint">Keep still until the ring empties</p>
         <p className="mt-1 text-[15px] font-bold text-surface/70">
           {store.marks.length} symptom {store.marks.length === 1 ? "mark" : "marks"} recorded
         </p>
       </div>
+
 
       <div className="shrink-0 px-5 pb-7">
         <Btn variant="secondary" onClick={() => store.go("postMeta")}>
