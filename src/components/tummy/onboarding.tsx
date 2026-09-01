@@ -25,7 +25,9 @@ import {
   IconSunset,
   IconMoon,
 } from "./icons";
+import { AbdomenGuide, RecordTimer, SymptomGrid, SeveritySheet } from "./recording";
 import type { TummyStore } from "./store";
+
 import { cn } from "@/lib/utils";
 
 /* ---------------- welcome ---------------- */
@@ -217,104 +219,134 @@ const QUIZ = [
     options: ["On top of my shirt", "Directly on bare skin, case off", "In my pocket"],
     answer: 1,
     why: "Clothing and cases hold the microphone away from your skin, and gut sounds are far too quiet to survive that gap.",
+    hint: "Think about what has to touch your skin for a very quiet sound to be picked up.",
   },
   {
     q: "You had a coffee 20 minutes ago. Can you do the fasting recording?",
     options: ["Yes, coffee doesn't count", "No, that breaks the fast"],
     answer: 1,
     why: "Anything other than a sip of water changes your gut activity, so the recording would no longer be a fasting one.",
+    hint: "Fasting means nothing at all in your stomach except water.",
   },
   {
     q: "How long after your target meal are the three recordings?",
     options: ["30 min, 90 min, 3 hrs", "1 hr, 2 hrs, 4 hrs", "Whenever I remember"],
     answer: 0,
     why: "Those three moments capture the early, middle and late stages of digestion, which is what makes the data comparable.",
+    hint: "The last one is 3 hours after the meal, and the first is well within the first hour.",
   },
 ];
 
+
 export function QuizScreen({ store }: { store: TummyStore }) {
-  const [picks, setPicks] = useState<(number | null)[]>([null, null, null]);
-  const allAnswered = picks.every((p) => p !== null);
+  const [qi, setQi] = useState(0);
+  const [pick, setPick] = useState<number | null>(null);
+  const item = QUIZ[qi];
+  const correct = pick !== null && pick === item.answer;
+
+  const next = () => {
+    if (qi === QUIZ.length - 1) {
+      store.go("protocolIntro");
+      return;
+    }
+    setQi((n) => n + 1);
+    setPick(null);
+  };
 
   return (
     <Screen>
-      <TopBar title="Attention check" onBack={store.back} step="Step 4 of 9" />
+      <TopBar
+        title="Attention check"
+        onBack={store.back}
+        step={`Step 4 of 9 · question ${qi + 1} of ${QUIZ.length}`}
+      />
       <ScreenBody>
-        <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Three quick questions so we know the setup is clear. Wrong answers are fine — I'll explain
-          either way.
-        </p>
-        <div className="mt-5 space-y-5">
-          {QUIZ.map((item, qi) => {
-            const pick = picks[qi];
-            const correct = pick === item.answer;
+        <MascotSays size={78} src={correct ? MASCOT.cheer : MASCOT.calm}>
+          {pick === null
+            ? qi === 0
+              ? "One question at a time. Pick the answer you think is right — you'll need the right one before we move on."
+              : "Nice. Here's the next one."
+            : correct
+              ? "That's it. Read the reason, then carry on."
+              : "Not quite — have another go. Take your time, there's no penalty."}
+        </MascotSays>
+
+        <div className="mt-3 flex gap-1.5">
+          {QUIZ.map((_, i) => (
+            <span
+              key={i}
+              className={cn(
+                "h-[6px] flex-1 rounded-full",
+                i < qi ? "bg-teal" : i === qi ? "bg-sage" : "bg-line",
+              )}
+            />
+          ))}
+        </div>
+
+        <p className="mt-5 text-[22px] font-extrabold leading-snug text-pine">{item.q}</p>
+
+        <div className="mt-4 space-y-2.5">
+          {item.options.map((opt, oi) => {
+            const picked = pick === oi;
+            const wrongPick = picked && !correct;
+            const lock = correct;
             return (
-              <Card key={item.q}>
-                <p className="text-[16px] font-extrabold leading-snug text-pine">
-                  {qi + 1}. {item.q}
-                </p>
-                <div className="mt-3 space-y-2">
-                  {item.options.map((opt, oi) => {
-                    const picked = pick === oi;
-                    const isRight = oi === item.answer;
-                    return (
-                      <button
-                        key={opt}
-                        disabled={pick !== null}
-                        onClick={() => setPicks((p) => p.map((v, i) => (i === qi ? oi : v)))}
-                        className={cn(
-                          "flex min-h-[56px] w-full items-center gap-3 rounded-2xl border-2 px-3 py-2 text-left text-[16px] font-bold",
-                          pick === null
-                            ? "border-line bg-wash text-pine"
-                            : picked && isRight
-                              ? "border-teal bg-mint-soft text-pine"
-                              : picked
-                                ? "border-amber/60 bg-amber-soft text-pine"
-                                : isRight
-                                  ? "border-teal bg-surface text-pine"
-                                  : "border-line bg-surface text-pine-soft opacity-60",
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[16px] font-black",
-                            pick !== null && isRight
-                              ? "bg-teal text-surface"
-                              : "bg-wash text-pine-soft",
-                          )}
-                        >
-                          {pick !== null && isRight ? (
-                            <IconCheck width={20} height={20} />
-                          ) : (
-                            "ABC"[oi]
-                          )}
-                        </span>
-                        <span className="min-w-0 flex-1">{opt}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-                {pick !== null ? (
-                  <p className="mt-3 text-[15px] font-semibold leading-snug text-pine-soft">
-                    <span className="font-extrabold text-pine">
-                      {correct ? "That's right. " : "Not quite. "}
-                    </span>
-                    {item.why}
-                  </p>
-                ) : null}
-              </Card>
+              <button
+                key={opt}
+                disabled={lock}
+                onClick={() => setPick(oi)}
+                className={cn(
+                  "flex min-h-[68px] w-full items-center gap-3 rounded-2xl border-2 px-3 py-2 text-left text-[17px] font-bold",
+                  picked && correct
+                    ? "border-teal bg-mint-soft text-pine"
+                    : wrongPick
+                      ? "border-amber bg-amber-soft text-pine"
+                      : lock
+                        ? "border-line bg-surface text-pine-soft opacity-60"
+                        : "border-line bg-wash text-pine",
+                )}
+              >
+                <span
+                  className={cn(
+                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[16px] font-black",
+                    picked && correct ? "bg-teal text-surface" : "bg-surface text-pine-soft",
+                  )}
+                >
+                  {picked && correct ? <IconCheck width={20} height={20} /> : "ABC"[oi]}
+                </span>
+                <span className="min-w-0 flex-1">{opt}</span>
+              </button>
             );
           })}
         </div>
+
+        {correct ? (
+          <div className="mt-4">
+            <Note tone="green" title="Why this is the answer">
+              {item.why}
+            </Note>
+          </div>
+        ) : pick !== null ? (
+          <div className="mt-4">
+            <Note tone="amber" title="Try again">
+              {item.hint}
+            </Note>
+          </div>
+        ) : null}
       </ScreenBody>
       <StickyFooter>
-        <Btn disabled={!allAnswered} onClick={() => store.go("protocolIntro")}>
-          {allAnswered ? "Continue" : "Answer all three"}
+        <Btn disabled={!correct} onClick={next}>
+          {correct
+            ? qi === QUIZ.length - 1
+              ? "Continue"
+              : "Next question"
+            : "Pick the right answer to continue"}
         </Btn>
       </StickyFooter>
     </Screen>
   );
 }
+
 
 /* ---------------- protocol intro ---------------- */
 
@@ -648,97 +680,223 @@ export function PracticeScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- practice part 2: dry run recording ---------------- */
 
-const COACH_STEPS = [
-  "Do not disturb stays on and you shouldn't leave this screen while recording.",
-  "The time remaining is always shown here, inside the circle.",
-  "Feel something? Tap the symptom, then pick how strong it is. Buttons are up top, away from the microphone.",
-  "You can always finish early if you need to. Nothing breaks.",
-];
+type Coach = { id: string; text: string; cta: string };
 
 export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const TOTAL = 45;
+  const [stage, setStage] = useState<"case" | "position" | "record">("case");
   const [left, setLeft] = useState(TOTAL);
-  const [coach, setCoach] = useState(0);
+  const [marks, setMarks] = useState<{ key: string; label: string; severity: number }[]>([]);
+  const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [seen, setSeen] = useState<string[]>([]);
+  const [coach, setCoach] = useState<Coach | null>(null);
 
+  const show = (c: Coach) => {
+    setSeen((s) => (s.includes(c.id) ? s : [...s, c.id]));
+    setCoach(c);
+  };
+  const notSeen = (id: string) => !seen.includes(id);
+
+  /* the clock only runs while nothing is being explained */
   useEffect(() => {
-    if (coach < COACH_STEPS.length) return;
+    if (stage !== "record" || coach || pending) return;
     const t = setInterval(() => setLeft((l) => (l > 0 ? l - 1 : 0)), 1000);
     return () => clearInterval(t);
-  }, [coach]);
+  }, [stage, coach, pending]);
 
-  const mmss = `${String(Math.floor(left / 60)).padStart(2, "0")}:${String(left % 60).padStart(2, "0")}`;
-  const coaching = coach < COACH_STEPS.length;
+  /* incremental coaching, revealed as the run unfolds */
+  useEffect(() => {
+    if (stage !== "record" || coach || pending) return;
+    const elapsed = TOTAL - left;
+    if (notSeen("dnd")) {
+      show({
+        id: "dnd",
+        text: "You're recording now. Do not disturb is on for this session only, and it switches off the moment the recording ends.",
+        cta: "Got it",
+      });
+    } else if (elapsed >= 4 && notSeen("timer")) {
+      show({
+        id: "timer",
+        text: "The time left is always in the middle of the ring. The ring fills as the recording runs, so you can see progress at a glance.",
+        cta: "Makes sense",
+      });
+    } else if (elapsed >= 9 && notSeen("symptom")) {
+      show({
+        id: "symptom",
+        text: "Feel a gurgle, a cramp, anything? Tap its icon up top — try one now. The buttons sit away from the microphone end.",
+        cta: "Let me try",
+      });
+    } else if (left <= 15 && left > 0 && notSeen("timeleft")) {
+      show({
+        id: "timeleft",
+        text: "Under fifteen seconds left. When it hits zero the recording saves itself and a few short questions follow.",
+        cta: "Okay",
+      });
+    }
+  }, [stage, left, coach, pending, seen]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 1800);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const counts = marks.reduce<Record<string, number>>((acc, m) => {
+    acc[m.key] = (acc[m.key] ?? 0) + 1;
+    return acc;
+  }, {});
   const finished = left === 0;
 
+  const banner = (
+    <div className="shrink-0 px-4 pt-3">
+      <div className="flex items-center gap-2 rounded-2xl bg-surface/10 px-4 py-3">
+        <span className="text-mint">
+          <IconLock width={20} height={20} />
+        </span>
+        <p className="flex-1 text-[15px] font-extrabold text-surface">
+          Dry run · nothing is uploaded
+        </p>
+      </div>
+    </div>
+  );
+
+  /* stage 1 — case off, exactly like the real thing */
+  if (stage === "case") {
+    return (
+      <Screen dark className="relative">
+        <TopBar
+          title="Practice recording"
+          onBack={store.back}
+          dark
+          step="Step 9 of 9 · part 2 of 2"
+        />
+        {banner}
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center">
+          <span className="flex h-[132px] w-[132px] items-center justify-center rounded-full bg-surface/10 text-mint">
+            <IconPhone width={72} height={72} />
+          </span>
+          <h2 className="mt-5 text-[24px] font-extrabold leading-tight text-surface">
+            Take your phone case off
+          </h2>
+          <p className="mt-2 text-[16px] font-semibold leading-snug text-mint">
+            Every real recording starts here. Bare phone against bare skin — a case holds the
+            microphone away from you.
+          </p>
+        </div>
+        <div className="shrink-0 px-5 pb-7">
+          <Btn onClick={() => setStage("position")}>My case is off</Btn>
+        </div>
+      </Screen>
+    );
+  }
+
+  /* stage 2 — positioning guide, exactly like the real thing */
+  if (stage === "position") {
+    return (
+      <Screen dark className="relative">
+        <TopBar title="Positioning guide" onBack={() => setStage("case")} dark step="Practice" />
+        {banner}
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 pt-2">
+          <AbdomenGuide height={220} />
+          <p className="text-[17px] font-extrabold leading-snug text-surface">
+            Lift your shirt and put the bottom of the phone 9 cm below and to the right of your
+            belly button, flat on bare skin.
+          </p>
+          <p className="mt-2 text-[15px] font-semibold leading-snug text-mint">
+            Microphone end onto the skin. Sit upright, breathe normally, no talking.
+          </p>
+        </div>
+        <div className="shrink-0 px-5 pb-7 pt-3">
+          <Btn onClick={() => setStage("record")}>I'm in position</Btn>
+        </div>
+      </Screen>
+    );
+  }
+
+  /* stage 3 — the run itself, identical UI to a real recording */
   return (
     <Screen dark className="relative">
-      <TopBar title="Practice recording" onBack={store.back} dark step="Step 9 of 9 · part 2 of 2" />
+      {banner}
 
-      <div className="shrink-0 px-5">
-        <div className="flex items-center gap-2 rounded-2xl bg-surface/10 px-4 py-3">
-          <span className="text-mint">
-            <IconLock width={20} height={20} />
-          </span>
-          <p className="flex-1 text-[15px] font-extrabold text-surface">
-            Dry run · nothing is uploaded
-          </p>
-        </div>
-      </div>
-
-      <div className="shrink-0 px-5 pt-4">
-        <div className="grid grid-cols-3 gap-2">
-          {["Gurgle", "Bloating", "Pain"].map((s) => (
-            <div
-              key={s}
-              className="flex h-[68px] items-center justify-center rounded-2xl border-2 border-surface/20 bg-surface/10 text-[15px] font-extrabold text-surface"
-            >
-              {s}
-            </div>
-          ))}
-        </div>
-      </div>
+      <SymptomGrid
+        counts={counts}
+        onPick={(key, label) => setPending({ key, label, at: TOTAL - left })}
+      />
 
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
-        <div className="flex h-[190px] w-[190px] flex-col items-center justify-center rounded-full border-[10px] border-mint/40">
-          <p className="text-[44px] font-extrabold leading-none tabular-nums text-surface">
-            {mmss}
-          </p>
-          <p className="mt-1 text-[13px] font-extrabold uppercase tracking-[0.14em] text-mint">
-            remaining
-          </p>
-        </div>
+        <RecordTimer left={left} total={TOTAL} />
+        <p className="mt-5 text-[16px] font-bold text-mint">Keep still until the ring empties</p>
+        <p className="mt-1 text-[15px] font-bold text-surface/70">
+          {marks.length} symptom {marks.length === 1 ? "mark" : "marks"} recorded
+        </p>
       </div>
 
       <div className="shrink-0 px-5 pb-7">
-        <Btn variant="secondary" onClick={() => setLeft(0)} disabled={coaching || finished}>
+        <Btn variant="secondary" onClick={() => setLeft(0)} disabled={finished}>
           {finished ? "Practice complete" : "Finish early"}
         </Btn>
       </div>
 
-      {coaching ? (
-        <div className="absolute inset-0 z-20 flex flex-col justify-end bg-pine/70 px-5 pb-10 backdrop-blur-md">
+      {pending ? (
+        <>
+          <SeveritySheet
+            pending={pending}
+            onCancel={() => setPending(null)}
+            onPick={(n) => {
+              setMarks((m) => [...m, { key: pending.key, label: pending.label, severity: n }]);
+              setPending(null);
+              setToast(`${pending.label} saved at level ${n}`);
+            }}
+          />
+          {notSeen("severity") ? (
+            <div className="absolute inset-x-0 bottom-0 top-[300px] z-30 flex flex-col justify-end bg-pine/70 px-5 pb-10 backdrop-blur-md">
+              <div className="flex items-end gap-3">
+                <Mascot src={MASCOT.calm} size={78} />
+                <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[16px] font-semibold leading-snug text-pine">
+                  Now say how strong it is, 1 to 5. It saves the moment you tap a number — no save
+                  button, and the time is stamped for you.
+                </p>
+              </div>
+              <div className="mt-4">
+                <Btn onClick={() => setSeen((s) => [...s, "severity"])}>Got it</Btn>
+              </div>
+            </div>
+          ) : null}
+        </>
+      ) : null}
+
+      {toast ? (
+        <div className="pointer-events-none absolute inset-x-5 top-[360px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
+          {toast}
+        </div>
+      ) : null}
+
+      {coach ? (
+        <div className="absolute inset-0 z-40 flex flex-col justify-end bg-pine/70 px-5 pb-10 backdrop-blur-md">
           <div className="flex items-end gap-3">
             <Mascot src={MASCOT.calm} size={84} />
             <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[17px] font-semibold leading-snug text-pine">
-              {COACH_STEPS[coach]}
+              {coach.text}
             </p>
           </div>
           <div className="mt-5">
-            <Btn onClick={() => setCoach((c) => c + 1)}>
-              {coach === COACH_STEPS.length - 1 ? "Start the practice run" : "Next"}
-            </Btn>
+            <Btn onClick={() => setCoach(null)}>{coach.cta}</Btn>
           </div>
         </div>
       ) : null}
 
       {finished ? (
-        <div className="absolute inset-0 z-20 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
+        <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
           <div className="rounded-[28px] bg-surface p-6 text-center">
             <Mascot src={MASCOT.cheer} size={140} className="mx-auto" />
             <h2 className="mt-3 text-[24px] font-extrabold text-pine">Successful session</h2>
             <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
-              After a real recording you'll be asked a few short questions. That's all there is to
-              it — you're set.
+              {marks.length > 0
+                ? `You logged ${marks.length} symptom ${marks.length === 1 ? "mark" : "marks"}. `
+                : ""}
+              After a real recording you'll be asked a few short questions. That's all there is to it
+              — you're set.
             </p>
             <div className="mt-5">
               <Btn onClick={() => store.go("onboardDone")}>Continue</Btn>
@@ -749,6 +907,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
     </Screen>
   );
 }
+
 
 
 /* ---------------- daily schedule ---------------- */

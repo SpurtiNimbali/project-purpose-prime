@@ -389,58 +389,115 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- positioning ---------------- */
 
-function AbdomenGuide() {
-  const x = 74;
-  const y = 132;
+export function AbdomenGuide({ height = 250 }: { height?: number }) {
   return (
     <svg
-      viewBox="0 0 200 220"
+      viewBox="0 0 240 268"
       width="100%"
-      height="230"
+      height={height}
       role="img"
-      aria-label="Phone placement guide"
+      aria-label="Where to place the phone: below and to the right of the belly button"
     >
-      {/* torso */}
+      <defs>
+        <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#2A5C4E" />
+          <stop offset="100%" stopColor="#1C4438" />
+        </linearGradient>
+        <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3E8EA8" />
+          <stop offset="100%" stopColor="#2E7D6B" />
+        </linearGradient>
+      </defs>
+
+      {/* torso / skin */}
       <path
-        d="M62 26c0-8 12-14 38-14s38 6 38 14c6 26 8 60 4 96-3 28-10 50-14 66H72c-4-16-11-38-14-66-4-36-2-70 4-96z"
-        fill="#1d4a3f"
+        d="M62 44c0-16 26-26 58-26s58 10 58 26l10 46c3 26-1 62-9 104-4 22-9 38-13 48H74c-4-10-9-26-13-48-8-42-12-78-9-104z"
+        fill="url(#skin)"
         stroke="#8FC9AC"
         strokeWidth="2.5"
+        strokeLinejoin="round"
       />
-      {/* lifted shirt hem */}
+
+      {/* soft abdominal contours */}
       <path
-        d="M56 74c14 10 30 14 44 14s30-4 44-14c3 6 5 10 5 14-16 12-32 17-49 17s-33-5-49-17c0-4 2-8 5-14z"
-        fill="#2E7D6B"
-        opacity="0.85"
+        d="M92 120c10 6 46 6 56 0M88 152c12 8 52 8 64 0"
+        stroke="#8FC9AC"
+        strokeWidth="1.6"
+        opacity="0.35"
+        fill="none"
+        strokeLinecap="round"
       />
+      <path
+        d="M120 104v54"
+        stroke="#8FC9AC"
+        strokeWidth="1.4"
+        opacity="0.25"
+        strokeLinecap="round"
+      />
+
+      {/* lifted shirt with rolled hem */}
+      <path
+        d="M62 44c0-16 26-26 58-26s58 10 58 26l10 46c-20 16-42 22-68 22s-48-6-68-22z"
+        fill="url(#shirt)"
+      />
+      <path
+        d="M52 90c20 18 42 24 68 24s48-6 68-24l4 16c-21 19-45 26-72 26s-51-7-72-26z"
+        fill="#2E7D6B"
+        stroke="#8FC9AC"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+
       {/* navel */}
-      <circle cx="100" cy="120" r="4.5" fill="#8FC9AC" />
-      <text x="100" y="146" textAnchor="middle" fontSize="9" fill="#8FC9AC" fontWeight="700">
+      <ellipse cx="120" cy="158" rx="5" ry="6" fill="#0F2B23" />
+      <ellipse cx="120" cy="156.5" rx="2.4" ry="2.8" fill="#8FC9AC" opacity="0.55" />
+      <line x1="128" y1="158" x2="152" y2="150" stroke="#8FC9AC" strokeWidth="1.4" />
+      <text x="155" y="153" fontSize="10.5" fill="#8FC9AC" fontWeight="800">
         belly button
       </text>
-      {/* measure line */}
-      <line x1="100" y1={y} x2={x} y2={y} stroke="#E8A33D" strokeWidth="2" strokeDasharray="4 4" />
-      <text
-        x={(100 + x) / 2}
-        y={y - 8}
-        textAnchor="middle"
-        fontSize="10"
-        fill="#E8A33D"
-        fontWeight="800"
-      >
+
+      {/* measurement from navel down-right (participant's right = viewer's left) */}
+      <line
+        x1="120"
+        y1="164"
+        x2="86"
+        y2="198"
+        stroke="#E8A33D"
+        strokeWidth="2.2"
+        strokeDasharray="5 5"
+        strokeLinecap="round"
+      />
+      <rect x="52" y="160" width="46" height="22" rx="11" fill="#E8A33D" />
+      <text x="75" y="175" textAnchor="middle" fontSize="12" fill="#143029" fontWeight="900">
         9 cm
       </text>
-      {/* phone */}
-      <g transform={`translate(${x - 13} ${y - 30})`}>
-        <rect width="26" height="52" rx="6" fill="#E7F1EC" stroke="#143029" strokeWidth="2" />
-        <rect x="8" y="45" width="10" height="3" rx="1.5" fill="#2E7D6B" />
-        <text x="13" y="28" textAnchor="middle" fontSize="7" fill="#2E7D6B" fontWeight="800">
+
+      {/* phone, mic end onto the skin */}
+      <g transform="translate(60 190) rotate(-6)">
+        <rect
+          x="0"
+          y="0"
+          width="52"
+          height="96"
+          rx="12"
+          fill="#E7F1EC"
+          stroke="#143029"
+          strokeWidth="2.5"
+        />
+        <rect x="6" y="6" width="40" height="72" rx="7" fill="#CFE3D8" />
+        <rect x="19" y="9" width="14" height="4" rx="2" fill="#8FC9AC" />
+        <circle cx="26" cy="86" r="4.5" fill="#2E7D6B" />
+        <text x="26" y="48" textAnchor="middle" fontSize="10" fill="#2E7D6B" fontWeight="900">
           mic
+        </text>
+        <text x="26" y="60" textAnchor="middle" fontSize="8" fill="#5C8574" fontWeight="700">
+          end down
         </text>
       </g>
     </svg>
   );
 }
+
 
 export function PositioningScreen({ store }: { store: TummyStore }) {
   return (
@@ -487,7 +544,7 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- recording ---------------- */
 
-const SYMPTOMS = [
+export const SYMPTOMS = [
   { key: "gurgle", label: "Gurgle", Icon: IconWave },
   { key: "bloat", label: "Bloating", Icon: IconBalloon },
   { key: "pain", label: "Pain", Icon: IconBolt },
@@ -496,8 +553,175 @@ const SYMPTOMS = [
   { key: "gas", label: "Gas", Icon: IconWind },
 ];
 
+export const SEV_LABELS = ["very mild", "mild", "moderate", "strong", "very strong"];
+
+/** Big, legible countdown ring shared by the real recording and the dry run. */
+export function RecordTimer({ left, total }: { left: number; total: number }) {
+  const mm = String(Math.floor(left / 60)).padStart(2, "0");
+  const ss = String(left % 60).padStart(2, "0");
+  const pct = 1 - left / total;
+  const R = 92;
+  const C = 2 * Math.PI * R;
+  const ticks = Array.from({ length: 60 }, (_, i) => i);
+
+  return (
+    <div className="relative h-[224px] w-[224px]">
+      <svg width="224" height="224" viewBox="0 0 224 224" className="absolute inset-0">
+        <circle cx="112" cy="112" r="104" fill="rgba(143,201,172,0.06)" />
+        {ticks.map((i) => {
+          const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
+          const on = i / 60 <= pct;
+          const r1 = 106;
+          const r2 = i % 5 === 0 ? 97 : 101;
+          return (
+            <line
+              key={i}
+              x1={112 + Math.cos(a) * r1}
+              y1={112 + Math.sin(a) * r1}
+              x2={112 + Math.cos(a) * r2}
+              y2={112 + Math.sin(a) * r2}
+              stroke={on ? "#8FC9AC" : "rgba(255,255,255,0.16)"}
+              strokeWidth={i % 5 === 0 ? 2.4 : 1.4}
+              strokeLinecap="round"
+            />
+          );
+        })}
+        <circle
+          cx="112"
+          cy="112"
+          r={R}
+          stroke="rgba(255,255,255,0.12)"
+          strokeWidth="8"
+          fill="none"
+        />
+        <circle
+          cx="112"
+          cy="112"
+          r={R}
+          stroke="#8FC9AC"
+          strokeWidth="8"
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={C}
+          strokeDashoffset={C * (1 - pct)}
+          transform="rotate(-90 112 112)"
+          style={{ transition: "stroke-dashoffset 1s linear" }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+        <span className="flex items-center gap-1.5 rounded-full bg-mint/15 px-3 py-1 text-mint">
+          <span className="h-[7px] w-[7px] animate-pulse rounded-full bg-mint" />
+          <span className="text-[12px] font-extrabold uppercase tracking-[0.16em]">recording</span>
+        </span>
+        <p className="mt-2 flex items-baseline justify-center text-surface tabular-nums">
+          <span className="text-[52px] font-extrabold leading-none tracking-tight">{mm}</span>
+          <span className="px-0.5 text-[40px] font-extrabold leading-none">:</span>
+          <span className="text-[52px] font-extrabold leading-none tracking-tight">{ss}</span>
+        </p>
+        <p className="mt-1.5 text-[13px] font-extrabold uppercase tracking-[0.16em] text-mint">
+          left of {Math.round(total / 60)} min
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function SymptomGrid({
+  counts,
+  onPick,
+  disabled,
+}: {
+  counts: Record<string, number>;
+  onPick: (key: string, label: string) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="shrink-0 px-4 pt-3">
+      <p className="mb-2 text-[15px] font-extrabold text-mint">
+        Feel something? Tap it — buttons are up here, away from the microphone.
+      </p>
+      <div className="grid grid-cols-3 gap-2">
+        {SYMPTOMS.map(({ key, label, Icon }) => (
+          <button
+            key={key}
+            disabled={disabled}
+            onClick={() => {
+              onPick(key, label);
+              if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(18);
+            }}
+            className="relative flex h-[76px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-surface/20 bg-surface/10 text-surface active:bg-mint active:text-pine"
+          >
+            <Icon width={26} height={26} />
+            <span className="text-[14px] font-extrabold">{label}</span>
+            {counts[key] ? (
+              <span className="absolute right-2 top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-mint px-1 text-[13px] font-extrabold text-pine">
+                {counts[key]}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function SeveritySheet({
+  pending,
+  onPick,
+  onCancel,
+}: {
+  pending: { key: string; label: string; at: number };
+  onPick: (n: number) => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="absolute inset-0 z-20 flex flex-col bg-pine/70 backdrop-blur-sm">
+      <div className="rounded-b-[32px] bg-pine px-5 pb-6 pt-14 ring-1 ring-surface/15">
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[22px] font-extrabold text-surface">{pending.label}</p>
+            <p className="text-[15px] font-bold text-mint">
+              At {String(Math.floor(pending.at / 60)).padStart(2, "0")}:
+              {String(pending.at % 60).padStart(2, "0")} · how strong is it?
+            </p>
+          </div>
+          <button
+            onClick={onCancel}
+            aria-label="Cancel"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface"
+          >
+            <IconX width={22} height={22} />
+          </button>
+        </div>
+        <div className="mt-4 flex gap-2">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              onClick={() => {
+                onPick(n);
+                if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(12);
+              }}
+              className="flex h-[72px] flex-1 flex-col items-center justify-center rounded-2xl border-2 border-surface/25 bg-surface/10 text-surface active:border-mint active:bg-mint active:text-pine"
+            >
+              <span className="text-[22px] font-extrabold leading-none">{n}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mt-2 flex justify-between text-[14px] font-bold text-mint">
+          <span>Very mild</span>
+          <span>Very strong</span>
+        </div>
+        <p className="mt-3 text-center text-[14px] font-bold text-surface/60">
+          Tap a number — it saves straight away.
+        </p>
+      </div>
+      <button className="flex-1" aria-label="Cancel" onClick={onCancel} />
+    </div>
+  );
+}
+
 const TOTAL = 120; // 2 minutes
-const SEV_LABELS = ["very mild", "mild", "moderate", "strong", "very strong"];
+
 
 export function RecordingScreen({ store }: { store: TummyStore }) {
   const [left, setLeft] = useState(TOTAL);
@@ -546,74 +770,17 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       </div>
 
       {/* symptom taps at TOP — bottom of the phone is against the mic */}
-      <div className="shrink-0 px-4 pt-3">
-        <p className="mb-2 text-[15px] font-extrabold text-mint">
-          Feel something? Tap it — buttons are up here, away from the microphone.
-        </p>
-        <div className="grid grid-cols-3 gap-2">
-          {SYMPTOMS.map(({ key, label, Icon }) => (
-            <button
-              key={key}
-              onClick={() => {
-                setPending({ key, label, at: TOTAL - left });
-                if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(18);
-              }}
-              className="relative flex h-[76px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-surface/20 bg-surface/10 text-surface active:bg-mint active:text-pine"
-            >
-              <Icon width={26} height={26} />
-              <span className="text-[14px] font-extrabold">{label}</span>
-              {counts[key] ? (
-                <span className="absolute right-2 top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-mint px-1 text-[13px] font-extrabold text-pine">
-                  {counts[key]}
-                </span>
-              ) : null}
-            </button>
-          ))}
-        </div>
-      </div>
+      <SymptomGrid counts={counts} onPick={(key, label) => setPending({ key, label, at: TOTAL - left })} />
 
       {/* timer */}
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
-        <div className="relative h-[212px] w-[212px]">
-          <svg width="212" height="212" viewBox="0 0 212 212" className="absolute inset-0">
-            <circle
-              cx="106"
-              cy="106"
-              r={R}
-              stroke="rgba(255,255,255,0.14)"
-              strokeWidth="10"
-              fill="none"
-            />
-            <circle
-              cx="106"
-              cy="106"
-              r={R}
-              stroke="#8FC9AC"
-              strokeWidth="10"
-              fill="none"
-              strokeLinecap="round"
-              strokeDasharray={C}
-              strokeDashoffset={C * (1 - pct)}
-              transform="rotate(-90 106 106)"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-mint/20 text-mint">
-              <IconMic width={20} height={20} />
-            </span>
-            <p className="mt-2 text-[46px] font-extrabold leading-none tracking-tight text-surface tabular-nums">
-              {mmss}
-            </p>
-            <p className="mt-1 text-[13px] font-extrabold uppercase tracking-[0.14em] text-mint">
-              remaining
-            </p>
-          </div>
-        </div>
-        <p className="mt-5 text-[16px] font-bold text-mint">Keep still until the circle empties</p>
+        <RecordTimer left={left} total={TOTAL} />
+        <p className="mt-5 text-[16px] font-bold text-mint">Keep still until the ring empties</p>
         <p className="mt-1 text-[15px] font-bold text-surface/70">
           {store.marks.length} symptom {store.marks.length === 1 ? "mark" : "marks"} recorded
         </p>
       </div>
+
 
       <div className="shrink-0 px-5 pb-7">
         <Btn variant="secondary" onClick={() => store.go("postMeta")}>
@@ -623,52 +790,17 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
 
       {/* severity picker — top sheet, saves on tap */}
       {pending ? (
-        <div className="absolute inset-0 z-20 flex flex-col bg-pine/70 backdrop-blur-sm">
-          <div className="rounded-b-[32px] bg-pine px-5 pb-6 pt-14 ring-1 ring-surface/15">
-            <div className="flex items-start gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[22px] font-extrabold text-surface">{pending.label}</p>
-                <p className="text-[15px] font-bold text-mint">
-                  At {String(Math.floor(pending.at / 60)).padStart(2, "0")}:
-                  {String(pending.at % 60).padStart(2, "0")} · how strong is it?
-                </p>
-              </div>
-              <button
-                onClick={() => setPending(null)}
-                aria-label="Cancel"
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface"
-              >
-                <IconX width={22} height={22} />
-              </button>
-            </div>
-            <div className="mt-4 flex gap-2">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  onClick={() => {
-                    store.addMark({ ...pending, severity: n });
-                    setPending(null);
-                    setToast(`${pending.label} · ${SEV_LABELS[n - 1]} saved`);
-                    if (typeof navigator !== "undefined" && navigator.vibrate)
-                      navigator.vibrate(12);
-                  }}
-                  className="flex h-[72px] flex-1 flex-col items-center justify-center rounded-2xl border-2 border-surface/25 bg-surface/10 text-surface active:border-mint active:bg-mint active:text-pine"
-                >
-                  <span className="text-[22px] font-extrabold leading-none">{n}</span>
-                </button>
-              ))}
-            </div>
-            <div className="mt-2 flex justify-between text-[14px] font-bold text-mint">
-              <span>Very mild</span>
-              <span>Very strong</span>
-            </div>
-            <p className="mt-3 text-center text-[14px] font-bold text-surface/60">
-              Tap a number — it saves straight away.
-            </p>
-          </div>
-          <button className="flex-1" aria-label="Cancel" onClick={() => setPending(null)} />
-        </div>
+        <SeveritySheet
+          pending={pending}
+          onCancel={() => setPending(null)}
+          onPick={(n) => {
+            store.addMark({ ...pending, severity: n });
+            setPending(null);
+            setToast(`${pending.label} · ${SEV_LABELS[n - 1]} saved`);
+          }}
+        />
       ) : null}
+
 
       {toast ? (
         <div className="pointer-events-none absolute inset-x-5 top-[350px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
