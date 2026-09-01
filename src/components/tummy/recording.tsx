@@ -21,7 +21,7 @@ import {
   IconCamera,
   IconSun,
   IconBowl,
-  IconSunset,
+  IconList,
   IconWave,
   IconBalloon,
   IconBolt,
