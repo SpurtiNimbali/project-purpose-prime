@@ -148,9 +148,9 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                           ? `Log ${p.label.toLowerCase()}`
                           : "Answer questions"}
                     </button>
-                    {late && p.kind === "recording" ? (
+                    {p.kind === "recording" ? (
                       <button
-                        onClick={() => store.completeItem(p.id)}
+                        onClick={() => store.missItem(p.id)}
                         className="mt-2 min-h-[48px] w-full text-[15px] font-extrabold text-amber-soft"
                       >
                         Mark as missed
@@ -162,16 +162,24 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                     <span
                       className={cn(
                         "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
-                        p.done ? "bg-teal text-surface" : "bg-wash text-pine-soft",
+                        p.missed
+                          ? "bg-wash text-amber"
+                          : p.done
+                            ? "bg-teal text-surface"
+                            : "bg-wash text-pine-soft",
                       )}
                     >
-                      {p.done ? <IconCheck width={18} height={18} /> : <Icon width={18} height={18} />}
+                      {p.done && !p.missed ? (
+                        <IconCheck width={18} height={18} />
+                      ) : (
+                        <Icon width={18} height={18} />
+                      )}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-[16px] font-extrabold text-pine">
                       {p.label}
                     </span>
                     <span className="shrink-0 text-[15px] font-bold text-pine-soft">
-                      {p.done ? "Done" : clockLabel(p.at)}
+                      {p.missed ? "Missed" : p.done ? "Done" : clockLabel(p.at)}
                     </span>
                   </div>
                 )}

@@ -186,6 +186,18 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             </div>
           ) : null}
 
+          {task.kind === "recording" && task.itemId ? (
+            <button
+              onClick={() => store.missItem(task.itemId!)}
+              className={cn(
+                "mt-3 min-h-[48px] w-full rounded-2xl text-[15px] font-extrabold",
+                due ? "text-mint" : "text-pine-soft",
+              )}
+            >
+              Can't do this one — mark as missed
+            </button>
+          ) : null}
+
           <button
             onClick={startTask}
             className={cn(
@@ -236,7 +248,9 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                   <span
                     className={cn(
                       "relative z-10 flex h-[28px] w-[28px] items-center justify-center rounded-full border-2",
-                      p.done
+                      p.missed
+                        ? "border-amber bg-surface text-amber"
+                        : p.done
                         ? "border-teal bg-teal text-surface"
                         : current
                           ? "border-teal bg-surface text-teal"
