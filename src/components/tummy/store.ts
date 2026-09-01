@@ -132,8 +132,9 @@ export function nowLabel() {
 }
 
 export function clockLabel(mins: number) {
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
+  const normalized = ((mins % (24 * 60)) + 24 * 60) % (24 * 60);
+  const h = Math.floor(normalized / 60);
+  const m = normalized % 60;
   const ampm = h >= 12 ? "pm" : "am";
   const h12 = h % 12 === 0 ? 12 : h % 12;
   return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
@@ -157,12 +158,14 @@ export function untilLabel(mins: number) {
 const WATER_NOTE =
   "No food, snacks or drinks other than water for the 3 hours after your meal. If you want water, have it in the 5 minutes right after a recording.";
 
-const INITIAL_PLAN: PlanItem[] = [
+function createInitialPlan(): PlanItem[] {
+  const now = minutesNow();
+  return [
   {
     id: "fasting",
     kind: "recording",
     label: "Fasting recording",
-    at: 7 * 60 + 30,
+    at: now - 95,
     done: true,
     window: "6:30 – 8:30 am",
     fasting: true,
@@ -171,7 +174,7 @@ const INITIAL_PLAN: PlanItem[] = [
     id: "breakfast",
     kind: "meal",
     label: "Breakfast",
-    at: 8 * 60 + 5,
+    at: now - 90,
     done: true,
     window: "After the fasting recording",
     meal: "breakfast",
@@ -180,7 +183,7 @@ const INITIAL_PLAN: PlanItem[] = [
     id: "m30",
     kind: "recording",
     label: "Breakfast + 30 min",
-    at: 8 * 60 + 35,
+    at: now - 60,
     done: true,
     window: "30 min after breakfast",
   },
@@ -188,7 +191,7 @@ const INITIAL_PLAN: PlanItem[] = [
     id: "m90",
     kind: "recording",
     label: "Breakfast + 90 min",
-    at: 9 * 60 + 35,
+    at: now + 30,
     done: false,
     window: "90 min after breakfast",
   },
@@ -196,7 +199,7 @@ const INITIAL_PLAN: PlanItem[] = [
     id: "m180",
     kind: "recording",
     label: "Breakfast + 3 hrs",
-    at: 11 * 60 + 5,
+    at: now + 120,
     done: false,
     window: "3 hrs after breakfast",
   },
@@ -204,7 +207,7 @@ const INITIAL_PLAN: PlanItem[] = [
     id: "qMorning",
     kind: "questions",
     label: "Morning questions",
-    at: 11 * 60 + 20,
+    at: now + 135,
     done: false,
     window: "After the morning recordings",
   },
@@ -212,7 +215,7 @@ const INITIAL_PLAN: PlanItem[] = [
     id: "lunch",
     kind: "meal",
     label: "Lunch",
-    at: 13 * 60,
+    at: now + 225,
     done: false,
     window: "Whenever you eat",
     meal: "lunch",
@@ -221,7 +224,7 @@ const INITIAL_PLAN: PlanItem[] = [
     id: "dinner",
     kind: "meal",
     label: "Dinner",
-    at: 19 * 60,
+    at: now + 480,
     done: false,
     window: "Whenever you eat",
     meal: "dinner",
@@ -230,11 +233,12 @@ const INITIAL_PLAN: PlanItem[] = [
     id: "qNight",
     kind: "questions",
     label: "End of day questions",
-    at: 21 * 60,
+    at: now + 600,
     done: false,
     window: "Before bed",
   },
-];
+  ];
+}
 
 /** Single source of truth for "what should I do right now". */
 export function computeNextTask(plan: PlanItem[]): NextTask {
@@ -362,7 +366,7 @@ export function useTummyStore(): TummyStore {
   const [side, setSide] = useState<"right" | "left">("right");
   const [region, setRegion] = useState<"upper" | "lower">("lower");
   const [marks, setMarks] = useState<SymptomMark[]>([]);
-  const [plan, setPlan] = useState<PlanItem[]>(INITIAL_PLAN);
+  const [plan, setPlan] = useState<PlanItem[]>(createInitialPlan);
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const [entries, setEntries] = useState<LogEntry[]>([
     { id: "seed-1", kind: "sleep", label: "Sleep", detail: "7 hrs · slept well", time: "7:10 am" },
@@ -395,7 +399,19 @@ export function useTummyStore(): TummyStore {
   );
 
   const completeItem = useCallback((id: string) => {
-    setPlan((prev) => prev.map((p) => (p.id === id ? { ...p, done: true } : p)));
+    setPlan((prev) => {
+      const completed = prev.find((p) => p.id === id);
+      const mealFinishedAt = minutesNow();
+      return prev.map((p) => {
+        if (p.id === id) return { ...p, done: true, at: completed?.kind === "meal" ? mealFinishedAt : p.at };
+        if (id !== "breakfast") return p;
+        if (p.id === "m30") return { ...p, at: mealFinishedAt + 30 };
+        if (p.id === "m90") return { ...p, at: mealFinishedAt + 90 };
+        if (p.id === "m180") return { ...p, at: mealFinishedAt + 180 };
+        if (p.id === "qMorning") return { ...p, at: mealFinishedAt + 195 };
+        return p;
+      });
+    });
   }, []);
 
   const startItem = useCallback(
