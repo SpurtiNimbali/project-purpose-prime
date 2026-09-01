@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { IconChat, IconX, IconSend, IconCheck } from "./icons";
 import { Mascot, MASCOT } from "./ui";
-import type { TummyStore } from "./store";
+import { nowLabel, type TummyStore } from "./store";
 
 type Msg = {
   id: string;
@@ -181,7 +181,7 @@ export function AssistantSheet({ store }: { store: TummyStore }) {
     {
       id: uid(),
       from: "tummy",
-      text: "Hi — I'm Tummy. Tell me what you ate, drank or felt and I'll log it for you.",
+      text: "Hi — I'm Tummy. Tell me what you ate, drank or felt and I will log it straight away — no forms.",
     },
   ]);
   const [text, setText] = useState("");
