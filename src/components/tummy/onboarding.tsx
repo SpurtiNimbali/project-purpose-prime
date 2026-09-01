@@ -233,88 +233,114 @@ const QUIZ = [
 ];
 
 export function QuizScreen({ store }: { store: TummyStore }) {
-  const [picks, setPicks] = useState<(number | null)[]>([null, null, null]);
-  const allAnswered = picks.every((p) => p !== null);
+  const [qi, setQi] = useState(0);
+  const [pick, setPick] = useState<number | null>(null);
+  const item = QUIZ[qi];
+  const correct = pick !== null && pick === item.answer;
+
+  const next = () => {
+    if (qi === QUIZ.length - 1) {
+      store.go("protocolIntro");
+      return;
+    }
+    setQi((n) => n + 1);
+    setPick(null);
+  };
 
   return (
     <Screen>
-      <TopBar title="Attention check" onBack={store.back} step="Step 4 of 9" />
+      <TopBar
+        title="Attention check"
+        onBack={store.back}
+        step={`Step 4 of 9 · question ${qi + 1} of ${QUIZ.length}`}
+      />
       <ScreenBody>
-        <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Three quick questions so we know the setup is clear. Wrong answers are fine — I'll explain
-          either way.
-        </p>
-        <div className="mt-5 space-y-5">
-          {QUIZ.map((item, qi) => {
-            const pick = picks[qi];
-            const correct = pick === item.answer;
+        <MascotSays size={78} src={correct ? MASCOT.cheer : MASCOT.calm}>
+          {pick === null
+            ? qi === 0
+              ? "One question at a time. Pick the answer you think is right — you'll need the right one before we move on."
+              : "Nice. Here's the next one."
+            : correct
+              ? "That's it. Read the reason, then carry on."
+              : "Not quite — have another go. Take your time, there's no penalty."}
+        </MascotSays>
+
+        <div className="mt-3 flex gap-1.5">
+          {QUIZ.map((_, i) => (
+            <span
+              key={i}
+              className={cn(
+                "h-[6px] flex-1 rounded-full",
+                i < qi ? "bg-teal" : i === qi ? "bg-sage" : "bg-line",
+              )}
+            />
+          ))}
+        </div>
+
+        <p className="mt-5 text-[22px] font-extrabold leading-snug text-pine">{item.q}</p>
+
+        <div className="mt-4 space-y-2.5">
+          {item.options.map((opt, oi) => {
+            const picked = pick === oi;
+            const wrongPick = picked && !correct;
+            const lock = correct;
             return (
-              <Card key={item.q}>
-                <p className="text-[16px] font-extrabold leading-snug text-pine">
-                  {qi + 1}. {item.q}
-                </p>
-                <div className="mt-3 space-y-2">
-                  {item.options.map((opt, oi) => {
-                    const picked = pick === oi;
-                    const isRight = oi === item.answer;
-                    return (
-                      <button
-                        key={opt}
-                        disabled={pick !== null}
-                        onClick={() => setPicks((p) => p.map((v, i) => (i === qi ? oi : v)))}
-                        className={cn(
-                          "flex min-h-[56px] w-full items-center gap-3 rounded-2xl border-2 px-3 py-2 text-left text-[16px] font-bold",
-                          pick === null
-                            ? "border-line bg-wash text-pine"
-                            : picked && isRight
-                              ? "border-teal bg-mint-soft text-pine"
-                              : picked
-                                ? "border-amber/60 bg-amber-soft text-pine"
-                                : isRight
-                                  ? "border-teal bg-surface text-pine"
-                                  : "border-line bg-surface text-pine-soft opacity-60",
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[16px] font-black",
-                            pick !== null && isRight
-                              ? "bg-teal text-surface"
-                              : "bg-wash text-pine-soft",
-                          )}
-                        >
-                          {pick !== null && isRight ? (
-                            <IconCheck width={20} height={20} />
-                          ) : (
-                            "ABC"[oi]
-                          )}
-                        </span>
-                        <span className="min-w-0 flex-1">{opt}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-                {pick !== null ? (
-                  <p className="mt-3 text-[15px] font-semibold leading-snug text-pine-soft">
-                    <span className="font-extrabold text-pine">
-                      {correct ? "That's right. " : "Not quite. "}
-                    </span>
-                    {item.why}
-                  </p>
-                ) : null}
-              </Card>
+              <button
+                key={opt}
+                disabled={lock}
+                onClick={() => setPick(oi)}
+                className={cn(
+                  "flex min-h-[68px] w-full items-center gap-3 rounded-2xl border-2 px-3 py-2 text-left text-[17px] font-bold",
+                  picked && correct
+                    ? "border-teal bg-mint-soft text-pine"
+                    : wrongPick
+                      ? "border-amber bg-amber-soft text-pine"
+                      : lock
+                        ? "border-line bg-surface text-pine-soft opacity-60"
+                        : "border-line bg-wash text-pine",
+                )}
+              >
+                <span
+                  className={cn(
+                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[16px] font-black",
+                    picked && correct ? "bg-teal text-surface" : "bg-surface text-pine-soft",
+                  )}
+                >
+                  {picked && correct ? <IconCheck width={20} height={20} /> : "ABC"[oi]}
+                </span>
+                <span className="min-w-0 flex-1">{opt}</span>
+              </button>
             );
           })}
         </div>
+
+        {correct ? (
+          <div className="mt-4">
+            <Note tone="green" title="Why this is the answer">
+              {item.why}
+            </Note>
+          </div>
+        ) : pick !== null ? (
+          <div className="mt-4">
+            <Note tone="amber" title="Try again">
+              {item.hint}
+            </Note>
+          </div>
+        ) : null}
       </ScreenBody>
       <StickyFooter>
-        <Btn disabled={!allAnswered} onClick={() => store.go("protocolIntro")}>
-          {allAnswered ? "Continue" : "Answer all three"}
+        <Btn disabled={!correct} onClick={next}>
+          {correct
+            ? qi === QUIZ.length - 1
+              ? "Continue"
+              : "Next question"
+            : "Pick the right answer to continue"}
         </Btn>
       </StickyFooter>
     </Screen>
   );
 }
+
 
 /* ---------------- protocol intro ---------------- */
 
