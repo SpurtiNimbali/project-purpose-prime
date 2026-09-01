@@ -42,6 +42,7 @@ import {
 } from "./icons";
 import {
   clockLabel,
+  computeNextTask,
   untilLabel,
   type LogKind,
   type ScreenKey,
@@ -75,10 +76,16 @@ const HOME_LOGS: {
 
 export function HomeScreen({ store }: { store: TummyStore }) {
   useTick();
-  const task = store.nextTask;
+  const task = computeNextTask(store.plan);
   const hour = new Date().getHours();
   const due = task.state === "due";
   const doneCount = store.plan.filter((p) => p.done).length;
+  const currentIndex = Math.max(0, store.plan.findIndex((p) => !p.done));
+  const railStart = Math.min(
+    Math.max(0, currentIndex - 1),
+    Math.max(0, store.plan.length - 4),
+  );
+  const railItems = store.plan.slice(railStart, railStart + 4);
 
   const TaskIcon =
     task.kind === "recording"
@@ -204,21 +211,25 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             </button>
           </div>
           <div className="mt-3 flex items-start">
-            {store.plan.map((p, i) => {
+            {railStart > 0 ? (
+              <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-teal" aria-label={`${railStart} earlier items`}>•••</span>
+            ) : null}
+            {railItems.map((p, i) => {
               const RailIcon =
                 p.kind === "recording" ? IconMic : p.kind === "meal" ? IconBowl : IconList;
               const current = task.itemId === p.id;
+              const planIndex = railStart + i;
               return (
                 <button
                   key={p.id}
                   onClick={() => store.go("sessionHub")}
                   className="relative flex min-w-0 flex-1 flex-col items-center gap-1.5"
                 >
-                  {i > 0 ? (
+                  {planIndex > 0 ? (
                     <span
                       className={cn(
                         "absolute left-[-50%] top-[13px] h-[3px] w-full",
-                        p.done || store.plan[i - 1].done ? "bg-teal" : "bg-line",
+                        p.done || store.plan[planIndex - 1].done ? "bg-teal" : "bg-line",
                       )}
                     />
                   ) : null}
@@ -240,6 +251,9 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 </button>
               );
             })}
+            {railStart + railItems.length < store.plan.length ? (
+              <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-pine-soft" aria-label={`${store.plan.length - railStart - railItems.length} later items`}>•••</span>
+            ) : null}
           </div>
         </div>
 
@@ -699,7 +713,8 @@ export function LogSleepScreen({ store }: { store: TummyStore }) {
           <Btn
             onClick={() => {
               store.addEntry("sleep", "Sleep", answers.join(" · "));
-              store.markQuestions(new Date().getHours() < 15 ? "morning" : "night");
+              if (store.activeItemId === "qMorning") store.markQuestions("morning");
+              if (store.activeItemId === "qNight") store.markQuestions("night");
               store.go("home");
             }}
 
