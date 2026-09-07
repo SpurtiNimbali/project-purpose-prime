@@ -103,7 +103,7 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
       </ScreenBody>
       <StickyFooter>
         {state === "ok" ? (
-          <Btn onClick={() => store.go("studyIntro")}>Continue</Btn>
+          <Btn onClick={() => store.go("aboutYou")}>Continue</Btn>
         ) : (
           <Btn onClick={check} disabled={id.trim().length < 3}>
             Check my ID
@@ -350,39 +350,43 @@ export function QuizScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- protocol intro ---------------- */
 
+const DAY_STEPS = [
+  {
+    t: "1 · Fasting recording",
+    b: "Soon after waking, before any food, drink or activity. Two minutes.",
+    Icon: IconSun,
+  },
+  {
+    t: "2 · Log your meal",
+    b: "Usually breakfast. Type it or record it out loud — your timers run from here.",
+    Icon: IconBowl,
+  },
+  {
+    t: "3 · Recordings across the next 3 hours",
+    b: "A short recording at each reminder. Only water in between, taken right after a recording.",
+    Icon: IconMic,
+  },
+  {
+    t: "4 · A few questions",
+    b: "Once after your morning recording, and once at the end of the day.",
+    Icon: IconMoon,
+  },
+];
+
 export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
+  const [shown, setShown] = useState(1);
+  const all = shown >= DAY_STEPS.length;
   return (
     <Screen>
       <TopBar title="How a day works" onBack={store.back} step="Step 5 of 9" />
       <ScreenBody>
         <MascotSays size={78}>
-          Every day has the same shape. Once you've done it twice it takes about as much thought as
-          brushing your teeth.
+          Every day has the same shape. I'll show you one step at a time — read each one, then tap
+          for the next.
         </MascotSays>
         <div className="mt-5 space-y-3">
-          {[
-            {
-              t: "1 · Fasting recording",
-              b: "Soon after waking, before any food, drink or activity. Two minutes.",
-              Icon: IconSun,
-            },
-            {
-              t: "2 · Log your meal",
-              b: "Usually breakfast. Type it or record it out loud — your timers run from here.",
-              Icon: IconBowl,
-            },
-            {
-              t: "3 · Recordings across the next 3 hours",
-              b: "A short recording at each reminder. Only water in between, taken right after a recording.",
-              Icon: IconMic,
-            },
-            {
-              t: "4 · A few questions",
-              b: "Once after your morning recording, and once at the end of the day.",
-              Icon: IconMoon,
-            },
-          ].map(({ t, b, Icon }) => (
-            <Card key={t}>
+          {DAY_STEPS.slice(0, shown).map(({ t, b, Icon }, i) => (
+            <Card key={t} className={cn(i === shown - 1 && "border-teal")}>
               <div className="flex gap-3">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
                   <Icon width={24} height={24} />
@@ -394,16 +398,27 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
               </div>
             </Card>
           ))}
+          {!all ? (
+            <p className="pt-1 text-center text-[15px] font-bold text-pine-soft">
+              {shown} of {DAY_STEPS.length}
+            </p>
+          ) : null}
         </div>
-        <div className="mt-4">
-          <Note tone="amber" title="Take your phone case off">
-            A case leaves a gap between the microphone and your skin, and that gap loses most of the
-            sound we're listening for.
-          </Note>
-        </div>
+        {all ? (
+          <div className="mt-4">
+            <Note tone="amber" title="Take your phone case off">
+              A case leaves a gap between the microphone and your skin, and that gap loses most of
+              the sound we're listening for.
+            </Note>
+          </div>
+        ) : null}
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("scheduling")}>Continue</Btn>
+        {all ? (
+          <Btn onClick={() => store.go("scheduling")}>Continue</Btn>
+        ) : (
+          <Btn onClick={() => setShown((s) => s + 1)}>Got it — next step</Btn>
+        )}
       </StickyFooter>
     </Screen>
   );
@@ -413,20 +428,59 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
 
 const PHONE_MODELS: Record<"apple" | "android", string[]> = {
   apple: [
-    "iPhone 12",
-    "iPhone 13",
-    "iPhone 14",
-    "iPhone 15",
+    "iPhone 17 Pro Max",
+    "iPhone 17 Pro",
+    "iPhone 17",
+    "iPhone 16 Pro Max",
+    "iPhone 16 Pro",
+    "iPhone 16 Plus",
     "iPhone 16",
-    "iPhone SE",
+    "iPhone 16e",
+    "iPhone 15 Pro Max",
+    "iPhone 15 Pro",
+    "iPhone 15 Plus",
+    "iPhone 15",
+    "iPhone 14 Pro Max",
+    "iPhone 14 Pro",
+    "iPhone 14 Plus",
+    "iPhone 14",
+    "iPhone 13 Pro Max",
+    "iPhone 13 Pro",
+    "iPhone 13",
+    "iPhone 13 mini",
+    "iPhone 12 Pro Max",
+    "iPhone 12 Pro",
+    "iPhone 12",
+    "iPhone 12 mini",
+    "iPhone 11 Pro Max",
+    "iPhone 11 Pro",
+    "iPhone 11",
+    "iPhone XS / XR",
+    "iPhone SE (2nd or 3rd gen)",
     "Other iPhone",
   ],
   android: [
-    "Samsung Galaxy S23",
+    "Samsung Galaxy S25 Ultra",
+    "Samsung Galaxy S25",
+    "Samsung Galaxy S24 Ultra",
+    "Samsung Galaxy S24+",
     "Samsung Galaxy S24",
-    "Google Pixel 7",
-    "Google Pixel 8",
+    "Samsung Galaxy S23 Ultra",
+    "Samsung Galaxy S23",
+    "Samsung Galaxy S22",
+    "Samsung Galaxy A55",
+    "Samsung Galaxy A54",
+    "Samsung Galaxy Z Fold / Flip",
+    "Google Pixel 9 Pro",
+    "Google Pixel 9",
+    "Google Pixel 8 Pro",
+    "Google Pixel 8 / 8a",
+    "Google Pixel 7 / 7a",
+    "Google Pixel 6 / 6a",
     "OnePlus 12",
+    "OnePlus 11",
+    "Motorola Edge / G series",
+    "Xiaomi / Redmi",
     "Other Android phone",
   ],
 };
@@ -499,7 +553,8 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
               <div className="flex-1">
                 <p className="text-[17px] font-extrabold text-pine">Case check</p>
                 <p className="text-[16px] font-semibold text-pine-soft">
-                  Confirm you can remove your case easily.
+                  The case has to come off for every recording, even if yours is stiff. Take your
+                  time and work it off from one corner.
                 </p>
               </div>
             </div>
@@ -519,7 +574,7 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
                 {caseOff ? <IconCheck width={18} height={18} /> : null}
               </span>
               <span className="text-[16px] font-extrabold text-pine">
-                Yes, my case comes off easily
+                I can get my case off before each recording
               </span>
             </button>
           </Card>
@@ -620,8 +675,8 @@ export function PracticeScreen({ store }: { store: TummyStore }) {
       <TopBar title="Sound check" onBack={store.back} step="Step 9 of 9 · part 1 of 2" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.calm}>
-          First a sound check, then a short practice recording. Twenty seconds of listening — no
-          need to lift your shirt for this one.
+          First a sound check, then a short practice recording. Set up exactly as you will for a
+          real one: case off, shirt lifted, phone flat on the skin of your belly.
         </MascotSays>
 
         <div className="mt-6 flex flex-col items-center">
