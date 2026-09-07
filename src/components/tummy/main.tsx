@@ -535,17 +535,22 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
 }
 
 export function LogMealScreen({ store }: { store: TummyStore }) {
-  const [photo, setPhoto] = useState(false);
+  const [photos, setPhotos] = useState(0);
   const [which, setWhich] = useState("");
   const [desc, setDesc] = useState("");
+  const [time, setTime] = useState(
+    new Date().toTimeString().slice(0, 5),
+  );
   const [mode, setMode] = useState<"type" | "voice">("type");
   const [recorded, setRecorded] = useState(false);
+  const photo = photos > 0;
+  const isSnack = which === "Snack";
   return (
     <Screen>
-      <TopBar title="Log a meal" onBack={store.back} />
+      <TopBar title="Log food or drink" onBack={store.back} />
       <ScreenBody>
         <button
-          onClick={() => setPhoto(true)}
+          onClick={() => setPhotos((p) => p + 1)}
           className={cn(
             "flex h-[170px] w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed",
             photo ? "border-teal bg-mint-soft text-teal" : "border-line bg-surface text-pine-soft",
@@ -553,9 +558,26 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
         >
           <IconCamera width={44} height={44} />
           <span className="text-[17px] font-extrabold">
-            {photo ? "Photo added" : "Add a photo"}
+            {photo
+              ? `${photos} photo${photos === 1 ? "" : "s"} — add another`
+              : "Photo of what you had"}
           </span>
         </button>
+        <p className="mt-2 text-[15px] font-semibold text-pine-soft">
+          {isSnack
+            ? "A photo is best, but a quick line of text is fine for snacks."
+            : "Photos are needed for every meal and drink. Add several if one shot doesn't cover it."}
+        </p>
+        <div className="mt-4">
+          <Field label="What time was this?">
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="min-h-[62px] w-full rounded-2xl border-2 border-line bg-surface px-4 text-[18px] font-extrabold text-pine"
+            />
+          </Field>
+        </div>
         <div className="mt-4 space-y-4">
           <Field label="Which meal?">
             <div className="space-y-2">
