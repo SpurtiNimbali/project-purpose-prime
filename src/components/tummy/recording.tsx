@@ -145,15 +145,20 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                       {p.kind === "recording"
                         ? "Start this recording"
                         : p.kind === "meal"
-                          ? `Log ${p.label.toLowerCase()}`
+                          ? p.id === "mealEnd"
+                            ? "I've finished eating"
+                            : "Log the meal and start eating"
                           : "Answer questions"}
                     </button>
                     {p.kind === "recording" ? (
                       <button
-                        onClick={() => store.missItem(p.id)}
+                        onClick={() => {
+                          store.startItem(p.id);
+                          store.go("skipReason");
+                        }}
                         className="mt-2 min-h-[48px] w-full text-[15px] font-extrabold text-amber-soft"
                       >
-                        Mark as missed
+                        Skip this one and tell us why
                       </button>
                     ) : null}
                   </div>
