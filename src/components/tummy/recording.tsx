@@ -7,6 +7,7 @@ import {
   Card,
   Note,
   Choice,
+  Field,
   Mascot,
   MascotSays,
   StickyFooter,
@@ -31,7 +32,16 @@ import {
   IconLock,
   IconX,
 } from "./icons";
-import { clockLabel, minutesNow, untilLabel, type PlanItem, type TummyStore } from "./store";
+import {
+  clockLabel,
+  minutesNow,
+  untilLabel,
+  QUALITY_RULE,
+  WINDOW_RULE,
+  type PlanItem,
+  type SessionKind,
+  type TummyStore,
+} from "./store";
 import { cn } from "@/lib/utils";
 
 /* ---------------- session hub ---------------- */
