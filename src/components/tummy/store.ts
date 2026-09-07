@@ -36,9 +36,14 @@ export type ScreenKey =
   | "logActivity"
   | "logHydration"
   | "logToilet"
+  | "periodCheck"
   // other
   | "progress"
-  | "profile";
+  | "profile"
+  | "contact"
+  | "contactForm";
+
+export type Gender = "female" | "male" | "other" | "unsaid";
 
 export type Track = "fasting" | "postMeal";
 export type Meal = "breakfast" | "lunch" | "dinner";
