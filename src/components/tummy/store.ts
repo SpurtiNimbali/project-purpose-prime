@@ -5,6 +5,7 @@ export type ScreenKey =
   | "welcome"
   | "studyIntro"
   | "subjectId"
+  | "aboutYou"
   | "protocolIntro"
   | "video"
   | "quiz"
@@ -13,6 +14,7 @@ export type ScreenKey =
   | "practice"
   | "practiceRun"
   | "scheduling"
+  | "snacking"
   | "onboardDone"
   // main
   | "home"
@@ -34,9 +36,14 @@ export type ScreenKey =
   | "logActivity"
   | "logHydration"
   | "logToilet"
+  | "periodCheck"
   // other
   | "progress"
-  | "profile";
+  | "profile"
+  | "contact"
+  | "contactForm";
+
+export type Gender = "female" | "male" | "other" | "unsaid";
 
 export type Track = "fasting" | "postMeal";
 export type Meal = "breakfast" | "lunch" | "dinner";
@@ -127,6 +134,8 @@ export type TummyStore = {
   questions: { morning: boolean; night: boolean };
   markQuestions: (when: "morning" | "night") => void;
   nextTask: NextTask;
+  gender: Gender;
+  setGender: (g: Gender) => void;
 };
 
 export function nowLabel() {
@@ -362,6 +371,7 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
 export function useTummyStore(): TummyStore {
   const [stack, setStack] = useState<ScreenKey[]>(["welcome"]);
 
+  const [gender, setGender] = useState<Gender>("unsaid");
   const [track, setTrack] = useState<Track>("fasting");
   const [meal, setMeal] = useState<Meal>("breakfast");
   const [offset, setOffset] = useState<30 | 90 | 210>(30);
@@ -445,6 +455,8 @@ export function useTummyStore(): TummyStore {
 
   return {
     nextTask,
+    gender,
+    setGender,
     questions,
     markQuestions: (when) => {
       setQuestions((q) => ({ ...q, [when]: true }));
