@@ -189,13 +189,16 @@ export function HomeScreen({ store }: { store: TummyStore }) {
 
           {task.kind === "recording" && task.itemId ? (
             <button
-              onClick={() => store.missItem(task.itemId!)}
+              onClick={() => {
+                store.startItem(task.itemId!);
+                store.go("skipReason");
+              }}
               className={cn(
                 "mt-3 min-h-[48px] w-full rounded-2xl text-[15px] font-extrabold",
                 due ? "text-mint" : "text-pine-soft",
               )}
             >
-              Can't do this one — mark as missed
+              Can't do this one — skip and tell us why
             </button>
           ) : null}
 
