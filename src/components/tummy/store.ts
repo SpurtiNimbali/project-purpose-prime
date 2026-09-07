@@ -5,6 +5,7 @@ export type ScreenKey =
   | "welcome"
   | "studyIntro"
   | "subjectId"
+  | "aboutYou"
   | "protocolIntro"
   | "video"
   | "quiz"
@@ -13,6 +14,7 @@ export type ScreenKey =
   | "practice"
   | "practiceRun"
   | "scheduling"
+  | "snacking"
   | "onboardDone"
   // main
   | "home"
