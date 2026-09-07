@@ -579,9 +579,9 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
           </Field>
         </div>
         <div className="mt-4 space-y-4">
-          <Field label="Which meal?">
+          <Field label="What was it?">
             <div className="space-y-2">
-              {["Breakfast", "Lunch", "Dinner", "Snack"].map((m) => (
+              {["Breakfast", "Lunch", "Dinner", "Snack", "Drink"].map((m) => (
                 <Choice key={m} label={m} selected={which === m} onClick={() => setWhich(m)} />
               ))}
             </div>
