@@ -751,9 +751,31 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
 
 
       <div className="shrink-0 px-5 pb-7">
-        <Btn variant="secondary" onClick={() => store.go("postMeta")}>
-          {left === 0 ? "Continue to the questions" : "Finish early"}
-        </Btn>
+        {left === 0 ? (
+          <Btn variant="secondary" onClick={() => store.go("postMeta")}>
+            Continue to the questions
+          </Btn>
+        ) : confirmEnd ? (
+          <div className="rounded-3xl bg-surface p-5 text-center">
+            <p className="text-[20px] font-extrabold leading-tight text-pine">
+              Are you sure? {left} seconds left
+            </p>
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
+              A full two minutes gives the study usable audio. Stay still and I'll tell you when
+              it's done.
+            </p>
+            <div className="mt-4 space-y-3">
+              <Btn onClick={() => setConfirmEnd(false)}>Keep recording</Btn>
+              <Btn variant="secondary" onClick={() => store.go("postMeta")}>
+                Finish early anyway
+              </Btn>
+            </div>
+          </div>
+        ) : (
+          <Btn variant="secondary" onClick={() => setConfirmEnd(true)}>
+            Finish early
+          </Btn>
+        )}
       </div>
 
       {/* severity picker — top sheet, saves on tap */}
