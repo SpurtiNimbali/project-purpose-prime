@@ -371,6 +371,7 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
 export function useTummyStore(): TummyStore {
   const [stack, setStack] = useState<ScreenKey[]>(["welcome"]);
 
+  const [gender, setGender] = useState<Gender>("unsaid");
   const [track, setTrack] = useState<Track>("fasting");
   const [meal, setMeal] = useState<Meal>("breakfast");
   const [offset, setOffset] = useState<30 | 90 | 210>(30);
