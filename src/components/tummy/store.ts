@@ -134,6 +134,8 @@ export type TummyStore = {
   questions: { morning: boolean; night: boolean };
   markQuestions: (when: "morning" | "night") => void;
   nextTask: NextTask;
+  gender: Gender;
+  setGender: (g: Gender) => void;
 };
 
 export function nowLabel() {
