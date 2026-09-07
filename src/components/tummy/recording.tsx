@@ -688,15 +688,16 @@ export function SeveritySheet({
   );
 }
 
-const TOTAL = 120; // 2 minutes
-
+const MIN_SECONDS = 120; // two minutes minimum, longer is welcome
 
 export function RecordingScreen({ store }: { store: TummyStore }) {
-  const [left, setLeft] = useState(TOTAL);
+  const [elapsed, setElapsed] = useState(0);
   const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [confirmEnd, setConfirmEnd] = useState(false);
   const startedRef = useRef(false);
+  const left = Math.max(0, MIN_SECONDS - elapsed);
+  const past = elapsed >= MIN_SECONDS;
 
   useEffect(() => {
     if (startedRef.current) return;
@@ -705,7 +706,7 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
   }, [store]);
 
   useEffect(() => {
-    const t = setInterval(() => setLeft((l) => (l > 0 ? l - 1 : 0)), 1000);
+    const t = setInterval(() => setElapsed((e) => e + 1), 1000);
     return () => clearInterval(t);
   }, []);
 
@@ -714,11 +715,6 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
     const t = setTimeout(() => setToast(null), 1800);
     return () => clearTimeout(t);
   }, [toast]);
-
-  const mmss = `${String(Math.floor(left / 60)).padStart(2, "0")}:${String(left % 60).padStart(2, "0")}`;
-  const pct = 1 - left / TOTAL;
-  const R = 90;
-  const C = 2 * Math.PI * R;
 
   const counts = store.marks.reduce<Record<string, number>>((acc, m) => {
     acc[m.key] = (acc[m.key] ?? 0) + 1;
@@ -739,42 +735,48 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       </div>
 
       {/* symptom taps at TOP — bottom of the phone is against the mic */}
-      <SymptomGrid counts={counts} onPick={(key, label) => setPending({ key, label, at: TOTAL - left })} />
+      <SymptomGrid counts={counts} onPick={(key, label) => setPending({ key, label, at: elapsed })} />
 
       {/* timer */}
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
-        <RecordTimer left={left} total={TOTAL} />
-        <p className="mt-5 text-[16px] font-bold text-mint">Keep still until the ring empties</p>
+        <RecordTimer elapsed={elapsed} min={MIN_SECONDS} />
+        <p className="mt-5 text-center text-[16px] font-bold text-mint">
+          {past
+            ? "Two minutes done — every extra minute helps. Stay still as long as you can."
+            : "Keep still until the ring fills"}
+        </p>
         <p className="mt-1 text-[15px] font-bold text-surface/70">
           {store.marks.length} symptom {store.marks.length === 1 ? "mark" : "marks"} recorded
         </p>
       </div>
 
-
       <div className="shrink-0 px-5 pb-7">
-        {left === 0 ? (
-          <Btn variant="secondary" onClick={() => store.go("postMeta")}>
-            Continue to the questions
-          </Btn>
+        {past ? (
+          <>
+            <Btn onClick={() => store.go("postMeta")}>Finish and answer the questions</Btn>
+            <p className="mt-3 text-center text-[15px] font-bold text-mint">
+              Or keep going — longer recordings are genuinely more useful.
+            </p>
+          </>
         ) : confirmEnd ? (
           <div className="rounded-3xl bg-surface p-5 text-center">
             <p className="text-[20px] font-extrabold leading-tight text-pine">
               Are you sure? {left} seconds left
             </p>
             <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
-              A full two minutes gives the study usable audio. Stay still and I'll tell you when
-              it's done.
+              Two minutes is the minimum the study can use. Stay still and I'll tell you the moment
+              you're there.
             </p>
             <div className="mt-4 space-y-3">
               <Btn onClick={() => setConfirmEnd(false)}>Keep recording</Btn>
               <Btn variant="secondary" onClick={() => store.go("postMeta")}>
-                Finish early anyway
+                Stop anyway
               </Btn>
             </div>
           </div>
         ) : (
           <Btn variant="secondary" onClick={() => setConfirmEnd(true)}>
-            Finish early
+            Stop early
           </Btn>
         )}
       </div>
@@ -791,7 +793,6 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
           }}
         />
       ) : null}
-
 
       {toast ? (
         <div className="pointer-events-none absolute inset-x-5 top-[350px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
