@@ -25,12 +25,20 @@ import {
   FastingCheckScreen,
   WhichMealScreen,
   MealCaptureScreen,
+  MealEndScreen,
   SessionCheckScreen,
   PositioningScreen,
   RecordingScreen,
   PostMetaScreen,
+  SnackSkipScreen,
+  SkipReasonScreen,
+  ExtraSessionScreen,
   UploadDoneScreen,
 } from "@/components/tummy/recording";
+import {
+  MorningQuestionsScreen,
+  EveningCheckinScreen,
+} from "@/components/tummy/questions";
 import {
   HomeScreen,
   LogHubScreen,
