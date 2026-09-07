@@ -548,11 +548,13 @@ export const SYMPTOMS = [
 
 export const SEV_LABELS = ["very mild", "mild", "moderate", "strong", "very strong"];
 
-/** Big, legible countdown ring shared by the real recording and the dry run. */
-export function RecordTimer({ left, total }: { left: number; total: number }) {
-  const mm = String(Math.floor(left / 60)).padStart(2, "0");
-  const ss = String(left % 60).padStart(2, "0");
-  const pct = Math.min(1, Math.max(0, 1 - left / total));
+/** Big, legible ring shared by the real recording and the dry run. */
+export function RecordTimer({ elapsed, min }: { elapsed: number; min: number }) {
+  const past = elapsed >= min;
+  const shown = past ? elapsed : min - elapsed;
+  const mm = String(Math.floor(shown / 60)).padStart(2, "0");
+  const ss = String(shown % 60).padStart(2, "0");
+  const pct = past ? 1 : Math.min(1, Math.max(0, elapsed / min));
   const R = 96;
   const C = 2 * Math.PI * R;
 
@@ -586,7 +588,7 @@ export function RecordTimer({ left, total }: { left: number; total: number }) {
           {mm}:{ss}
         </p>
         <p className="mt-2 text-[15px] font-bold text-mint">
-          left of {Math.round(total / 60)} min
+          {past ? "recorded so far" : `until ${Math.round(min / 60)} min minimum`}
         </p>
       </div>
     </div>
