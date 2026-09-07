@@ -695,6 +695,7 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
   const [left, setLeft] = useState(TOTAL);
   const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [confirmEnd, setConfirmEnd] = useState(false);
   const startedRef = useRef(false);
 
   useEffect(() => {
