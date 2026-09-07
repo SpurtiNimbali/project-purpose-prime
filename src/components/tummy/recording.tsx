@@ -78,11 +78,12 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
     store.startItem(p.id);
     if (p.kind === "recording") {
       store.setTrack(p.fasting ? "fasting" : "postMeal");
+      store.setSessionKind(p.sessionKind ?? (p.fasting ? "fasted" : "postMeal"));
       store.go("caseReminder");
     } else if (p.kind === "meal") {
-      store.go("logMeal");
+      store.go(p.id === "mealEnd" ? "mealEnd" : "mealCapture");
     } else {
-      store.go("logSleep");
+      store.go(p.id === "qEvening" ? "eveningCheckin" : "morningQuestions");
     }
   };
 
