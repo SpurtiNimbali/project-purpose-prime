@@ -192,10 +192,18 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
               Everything is done today. Nothing more until tomorrow morning.
             </p>
           ) : null}
+
+          <button
+            onClick={() => store.go("extraSession")}
+            className="mt-3 flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-teal bg-surface text-[17px] font-extrabold text-teal"
+          >
+            <IconMic width={22} height={22} />
+            Record an extra session
+          </button>
         </div>
 
         <p className="pt-2 text-center text-[15px] font-bold text-pine-soft">
-          No food or drinks other than water for 3 hours after your meal
+          {WINDOW_RULE}
         </p>
       </div>
     </Screen>
