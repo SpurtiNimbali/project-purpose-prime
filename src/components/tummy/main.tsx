@@ -641,19 +641,21 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
       </ScreenBody>
       <StickyFooter>
         <Btn
-          disabled={!which}
+          disabled={!which || (!photo && !isSnack && desc.trim().length === 0)}
           onClick={() => {
-            store.addEntry("meal", which || "Meal", desc || (photo ? "Photo added" : undefined));
-            const item = store.plan.find(
-              (p) => p.kind === "meal" && !p.done && p.label.toLowerCase() === which.toLowerCase(),
-            );
-            store.completeItem(item ? item.id : (store.plan.find((p) => p.kind === "meal" && !p.done)?.id ?? ""));
-            store.go("home");
+            const detail = [
+              time,
+              desc.trim() || undefined,
+              photo ? `${photos} photo${photos === 1 ? "" : "s"}` : undefined,
+            ]
+              .filter(Boolean)
+              .join(" · ");
+            store.addEntry(which === "Drink" ? "hydration" : "meal", which, detail);
+            store.go("logHub");
           }}
         >
-          Save meal
+          Save to today's diary
         </Btn>
-
       </StickyFooter>
     </Screen>
   );
