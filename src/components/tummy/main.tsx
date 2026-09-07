@@ -275,6 +275,26 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           </div>
         </div>
 
+        <button
+          onClick={() => {
+            store.startExtraSession();
+            store.go("extraSession");
+          }}
+          className="mt-4 flex min-h-[64px] w-full items-center gap-3 rounded-3xl border border-line bg-surface px-4 text-left active:scale-[0.99]"
+        >
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+            <IconMic width={22} height={22} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[16px] font-extrabold text-pine">
+              Something feels different?
+            </span>
+            <span className="block text-[15px] font-semibold text-pine-soft">
+              Add an extra 2 minute recording — loud sounds, worse symptoms
+            </span>
+          </span>
+        </button>
+
         {/* quick log */}
         <div className="mt-5">
           <div className="flex items-end justify-between gap-3">
