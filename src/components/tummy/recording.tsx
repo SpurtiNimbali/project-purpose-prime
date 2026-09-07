@@ -315,8 +315,8 @@ export function WhichMealScreen({ store }: { store: TummyStore }) {
       <TopBar title="Which meal?" onBack={store.back} />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Pick the meal these recordings will follow. Your three timers start from the moment you
-          finish eating.
+          Pick the one meal your recordings will follow. It stays the same every study day, so
+          choose the meal you're most likely to eat at a steady time.
         </p>
         <div className="mt-5 space-y-3">
           {meals.map(({ k, label, Icon }) => (
@@ -338,56 +338,113 @@ export function WhichMealScreen({ store }: { store: TummyStore }) {
             </button>
           ))}
         </div>
+        <div className="mt-4">
+          <Note tone="amber" title="This can't change later">
+            Every study day uses the same meal, so the recordings can be compared with each other.
+          </Note>
+        </div>
       </ScreenBody>
     </Screen>
   );
 }
 
-/* ---------------- meal capture ---------------- */
+/* ---------------- meal start ---------------- */
 
 export function MealCaptureScreen({ store }: { store: TummyStore }) {
-  const [photo, setPhoto] = useState(false);
+  const [photos, setPhotos] = useState(0);
   const [desc, setDesc] = useState("");
   return (
     <Screen>
-      <TopBar title={`Capture your ${store.meal}`} onBack={store.back} />
+      <TopBar title={`Start your ${store.meal}`} onBack={store.back} step="Start of meal" />
       <ScreenBody>
         <button
-          onClick={() => setPhoto(true)}
+          onClick={() => setPhotos((p) => p + 1)}
           className={cn(
-            "flex h-[190px] w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed",
-            photo ? "border-teal bg-mint-soft text-teal" : "border-line bg-surface text-pine-soft",
+            "flex h-[180px] w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed",
+            photos ? "border-teal bg-mint-soft text-teal" : "border-line bg-surface text-pine-soft",
           )}
         >
           <IconCamera width={48} height={48} />
           <span className="text-[17px] font-extrabold">
-            {photo ? "Photo added" : "Upload a photo of the meal"}
+            {photos ? `${photos} photo${photos === 1 ? "" : "s"} added — add another` : "Photo of the plate"}
           </span>
         </button>
+        <p className="mt-2 text-[15px] font-semibold text-pine-soft">
+          More than one photo is welcome when a single shot doesn't capture everything.
+        </p>
         <div className="mt-4">
-          <p className="mb-2 text-[16px] font-extrabold text-pine">Or describe it</p>
-          <TextInput
-            value={desc}
-            onChange={(e) => setDesc(e.target.value)}
-            placeholder="Two eggs, toast, black coffee"
-          />
+          <Field label="What's in it?" hint="A short description, or a voice note if it's easier.">
+            <TextInput
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              placeholder="Two eggs, toast, black coffee"
+            />
+          </Field>
         </div>
         <div className="mt-4">
-          <Note tone="blue" title="We'll set the three timers for you">
-            Once you save, reminders land at 30 minutes, 90 minutes and 3 hours from now. Only water in between, taken right after a recording.
+          <Note tone="blue" title="Timers start when you finish, not now">
+            Tap below as you take the first bite. When you're done eating, tap "I've finished" and
+            the app sets every recording from that moment: right away, then every 30 minutes for
+            three and a half hours.
           </Note>
         </div>
       </ScreenBody>
       <StickyFooter>
         <Btn
-          disabled={!photo && desc.trim().length === 0}
+          disabled={!photos && desc.trim().length === 0}
           onClick={() => {
-            store.setOffset(30);
+            store.addEntry(
+              "meal",
+              store.meal[0].toUpperCase() + store.meal.slice(1),
+              desc.trim() || `${photos} photo${photos === 1 ? "" : "s"}`,
+            );
+            store.completeItem("mealStart");
+            store.go("mealEnd");
+          }}
+        >
+          I'm starting to eat now
+        </Btn>
+      </StickyFooter>
+    </Screen>
+  );
+}
+
+/* ---------------- meal end — the timing anchor ---------------- */
+
+export function MealEndScreen({ store }: { store: TummyStore }) {
+  return (
+    <Screen>
+      <TopBar title="Finished eating?" onBack={store.back} step="Timing anchor" />
+      <ScreenBody className="flex flex-col">
+        <div className="flex flex-1 flex-col items-center justify-center text-center">
+          <Mascot src={MASCOT.wave} size={150} />
+          <h2 className="mt-4 text-[25px] font-extrabold leading-tight text-pine">
+            Tap the moment your last bite is done
+          </h2>
+          <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
+            Everything after this is measured from the end of your meal, so accuracy here matters
+            more than anywhere else.
+          </p>
+        </div>
+        <Note tone="amber" title="From now until the last recording">
+          {WINDOW_RULE}
+        </Note>
+      </ScreenBody>
+      <StickyFooter>
+        <Btn
+          onClick={() => {
+            store.completeItem("mealEnd");
+            store.addEntry("meal", "Finished eating", "Recording timers set");
             store.go("sessionHub");
           }}
         >
-          Save meal and start timers
+          I've finished eating — start the timers
         </Btn>
+        <div className="mt-3">
+          <Btn variant="secondary" onClick={() => store.go("home")}>
+            Still eating
+          </Btn>
+        </div>
       </StickyFooter>
     </Screen>
   );
