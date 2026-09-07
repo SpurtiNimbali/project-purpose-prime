@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import bristolScale from "@/assets/bristol-scale.jpg";
 import {
   Screen,
   ScreenBody,
