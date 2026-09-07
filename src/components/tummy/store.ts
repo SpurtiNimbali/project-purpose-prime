@@ -455,6 +455,8 @@ export function useTummyStore(): TummyStore {
 
   return {
     nextTask,
+    gender,
+    setGender,
     questions,
     markQuestions: (when) => {
       setQuestions((q) => ({ ...q, [when]: true }));
