@@ -459,7 +459,7 @@ export function useTummyStore(): TummyStore {
         return p;
       });
     });
-    setPlan((prev) => prev);
+    
     const item = plan.find((p) => p.id === id);
     if (item?.kind === "recording") setLastRecordingAt(at);
   }, [plan]);
