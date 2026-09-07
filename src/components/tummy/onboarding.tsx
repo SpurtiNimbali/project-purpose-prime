@@ -967,23 +967,74 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- daily schedule ---------------- */
 
+const SCHEDULE_ROWS = {
+  weekday: [
+    { label: "Wake up", def: "07:00", Icon: IconSun },
+    { label: "Breakfast", def: "08:00", Icon: IconBowl },
+    { label: "Lunch", def: "12:30", Icon: IconBowl },
+    { label: "Dinner", def: "19:00", Icon: IconSunset },
+    { label: "Go to bed", def: "23:00", Icon: IconMoon },
+  ],
+  weekend: [
+    { label: "Wake up", def: "08:30", Icon: IconSun },
+    { label: "Breakfast", def: "09:30", Icon: IconBowl },
+    { label: "Lunch", def: "13:30", Icon: IconBowl },
+    { label: "Dinner", def: "20:00", Icon: IconSunset },
+    { label: "Go to bed", def: "23:30", Icon: IconMoon },
+  ],
+} as const;
+
+export function DayTypeTabs({
+  value,
+  onChange,
+}: {
+  value: "weekday" | "weekend";
+  onChange: (v: "weekday" | "weekend") => void;
+}) {
+  return (
+    <div className="flex rounded-2xl bg-surface p-1">
+      {(
+        [
+          { k: "weekday", label: "Weekdays" },
+          { k: "weekend", label: "Weekends" },
+        ] as const
+      ).map(({ k, label }) => (
+        <button
+          key={k}
+          onClick={() => onChange(k)}
+          className={cn(
+            "min-h-[56px] flex-1 rounded-xl text-[17px] font-extrabold",
+            value === k ? "bg-teal text-surface" : "text-pine-soft",
+          )}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function SchedulingScreen({ store }: { store: TummyStore }) {
+  const [tab, setTab] = useState<"weekday" | "weekend">("weekday");
+  const [seenWeekend, setSeenWeekend] = useState(false);
   return (
     <Screen>
       <TopBar title="Daily schedule" onBack={store.back} step="Step 6 of 9" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.cheer}>
-          Tell me when you usually eat and sleep, and I'll place your reminders around your life
-          instead of the other way round.
+          Tell me when you usually eat and sleep. Weekends are usually different, so I ask for both.
         </MascotSays>
-        <div className="mt-5 space-y-3">
-          {[
-            { label: "Wake up", def: "07:00", Icon: IconSun },
-            { label: "Breakfast", def: "08:00", Icon: IconBowl },
-            { label: "Lunch", def: "12:30", Icon: IconBowl },
-            { label: "Dinner", def: "19:00", Icon: IconSunset },
-            { label: "Go to bed", def: "23:00", Icon: IconMoon },
-          ].map(({ label, def, Icon }) => (
+        <div className="mt-5">
+          <DayTypeTabs
+            value={tab}
+            onChange={(v) => {
+              setTab(v);
+              if (v === "weekend") setSeenWeekend(true);
+            }}
+          />
+        </div>
+        <div className="mt-4 space-y-3">
+          {SCHEDULE_ROWS[tab].map(({ label, def, Icon }) => (
             <div
               key={label}
               className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-4"
@@ -995,6 +1046,7 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
                 {label}
               </span>
               <input
+                key={tab + label}
                 type="time"
                 defaultValue={def}
                 className="min-h-[52px] shrink-0 rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine"
@@ -1008,7 +1060,148 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
         </p>
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("technicalSetup")}>Save my schedule</Btn>
+        {tab === "weekday" && !seenWeekend ? (
+          <Btn
+            onClick={() => {
+              setTab("weekend");
+              setSeenWeekend(true);
+            }}
+          >
+            Next: weekend times
+          </Btn>
+        ) : (
+          <Btn onClick={() => store.go("snacking")}>Save my schedule</Btn>
+        )}
+      </StickyFooter>
+    </Screen>
+  );
+}
+
+/* ---------------- snacking ---------------- */
+
+export function SnackingScreen({ store }: { store: TummyStore }) {
+  const [tab, setTab] = useState<"weekday" | "weekend">("weekday");
+  const [snacks, setSnacks] = useState<"" | "yes" | "no">("");
+  const [seenWeekend, setSeenWeekend] = useState(false);
+  return (
+    <Screen>
+      <TopBar title="Snacking" onBack={store.back} step="Step 6 of 9" />
+      <ScreenBody>
+        <MascotSays size={78} src={MASCOT.calm}>
+          Do you usually snack in between meals?
+        </MascotSays>
+        <div className="mt-5 space-y-2">
+          <Choice
+            label="Yes, most days"
+            selected={snacks === "yes"}
+            onClick={() => setSnacks("yes")}
+          />
+          <Choice
+            label="No, rarely or never"
+            selected={snacks === "no"}
+            onClick={() => setSnacks("no")}
+          />
+        </div>
+        {snacks === "yes" ? (
+          <>
+            <div className="mt-5">
+              <DayTypeTabs
+                value={tab}
+                onChange={(v) => {
+                  setTab(v);
+                  if (v === "weekend") setSeenWeekend(true);
+                }}
+              />
+            </div>
+            <div className="mt-4 space-y-3">
+              {[
+                { label: "Morning snack", def: tab === "weekday" ? "10:30" : "11:00" },
+                { label: "Afternoon snack", def: tab === "weekday" ? "16:00" : "16:30" },
+                { label: "Evening snack", def: tab === "weekday" ? "21:00" : "21:30" },
+              ].map(({ label, def }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-4"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+                    <IconBowl width={24} height={24} />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold text-pine">
+                    {label}
+                  </span>
+                  <input
+                    key={tab + label}
+                    type="time"
+                    defaultValue={def}
+                    className="min-h-[52px] shrink-0 rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine"
+                  />
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-pine-soft">
+              If you're not sure, a rough guess is completely fine — this doesn't have to be
+              accurate.
+            </p>
+          </>
+        ) : null}
+      </ScreenBody>
+      <StickyFooter>
+        {snacks === "yes" && !seenWeekend ? (
+          <Btn
+            onClick={() => {
+              setTab("weekend");
+              setSeenWeekend(true);
+            }}
+          >
+            Next: weekend snacks
+          </Btn>
+        ) : (
+          <Btn disabled={!snacks} onClick={() => store.go("technicalSetup")}>
+            Continue
+          </Btn>
+        )}
+      </StickyFooter>
+    </Screen>
+  );
+}
+
+/* ---------------- about you ---------------- */
+
+export function AboutYouScreen({ store }: { store: TummyStore }) {
+  return (
+    <Screen>
+      <TopBar title="About you" onBack={store.back} step="Step 2 of 9" />
+      <ScreenBody>
+        <MascotSays size={78}>
+          One quick question. Gut activity differs between people, so the study team records this
+          alongside your subject ID.
+        </MascotSays>
+        <div className="mt-5 space-y-2">
+          {(
+            [
+              { k: "female", label: "Female" },
+              { k: "male", label: "Male" },
+              { k: "other", label: "Another description" },
+              { k: "unsaid", label: "Prefer not to say" },
+            ] as const
+          ).map(({ k, label }) => (
+            <Choice
+              key={k}
+              label={label}
+              selected={store.gender === k}
+              onClick={() => store.setGender(k)}
+            />
+          ))}
+        </div>
+        <div className="mt-4">
+          <Note tone="green" title="Why we ask">
+            If you're female, we'll add one short question about your cycle to the evening check-in,
+            because it can change gut symptoms.
+          </Note>
+        </div>
+      </ScreenBody>
+      <StickyFooter>
+        <Btn onClick={() => store.go("studyIntro")}>Continue</Btn>
       </StickyFooter>
     </Screen>
   );
