@@ -249,23 +249,28 @@ export function CaseReminderScreen({ store }: { store: TummyStore }) {
 export function FastingCheckScreen({ store }: { store: TummyStore }) {
   return (
     <Screen>
-      <TopBar title="Fasting check" onBack={store.back} />
+      <TopBar title="Fasted check" onBack={store.back} />
       <ScreenBody className="flex flex-col">
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <Mascot src={MASCOT.calm} size={150} />
-          <h2 className="mt-4 text-[26px] font-extrabold leading-tight text-pine">
-            Are you in a fasting state right now?
+          <Mascot src={MASCOT.calm} size={140} />
+          <h2 className="mt-4 text-[25px] font-extrabold leading-tight text-pine">
+            Still fasted, and within 30 minutes of waking?
           </h2>
           <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
-            No food, no drinks other than a sip of water, and no exercise since you woke up.
+            Nothing eaten or drunk — a few slow sips of water are fine if you really needed them. No
+            walking about; the bathroom is fine. Sitting up in bed counts, lying down doesn't.
           </p>
         </div>
+        <Note tone="amber" title="If either is a no">
+          Skip this morning's recording and tell us why. We'd much rather have a gap than a
+          recording we can't use.
+        </Note>
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("positioning")}>Yes, I am fasting</Btn>
+        <Btn onClick={() => store.go("positioning")}>Yes — fasted and just woke up</Btn>
         <div className="mt-3">
-          <Btn variant="secondary" onClick={() => store.go("home")}>
-            No, return home
+          <Btn variant="danger" onClick={() => store.go("skipReason")}>
+            No — skip this one
           </Btn>
         </div>
       </StickyFooter>
