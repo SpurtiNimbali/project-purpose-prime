@@ -15,6 +15,8 @@ import {
   PracticeScreen,
   PracticeRunScreen,
   SchedulingScreen,
+  SnackingScreen,
+  AboutYouScreen,
   OnboardDoneScreen,
 } from "@/components/tummy/onboarding";
 import {
@@ -40,6 +42,9 @@ import {
   LogToiletScreen,
   ProgressScreen,
   ProfileScreen,
+  PeriodCheckScreen,
+  ContactScreen,
+  ContactFormScreen,
 } from "@/components/tummy/main";
 
 const TITLE = "Tummy — Stanford bowel sound study companion";
@@ -74,6 +79,8 @@ const ONBOARD_SCREENS: ScreenKey[] = [
   "practice",
   "practiceRun",
   "scheduling",
+  "snacking",
+  "aboutYou",
   "onboardDone",
 ];
 
@@ -93,6 +100,8 @@ function TummyApp() {
     practice: <PracticeScreen store={store} />,
     practiceRun: <PracticeRunScreen store={store} />,
     scheduling: <SchedulingScreen store={store} />,
+    snacking: <SnackingScreen store={store} />,
+    aboutYou: <AboutYouScreen store={store} />,
     onboardDone: <OnboardDoneScreen store={store} />,
     home: <HomeScreen store={store} />,
     sessionHub: <SessionHubScreen store={store} />,
@@ -114,6 +123,9 @@ function TummyApp() {
     logToilet: <LogToiletScreen store={store} />,
     progress: <ProgressScreen store={store} />,
     profile: <ProfileScreen store={store} />,
+    periodCheck: <PeriodCheckScreen store={store} />,
+    contact: <ContactScreen store={store} />,
+    contactForm: <ContactFormScreen store={store} />,
   };
 
   const dark = DARK_SCREENS.includes(s);
