@@ -728,8 +728,9 @@ export function LogSleepScreen({ store }: { store: TummyStore }) {
             onClick={() => {
               store.addEntry("sleep", "Sleep", answers.join(" · "));
               if (store.activeItemId === "qMorning") store.markQuestions("morning");
-              if (store.activeItemId === "qNight") store.markQuestions("night");
-              store.go("home");
+              const night = store.activeItemId === "qNight";
+              if (night) store.markQuestions("night");
+              store.go(night && store.gender === "female" ? "periodCheck" : "home");
             }}
 
           >
@@ -840,6 +841,8 @@ export function LogHydrationScreen({ store }: { store: TummyStore }) {
 export function LogToiletScreen({ store }: { store: TummyStore }) {
   const [consistency, setConsistency] = useState(0);
   const [urgency, setUrgency] = useState("");
+  const [scale, setScale] = useState(false);
+  const [urgencyInfo, setUrgencyInfo] = useState(false);
   return (
     <Screen>
       <TopBar title="Log toilet habits" onBack={store.back} />
@@ -868,6 +871,27 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
           </div>
 
           <Field label="Consistency" hint="1 is hard and lumpy, 7 is entirely liquid.">
+            <button
+              onClick={() => setScale((v) => !v)}
+              className="mb-3 flex min-h-[56px] w-full items-center gap-3 rounded-2xl border-2 border-line bg-surface px-4 text-left"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-teal text-[16px] font-black text-teal">
+                i
+              </span>
+              <span className="min-w-0 flex-1 text-[16px] font-extrabold text-pine">
+                {scale ? "Hide consistency descriptions" : "Check consistency descriptions"}
+              </span>
+            </button>
+            {scale ? (
+              <img
+                src={bristolScale}
+                alt="Bristol stool scale showing types 1 to 7, from separate hard lumps to entirely liquid"
+                width={1024}
+                height={1280}
+                loading="lazy"
+                className="mb-3 w-full rounded-2xl border border-line"
+              />
+            ) : null}
             <div className="flex gap-1.5">
               {[1, 2, 3, 4, 5, 6, 7].map((n) => (
                 <button
@@ -886,6 +910,24 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
             </div>
           </Field>
           <Field label="Was there any urgency?">
+            <button
+              onClick={() => setUrgencyInfo((v) => !v)}
+              className="mb-3 flex min-h-[56px] w-full items-center gap-3 rounded-2xl border-2 border-line bg-surface px-4 text-left"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-teal text-[16px] font-black text-teal">
+                ?
+              </span>
+              <span className="min-w-0 flex-1 text-[16px] font-extrabold text-pine">
+                What does urgency mean?
+              </span>
+            </button>
+            {urgencyInfo ? (
+              <p className="mb-3 rounded-2xl bg-mint-soft px-4 py-3 text-[16px] font-semibold leading-snug text-pine">
+                Urgency is the feeling of needing to go right now, with little or no warning. "A
+                little" means you could have waited a few minutes; "a lot" means you had to stop
+                what you were doing and get to a toilet straight away.
+              </p>
+            ) : null}
             <div className="space-y-2">
               {["No", "A little", "A lot"].map((u) => (
                 <Choice key={u} label={u} selected={urgency === u} onClick={() => setUrgency(u)} />
@@ -1056,9 +1098,160 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
           <Btn variant="secondary" onClick={() => store.go("welcome")}>
             Restart the walkthrough
           </Btn>
-          <Btn variant="danger">Withdraw from the study</Btn>
+          <Btn variant="secondary" onClick={() => store.go("contact")}>
+            Contact the study team
+          </Btn>
         </div>
       </ScreenBody>
+    </Screen>
+  );
+}
+
+/* ---------------- period check-in ---------------- */
+
+export function PeriodCheckScreen({ store }: { store: TummyStore }) {
+  return (
+    <Screen>
+      <TopBar title="Evening check-in" onBack={store.back} />
+      <ScreenBody>
+        <MascotSays src={MASCOT.calm} size={78}>
+          Last one for today — are you on your period right now?
+        </MascotSays>
+        <div className="mt-5 space-y-2">
+          {["Yes", "No", "Not sure", "Prefer not to say"].map((o) => (
+            <Choice
+              key={o}
+              label={o}
+              onClick={() => {
+                store.addEntry("symptom", "Period check", o);
+                store.go("home");
+              }}
+            />
+          ))}
+        </div>
+        <div className="mt-4">
+          <Note tone="green" title="Why we ask">
+            Cycle timing can change gut symptoms, so this helps the team read your recordings
+            properly. It's stored against your subject ID only.
+          </Note>
+        </div>
+      </ScreenBody>
+    </Screen>
+  );
+}
+
+/* ---------------- contact the study team ---------------- */
+
+export function ContactScreen({ store }: { store: TummyStore }) {
+  return (
+    <Screen>
+      <TopBar title="Contact the study team" onBack={store.back} />
+      <ScreenBody>
+        <MascotSays size={78}>
+          Tell me what's going on and I'll point you to the right person. Most things can be sorted
+          without leaving the study.
+        </MascotSays>
+        <div className="mt-5 space-y-3">
+          <Card onClick={() => store.setChatOpen(true)}>
+            <p className="text-[17px] font-extrabold text-pine">Ask me first</p>
+            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
+              Missed recordings, timings, reminders and app problems — I can usually answer straight
+              away.
+            </p>
+          </Card>
+          <Card onClick={() => store.go("contactForm")}>
+            <p className="text-[17px] font-extrabold text-pine">Message your study coordinator</p>
+            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
+              Scheduling, compensation, or anything about taking part. Replies within one working
+              day.
+            </p>
+          </Card>
+          <Card onClick={() => store.go("contactForm")}>
+            <p className="text-[17px] font-extrabold text-pine">Speak to the lead researcher</p>
+            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
+              Questions about the science, your data, or how the recordings are used.
+            </p>
+          </Card>
+          <Card onClick={() => store.go("contactForm")}>
+            <p className="text-[17px] font-extrabold text-pine">Raise a concern or complaint</p>
+            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
+              Goes to the study manager and, if you ask, the independent review board.
+            </p>
+          </Card>
+        </div>
+        <div className="mt-4">
+          <Note tone="green" title="Prefer to phone?">
+            Your coordinator is on (650) 555-0134, weekdays 9am to 5pm.
+          </Note>
+        </div>
+      </ScreenBody>
+    </Screen>
+  );
+}
+
+export function ContactFormScreen({ store }: { store: TummyStore }) {
+  const [topic, setTopic] = useState("");
+  const [msg, setMsg] = useState("");
+  const [sent, setSent] = useState(false);
+  return (
+    <Screen>
+      <TopBar title="Send a message" onBack={store.back} />
+      <ScreenBody>
+        {sent ? (
+          <>
+            <MascotSays src={MASCOT.cheer} size={78}>
+              Sent. Someone from the study team will come back to you within one working day.
+            </MascotSays>
+            <div className="mt-4">
+              <Note tone="green" title="Nothing changes in the meantime">
+                Keep recording as usual — if you need to pause, say so and the team will arrange it
+                with you.
+              </Note>
+            </div>
+          </>
+        ) : (
+          <>
+            <Field label="What's it about?">
+              <div className="space-y-2">
+                {[
+                  "Scheduling or timings",
+                  "The app isn't working",
+                  "Compensation",
+                  "A concern or complaint",
+                  "I'd like to pause or stop taking part",
+                ].map((t) => (
+                  <Choice key={t} label={t} selected={topic === t} onClick={() => setTopic(t)} />
+                ))}
+              </div>
+            </Field>
+            <div className="mt-4">
+              <Field label="Tell us a bit more" hint="A sentence or two is plenty.">
+                <textarea
+                  value={msg}
+                  onChange={(e) => setMsg(e.target.value)}
+                  rows={5}
+                  placeholder="What happened, and what would help?"
+                  className="w-full rounded-2xl border-2 border-line bg-surface p-4 text-[17px] font-semibold text-pine placeholder:text-pine-soft/60 focus:border-teal focus:outline-none"
+                />
+              </Field>
+            </div>
+            <div className="mt-4">
+              <Note tone="blue" title="Want a quicker answer?">
+                Ask Tummy in the chat — timing and app questions are usually answered instantly.
+              </Note>
+            </div>
+          </>
+        )}
+      </ScreenBody>
+      <StickyFooter>
+        {sent ? (
+          <Btn onClick={() => store.go("home")}>Back to home</Btn>
+        ) : (
+          <Btn disabled={!topic} onClick={() => setSent(true)}>
+            Send to the study team
+          </Btn>
+        )}
+      </StickyFooter>
     </Screen>
   );
 }
