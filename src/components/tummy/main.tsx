@@ -775,10 +775,7 @@ export function LogSleepScreen({ store }: { store: TummyStore }) {
           <Btn
             onClick={() => {
               store.addEntry("sleep", "Sleep", answers.join(" · "));
-              if (store.activeItemId === "qMorning") store.markQuestions("morning");
-              const night = store.activeItemId === "qNight";
-              if (night) store.markQuestions("night");
-              store.go(night && store.gender === "female" ? "periodCheck" : "home");
+              store.go("logHub");
             }}
 
           >
