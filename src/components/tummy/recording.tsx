@@ -367,28 +367,51 @@ export function MealCaptureScreen({ store }: { store: TummyStore }) {
 /* ---------------- session checklist ---------------- */
 
 export function SessionCheckScreen({ store }: { store: TummyStore }) {
+  const preMeal = store.sessionKind === "preMeal";
+  const extra = store.sessionKind === "extra";
   return (
     <Screen>
-      <TopBar title="Session checklist" onBack={store.back} />
+      <TopBar title="Quick check" onBack={store.back} />
       <ScreenBody className="flex flex-col">
         <div className="flex flex-1 flex-col justify-center">
           <Mascot src={MASCOT.calm} size={120} className="mx-auto" />
           <h2 className="mt-4 text-center text-[24px] font-extrabold leading-tight text-pine">
-            Please confirm you haven't had any snacks or drinks after that target meal
+            {preMeal
+              ? "Are you about to start eating, right after this recording?"
+              : extra
+                ? "Quiet room, case off, sitting upright?"
+                : "Have you had anything at all since the meal?"}
           </h2>
           <p className="mt-3 text-center text-[17px] font-semibold leading-snug text-pine-soft">
-            Anything eaten in between changes what we hear, so we'd rather skip the session than
-            record it.
+            {preMeal
+              ? "This recording has to sit immediately before the first bite."
+              : extra
+                ? "Same site and same rules as your scheduled sessions."
+                : "No snacks, no drinks other than water — and water only if it was straight after a recording, at least 15 minutes ago."}
           </p>
         </div>
+        <Note tone="amber" title="Quality over quantity">
+          {QUALITY_RULE}
+        </Note>
       </ScreenBody>
       <StickyFooter>
         <Btn onClick={() => store.go("positioning")}>
-          I haven't had anything besides the target meal
+          {preMeal
+            ? "Yes, eating straight after"
+            : extra
+              ? "All set — let's record"
+              : "Nothing since the meal"}
         </Btn>
         <div className="mt-3">
-          <Btn variant="danger" onClick={() => store.go("home")}>
-            I consumed something after the target meal
+          <Btn
+            variant="danger"
+            onClick={() => store.go(preMeal || extra ? "skipReason" : "snackSkip")}
+          >
+            {preMeal
+              ? "Not yet — skip this one"
+              : extra
+                ? "Not right now"
+                : "I had a snack or a drink"}
           </Btn>
         </div>
       </StickyFooter>
