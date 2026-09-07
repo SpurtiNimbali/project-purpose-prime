@@ -189,13 +189,16 @@ export function HomeScreen({ store }: { store: TummyStore }) {
 
           {task.kind === "recording" && task.itemId ? (
             <button
-              onClick={() => store.missItem(task.itemId!)}
+              onClick={() => {
+                store.startItem(task.itemId!);
+                store.go("skipReason");
+              }}
               className={cn(
                 "mt-3 min-h-[48px] w-full rounded-2xl text-[15px] font-extrabold",
                 due ? "text-mint" : "text-pine-soft",
               )}
             >
-              Can't do this one — mark as missed
+              Can't do this one — skip and tell us why
             </button>
           ) : null}
 
@@ -271,6 +274,26 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             ) : null}
           </div>
         </div>
+
+        <button
+          onClick={() => {
+            store.startExtraSession();
+            store.go("extraSession");
+          }}
+          className="mt-4 flex min-h-[64px] w-full items-center gap-3 rounded-3xl border border-line bg-surface px-4 text-left active:scale-[0.99]"
+        >
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+            <IconMic width={22} height={22} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[16px] font-extrabold text-pine">
+              Something feels different?
+            </span>
+            <span className="block text-[15px] font-semibold text-pine-soft">
+              Add an extra 2 minute recording — loud sounds, worse symptoms
+            </span>
+          </span>
+        </button>
 
         {/* quick log */}
         <div className="mt-5">
@@ -512,17 +535,22 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
 }
 
 export function LogMealScreen({ store }: { store: TummyStore }) {
-  const [photo, setPhoto] = useState(false);
+  const [photos, setPhotos] = useState(0);
   const [which, setWhich] = useState("");
   const [desc, setDesc] = useState("");
+  const [time, setTime] = useState(
+    new Date().toTimeString().slice(0, 5),
+  );
   const [mode, setMode] = useState<"type" | "voice">("type");
   const [recorded, setRecorded] = useState(false);
+  const photo = photos > 0;
+  const isSnack = which === "Snack";
   return (
     <Screen>
-      <TopBar title="Log a meal" onBack={store.back} />
+      <TopBar title="Log food or drink" onBack={store.back} />
       <ScreenBody>
         <button
-          onClick={() => setPhoto(true)}
+          onClick={() => setPhotos((p) => p + 1)}
           className={cn(
             "flex h-[170px] w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed",
             photo ? "border-teal bg-mint-soft text-teal" : "border-line bg-surface text-pine-soft",
@@ -530,13 +558,30 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
         >
           <IconCamera width={44} height={44} />
           <span className="text-[17px] font-extrabold">
-            {photo ? "Photo added" : "Add a photo"}
+            {photo
+              ? `${photos} photo${photos === 1 ? "" : "s"} — add another`
+              : "Photo of what you had"}
           </span>
         </button>
+        <p className="mt-2 text-[15px] font-semibold text-pine-soft">
+          {isSnack
+            ? "A photo is best, but a quick line of text is fine for snacks."
+            : "Photos are needed for every meal and drink. Add several if one shot doesn't cover it."}
+        </p>
+        <div className="mt-4">
+          <Field label="What time was this?">
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="min-h-[62px] w-full rounded-2xl border-2 border-line bg-surface px-4 text-[18px] font-extrabold text-pine"
+            />
+          </Field>
+        </div>
         <div className="mt-4 space-y-4">
-          <Field label="Which meal?">
+          <Field label="What was it?">
             <div className="space-y-2">
-              {["Breakfast", "Lunch", "Dinner", "Snack"].map((m) => (
+              {["Breakfast", "Lunch", "Dinner", "Snack", "Drink"].map((m) => (
                 <Choice key={m} label={m} selected={which === m} onClick={() => setWhich(m)} />
               ))}
             </div>
@@ -596,19 +641,21 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
       </ScreenBody>
       <StickyFooter>
         <Btn
-          disabled={!which}
+          disabled={!which || (!photo && !isSnack && desc.trim().length === 0)}
           onClick={() => {
-            store.addEntry("meal", which || "Meal", desc || (photo ? "Photo added" : undefined));
-            const item = store.plan.find(
-              (p) => p.kind === "meal" && !p.done && p.label.toLowerCase() === which.toLowerCase(),
-            );
-            store.completeItem(item ? item.id : (store.plan.find((p) => p.kind === "meal" && !p.done)?.id ?? ""));
-            store.go("home");
+            const detail = [
+              time,
+              desc.trim() || undefined,
+              photo ? `${photos} photo${photos === 1 ? "" : "s"}` : undefined,
+            ]
+              .filter(Boolean)
+              .join(" · ");
+            store.addEntry(which === "Drink" ? "hydration" : "meal", which, detail);
+            store.go("logHub");
           }}
         >
-          Save meal
+          Save to today's diary
         </Btn>
-
       </StickyFooter>
     </Screen>
   );
@@ -728,10 +775,7 @@ export function LogSleepScreen({ store }: { store: TummyStore }) {
           <Btn
             onClick={() => {
               store.addEntry("sleep", "Sleep", answers.join(" · "));
-              if (store.activeItemId === "qMorning") store.markQuestions("morning");
-              const night = store.activeItemId === "qNight";
-              if (night) store.markQuestions("night");
-              store.go(night && store.gender === "female" ? "periodCheck" : "home");
+              store.go("logHub");
             }}
 
           >

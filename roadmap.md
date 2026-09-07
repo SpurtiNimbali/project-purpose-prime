@@ -1,13 +1,14 @@
-# Tummy — feedback round
+# Tummy — protocol update (Sept 2026 study document)
 
-- [x] 1. "How a day works": reveal each step bubble one at a time
-- [x] 2. Pre-recording checklist: one box at a time, rest of screen blurred
-- [x] 3. Stool log: "check consistency descriptions" with Bristol scale image; info on urgency
-- [x] 4. Recording: "Finish early" asks for confirmation with seconds left
-- [x] 5a. Gender asked at start; females get period question after evening check-in
-- [x] 5b. Daily schedule: separate weekday and weekend times
-- [x] 5c. Snacking screen (weekday + weekend snack times, rough is fine)
-- [x] 6. Technical setup: full phone model lists (iPhone 16 Pro etc.)
-- [x] 7. Contact the study team + grievance form replacing "Withdraw"
-- [x] 8a. Case-off copy: it has to come off even if stiff
-- [x] 8b. Sound check: shirt lifted from the start
+- [x] Schedule rebuilt: morning questions → fasted recording → pre-meal recording → meal start → meal end (timing anchor) → 8 post-meal recordings (0/30/60/90/120/150/180/210 min from end of meal) → evening check-in. 10 recordings, 20+ min a day.
+- [x] Recordings are a 2-minute minimum count-up, longer encouraged; quality-over-quantity messaging.
+- [x] Skip-with-reason flow replaces silent "mark as missed" (reasons taken from protocol).
+- [x] Snack or drink during the meal window ends the remaining sessions, with an explanation screen.
+- [x] Optional extra recordings for loud sounds or worse symptoms, from Home.
+- [x] Morning pre-recording questionnaire (bed/sleep/wake/out-of-bed, intake, bathroom + Bristol, activity).
+- [x] Evening check-in (diary completeness, missed sessions, difficulties, physical/emotional, unusual events, GI severity + description, smartwatch + charging reminder).
+- [x] Post-recording questions per session type, with voice-note option on longer answers.
+- [x] Full-day dietary logging: photo(s) + time required for meals and drinks, text/voice fallback for snacks.
+- [x] Home next-up states follow the new protocol: recording, waiting, meal logging, questionnaire.
+
+Open item: the study coordinator phone number in Contact is placeholder text and needs the real one.

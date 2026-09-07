@@ -880,7 +880,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
       />
 
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
-        <RecordTimer left={left} total={TOTAL} />
+        <RecordTimer elapsed={TOTAL - left} min={TOTAL} />
         <p className="mt-5 text-[16px] font-bold text-mint">Keep still until the ring empties</p>
         <p className="mt-1 text-[15px] font-bold text-surface/70">
           {marks.length} symptom {marks.length === 1 ? "mark" : "marks"} recorded
