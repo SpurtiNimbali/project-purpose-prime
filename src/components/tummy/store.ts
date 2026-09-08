@@ -338,7 +338,8 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
     ...diary,
     {
       id: "qEvening",
-      kind: "questions",
+      kind: "questions" as const,
+
       label: "Evening check-in",
       at: Math.max(21 * 60, lastAt + 30),
       done: false,
