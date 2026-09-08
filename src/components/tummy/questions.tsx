@@ -26,9 +26,12 @@ export type FlowQ = {
   bristolIf?: string[];
   optional?: boolean;
   hint?: string;
+  /** answers that trigger a warning message */
+  warnIf?: string[];
+  warn?: string;
 };
 
-type Turn = { from: "bot" | "you"; text: string };
+type Turn = { from: "bot" | "you"; text: string; warn?: boolean };
 
 const VS_USUAL = ["Better than usual", "Same as usual", "Worse than usual"];
 
@@ -66,6 +69,8 @@ export const MORNING_QS: FlowQ[] = [
     options: ["Nothing at all", "A few sips of water", "Yes, something else"],
     textIf: ["Yes, something else"],
     followUp: "What was it, and roughly when?",
+    warnIf: ["Yes, something else"],
+    warn: "Just so you know — the morning recording is meant to be fasted. Nothing but a few sips of water before it. Tell me what you had and we'll note it for the team, and try to keep tomorrow's recording food-free.",
   },
   {
     id: "bathroom",
@@ -179,6 +184,9 @@ function QuestionFlow({
   const record = (value: string) => {
     setAnswers((a) => ({ ...a, [current.id]: value }));
     const next: Turn[] = [...turns, { from: "you", text: value }];
+    if (current.warnIf?.includes(value) && current.warn) {
+      next.push({ from: "bot", text: current.warn, warn: true });
+    }
     if (current.bristolIf?.includes(value)) {
       setNeedBristol(true);
       setTurns([...next, { from: "bot", text: "Which Bristol type was it, 1 to 7?" }]);
@@ -215,7 +223,14 @@ function QuestionFlow({
             t.from === "bot" ? (
               <div key={i} className="flex items-start gap-2">
                 <Mascot size={44} src={MASCOT.calm} />
-                <p className="max-w-[78%] rounded-3xl rounded-tl-md border border-line bg-surface px-4 py-3 text-[16px] font-semibold leading-snug text-pine">
+                <p
+                  className={cn(
+                    "max-w-[78%] rounded-3xl rounded-tl-md border px-4 py-3 text-[16px] font-semibold leading-snug",
+                    t.warn
+                      ? "border-amber bg-amber/20 text-pine"
+                      : "border-line bg-surface text-pine",
+                  )}
+                >
                   {t.text}
                 </p>
               </div>
