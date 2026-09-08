@@ -423,9 +423,25 @@ export function MorningQuestionsScreen({ store }: { store: TummyStore }) {
         store.addEntry(
           "sleep",
           "Wake-up questions",
-          `In bed ${a.bedTime ?? "—"} · awake ${a.wakeTime ?? "—"}`,
+          `In bed ${a.bedTime ?? "—"} · awake ${a.wakeTime ?? "—"}${
+            a.latency ? ` · fell asleep in ${a.latency.toLowerCase()}` : ""
+          }`,
         );
+        if (a.intake === "A few sips of water") {
+          store.addEntry("hydration", "A few sips of water", "Before the fasted recording");
+        }
+        if (a.intake === "Yes, something else") {
+          store.addEntry(
+            "meal",
+            "Food or drink before fasting",
+            a.intakeNote ?? "Reported in the morning questions",
+          );
+        }
+        if (a.activity === "Yes") {
+          store.addEntry("activity", "Morning activity", a.activityNote ?? "Reported on waking");
+        }
         store.markQuestions("morning");
+
         const fasted = store.plan.find((p) => p.id === "fasted" && !p.done);
         if (fasted) {
           store.startItem(fasted.id);
