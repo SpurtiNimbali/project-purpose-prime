@@ -1288,14 +1288,16 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
             >
               Record a voice note instead
             </Btn>
-            {current.optional && !needNote ? (
+            {(current.optional && !needNote) ||
+            (needNote && current.followUp?.startsWith("Anything")) ? (
               <button
                 onClick={() => submitNote(true)}
-                className="min-h-[48px] w-full text-[16px] font-extrabold text-pine-soft"
+                className="min-h-[52px] w-full rounded-2xl border-2 border-line bg-surface text-[16px] font-extrabold text-pine-soft"
               >
                 Nothing to add
               </button>
             ) : null}
+
           </div>
         ) : null}
 
