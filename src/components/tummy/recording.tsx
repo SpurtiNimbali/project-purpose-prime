@@ -547,35 +547,24 @@ export function AbdomenGuide({ height = 250 }: { height?: number }) {
         belly button
       </text>
 
-      {/* target zone: lower right quadrant */}
-      <circle
-        cx="118"
-        cy="150"
-        r="30"
-        fill="rgba(232,163,61,0.16)"
-        stroke={amber}
-        strokeWidth="2"
-        strokeDasharray="5 6"
-      />
-
       {/* measured offset from the belly button */}
       <line
         x1="150"
         y1="118"
-        x2="118"
-        y2="150"
+        x2="122"
+        y2="140"
         stroke={amber}
         strokeWidth="2.5"
         strokeDasharray="6 6"
         strokeLinecap="round"
       />
-      <rect x="140" y="152" width="46" height="22" rx="11" fill={amber} />
-      <text x="163" y="167" textAnchor="middle" fontSize="12" fill="#143029" fontWeight="900">
+      <rect x="152" y="116" width="46" height="22" rx="11" fill={amber} />
+      <text x="175" y="131" textAnchor="middle" fontSize="12" fill="#143029" fontWeight="900">
         9 cm
       </text>
 
       {/* the phone: flat on the skin, portrait, screen facing out */}
-      <g transform="translate(92 108)">
+      <g transform="translate(90 106)">
         <rect
           x="4"
           y="6"
@@ -614,26 +603,23 @@ export function AbdomenGuide({ height = 250 }: { height?: number }) {
       </g>
 
       {/* orientation callouts */}
-      <text x="118" y="103" fontSize="10.5" fill="#2E7D6B" fontWeight="900" textAnchor="middle">
-        top
-      </text>
       <line
-        x1="118"
-        y1="206"
-        x2="118"
-        y2="222"
+        x1="116"
+        y1="204"
+        x2="116"
+        y2="220"
         stroke="#2E7D6B"
         strokeWidth="2"
         strokeLinecap="round"
       />
-      <path d="M113 216l5 7 5-7" fill="none" stroke="#2E7D6B" strokeWidth="2" strokeLinecap="round" />
-      <text x="132" y="222" fontSize="11" fill="#2E7D6B" fontWeight="800">
+      <path d="M111 214l5 7 5-7" fill="none" stroke="#2E7D6B" strokeWidth="2" strokeLinecap="round" />
+      <text x="130" y="220" fontSize="11" fill="#2E7D6B" fontWeight="800">
         mic end points down
       </text>
-      <text x="200" y="140" fontSize="11" fill={line} fontWeight="800">
+      <text x="200" y="164" fontSize="11" fill={line} fontWeight="800">
         screen faces
       </text>
-      <text x="200" y="154" fontSize="11" fill={line} fontWeight="800">
+      <text x="200" y="178" fontSize="11" fill={line} fontWeight="800">
         away from you
       </text>
     </svg>
