@@ -1124,17 +1124,8 @@ function questionsFor(kind: SessionKind): Q[] {
   }
 
   if (kind === "extra") {
-    return [
-      ...common,
-      {
-        id: "why",
-        q: "What made you record this extra session?",
-        type: "single",
-        options: ["Unusually loud or frequent sounds", "Symptoms higher than normal", "Both"],
-      },
-      { id: "severity", q: "How strong is it right now?", type: "scale" },
-      { id: "describe", q: "Describe what you're feeling or hearing.", type: "text" },
-    ];
+    // why you're recording and how strong it feels are asked before the recording
+    return [...common];
   }
 
   // post-meal short set
@@ -1507,14 +1498,25 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
         {needsSymptom ? (
           <>
             <h3 className="mt-6 text-[18px] font-extrabold text-pine">Which symptom?</h3>
-            <div className="mt-3">
-              <SymptomGrid
-                onPick={(s) => {
-                  setSymptom(s);
-                  setSeverity(0);
-                }}
-                selectedKey={symptom?.key}
-              />
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              {SYMPTOMS.map(({ key, label, Icon }) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setSymptom({ key, label });
+                    setSeverity(0);
+                  }}
+                  className={cn(
+                    "flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border-2 bg-surface px-2",
+                    symptom?.key === key ? "border-teal bg-mint-soft" : "border-line",
+                  )}
+                >
+                  <span className="text-teal">
+                    <Icon width={28} height={28} />
+                  </span>
+                  <span className="text-[15px] font-extrabold text-pine">{label}</span>
+                </button>
+              ))}
             </div>
             {symptom ? (
               <>
