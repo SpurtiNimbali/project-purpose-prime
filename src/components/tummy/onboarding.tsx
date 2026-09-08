@@ -24,6 +24,9 @@ import {
   IconBowl,
   IconSunset,
   IconMoon,
+  IconClock,
+  IconCamera,
+
 } from "./icons";
 import {
   AbdomenGuide,
