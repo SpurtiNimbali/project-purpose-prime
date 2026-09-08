@@ -1209,10 +1209,6 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
                 + Add another snack time
               </button>
             </div>
-            <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-pine-soft">
-              If you're not sure, a rough guess is completely fine — this doesn't have to be
-              accurate.
-            </p>
           </>
         ) : null}
       </ScreenBody>
