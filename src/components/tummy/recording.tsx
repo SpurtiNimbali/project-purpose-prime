@@ -444,9 +444,13 @@ export function MealEndScreen({ store }: { store: TummyStore }) {
         </Btn>
         <div className="mt-3">
           <Btn variant="secondary" onClick={() => store.go("home")}>
-            Still eating
+            Return to the home screen
           </Btn>
         </div>
+        <p className="mt-2 text-center text-[15px] font-semibold text-pine-soft">
+          Still eating? Go back to home and come straight back here when your last bite is done.
+        </p>
+
       </StickyFooter>
     </Screen>
   );
