@@ -609,7 +609,71 @@ export const SYMPTOMS = [
 
 export const SEV_LABELS = ["very mild", "mild", "moderate", "strong", "very strong"];
 
+/** Audio quality analysis shown straight after a recording, real or practice. */
+export function QualityPanel({
+  pass,
+  onRedo,
+  onContinue,
+}: {
+  pass: boolean;
+  onRedo: () => void;
+  onContinue: () => void;
+}) {
+  const [phase, setPhase] = useState<"checking" | "done">("checking");
+  useEffect(() => {
+    const t = setTimeout(() => setPhase("done"), 1800);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
+      <div className="rounded-[28px] bg-surface p-6 text-center">
+        {phase === "checking" ? (
+          <>
+            <span className="mx-auto flex h-[110px] w-[110px] animate-pulse items-center justify-center rounded-full bg-mint-soft text-teal">
+              <IconWave width={54} height={54} />
+            </span>
+            <h2 className="mt-4 text-[23px] font-extrabold text-pine">Checking the audio…</h2>
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
+              We listen for background noise, rustling and gaps in contact with your skin.
+            </p>
+          </>
+        ) : pass ? (
+          <>
+            <Mascot src={MASCOT.cheer} size={130} className="mx-auto" />
+            <h2 className="mt-3 text-[24px] font-extrabold text-pine">Good quality recording</h2>
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
+              Clear contact, quiet room, gut sounds coming through nicely. Nothing to redo.
+            </p>
+            <div className="mt-5">
+              <Btn onClick={onContinue}>Continue</Btn>
+            </div>
+          </>
+        ) : (
+          <>
+            <Mascot src={MASCOT.calm} size={130} className="mx-auto" />
+            <h2 className="mt-3 text-[24px] font-extrabold text-pine">
+              This one is too noisy to use
+            </h2>
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
+              We picked up rustling and background noise. Press the phone flat on bare skin, settle
+              somewhere quieter, and record it again — it only takes two minutes.
+            </p>
+            <div className="mt-5 space-y-3">
+              <Btn onClick={onRedo}>Record it again</Btn>
+              <Btn variant="secondary" onClick={onContinue}>
+                Keep it anyway
+              </Btn>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /** Big, legible ring shared by the real recording and the dry run. */
+
 export function RecordTimer({ elapsed, min }: { elapsed: number; min: number }) {
   const past = elapsed >= min;
   const shown = past ? elapsed : min - elapsed;
