@@ -179,7 +179,9 @@ function QuestionFlow({
   const [needBristol, setNeedBristol] = useState(false);
   const [showScale, setShowScale] = useState(false);
 
-  const [time, setTime] = useState("07:00");
+  const [time, setTime] = useState(questions[0].def ?? "07:00");
+  const [durH, setDurH] = useState(0);
+  const [durM, setDurM] = useState(15);
   const done = step >= questions.length;
   const current = questions[Math.min(step, questions.length - 1)];
 
