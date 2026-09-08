@@ -511,7 +511,7 @@ export function AbdomenGuide({ height = 250 }: { height?: number }) {
   const amber = "#E8A33D";
   return (
     <svg
-      viewBox="0 0 300 240"
+      viewBox="0 0 300 262"
       width="100%"
       height={height}
       role="img"
@@ -533,7 +533,7 @@ export function AbdomenGuide({ height = 250 }: { height?: number }) {
         strokeWidth="2"
         opacity="0.45"
       />
-      <path d="M86 196h128" stroke={line} strokeWidth="3" opacity="0.45" strokeLinecap="round" />
+      <path d="M86 226h128" stroke={line} strokeWidth="3" opacity="0.45" strokeLinecap="round" />
 
       {/* body side labels — participant's right is the viewer's left */}
       <text x="60" y="120" fontSize="11" fill={line} fontWeight="800" textAnchor="middle">
@@ -551,20 +551,20 @@ export function AbdomenGuide({ height = 250 }: { height?: number }) {
       <line
         x1="150"
         y1="118"
-        x2="122"
-        y2="140"
+        x2="110"
+        y2="148"
         stroke={amber}
         strokeWidth="2.5"
         strokeDasharray="6 6"
         strokeLinecap="round"
       />
-      <rect x="152" y="116" width="46" height="22" rx="11" fill={amber} />
-      <text x="175" y="131" textAnchor="middle" fontSize="12" fill="#143029" fontWeight="900">
+      <rect x="150" y="128" width="46" height="22" rx="11" fill={amber} />
+      <text x="173" y="143" textAnchor="middle" fontSize="12" fill="#143029" fontWeight="900">
         9 cm
       </text>
 
       {/* the phone: flat on the skin, portrait, screen facing out */}
-      <g transform="translate(90 106)">
+      <g transform="translate(82 122)">
         <rect
           x="4"
           y="6"
@@ -604,22 +604,22 @@ export function AbdomenGuide({ height = 250 }: { height?: number }) {
 
       {/* orientation callouts */}
       <line
-        x1="116"
-        y1="204"
-        x2="116"
-        y2="220"
+        x1="108"
+        y1="222"
+        x2="108"
+        y2="240"
         stroke="#2E7D6B"
         strokeWidth="2"
         strokeLinecap="round"
       />
-      <path d="M111 214l5 7 5-7" fill="none" stroke="#2E7D6B" strokeWidth="2" strokeLinecap="round" />
-      <text x="130" y="220" fontSize="11" fill="#2E7D6B" fontWeight="800">
+      <path d="M103 234l5 7 5-7" fill="none" stroke="#2E7D6B" strokeWidth="2" strokeLinecap="round" />
+      <text x="122" y="242" fontSize="11" fill="#2E7D6B" fontWeight="800">
         mic end points down
       </text>
-      <text x="200" y="164" fontSize="11" fill={line} fontWeight="800">
+      <text x="196" y="176" fontSize="11" fill={line} fontWeight="800">
         screen faces
       </text>
-      <text x="200" y="178" fontSize="11" fill={line} fontWeight="800">
+      <text x="196" y="190" fontSize="11" fill={line} fontWeight="800">
         away from you
       </text>
     </svg>
