@@ -80,7 +80,8 @@ const HOME_LOGS: {
 
 export function HomeScreen({ store }: { store: TummyStore }) {
   useTick();
-  const task = computeNextTask(store.plan);
+  const task = store.frozen ? store.nextTask : computeNextTask(store.plan);
+
   const hour = Math.floor(store.demoNow / 60);
   const due = task.state === "due";
   const doneCount = store.plan.filter((p) => p.done).length;
