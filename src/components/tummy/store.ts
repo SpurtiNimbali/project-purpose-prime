@@ -518,6 +518,13 @@ export function useTummyStore(): TummyStore {
   const [demoTick, setDemoTick] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [questions, setQuestions] = useState({ morning: false, night: false });
+  const [freezeUsed, setFreezeUsed] = useState(false);
+
+  const chooseStudyMeal = useCallback((m: Meal) => {
+    setMeal(m);
+    setPlan(createInitialPlan(m));
+  }, []);
+
 
   const go = useCallback((s: ScreenKey) => {
     setStack((prev) => [...prev, s]);
