@@ -25,7 +25,14 @@ import {
   IconSunset,
   IconMoon,
 } from "./icons";
-import { AbdomenGuide, RecordTimer, SymptomGrid, SeveritySheet } from "./recording";
+import {
+  AbdomenGuide,
+  RecordTimer,
+  SymptomGrid,
+  SeveritySheet,
+  QualityPanel,
+} from "./recording";
+
 import type { TummyStore } from "./store";
 
 import { cn } from "@/lib/utils";
@@ -767,7 +774,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
           title="Practice recording"
           onBack={store.back}
           dark
-          step="Step 9 of 9 · part 2 of 2"
+          step="Step 9 of 9"
         />
         {banner}
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center">
