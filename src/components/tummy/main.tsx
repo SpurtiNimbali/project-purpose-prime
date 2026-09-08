@@ -1087,8 +1087,10 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
 /* ---------------- progress ---------------- */
 
 export function ProgressScreen({ store }: { store: TummyStore }) {
+  const [confirmFreeze, setConfirmFreeze] = useState(false);
   const todayIdx = Math.min(Math.max(store.day - 1, 0), 6);
   const days = [0, 1, 2, 3, 4, 5, 6].map((i) => i < todayIdx);
+
 
   const recs = store.plan.filter((p) => p.kind === "recording");
   const recDone = recs.filter((p) => p.done).length;
@@ -1249,12 +1251,24 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                       : "Life happens. Pause a whole day once and the study picks up where it left off — no session counts as missed."}
                 </p>
                 {!store.freezeUsed ? (
-                  <div className="mt-3">
-                    <Btn variant="secondary" onClick={() => store.useFreeze()}>
-                      Use my freeze day
-                    </Btn>
-                  </div>
+                  <>
+                    <div className="mt-3 rounded-2xl border-2 border-amber bg-amber/15 px-4 py-3">
+                      <p className="text-[15px] font-bold leading-snug text-pine">
+                        You get one freeze for the whole study, and it can't be undone once you
+                        use it. Only use it on a day you truly can't take part.
+                      </p>
+                    </div>
+                    <div className="mt-3">
+                      <Btn
+                        variant="secondary"
+                        onClick={() => setConfirmFreeze(true)}
+                      >
+                        Use my freeze day
+                      </Btn>
+                    </div>
+                  </>
                 ) : null}
+
               </div>
             </div>
           </Card>
@@ -1271,8 +1285,34 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
           </Card>
         </div>
       </ScreenBody>
+
+      {confirmFreeze ? (
+        <div className="absolute inset-0 z-40 flex items-end bg-pine/45 backdrop-blur-sm">
+          <div className="w-full rounded-t-[28px] bg-cream px-5 pb-7 pt-6">
+            <p className="text-[20px] font-extrabold text-pine">Use your only freeze day?</p>
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
+              This pauses today's recordings, logs and questions. You get one freeze for the whole
+              study and this cannot be undone.
+            </p>
+            <div className="mt-5 space-y-3">
+              <Btn
+                onClick={() => {
+                  setConfirmFreeze(false);
+                  store.useFreeze();
+                }}
+              >
+                Yes, freeze today
+              </Btn>
+              <Btn variant="secondary" onClick={() => setConfirmFreeze(false)}>
+                Keep going today
+              </Btn>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </Screen>
   );
+
 }
 
 
