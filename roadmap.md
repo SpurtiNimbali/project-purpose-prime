@@ -13,11 +13,5 @@
 
 Open item: the study coordinator phone number in Contact is placeholder text and needs the real one.
 
-## New (Sep 8)
-- [ ] Ruler icon for right-lower-belly placement tip
-- [ ] Three pre-recording checks during dry run
-- [ ] Bristol infographic in morning quiz
-- [ ] Prettier extra-recording card on Home
-- [ ] Questionnaires write to Today's log
-- [ ] Freeze state: remove buttons from Home
-- [ ] Progress page reflects new study rules/structure
+## New (Sep 8) — done
+- [x] Ruler icon, dry-run checks, Bristol info in morning quiz, extra-recording card, questionnaire log entries, freeze home buttons removed, progress page reworked
