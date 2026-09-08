@@ -232,7 +232,9 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
 
 export function CaseReminderScreen({ store }: { store: TummyStore }) {
   const [why, setWhy] = useState(false);
-  const next = () => store.go(store.track === "fasting" ? "fastingCheck" : "sessionCheck");
+  // the wake-up questions already cover food and drink, so fasted sessions go straight on
+  const next = () => store.go(store.sessionKind === "fasted" ? "positioning" : "sessionCheck");
+
   return (
     <Screen>
       <TopBar title="Before we start" onBack={store.back} />
