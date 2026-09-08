@@ -28,7 +28,7 @@ import {
   IconBalloon,
   IconBolt,
   IconSpiral,
-  IconNavelPoint,
+  IconRuler,
 
   IconDizzy,
   IconWind,
