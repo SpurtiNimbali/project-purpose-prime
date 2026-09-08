@@ -260,3 +260,11 @@ export const IconSnowflake = (p: P) => (
     <path d="m17.4 9 2.6.6M17.4 9l-.3-2.7M6.6 15 4 14.4M6.6 15l.3 2.7" />
   </Base>
 );
+
+/** Ruler — measured placement. */
+export const IconRuler = (p: P) => (
+  <Base {...p}>
+    <rect x="2.6" y="8.4" width="18.8" height="7.2" rx="1.6" transform="rotate(-12 12 12)" />
+    <path d="M6.6 9.6v2.2M9.7 8.9v3.2M12.8 8.2v2.2M15.9 7.6v3.2M19 6.9v2.2" />
+  </Base>
+);
