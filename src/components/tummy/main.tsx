@@ -1155,8 +1155,8 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
 
         <div className="mt-4">
           <Note tone="green" title="Your data is anonymous">
-            Recordings and logs are stored against your subject ID. Contact your coordinator at
-            (650) 555-0134 with any questions.
+            Recordings and logs are stored against your subject ID. Message your coordinator
+            with any questions.
           </Note>
         </div>
 
@@ -1261,8 +1261,8 @@ export function ContactScreen({ store }: { store: TummyStore }) {
           ))}
         </div>
         <div className="mt-4">
-          <Note tone="green" title="Prefer to phone?">
-            Your coordinator is on (650) 555-0134, weekdays 9am to 5pm.
+          <Note tone="green" title="Prefer to talk it through?">
+            Send a message any time — your coordinator replies on weekdays, 9am to 5pm.
           </Note>
         </div>
       </ScreenBody>

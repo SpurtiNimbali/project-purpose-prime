@@ -103,7 +103,7 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
           ) : null}
           {state === "bad" ? (
             <Note tone="coral" title="We can't find that ID">
-              Double-check the card, or contact your coordinator at (650) 555-0134.
+              Double-check the card, or contact your coordinator through the Help page.
             </Note>
           ) : null}
         </div>
