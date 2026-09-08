@@ -1083,12 +1083,69 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
             Next: weekend times
           </Btn>
         ) : (
-          <Btn onClick={() => store.go("snacking")}>Save my schedule</Btn>
+          <Btn onClick={() => store.go("mealPick")}>Save my schedule</Btn>
         )}
       </StickyFooter>
     </Screen>
   );
 }
+
+/* ---------------- which meal the recordings follow ---------------- */
+
+export function MealPickScreen({ store }: { store: TummyStore }) {
+  const meals = [
+    { k: "breakfast", label: "Breakfast", sub: "Recordings run through the morning", Icon: IconSun },
+    { k: "lunch", label: "Lunch", sub: "Recordings run through the afternoon", Icon: IconBowl },
+    { k: "dinner", label: "Dinner", sub: "Recordings run through the evening", Icon: IconSunset },
+  ] as const;
+  return (
+    <Screen>
+      <TopBar title="Your study meal" onBack={store.back} step="Step 6 of 9" />
+      <ScreenBody>
+        <MascotSays size={78} src={MASCOT.calm}>
+          Which meal would you like your recordings to follow? Pick the one you eat at the steadiest
+          time — it stays the same every study day.
+        </MascotSays>
+        <div className="mt-5 space-y-3">
+          {meals.map(({ k, label, sub, Icon }) => (
+            <button
+              key={k}
+              onClick={() => store.chooseStudyMeal(k)}
+              className={cn(
+                "flex min-h-[92px] w-full items-center gap-4 rounded-3xl border-2 bg-surface px-5 text-left",
+                store.meal === k ? "border-teal bg-mint-soft" : "border-line",
+              )}
+            >
+              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+                <Icon width={30} height={30} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[20px] font-extrabold text-pine">{label}</span>
+                <span className="block text-[15px] font-semibold text-pine-soft">{sub}</span>
+              </span>
+              {store.meal === k ? (
+                <span className="shrink-0 text-teal">
+                  <IconCheck width={24} height={24} />
+                </span>
+              ) : null}
+            </button>
+          ))}
+        </div>
+        <div className="mt-4">
+          <Note tone="blue" title="What this changes">
+            Your day is built around this meal: a recording just before it, one straight after, then
+            every 30 minutes for three and a half hours. Your other meals and snacks just get logged.
+          </Note>
+        </div>
+      </ScreenBody>
+      <StickyFooter>
+        <Btn onClick={() => store.go("snacking")}>Continue</Btn>
+      </StickyFooter>
+    </Screen>
+  );
+}
+
+
 
 /* ---------------- snacking ---------------- */
 
