@@ -657,6 +657,10 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
               .filter(Boolean)
               .join(" · ");
             store.addEntry(which === "Drink" ? "hydration" : "meal", which, detail);
+            const scheduled = store.plan.find(
+              (p) => p.id === store.activeItemId && p.mealLog && !p.done,
+            );
+            if (scheduled) store.completeItem(scheduled.id);
             store.go("logHub");
           }}
         >
