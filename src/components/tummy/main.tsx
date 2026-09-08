@@ -1249,12 +1249,24 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                       : "Life happens. Pause a whole day once and the study picks up where it left off — no session counts as missed."}
                 </p>
                 {!store.freezeUsed ? (
-                  <div className="mt-3">
-                    <Btn variant="secondary" onClick={() => store.useFreeze()}>
-                      Use my freeze day
-                    </Btn>
-                  </div>
+                  <>
+                    <div className="mt-3 rounded-2xl border-2 border-amber bg-amber/15 px-4 py-3">
+                      <p className="text-[15px] font-bold leading-snug text-pine">
+                        You get one freeze for the whole study, and it can't be undone once you
+                        use it. Only use it on a day you truly can't take part.
+                      </p>
+                    </div>
+                    <div className="mt-3">
+                      <Btn
+                        variant="secondary"
+                        onClick={() => setConfirmFreeze(true)}
+                      >
+                        Use my freeze day
+                      </Btn>
+                    </div>
+                  </>
                 ) : null}
+
               </div>
             </div>
           </Card>
