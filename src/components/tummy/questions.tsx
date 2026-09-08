@@ -13,7 +13,9 @@ import {
   MASCOT,
 } from "./ui";
 import { IconMic } from "./icons";
+import bristolScale from "@/assets/bristol-scale.jpg";
 import type { TummyStore } from "./store";
+
 
 export type FlowQ = {
   id: string;
@@ -169,6 +171,8 @@ function QuestionFlow({
   const [note, setNote] = useState("");
   const [needNote, setNeedNote] = useState(false);
   const [needBristol, setNeedBristol] = useState(false);
+  const [showScale, setShowScale] = useState(false);
+
   const [time, setTime] = useState("07:00");
   const done = step >= questions.length;
   const current = questions[Math.min(step, questions.length - 1)];
