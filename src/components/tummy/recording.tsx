@@ -590,13 +590,13 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
         <AbdomenGuide />
 
         <div className="mt-4 space-y-2">
-          {PLACEMENT_TIPS.map(({ t, b }, i) => (
+          {PLACEMENT_TIPS.map(({ t, b, Icon }) => (
             <div
               key={t}
               className="flex items-start gap-3 rounded-2xl bg-surface/10 px-4 py-3 text-surface"
             >
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber text-[13px] font-extrabold text-pine">
-                {i + 1}
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber text-pine">
+                <Icon width={20} height={20} />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[16px] font-bold leading-snug">{t}</span>
@@ -607,6 +607,7 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
             </div>
           ))}
         </div>
+
 
         <div className="mt-5 space-y-2">
           {POSITION_CHECKS.map(({ t }) => (
