@@ -1087,7 +1087,7 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
 /* ---------------- progress ---------------- */
 
 export function ProgressScreen({ store }: { store: TummyStore }) {
-  const [confirmFreeze, setConfirmFreeze] = React.useState(false);
+  const [confirmFreeze, setConfirmFreeze] = useState(false);
   const todayIdx = Math.min(Math.max(store.day - 1, 0), 6);
   const days = [0, 1, 2, 3, 4, 5, 6].map((i) => i < todayIdx);
 
