@@ -31,6 +31,7 @@ import {
 import {
   AbdomenGuide,
   PlacementTips,
+  PositionChecksGate,
 
   RecordTimer,
   SymptomGrid,
@@ -705,6 +706,7 @@ type Coach = { id: string; text: string; cta: string };
 export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const TOTAL = 45;
   const [stage, setStage] = useState<"case" | "position" | "record">("case");
+  const [posChecked, setPosChecked] = useState(false);
   const [left, setLeft] = useState(TOTAL);
   const [marks, setMarks] = useState<{ key: string; label: string; severity: number }[]>([]);
   const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
@@ -820,7 +822,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
       <Screen dark className="relative">
         <TopBar title="Positioning guide" onBack={() => setStage("case")} dark step="Practice" />
         {banner}
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 pt-2">
+        <div className={cn("min-h-0 flex-1 overflow-y-auto px-5 pt-2", !posChecked && "blur-md")}>
           <AbdomenGuide />
           <p className="mt-3 text-[17px] font-extrabold leading-snug text-surface">
             Lift your shirt and put the bottom of the phone 8 cm to the right of your belly button
@@ -833,11 +835,16 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
         </div>
 
         <div className="shrink-0 px-5 pb-7 pt-3">
-          <Btn onClick={() => setStage("record")}>I'm in position</Btn>
+          <Btn disabled={!posChecked} onClick={() => setStage("record")}>
+            I'm in position
+          </Btn>
         </div>
+
+        {!posChecked ? <PositionChecksGate onDone={() => setPosChecked(true)} /> : null}
       </Screen>
     );
   }
+
 
   /* stage 3 — the run itself, identical UI to a real recording */
   return (

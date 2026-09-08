@@ -12,3 +12,6 @@
 - [x] Home next-up states follow the new protocol: recording, waiting, meal logging, questionnaire.
 
 Open item: the study coordinator phone number in Contact is placeholder text and needs the real one.
+
+## New (Sep 8) — done
+- [x] Ruler icon, dry-run checks, Bristol info in morning quiz, extra-recording card, questionnaire log entries, freeze home buttons removed, progress page reworked

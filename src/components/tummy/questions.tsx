@@ -13,7 +13,9 @@ import {
   MASCOT,
 } from "./ui";
 import { IconMic } from "./icons";
+import bristolScale from "@/assets/bristol-scale.jpg";
 import type { TummyStore } from "./store";
+
 
 export type FlowQ = {
   id: string;
@@ -169,6 +171,8 @@ function QuestionFlow({
   const [note, setNote] = useState("");
   const [needNote, setNeedNote] = useState(false);
   const [needBristol, setNeedBristol] = useState(false);
+  const [showScale, setShowScale] = useState(false);
+
   const [time, setTime] = useState("07:00");
   const done = step >= questions.length;
   const current = questions[Math.min(step, questions.length - 1)];
@@ -324,12 +328,34 @@ function QuestionFlow({
 
         {!done && needBristol ? (
           <div className="mt-4">
+            <button
+              onClick={() => setShowScale((v) => !v)}
+              className="mb-3 flex min-h-[56px] w-full items-center gap-3 rounded-2xl border-2 border-line bg-surface px-4 text-left"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-teal text-[16px] font-black text-teal">
+                i
+              </span>
+              <span className="min-w-0 flex-1 text-[16px] font-extrabold text-pine">
+                {showScale ? "Hide consistency descriptions" : "Check consistency descriptions"}
+              </span>
+            </button>
+            {showScale ? (
+              <img
+                src={bristolScale}
+                alt="Bristol stool scale showing types 1 to 7, from separate hard lumps to entirely liquid"
+                width={1024}
+                height={1280}
+                loading="lazy"
+                className="mb-3 w-full rounded-2xl border border-line"
+              />
+            ) : null}
             <div className="flex gap-1.5">
               {[1, 2, 3, 4, 5, 6, 7].map((n) => (
                 <button
                   key={n}
                   onClick={() => {
                     setNeedBristol(false);
+                    setShowScale(false);
                     setAnswers((a) => ({ ...a, bristol: String(n) }));
                     store.addEntry("toilet", "Bowel movement", `Bristol type ${n}`);
                     advance([...turns, { from: "you", text: `Type ${n}` }], step + 1);
@@ -345,6 +371,7 @@ function QuestionFlow({
             </p>
           </div>
         ) : null}
+
 
         {!done && needNote ? (
           <div className="mt-4 space-y-2">
@@ -396,9 +423,25 @@ export function MorningQuestionsScreen({ store }: { store: TummyStore }) {
         store.addEntry(
           "sleep",
           "Wake-up questions",
-          `In bed ${a.bedTime ?? "—"} · awake ${a.wakeTime ?? "—"}`,
+          `In bed ${a.bedTime ?? "—"} · awake ${a.wakeTime ?? "—"}${
+            a.latency ? ` · fell asleep in ${a.latency.toLowerCase()}` : ""
+          }`,
         );
+        if (a.intake === "A few sips of water") {
+          store.addEntry("hydration", "A few sips of water", "Before the fasted recording");
+        }
+        if (a.intake === "Yes, something else") {
+          store.addEntry(
+            "meal",
+            "Food or drink before fasting",
+            a.intakeNote ?? "Reported in the morning questions",
+          );
+        }
+        if (a.activity === "Yes") {
+          store.addEntry("activity", "Morning activity", a.activityNote ?? "Reported on waking");
+        }
         store.markQuestions("morning");
+
         const fasted = store.plan.find((p) => p.id === "fasted" && !p.done);
         if (fasted) {
           store.startItem(fasted.id);
@@ -423,9 +466,21 @@ export function EveningCheckinScreen({ store }: { store: TummyStore }) {
         store.addEntry(
           "symptom",
           "Evening check-in",
-          `GI symptoms ${a.giScore ?? "—"} of 5${a.giWordsNote ? ` · ${a.giWordsNote}` : ""}`,
+          `GI symptoms ${a.giScore ?? "—"} of 5${a.giWords ? ` · ${a.giWords}` : ""}${
+            a.giWordsNote ? ` · ${a.giWordsNote}` : ""
+          }`,
         );
+        if (a.intakeLogged === "No, some is missing" && a.intakeLoggedNote) {
+          store.addEntry("meal", "Added at the evening check-in", a.intakeLoggedNote);
+        }
+        if (a.missed === "Yes" && a.missedNote) {
+          store.addEntry("recording", "Missed sessions reported", a.missedNote);
+        }
+        if (a.unusualNote && a.unusualNote !== "Nothing to add") {
+          store.addEntry("activity", "Something unusual today", a.unusualNote);
+        }
         store.markQuestions("night");
+
         store.go(store.gender === "female" ? "periodCheck" : "home");
       }}
     />
