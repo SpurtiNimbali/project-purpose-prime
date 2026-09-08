@@ -827,7 +827,9 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
           <p className="mt-2 text-[15px] font-semibold leading-snug text-mint">
             Microphone end onto the skin. Sit upright, breathe normally, no talking.
           </p>
+          <PlacementTips />
         </div>
+
         <div className="shrink-0 px-5 pb-7 pt-3">
           <Btn onClick={() => setStage("record")}>I'm in position</Btn>
         </div>
