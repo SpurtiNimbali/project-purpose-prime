@@ -20,8 +20,10 @@ import type { TummyStore } from "./store";
 export type FlowQ = {
   id: string;
   q: string;
-  type: "single" | "text" | "scale" | "time" | "bristol";
+  type: "single" | "text" | "scale" | "time" | "duration" | "bristol";
   options?: string[];
+  /** default value for time questions */
+  def?: string;
   /** answers that open a free-text follow-up */
   textIf?: string[];
   followUp?: string;
@@ -43,48 +45,48 @@ const WATCH_QS: FlowQ[] = [
     id: "watchWearing",
     q: "Are you wearing your smartwatch right now?",
     type: "single",
-    options: ["Yes", "No, it is charging", "No, other reason"],
-    textIf: ["No, other reason"],
+    options: ["Yes", "No, it's charging", "No, another reason"],
+    textIf: ["No, another reason"],
     followUp: "What's going on with it?",
   },
   {
     id: "watchBattery",
-    q: "Smartwatch battery level?",
+    q: "How much battery does it have?",
     type: "single",
-    options: ["Above 50%", "20 to 50%", "Below 20%"],
+    options: ["Above 50%", "20 to 50%", "Below 20%", "Not sure"],
   },
 ];
 
 export const MORNING_QS: FlowQ[] = [
-  { id: "bedTime", q: "What time did you get into bed last night?", type: "time" },
+  { id: "bedTime", q: "What time did you get into bed last night?", type: "time", def: "23:00" },
   {
     id: "latency",
     q: "How long did it take you to fall asleep?",
-    type: "single",
-    options: ["Under 15 min", "15 to 30 min", "30 to 60 min", "Over an hour"],
+    type: "duration",
+    hint: "A rough guess is fine.",
   },
-  { id: "wakeTime", q: "What time did you wake up?", type: "time" },
-  { id: "outOfBed", q: "And what time did you get out of bed?", type: "time" },
+  { id: "wakeTime", q: "What time did you wake up?", type: "time", def: "07:00" },
+  { id: "outOfBed", q: "What time did you get out of bed?", type: "time", def: "07:15" },
   {
     id: "intake",
-    q: "Have you had any food or drink yet this morning?",
+    q: "Have you had anything to eat or drink yet this morning?",
     type: "single",
     options: ["Nothing at all", "A few sips of water", "Yes, something else"],
     textIf: ["Yes, something else"],
     followUp: "What was it, and roughly when?",
     warnIf: ["Yes, something else"],
-    warn: "Just so you know — the morning recording is meant to be fasted. Nothing but a few sips of water before it. Tell me what you had and we'll note it for the team, and try to keep tomorrow's recording food-free.",
+    warn: "The morning recording is meant to be fasted: nothing but a few sips of water. Tell me what you had and I'll note it for the team.",
   },
   {
     id: "bathroom",
-    q: "Have you been to the bathroom since waking?",
+    q: "Have you been to the toilet since waking?",
     type: "single",
     options: ["No", "Yes, but no bowel movement", "Yes, a bowel movement"],
     bristolIf: ["Yes, a bowel movement"],
   },
   {
     id: "activity",
-    q: "Any physical activity since waking, other than going to the bathroom?",
+    q: "Any physical activity since waking, other than going to the toilet?",
     type: "single",
     options: ["No, straight to this", "Yes"],
     textIf: ["Yes"],
