@@ -632,7 +632,7 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
     {
       k: "notif",
       label: "Reminders",
-      sub: "For your 30, 90 and 210 minute alarms",
+      sub: "For your fasted recording, your meal, and every 30 minutes after it",
       Icon: IconPhone,
     },
     {
