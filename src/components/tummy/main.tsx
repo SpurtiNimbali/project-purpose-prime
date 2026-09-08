@@ -295,6 +295,8 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           </span>
         </button>
 
+        <DemoClock store={store} />
+
         {/* quick log */}
         <div className="mt-5">
           <div className="flex items-end justify-between gap-3">
