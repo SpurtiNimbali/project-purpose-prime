@@ -238,3 +238,15 @@ export const IconList = (p: P) => (
     <path d="M8.5 7h11M8.5 12h11M8.5 17h11M4.5 7h.01M4.5 12h.01M4.5 17h.01" />
   </Base>
 );
+
+/** Navel with a measured offset to the placement point (right and down). */
+export const IconNavelPoint = (p: P) => (
+  <Base {...p}>
+    <circle cx="8" cy="8" r="2.6" />
+    <path d="M8 8v0" />
+    <path d="M8 8h8" strokeDasharray="2 2" opacity=".55" />
+    <path d="M16 8v7" strokeDasharray="2 2" opacity=".55" />
+    <circle cx="16" cy="16" r="3.2" />
+    <path d="M16 14.6v2.8" />
+  </Base>
+);
