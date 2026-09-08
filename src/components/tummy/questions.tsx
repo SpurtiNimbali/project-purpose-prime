@@ -185,10 +185,11 @@ function QuestionFlow({
 
   const advance = (from: Turn[], n: number) => {
     setStep(n);
+    if (questions[n]?.def) setTime(questions[n].def as string);
     setTurns(
       n < questions.length
         ? [...from, { from: "bot", text: questions[n].q }]
-        : [...from, { from: "bot", text: "That's everything — thank you." }],
+        : [...from, { from: "bot", text: "That's everything. Thank you." }],
     );
   };
 
