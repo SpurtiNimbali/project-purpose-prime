@@ -686,6 +686,9 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const [toast, setToast] = useState<string | null>(null);
   const [seen, setSeen] = useState<string[]>([]);
   const [coach, setCoach] = useState<Coach | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const [passed, setPassed] = useState(false);
+
 
   const show = (c: Coach) => {
     setSeen((s) => (s.includes(c.id) ? s : [...s, c.id]));
