@@ -78,6 +78,8 @@ export type PlanItem = {
   offset?: number;
   /** meals only */
   meal?: Meal;
+  /** a diary entry for a meal or snack outside the study meal */
+  mealLog?: boolean;
 };
 
 /** Kept for older call sites — recordings only. */
@@ -287,6 +289,44 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
     },
     ...post,
     {
+      id: "logLunch",
+      kind: "meal",
+      label: "Log your lunch",
+      at: 12 * 60 + 30,
+      done: false,
+      window: "Photo and time, as soon as you can",
+      mealLog: true,
+      meal: "lunch",
+    },
+    {
+      id: "logSnackPm",
+      kind: "meal",
+      label: "Log your afternoon snack",
+      at: 16 * 60,
+      done: false,
+      window: "Photo, or a quick line of text",
+      mealLog: true,
+    },
+    {
+      id: "logDinner",
+      kind: "meal",
+      label: "Log your dinner",
+      at: 19 * 60,
+      done: false,
+      window: "Photo and time, as soon as you can",
+      mealLog: true,
+      meal: "dinner",
+    },
+    {
+      id: "logSnackEve",
+      kind: "meal",
+      label: "Log your evening snack",
+      at: 20 * 60 + 30,
+      done: false,
+      window: "Photo, or a quick line of text",
+      mealLog: true,
+    },
+    {
       id: "qEvening",
       kind: "questions",
       label: "Evening check-in",
@@ -359,6 +399,33 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
       itemId: item.id,
       sessionId: item.id,
       fasting: item.fasting,
+    };
+  }
+
+  if (item.kind === "meal" && item.mealLog) {
+    if (due) {
+      return {
+        kind: "meal",
+        tag: "Meal logging",
+        title: item.label,
+        sub: "Add a photo and the time. A line of text is fine for a snack.",
+        cta: "Log it now",
+        screen: "logMeal",
+        state: "due",
+        minsUntil: null,
+        itemId: item.id,
+      };
+    }
+    return {
+      kind: "waiting",
+      tag: "Waiting",
+      title: item.label,
+      sub: `Nothing due until around ${clockLabel(item.at)}.`,
+      cta: "Open today's plan",
+      screen: "sessionHub",
+      state: "soon",
+      minsUntil: mins,
+      itemId: item.id,
     };
   }
 

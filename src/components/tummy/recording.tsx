@@ -515,7 +515,7 @@ export function AbdomenGuide({ height = 250 }: { height?: number }) {
         alt="A person sitting upright on a chair, holding the phone flat against the lower right of the bare belly, screen facing out"
         loading="lazy"
         width={1024}
-        height={896}
+        height={768}
         className="h-full w-full object-contain"
       />
       <figcaption className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 text-[13px] font-bold text-mint">

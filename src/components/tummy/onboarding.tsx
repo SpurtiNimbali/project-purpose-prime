@@ -1091,6 +1091,7 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
   const [tab, setTab] = useState<"weekday" | "weekend">("weekday");
   const [snacks, setSnacks] = useState<"" | "yes" | "no">("");
   const [seenWeekend, setSeenWeekend] = useState(false);
+  const [picked, setPicked] = useState<Record<string, boolean>>({});
   return (
     <Screen>
       <TopBar title="Snacking" onBack={store.back} step="Step 6 of 9" />
@@ -1121,30 +1122,57 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
                 }}
               />
             </div>
-            <div className="mt-4 space-y-3">
+            <p className="mt-4 text-[16px] font-semibold leading-snug text-pine-soft">
+              Tick only the snacks you actually have. Leave the others switched off.
+            </p>
+            <div className="mt-3 space-y-3">
               {[
                 { label: "Morning snack", def: tab === "weekday" ? "10:30" : "11:00" },
                 { label: "Afternoon snack", def: tab === "weekday" ? "16:00" : "16:30" },
                 { label: "Evening snack", def: tab === "weekday" ? "21:00" : "21:30" },
-              ].map(({ label, def }) => (
-                <div
-                  key={label}
-                  className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-4"
-                >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
-                    <IconBowl width={24} height={24} />
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold text-pine">
-                    {label}
-                  </span>
-                  <input
-                    key={tab + label}
-                    type="time"
-                    defaultValue={def}
-                    className="min-h-[52px] shrink-0 rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine"
-                  />
-                </div>
-              ))}
+              ].map(({ label, def }) => {
+                const key = `${tab}-${label}`;
+                const on = picked[key] ?? false;
+                return (
+                  <div
+                    key={label}
+                    className={cn(
+                      "flex items-center gap-3 rounded-2xl border-2 p-4",
+                      on ? "border-teal bg-mint-soft" : "border-line bg-surface",
+                    )}
+                  >
+                    <button
+                      onClick={() => setPicked((p) => ({ ...p, [key]: !on }))}
+                      aria-pressed={on}
+                      className="flex min-h-[52px] min-w-0 flex-1 items-center gap-3 text-left"
+                    >
+                      <span
+                        className={cn(
+                          "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border-2",
+                          on
+                            ? "border-teal bg-teal text-surface"
+                            : "border-line bg-wash text-pine-soft",
+                        )}
+                      >
+                        {on ? <IconCheck width={24} height={24} /> : <IconBowl width={24} height={24} />}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold text-pine">
+                        {label}
+                      </span>
+                    </button>
+                    {on ? (
+                      <input
+                        key={key}
+                        type="time"
+                        defaultValue={def}
+                        className="min-h-[52px] shrink-0 rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine"
+                      />
+                    ) : (
+                      <span className="shrink-0 text-[15px] font-bold text-pine-soft">Off</span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
             <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-pine-soft">
               If you're not sure, a rough guess is completely fine — this doesn't have to be
