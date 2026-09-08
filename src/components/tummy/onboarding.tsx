@@ -803,10 +803,10 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
         <TopBar title="Positioning guide" onBack={() => setStage("case")} dark step="Practice" />
         {banner}
         <div className="min-h-0 flex-1 overflow-y-auto px-5 pt-2">
-          <AbdomenGuide height={220} />
-          <p className="text-[17px] font-extrabold leading-snug text-surface">
-            Lift your shirt and put the bottom of the phone 9 cm below and to the right of your
-            belly button, flat on bare skin.
+          <AbdomenGuide />
+          <p className="mt-3 text-[17px] font-extrabold leading-snug text-surface">
+            Lift your shirt and put the bottom of the phone 8 cm to the right of your belly button
+            and 3 cm down, flat on bare skin.
           </p>
           <p className="mt-2 text-[15px] font-semibold leading-snug text-mint">
             Microphone end onto the skin. Sit upright, breathe normally, no talking.
