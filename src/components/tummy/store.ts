@@ -223,9 +223,15 @@ function offsetLabel(off: number) {
 }
 
 /** The day's plan, in clock order, with nothing done yet. */
+const MEAL_TIMES: Record<Meal, number> = {
+  breakfast: 8 * 60,
+  lunch: 12 * 60 + 30,
+  dinner: 19 * 60,
+};
+
 function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
   const wake = 7 * 60; // 7:00 am
-  const mealStartAt = 8 * 60; // 8:00 am
+  const mealStartAt = MEAL_TIMES[meal];
   const mealEndAt = mealStartAt + 25;
   const mealName = meal[0].toUpperCase() + meal.slice(1);
 
@@ -241,7 +247,34 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
     offset: off,
   }));
 
-  return [
+  /** everything else you eat that day, as diary entries */
+  const otherMeals: PlanItem[] = (["breakfast", "lunch", "dinner"] as Meal[])
+    .filter((m) => m !== meal)
+    .map((m) => ({
+      id: `log-${m}`,
+      kind: "meal" as const,
+      label: `Log your ${m}`,
+      at: MEAL_TIMES[m],
+      done: false,
+      window: "Photo and time, as soon as you can",
+      mealLog: true,
+      meal: m,
+    }));
+
+  const snacks: PlanItem[] = [
+    { id: "logSnackPm", label: "Log your afternoon snack", at: 16 * 60 },
+    { id: "logSnackEve", label: "Log your evening snack", at: 20 * 60 + 30 },
+  ].map((s) => ({
+    id: s.id,
+    kind: "meal" as const,
+    label: s.label,
+    at: s.at,
+    done: false,
+    window: "Photo, or a quick line of text",
+    mealLog: true,
+  }));
+
+  const core: PlanItem[] = [
     {
       id: "qMorning",
       kind: "questions",
@@ -288,54 +321,25 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
       meal,
     },
     ...post,
-    {
-      id: "logLunch",
-      kind: "meal",
-      label: "Log your lunch",
-      at: 12 * 60 + 30,
-      done: false,
-      window: "Photo and time, as soon as you can",
-      mealLog: true,
-      meal: "lunch",
-    },
-    {
-      id: "logSnackPm",
-      kind: "meal",
-      label: "Log your afternoon snack",
-      at: 16 * 60,
-      done: false,
-      window: "Photo, or a quick line of text",
-      mealLog: true,
-    },
-    {
-      id: "logDinner",
-      kind: "meal",
-      label: "Log your dinner",
-      at: 19 * 60,
-      done: false,
-      window: "Photo and time, as soon as you can",
-      mealLog: true,
-      meal: "dinner",
-    },
-    {
-      id: "logSnackEve",
-      kind: "meal",
-      label: "Log your evening snack",
-      at: 20 * 60 + 30,
-      done: false,
-      window: "Photo, or a quick line of text",
-      mealLog: true,
-    },
+  ];
+
+  const diary = [...otherMeals, ...snacks].sort((a, b) => a.at - b.at);
+  const lastAt = Math.max(...core.map((p) => p.at), ...diary.map((p) => p.at));
+
+  return [
+    ...core,
+    ...diary,
     {
       id: "qEvening",
       kind: "questions",
       label: "Evening check-in",
-      at: 21 * 60,
+      at: Math.max(21 * 60, lastAt + 30),
       done: false,
       window: "Before bed",
     },
-  ];
+  ].sort((a, b) => a.at - b.at);
 }
+
 
 /** Single source of truth for "what should I do right now". */
 export function computeNextTask(plan: PlanItem[]): NextTask {
