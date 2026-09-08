@@ -133,6 +133,8 @@ export type TummyStore = {
   /** tick off a scheduled diary item that matches what was just logged */
   completeMealLog: (which: string) => void;
   freezeUsed: boolean;
+  /** today's plan is paused — no recordings, meals or questions expected */
+  frozen: boolean;
   useFreeze: () => void;
 
   offset: 30 | 90 | 210;
@@ -520,6 +522,7 @@ export function useTummyStore(): TummyStore {
   const [chatOpen, setChatOpen] = useState(false);
   const [questions, setQuestions] = useState({ morning: false, night: false });
   const [freezeUsed, setFreezeUsed] = useState(false);
+  const [frozen, setFrozen] = useState(false);
 
   const chooseStudyMeal = useCallback((m: Meal) => {
     setMeal(m);
@@ -617,7 +620,18 @@ export function useTummyStore(): TummyStore {
   }, []);
 
   void demoTick;
-  const nextTask = computeNextTask(plan);
+  const nextTask: NextTask = frozen
+    ? {
+        kind: "done",
+        tag: "Freeze day",
+        title: "Today is a freeze day",
+        sub: "Nothing to record, log or answer today. Your streak stays safe and the schedule picks up again tomorrow morning.",
+        cta: "Open today's log",
+        screen: "logHub",
+        state: "clear",
+        minsUntil: null,
+      }
+    : computeNextTask(plan);
 
   return {
     demoNow: minutesNow(),
@@ -646,7 +660,26 @@ export function useTummyStore(): TummyStore {
     setMeal,
     chooseStudyMeal,
     freezeUsed,
-    useFreeze: () => setFreezeUsed(true),
+    frozen,
+    useFreeze: () => {
+      setFreezeUsed(true);
+      setFrozen(true);
+      setPlan((prev) =>
+        prev.map((p) =>
+          p.done ? p : { ...p, done: true, missed: true, reason: "Freeze day" },
+        ),
+      );
+      setEntries((prev) => [
+        ...prev,
+        {
+          id: `${Date.now()}-freeze`,
+          kind: "recording",
+          label: "Freeze day used",
+          detail: "Today's recordings, meals and questions are paused. Your streak is safe.",
+          time: nowLabel(),
+        },
+      ]);
+    },
     completeMealLog: (which: string) => {
       const key = which.toLowerCase();
       setPlan((prev) => {
