@@ -31,7 +31,10 @@ import {
   IconDizzy,
   IconWind,
   IconLock,
+  IconShield,
+  IconChart,
   IconX,
+
 } from "./icons";
 import {
   clockLabel,
