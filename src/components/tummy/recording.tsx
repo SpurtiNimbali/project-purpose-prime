@@ -537,12 +537,38 @@ export function AbdomenGuide() {
 }
 
 const PLACEMENT_TIPS = [
-  { t: "Right lower belly", b: "8 cm to your right of the belly button, then 3 cm down." },
-  { t: "Microphone edge down", b: "The bottom edge of the phone — where the mic is — goes on the skin." },
-  { t: "Bare skin", b: "Case off, shirt lifted — nothing between the phone and your skin." },
-  { t: "Phone upright", b: "Hold it vertically, screen facing out towards you." },
-  { t: "Gentle, steady pressure", b: "Press just enough to keep full contact, and hold still." },
+  {
+    t: "Right lower belly",
+    b: "8 cm to the right of your belly button, then 3 cm down.",
+    Icon: IconSpiral,
+  },
+  {
+    t: "Microphone edge down",
+    b: "The bottom edge of the phone — the edge holding the main microphone — sits on that point, bottom edge down.",
+    Icon: IconMic,
+  },
+  {
+    t: "Directly on bare skin",
+    b: "No fabric of any kind between the phone and your abdomen. Case off, shirt lifted.",
+    Icon: IconShield,
+  },
+  {
+    t: "Same orientation every time",
+    b: "Phone upright, screen facing out — the same way at every session, every day.",
+    Icon: IconPhone,
+  },
+  {
+    t: "Measure, don't guess",
+    b: "Use the ruler app on your phone to find the spot rather than estimating by eye.",
+    Icon: IconChart,
+  },
+  {
+    t: "Gentle pressure only",
+    b: "Just enough to keep skin contact and no more. Pressing harder muffles the signal.",
+    Icon: IconBalloon,
+  },
 ];
+
 
 const POSITION_CHECKS = [
   {
