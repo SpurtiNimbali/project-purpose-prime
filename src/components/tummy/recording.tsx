@@ -885,7 +885,7 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       <div className="shrink-0 px-5 pb-7">
         {past ? (
           <>
-            <Btn onClick={() => store.go("postMeta")}>Finish and answer the questions</Btn>
+            <Btn onClick={() => setChecking(true)}>Finish and check the audio</Btn>
             <p className="mt-3 text-center text-[15px] font-bold text-mint">
               Or keep going — longer recordings are genuinely more useful.
             </p>
@@ -901,7 +901,7 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
             </p>
             <div className="mt-4 space-y-3">
               <Btn onClick={() => setConfirmEnd(false)}>Keep recording</Btn>
-              <Btn variant="secondary" onClick={() => store.go("postMeta")}>
+              <Btn variant="secondary" onClick={() => setChecking(true)}>
                 Stop anyway
               </Btn>
             </div>
@@ -926,11 +926,26 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
         />
       ) : null}
 
+      {checking ? (
+        <QualityPanel
+          pass={past || attempt > 0}
+          onRedo={() => {
+            setAttempt((a) => a + 1);
+            setChecking(false);
+            setConfirmEnd(false);
+            setElapsed(0);
+            store.resetMarks();
+          }}
+          onContinue={() => store.go("postMeta")}
+        />
+      ) : null}
+
       {toast ? (
         <div className="pointer-events-none absolute inset-x-5 top-[350px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
           {toast}
         </div>
       ) : null}
+
     </Screen>
   );
 }
