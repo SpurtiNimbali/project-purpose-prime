@@ -706,7 +706,7 @@ type Coach = { id: string; text: string; cta: string };
 
 export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const TOTAL = 45;
-  const [stage, setStage] = useState<"case" | "position" | "record">("case");
+  const [stage, setStage] = useState<"intro" | "case" | "position" | "record">("intro");
   const [posChecked, setPosChecked] = useState(false);
   const [left, setLeft] = useState(TOTAL);
   const [marks, setMarks] = useState<{ key: string; label: string; severity: number }[]>([]);
