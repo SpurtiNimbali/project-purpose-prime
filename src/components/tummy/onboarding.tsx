@@ -237,12 +237,17 @@ const QUIZ = [
     hint: "Fasting means nothing at all in your stomach except water.",
   },
   {
-    q: "How long after your target meal are the three recordings?",
-    options: ["30 min, 90 min, 3 hrs", "1 hr, 2 hrs, 4 hrs", "Whenever I remember"],
+    q: "After your study meal, how often do you record?",
+    options: [
+      "Right after eating, then every 30 minutes for 3.5 hours",
+      "Once an hour until bedtime",
+      "Whenever I remember",
+    ],
     answer: 0,
-    why: "Those three moments capture the early, middle and late stages of digestion, which is what makes the data comparable.",
-    hint: "The last one is 3 hours after the meal, and the first is well within the first hour.",
+    why: "A recording right after the meal and then every 30 minutes for three and a half hours captures the whole of digestion, which is what makes the data comparable between people.",
+    hint: "It starts the moment the meal ends, and the gaps between recordings are short.",
   },
+
 ];
 
 
