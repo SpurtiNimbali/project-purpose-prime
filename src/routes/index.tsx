@@ -6,7 +6,6 @@ import { AssistantButton, AssistantSheet } from "@/components/tummy/assistant";
 import {
   WelcomeScreen,
   SubjectIdScreen,
-  StudyIntroScreen,
   VideoScreen,
   QuizScreen,
   ProtocolIntroScreen,
@@ -77,7 +76,6 @@ const TAB_SCREENS: ScreenKey[] = ["home", "logHub", "progress", "profile"];
 const DARK_SCREENS: ScreenKey[] = ["positioning", "recording", "practiceRun"];
 const ONBOARD_SCREENS: ScreenKey[] = [
   "welcome",
-  "studyIntro",
   "subjectId",
   "protocolIntro",
   "video",
@@ -99,7 +97,6 @@ function TummyApp() {
   const screens: Record<ScreenKey, ReactElement> = {
     welcome: <WelcomeScreen store={store} />,
     subjectId: <SubjectIdScreen store={store} />,
-    studyIntro: <StudyIntroScreen store={store} />,
     video: <VideoScreen store={store} />,
     quiz: <QuizScreen store={store} />,
     protocolIntro: <ProtocolIntroScreen store={store} />,
