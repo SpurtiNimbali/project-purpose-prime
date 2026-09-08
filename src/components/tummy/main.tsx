@@ -33,6 +33,8 @@ import {
   IconUser,
   IconShield,
   IconSun,
+  IconSnowflake,
+
   IconBalloon,
   IconBolt,
   IconSpiral,
