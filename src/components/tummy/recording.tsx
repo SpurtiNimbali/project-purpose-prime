@@ -28,6 +28,8 @@ import {
   IconBalloon,
   IconBolt,
   IconSpiral,
+  IconNavelPoint,
+
   IconDizzy,
   IconWind,
   IconLock,
