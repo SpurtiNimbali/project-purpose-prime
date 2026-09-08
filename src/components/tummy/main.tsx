@@ -40,6 +40,8 @@ import {
   IconWind,
   IconPhone,
   IconList,
+  IconChat,
+  IconSend,
 } from "./icons";
 import {
   clockLabel,
@@ -1259,7 +1261,7 @@ export function ContactScreen({ store }: { store: TummyStore }) {
             {
               t: "Message your study coordinator",
               b: "Scheduling, compensation, or anything about taking part. Replies within one working day.",
-              Icon: IconMail,
+              Icon: IconSend,
               action: () => store.go("contactForm"),
               cta: "Write a message",
             },
