@@ -11,9 +11,9 @@ export type ScreenKey =
   | "quiz"
   | "technicalSetup"
   | "permissions"
-  | "practice"
   | "practiceRun"
   | "scheduling"
+  | "mealPick"
   | "snacking"
   | "onboardDone"
   // main
