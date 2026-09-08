@@ -787,6 +787,29 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
     </div>
   );
 
+  /* stage 0 — get somewhere quiet */
+  if (stage === "intro") {
+    return (
+      <Screen>
+        <TopBar title="Practice recording" onBack={store.back} step="Step 9 of 9" />
+        <ScreenBody className="flex flex-col">
+          <div className="flex flex-1 flex-col items-center justify-center text-center">
+            <Mascot src={MASCOT.wave} size={170} />
+            <h2 className="mt-4 text-[26px] font-extrabold leading-tight text-pine">
+              Let's practice a recording
+            </h2>
+            <p className="mt-3 text-[17px] font-semibold leading-snug text-pine-soft">
+              Go somewhere quiet and hit start when you're ready. Nothing is uploaded.
+            </p>
+          </div>
+        </ScreenBody>
+        <StickyFooter>
+          <Btn onClick={() => setStage("case")}>Start</Btn>
+        </StickyFooter>
+      </Screen>
+    );
+  }
+
   /* stage 1 — case off, exactly like the real thing */
   if (stage === "case") {
     return (
