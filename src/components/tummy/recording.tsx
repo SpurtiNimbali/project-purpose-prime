@@ -545,8 +545,9 @@ export const PLACEMENT_TIPS = [
   {
     t: "Right lower belly",
     b: "8 cm to the right of your belly button, then 3 cm down.",
-    Icon: IconNavelPoint,
+    Icon: IconRuler,
   },
+
 
   {
     t: "Microphone edge down",
@@ -606,38 +607,52 @@ const POSITION_CHECKS = [
   { t: "Sitting upright, no talking", b: "Feet on the floor, breathe normally, stay still." },
 ];
 
-export function PositioningScreen({ store }: { store: TummyStore }) {
+/** The three one-at-a-time checks shown over a blurred positioning guide. */
+export function PositionChecksGate({ onDone }: { onDone: () => void }) {
   const [step, setStep] = useState(0);
-  const gated = step < POSITION_CHECKS.length;
   const check = POSITION_CHECKS[Math.min(step, POSITION_CHECKS.length - 1)];
+  return (
+    <div className="absolute inset-0 z-30 flex flex-col justify-end bg-pine/70 px-5 pb-10">
+      <div className="rounded-3xl bg-surface p-5">
+        <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+          Check {step + 1} of {POSITION_CHECKS.length}
+        </p>
+        <p className="mt-2 text-[22px] font-extrabold leading-tight text-pine">{check.t}</p>
+        <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">{check.b}</p>
+        <div className="mt-5">
+          <Btn
+            onClick={() => {
+              if (step + 1 >= POSITION_CHECKS.length) onDone();
+              else setStep((s) => s + 1);
+            }}
+          >
+            Done — it's ready
+          </Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function PositioningScreen({ store }: { store: TummyStore }) {
+  const [checked, setChecked] = useState(false);
   return (
     <Screen dark className="relative">
       <TopBar title="Positioning guide" onBack={store.back} dark step="Placement" />
-      <div className={cn("flex-1 overflow-y-auto px-5 pb-6", gated && "blur-md")}>
+      <div className={cn("flex-1 overflow-y-auto px-5 pb-6", !checked && "blur-md")}>
         <AbdomenGuide />
         <PlacementTips />
       </div>
 
 
       <div className="shrink-0 px-5 pb-7 pt-3">
-        <Btn disabled={gated} onClick={() => store.go("recording")}>
+        <Btn disabled={!checked} onClick={() => store.go("recording")}>
           I'm in position
         </Btn>
       </div>
 
-      {gated ? (
-        <div className="absolute inset-0 z-30 flex flex-col justify-end bg-pine/70 px-5 pb-10">
-          <div className="rounded-3xl bg-surface p-5">
-            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-              Check {step + 1} of {POSITION_CHECKS.length}
-            </p>
-            <p className="mt-2 text-[22px] font-extrabold leading-tight text-pine">{check.t}</p>
-            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">{check.b}</p>
-            <div className="mt-5">
-              <Btn onClick={() => setStep((s) => s + 1)}>Done — it's ready</Btn>
-            </div>
-          </div>
-        </div>
+      {!checked ? <PositionChecksGate onDone={() => setChecked(true)} /> : null}
+
       ) : null}
     </Screen>
   );
