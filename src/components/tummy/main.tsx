@@ -1087,8 +1087,20 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
 /* ---------------- progress ---------------- */
 
 export function ProgressScreen({ store }: { store: TummyStore }) {
-  const days = [true, true, true, false, false, false, false];
-  const todayIdx = 3;
+  const todayIdx = Math.min(Math.max(store.day - 1, 0), 6);
+  const days = [0, 1, 2, 3, 4, 5, 6].map((i) => i < todayIdx);
+
+  const recs = store.plan.filter((p) => p.kind === "recording");
+  const recDone = recs.filter((p) => p.done).length;
+  const extras = store.entries.filter((e) => e.kind === "recording").length;
+  const REQUIRED = 10;
+  const minutes = recDone * 2;
+  const mealsDone = store.plan.filter((p) => p.kind === "meal" && p.done).length;
+  const mealsTotal = store.plan.filter((p) => p.kind === "meal").length;
+  const qDone = store.plan.filter((p) => p.kind === "questions" && p.done).length;
+  const qTotal = store.plan.filter((p) => p.kind === "questions").length;
+  const pct = Math.round((Math.min(recDone, REQUIRED) / REQUIRED) * 100);
+
   return (
     <Screen>
       <TopBar title="Progress" />
@@ -1096,16 +1108,19 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
         <Card className={cn("border-0 text-surface", store.frozen ? "bg-blue" : "bg-teal")}>
           <div className="flex items-center gap-3">
             <Mascot src={MASCOT.cheer} size={72} />
-            <div>
-              <p className="text-[34px] font-extrabold leading-none">3 days</p>
+            <div className="min-w-0">
+              <p className="text-[34px] font-extrabold leading-none">Day {store.day} of 7</p>
               <p className="text-[16px] font-bold text-surface/85">
-                {store.frozen ? "streak frozen · safe until tomorrow" : "in a row · keep it going"}
+                {store.frozen
+                  ? "freeze day · streak safe until tomorrow"
+                  : "seven consecutive study days"}
               </p>
             </div>
           </div>
           <div className="mt-4 flex justify-between">
             {days.map((d, i) => {
               const isFrozen = store.frozen && i === todayIdx;
+              const isToday = i === todayIdx;
               return (
                 <div key={i} className="flex flex-col items-center gap-1">
                   <span
@@ -1115,7 +1130,9 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                         ? "border-surface bg-surface text-blue"
                         : d
                           ? "border-mint bg-mint text-pine"
-                          : "border-surface/30 text-surface/50",
+                          : isToday
+                            ? "border-surface text-surface"
+                            : "border-surface/30 text-surface/50",
                     )}
                   >
                     {isFrozen ? (
@@ -1126,12 +1143,80 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                       <IconSun width={18} height={18} />
                     )}
                   </span>
-                  <span className="text-[13px] font-extrabold text-surface/85">{"MTWTFSS"[i]}</span>
+                  <span className="text-[13px] font-extrabold text-surface/85">{i + 1}</span>
                 </div>
               );
             })}
           </div>
         </Card>
+
+        <div className="mt-4">
+          <Card>
+            <div className="flex items-center gap-2 text-teal">
+              <IconChart width={22} height={22} />
+              <p className="text-[17px] font-extrabold text-pine">Today's recordings</p>
+            </div>
+            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
+              The protocol asks for {REQUIRED} recordings — about 20 minutes of sound — across the
+              fasted session, your chosen meal and the 3.5 hours after it.
+            </p>
+            <div className="mt-4 h-5 w-full overflow-hidden rounded-full bg-wash">
+              <div
+                className="h-full rounded-full bg-sage transition-all"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <p className="mt-2 text-[16px] font-extrabold text-teal">
+              {recDone} of {REQUIRED} done · {minutes} minutes recorded
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {recs.map((p) => (
+                <span
+                  key={p.id}
+                  className={cn(
+                    "flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-[13px] font-extrabold",
+                    p.done ? "bg-teal text-surface" : "bg-wash text-pine-soft",
+                  )}
+                >
+                  {clockLabel(p.at).replace(" ", "")}
+                </span>
+              ))}
+            </div>
+            {extras > 0 ? (
+              <p className="mt-3 text-[15px] font-semibold text-pine-soft">
+                Plus {extras} extra {extras === 1 ? "recording" : "recordings"} you added yourself —
+                these are a bonus, not part of the {REQUIRED}.
+              </p>
+            ) : null}
+          </Card>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <Card>
+            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+              Food &amp; drink
+            </p>
+            <p className="mt-1 text-[26px] font-extrabold leading-none text-pine">
+              {mealsDone}
+              <span className="text-[16px] font-bold text-pine-soft">/{mealsTotal}</span>
+            </p>
+            <p className="mt-1 text-[15px] font-semibold leading-snug text-pine-soft">
+              Everything eaten and drunk, photographed and timed.
+            </p>
+          </Card>
+          <Card>
+            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+              Questionnaires
+            </p>
+            <p className="mt-1 text-[26px] font-extrabold leading-none text-pine">
+              {qDone}
+              <span className="text-[16px] font-bold text-pine-soft">/{qTotal}</span>
+            </p>
+            <p className="mt-1 text-[15px] font-semibold leading-snug text-pine-soft">
+              Morning, around your meal and the evening check-in.
+            </p>
+          </Card>
+        </div>
 
         <div className="mt-4">
           <Card className={store.frozen ? "border-2 border-blue bg-surface" : undefined}>
@@ -1153,15 +1238,15 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                   {store.frozen
                     ? "Today is a freeze day"
                     : store.freezeUsed
-                      ? "Streak freeze used"
-                      : "Streak freeze available"}
+                      ? "Freeze day used"
+                      : "Freeze day available"}
                 </p>
                 <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
                   {store.frozen
-                    ? "Everything is paused until tomorrow morning. Nothing counts as missed and your streak is protected."
+                    ? "Everything is paused until tomorrow morning. Nothing counts as missed and the seven days simply extend by one."
                     : store.freezeUsed
-                      ? "You've used your one freeze for this study week. Your streak is safe for that day."
-                      : "Need a day off? Use your one freeze and your streak stays intact. Life happens — this is a study, not a competition."}
+                      ? "You've used your freeze for this study period. The rest of the days run back to back."
+                      : "Life happens. Pause a whole day once and the study picks up where it left off — no session counts as missed."}
                 </p>
                 {!store.freezeUsed ? (
                   <div className="mt-3">
@@ -1172,43 +1257,24 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                 ) : null}
               </div>
             </div>
-
           </Card>
         </div>
 
         <div className="mt-4">
           <Card>
-            <p className="text-[17px] font-extrabold text-pine">Full study goal</p>
-            <p className="mt-1 text-[16px] font-semibold text-pine-soft">
-              Compensation is released once when the full week is complete.
+            <p className="text-[17px] font-extrabold text-pine">Missing a session is fine</p>
+            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
+              A quiet, well-placed two minutes is worth more than a rushed one. If a session is
+              missed or compromised, tell us why — that note is data too, and it never removes you
+              from the study.
             </p>
-            <div className="mt-4 h-5 w-full overflow-hidden rounded-full bg-wash">
-              <div className="h-full w-[43%] rounded-full bg-sage" />
-            </div>
-            <p className="mt-2 text-[16px] font-extrabold text-teal">12 of 28 sessions complete</p>
-          </Card>
-        </div>
-
-        <div className="mt-4">
-          <Card>
-            <div className="flex items-center gap-2 text-teal">
-              <IconChart width={22} height={22} />
-              <p className="text-[17px] font-extrabold text-pine">This week's sessions</p>
-            </div>
-            <div className="mt-4 space-y-3">
-              {["Day 1", "Day 2", "Day 3"].map((d, i) => (
-                <div key={d} className="flex items-center gap-3">
-                  <span className="w-[58px] text-[16px] font-extrabold text-pine">{d}</span>
-                  <Dots states={[true, true, i < 2, i < 2]} />
-                </div>
-              ))}
-            </div>
           </Card>
         </div>
       </ScreenBody>
     </Screen>
   );
 }
+
 
 /* ---------------- profile ---------------- */
 
