@@ -40,6 +40,8 @@ import {
   IconWind,
   IconPhone,
   IconList,
+  IconChat,
+  IconSend,
 } from "./icons";
 import {
   clockLabel,
@@ -75,10 +77,59 @@ const HOME_LOGS: {
   { k: "logSymptom", label: "Symptom", kind: "symptom", Icon: IconWave },
 ];
 
+/** Prototype-only: move the clock through the day to see every home state. */
+function DemoClock({ store }: { store: TummyStore }) {
+  const now = store.demoNow;
+  const jumps: { label: string; at: number }[] = [
+    { label: "Wake-up", at: 7 * 60 },
+    { label: "Fasted", at: 7 * 60 + 10 },
+    { label: "Meal", at: 8 * 60 },
+    { label: "Waiting", at: 9 * 60 + 40 },
+    { label: "Evening", at: 21 * 60 },
+  ];
+  return (
+    <div className="mt-5 rounded-3xl border-2 border-dashed border-teal/40 bg-mint-soft/50 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+          Prototype clock
+        </p>
+        <span className="rounded-full bg-surface px-3 py-1 text-[15px] font-extrabold text-pine tabular-nums">
+          {clockLabel(now)}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={5 * 60}
+        max={23 * 60 + 55}
+        step={5}
+        value={now}
+        aria-label="Time of day"
+        onChange={(e) => store.setDemoNow(Number(e.target.value))}
+        className="mt-3 h-3 w-full accent-teal"
+      />
+      <div className="mt-3 flex flex-wrap gap-2">
+        {jumps.map((j) => (
+          <button
+            key={j.label}
+            onClick={() => store.setDemoNow(j.at)}
+            className="min-h-[38px] rounded-full border border-line bg-surface px-3 text-[14px] font-extrabold text-teal active:scale-[0.98]"
+          >
+            {j.label}
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 text-[14px] font-semibold leading-snug text-pine-soft">
+        Demo only — drag to move through the day and watch this screen change between recording,
+        waiting, meal logging and questions.
+      </p>
+    </div>
+  );
+}
+
 export function HomeScreen({ store }: { store: TummyStore }) {
   useTick();
   const task = computeNextTask(store.plan);
-  const hour = new Date().getHours();
+  const hour = Math.floor(store.demoNow / 60);
   const due = task.state === "due";
   const doneCount = store.plan.filter((p) => p.done).length;
   const currentIndex = Math.max(0, store.plan.findIndex((p) => !p.done));
@@ -294,6 +345,8 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             </span>
           </span>
         </button>
+
+        <DemoClock store={store} />
 
         {/* quick log */}
         <div className="mt-5">
@@ -1197,32 +1250,54 @@ export function ContactScreen({ store }: { store: TummyStore }) {
           without leaving the study.
         </MascotSays>
         <div className="mt-5 space-y-3">
-          <Card onClick={() => store.setChatOpen(true)}>
-            <p className="text-[17px] font-extrabold text-pine">Ask me first</p>
-            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              Missed recordings, timings, reminders and app problems — I can usually answer straight
-              away.
-            </p>
-          </Card>
-          <Card onClick={() => store.go("contactForm")}>
-            <p className="text-[17px] font-extrabold text-pine">Message your study coordinator</p>
-            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              Scheduling, compensation, or anything about taking part. Replies within one working
-              day.
-            </p>
-          </Card>
-          <Card onClick={() => store.go("contactForm")}>
-            <p className="text-[17px] font-extrabold text-pine">Speak to the lead researcher</p>
-            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              Questions about the science, your data, or how the recordings are used.
-            </p>
-          </Card>
-          <Card onClick={() => store.go("contactForm")}>
-            <p className="text-[17px] font-extrabold text-pine">Raise a concern or complaint</p>
-            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              Goes to the study manager and, if you ask, the independent review board.
-            </p>
-          </Card>
+          {[
+            {
+              t: "Ask me first",
+              b: "Missed recordings, timings, reminders and app problems — I can usually answer straight away.",
+              Icon: IconChat,
+              action: () => store.setChatOpen(true),
+              cta: "Open chat",
+            },
+            {
+              t: "Message your study coordinator",
+              b: "Scheduling, compensation, or anything about taking part. Replies within one working day.",
+              Icon: IconSend,
+              action: () => store.go("contactForm"),
+              cta: "Write a message",
+            },
+            {
+              t: "Speak to the lead researcher",
+              b: "Questions about the science, your data, or how the recordings are used.",
+              Icon: IconUser,
+              action: () => store.go("contactForm"),
+              cta: "Write a message",
+            },
+            {
+              t: "Raise a concern or complaint",
+              b: "Goes to the study manager and, if you ask, the independent review board.",
+              Icon: IconShield,
+              action: () => store.go("contactForm"),
+              cta: "Write a message",
+            },
+          ].map(({ t, b, Icon, action, cta }) => (
+            <button
+              key={t}
+              onClick={action}
+              className="flex w-full items-center gap-3 rounded-3xl border border-line bg-surface p-4 text-left active:scale-[0.99]"
+            >
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+                <Icon width={24} height={24} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[17px] font-extrabold text-pine">{t}</span>
+                <span className="mt-1 block text-[16px] font-semibold leading-snug text-pine-soft">
+                  {b}
+                </span>
+                <span className="mt-1 block text-[15px] font-extrabold text-teal">{cta} →</span>
+              </span>
+              <span className="shrink-0 text-[22px] font-extrabold text-teal">›</span>
+            </button>
+          ))}
         </div>
         <div className="mt-4">
           <Note tone="green" title="Prefer to phone?">

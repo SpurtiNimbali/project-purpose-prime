@@ -155,6 +155,9 @@ export type TummyStore = {
   markQuestions: (when: "morning" | "night") => void;
   nextTask: NextTask;
   gender: Gender;
+  /** prototype clock: current simulated minutes from midnight */
+  demoNow: number;
+  setDemoNow: (mins: number) => void;
   setGender: (g: Gender) => void;
 };
 
@@ -171,9 +174,24 @@ export function clockLabel(mins: number) {
   return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
-export function minutesNow() {
+/** Prototype-only clock shift, in minutes, so the demo can jump through the day. */
+let demoShift = 0;
+
+export function realMinutesNow() {
   const d = new Date();
   return d.getHours() * 60 + d.getMinutes();
+}
+
+export function getDemoShift() {
+  return demoShift;
+}
+
+export function setDemoShift(mins: number) {
+  demoShift = mins;
+}
+
+export function minutesNow() {
+  return ((realMinutesNow() + demoShift) % (24 * 60) + 24 * 60) % (24 * 60);
 }
 
 export function untilLabel(mins: number) {
@@ -202,17 +220,20 @@ function offsetLabel(off: number) {
   return `${h % 1 === 0 ? h : h.toFixed(1)} hr after the meal`;
 }
 
+/** The day's plan, in clock order, with nothing done yet. */
 function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
-  const now = minutesNow();
-  const mealEndAt = now - 30;
+  const wake = 7 * 60; // 7:00 am
+  const mealStartAt = 8 * 60; // 8:00 am
+  const mealEndAt = mealStartAt + 25;
   const mealName = meal[0].toUpperCase() + meal.slice(1);
 
   const post: PlanItem[] = POST_MEAL_OFFSETS.map((off) => ({
     id: `p${off}`,
     kind: "recording" as const,
-    label: off === 0 ? "Right after the meal" : `Meal + ${off < 60 ? `${off} min` : `${off / 60} hr`}`,
+    label:
+      off === 0 ? "Right after the meal" : `Meal + ${off < 60 ? `${off} min` : `${off / 60} hr`}`,
     at: mealEndAt + off,
-    done: mealEndAt + off <= now - 5,
+    done: false,
     window: offsetLabel(off),
     sessionKind: "postMeal" as const,
     offset: off,
@@ -223,16 +244,16 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
       id: "qMorning",
       kind: "questions",
       label: "Wake-up questions",
-      at: now - 145,
-      done: true,
+      at: wake,
+      done: false,
       window: "Before the fasted recording",
     },
     {
       id: "fasted",
       kind: "recording",
       label: "Fasted morning recording",
-      at: now - 140,
-      done: true,
+      at: wake + 10,
+      done: false,
       window: "Within 30 min of waking, before any food or drink",
       fasting: true,
       sessionKind: "fasted",
@@ -241,8 +262,8 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
       id: "preMeal",
       kind: "recording",
       label: `Before ${mealName.toLowerCase()}`,
-      at: now - 55,
-      done: true,
+      at: mealStartAt - 5,
+      done: false,
       window: "Immediately before you start eating",
       sessionKind: "preMeal",
     },
@@ -250,8 +271,8 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
       id: "mealStart",
       kind: "meal",
       label: `${mealName} — start eating`,
-      at: now - 50,
-      done: true,
+      at: mealStartAt,
+      done: false,
       window: "Tap when you take the first bite",
       meal,
     },
@@ -260,7 +281,7 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
       kind: "meal",
       label: `${mealName} — finished eating`,
       at: mealEndAt,
-      done: true,
+      done: false,
       window: "Tap the moment you finish — all timers start here",
       meal,
     },
@@ -269,7 +290,7 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
       id: "qEvening",
       kind: "questions",
       label: "Evening check-in",
-      at: now + 400,
+      at: 21 * 60,
       done: false,
       window: "Before bed",
     },
@@ -415,24 +436,8 @@ export function useTummyStore(): TummyStore {
   const [plan, setPlan] = useState<PlanItem[]>(() => createInitialPlan("breakfast"));
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const [lastRecordingAt, setLastRecordingAt] = useState<number | null>(null);
-  const [entries, setEntries] = useState<LogEntry[]>([
-    { id: "seed-1", kind: "sleep", label: "Wake-up questions", detail: "In bed 11:20 pm · up 7:05 am", time: "7:10 am" },
-    {
-      id: "seed-2",
-      kind: "recording",
-      label: "Gut sound recording",
-      detail: "Fasted morning",
-      time: "7:20 am",
-    },
-    { id: "seed-3", kind: "meal", label: "Breakfast", detail: "Oats and berries · photo added", time: "8:05 am" },
-    {
-      id: "seed-4",
-      kind: "recording",
-      label: "Gut sound recording",
-      detail: "Right after the meal",
-      time: "8:35 am",
-    },
-  ]);
+  const [entries, setEntries] = useState<LogEntry[]>([]);
+  const [demoTick, setDemoTick] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [questions, setQuestions] = useState({ morning: false, night: false });
 
@@ -525,9 +530,15 @@ export function useTummyStore(): TummyStore {
     setSessionKind("extra");
   }, []);
 
+  void demoTick;
   const nextTask = computeNextTask(plan);
 
   return {
+    demoNow: minutesNow(),
+    setDemoNow: (mins: number) => {
+      setDemoShift(mins - realMinutesNow());
+      setDemoTick((t) => t + 1);
+    },
     nextTask,
     gender,
     setGender,

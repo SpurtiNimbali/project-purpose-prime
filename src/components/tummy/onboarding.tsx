@@ -118,20 +118,28 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
 
 const INTRO_POINTS = [
   {
-    title: "One week, four-plus sessions a day",
-    body: "A fasting recording after you wake, then recordings across the three hours after a meal.",
+    title: "Seven days in a row",
+    body: "You take part on seven consecutive days. If life gets in the way, you can freeze the study for up to two days within a fortnight.",
   },
   {
-    title: "Each recording is 2 minutes",
-    body: "You sit still with the phone held against the skin of your belly. That's the whole thing.",
+    title: "Ten recordings a day, about 20 minutes",
+    body: "One after you wake before eating, one right before your chosen meal, then one straight after it and every 30 minutes for the next three and a half hours.",
   },
   {
-    title: "You also log a little context",
-    body: "Meals, sleep, hydration, toilet habits and symptoms — quick taps, no writing needed.",
+    title: "Two minutes each, longer is welcome",
+    body: "Sit upright and still in a quiet room with the phone on the bare skin of your lower right belly. Two minutes is the minimum, keep going if you can.",
   },
   {
-    title: "Nothing is diagnostic",
-    body: "We never tell you that something is wrong. This is research into normal gut sounds.",
+    title: "Eating and drinking during the meal window",
+    body: "Once the meal ends, nothing to eat or drink until the last recording, apart from a small amount of water straight after a recording.",
+  },
+  {
+    title: "A short diary alongside",
+    body: "Questions when you wake and before bed, a few after each recording, and a photo and time for everything you eat or drink that day.",
+  },
+  {
+    title: "Quality matters more than quantity",
+    body: "If a session can't be done properly, skip it and tell us why. Missing a session never ends your part in the study.",
   },
 ];
 
