@@ -77,54 +77,6 @@ const HOME_LOGS: {
   { k: "logSymptom", label: "Symptom", kind: "symptom", Icon: IconWave },
 ];
 
-/** Prototype-only: move the clock through the day to see every home state. */
-function DemoClock({ store }: { store: TummyStore }) {
-  const now = store.demoNow;
-  const jumps: { label: string; at: number }[] = [
-    { label: "Wake-up", at: 7 * 60 },
-    { label: "Fasted", at: 7 * 60 + 10 },
-    { label: "Meal", at: 8 * 60 },
-    { label: "Waiting", at: 9 * 60 + 40 },
-    { label: "Evening", at: 21 * 60 },
-  ];
-  return (
-    <div className="mt-5 rounded-3xl border-2 border-dashed border-teal/40 bg-mint-soft/50 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-          Prototype clock
-        </p>
-        <span className="rounded-full bg-surface px-3 py-1 text-[15px] font-extrabold text-pine tabular-nums">
-          {clockLabel(now)}
-        </span>
-      </div>
-      <input
-        type="range"
-        min={5 * 60}
-        max={23 * 60 + 55}
-        step={5}
-        value={now}
-        aria-label="Time of day"
-        onChange={(e) => store.setDemoNow(Number(e.target.value))}
-        className="mt-3 h-3 w-full accent-teal"
-      />
-      <div className="mt-3 flex flex-wrap gap-2">
-        {jumps.map((j) => (
-          <button
-            key={j.label}
-            onClick={() => store.setDemoNow(j.at)}
-            className="min-h-[38px] rounded-full border border-line bg-surface px-3 text-[14px] font-extrabold text-teal active:scale-[0.98]"
-          >
-            {j.label}
-          </button>
-        ))}
-      </div>
-      <p className="mt-2 text-[14px] font-semibold leading-snug text-pine-soft">
-        Demo only — drag to move through the day and watch this screen change between recording,
-        waiting, meal logging and questions.
-      </p>
-    </div>
-  );
-}
 
 export function HomeScreen({ store }: { store: TummyStore }) {
   useTick();
@@ -245,11 +197,13 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 store.go("skipReason");
               }}
               className={cn(
-                "mt-3 min-h-[48px] w-full rounded-2xl text-[15px] font-extrabold",
-                due ? "text-mint" : "text-pine-soft",
+                "mt-3 min-h-[54px] w-full rounded-2xl border-2 text-[16px] font-extrabold active:scale-[0.99]",
+                due
+                  ? "border-surface/40 bg-surface/10 text-surface"
+                  : "border-line bg-wash text-pine",
               )}
             >
-              Can't do this one — skip and tell us why
+              Skip this recording
             </button>
           ) : null}
 
