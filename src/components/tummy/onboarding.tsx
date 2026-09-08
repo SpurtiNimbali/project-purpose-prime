@@ -1112,8 +1112,8 @@ export function MealPickScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="blue" title="What this changes">
-            Your day is built around this meal: a recording just before it, one straight after, then
-            every 30 minutes for three and a half hours. Your other meals and snacks just get logged.
+            A recording just before this meal, one straight after, then every 30 minutes for 3.5
+            hours. Other meals and snacks are only logged.
           </Note>
         </div>
       </ScreenBody>
