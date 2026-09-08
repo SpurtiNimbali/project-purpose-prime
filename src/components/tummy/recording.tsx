@@ -822,6 +822,9 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
   const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [confirmEnd, setConfirmEnd] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
   const startedRef = useRef(false);
   const left = Math.max(0, MIN_SECONDS - elapsed);
   const past = elapsed >= MIN_SECONDS;
