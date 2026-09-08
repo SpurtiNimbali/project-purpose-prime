@@ -1273,7 +1273,7 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("studyIntro")}>Continue</Btn>
+        <Btn onClick={() => store.go("video")}>Continue</Btn>
       </StickyFooter>
     </Screen>
   );
