@@ -539,12 +539,13 @@ export function AbdomenGuide() {
   );
 }
 
-const PLACEMENT_TIPS = [
+export const PLACEMENT_TIPS = [
   {
     t: "Right lower belly",
     b: "8 cm to the right of your belly button, then 3 cm down.",
-    Icon: IconSpiral,
+    Icon: IconNavelPoint,
   },
+
   {
     t: "Microphone edge down",
     b: "The bottom edge of the phone — the edge holding the main microphone — sits on that point, bottom edge down.",
