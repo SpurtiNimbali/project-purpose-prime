@@ -172,7 +172,15 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                       >
                         Skip this one and tell us why
                       </button>
+                    ) : p.kind === "meal" ? (
+                      <button
+                        onClick={() => store.missItem(p.id, "Meal skipped or not eaten")}
+                        className="mt-2 min-h-[48px] w-full text-[15px] font-extrabold text-amber-soft"
+                      >
+                        I skipped this meal
+                      </button>
                     ) : null}
+
                   </div>
                 ) : (
                   <div className="flex min-h-[56px] min-w-0 flex-1 items-center gap-3 rounded-2xl border border-line bg-surface px-4">
