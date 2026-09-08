@@ -593,40 +593,8 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
       <div className={cn("flex-1 overflow-y-auto px-5 pb-6", gated && "blur-md")}>
         <AbdomenGuide />
 
-        <div className="mt-4 space-y-2">
-          {PLACEMENT_TIPS.map(({ t, b, Icon }) => (
-            <div
-              key={t}
-              className="flex items-start gap-3 rounded-2xl bg-surface/10 px-4 py-3 text-surface"
-            >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber text-pine">
-                <Icon width={20} height={20} />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[16px] font-bold leading-snug">{t}</span>
-                <span className="mt-0.5 block text-[14px] font-semibold leading-snug text-mint">
-                  {b}
-                </span>
-              </span>
-            </div>
-          ))}
-        </div>
+        <PlacementTips />
 
-
-        <div className="mt-5 space-y-2">
-          {POSITION_CHECKS.map(({ t }) => (
-            <div
-              key={t}
-              className="flex min-h-[56px] items-center gap-3 rounded-2xl bg-surface/10 px-4 text-surface"
-            >
-              <span className="shrink-0 text-mint">
-                <IconCheck width={20} height={20} />
-              </span>
-              <span className="min-w-0 flex-1 text-[16px] font-bold">{t}</span>
-            </div>
-          ))}
-        </div>
-      </div>
       <div className="shrink-0 px-5 pb-7 pt-3">
         <Btn disabled={gated} onClick={() => store.go("recording")}>
           I'm in position
