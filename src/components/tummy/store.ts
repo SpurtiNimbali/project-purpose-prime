@@ -643,6 +643,25 @@ export function useTummyStore(): TummyStore {
     startExtraSession,
     meal,
     setMeal,
+    chooseStudyMeal,
+    freezeUsed,
+    useFreeze: () => setFreezeUsed(true),
+    completeMealLog: (which: string) => {
+      const key = which.toLowerCase();
+      setPlan((prev) => {
+        const target =
+          prev.find((p) => p.mealLog && !p.done && p.meal === key) ??
+          prev.find(
+            (p) =>
+              p.mealLog &&
+              !p.done &&
+              (key === "snack" || key === "drink" ? !p.meal : false),
+          );
+        if (!target) return prev;
+        return prev.map((p) => (p.id === target.id ? { ...p, done: true } : p));
+      });
+    },
+
     offset,
     setOffset,
     side,
