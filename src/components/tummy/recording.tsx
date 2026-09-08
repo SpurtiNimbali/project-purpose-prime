@@ -544,67 +544,68 @@ export function AbdomenGuide() {
 export const PLACEMENT_TIPS = [
   {
     t: "Right lower belly",
-    b: "8 cm to the right of your belly button, then 3 cm down.",
+    b: "8 cm right of your belly button, then 3 cm down.",
     Icon: IconRuler,
   },
-
-
   {
     t: "Microphone edge down",
-    b: "The bottom edge of the phone — the edge holding the main microphone — sits on that point, bottom edge down.",
+    b: "The bottom edge of the phone sits on that point.",
     Icon: IconMic,
   },
   {
-    t: "Directly on bare skin",
-    b: "No fabric of any kind between the phone and your abdomen. Case off, shirt lifted.",
+    t: "Bare skin",
+    b: "Case off, shirt lifted. No fabric in between.",
     Icon: IconShield,
   },
   {
-    t: "Same orientation every time",
-    b: "Phone upright, screen facing out — the same way at every session, every day.",
+    t: "Same way every time",
+    b: "Phone upright, screen facing out, every session.",
     Icon: IconPhone,
   },
   {
     t: "Measure, don't guess",
-    b: "Use the ruler app on your phone to find the spot rather than estimating by eye.",
+    b: "Use a ruler rather than your eye.",
     Icon: IconChart,
   },
-  {
-    t: "Gentle pressure only",
-    b: "Just enough to keep skin contact and no more. Pressing harder muffles the signal.",
-    Icon: IconBalloon,
-  },
 ];
+
+/** Placement rules, revealed one at a time so each one gets read. */
 export function PlacementTips() {
+  const [shown, setShown] = useState(1);
+  const all = shown >= PLACEMENT_TIPS.length;
   return (
     <div className="mt-4 space-y-2">
-      {PLACEMENT_TIPS.map(({ t, b, Icon }) => (
+      {PLACEMENT_TIPS.slice(0, shown).map(({ t, b, Icon }) => (
         <div
           key={t}
-          className="flex items-start gap-3 rounded-2xl bg-surface/10 px-4 py-3 text-surface"
+          className="flex items-center gap-3 rounded-2xl bg-surface/10 px-3 py-2 text-surface"
         >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber text-pine">
-            <Icon width={20} height={20} />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber text-pine">
+            <Icon width={18} height={18} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[16px] font-bold leading-snug">{t}</span>
-            <span className="mt-0.5 block text-[14px] font-semibold leading-snug text-mint">
-              {b}
-            </span>
+            <span className="block text-[15px] font-bold leading-snug">{t}</span>
+            <span className="block text-[13px] font-semibold leading-snug text-mint">{b}</span>
           </span>
         </div>
       ))}
+      {!all ? (
+        <button
+          onClick={() => setShown((s) => s + 1)}
+          className="min-h-[48px] w-full rounded-2xl border-2 border-mint text-[15px] font-extrabold text-mint"
+        >
+          Next rule · {shown} of {PLACEMENT_TIPS.length}
+        </button>
+      ) : null}
     </div>
   );
 }
 
 const POSITION_CHECKS = [
-  {
-    t: "Case off",
-    b: "Nothing at all between the phone and your skin — no case, no shirt, no blanket.",
-  },
-  { t: "Quiet room", b: "TV, radio, fans and extractor off. Close the door if you can." },
+  { t: "Case off", b: "Nothing between the phone and your skin." },
+  { t: "Quiet room", b: "TV, radio and fans off. Close the door if you can." },
   { t: "Sitting upright, no talking", b: "Feet on the floor, breathe normally, stay still." },
+  { t: "Gentle pressure only", b: "Just enough to keep skin contact. Pressing harder muffles it." },
 ];
 
 /** The three one-at-a-time checks shown over a blurred positioning guide. */
