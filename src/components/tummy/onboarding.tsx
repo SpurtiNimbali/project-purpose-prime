@@ -1082,9 +1082,46 @@ export function MealPickScreen({ store }: { store: TummyStore }) {
       <TopBar title="Your study meal" onBack={store.back} step="Step 6 of 9" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.calm}>
-          Which meal would you like your recordings to follow? Pick the one you eat at the steadiest
-          time — it stays the same every study day.
+          Which meal would you like to do your bowel sound recordings around? Pick the one you
+          usually eat at similar times every day, and after which you'll have a private, quiet space
+          to record.
         </MascotSays>
+
+        <button
+          onClick={() => setInfo((v) => !v)}
+          className="mt-3 flex min-h-[56px] w-full items-center gap-3 rounded-2xl border-2 border-teal bg-surface px-4 text-left"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-teal text-[16px] font-black text-teal">
+            i
+          </span>
+          <span className="min-w-0 flex-1 text-[17px] font-extrabold text-pine">
+            Which meal should I pick?
+          </span>
+        </button>
+
+        {info ? (
+          <div className="mt-3 space-y-2">
+            {[
+              {
+                t: "Breakfast",
+                b: "Only if you work from home every day. Commuting after breakfast disrupts the recording schedule.",
+              },
+              {
+                t: "Lunch",
+                b: "Only if you have a private, quiet spot: a lactation room, private office, or a room you can book. Bathrooms are not allowed, flushing and other people are too noisy. Also a poor choice if you usually have meetings where you talk in the 3.5 hours after lunch, since you need to stay quiet and hold the phone in place.",
+              },
+              {
+                t: "Dinner",
+                b: "Only if you'll be awake for the 3.5 hours after it. If you usually are, we recommend dinner: no office meetings to work around, so it's the easiest to finish.",
+              },
+            ].map(({ t, b }) => (
+              <div key={t} className="rounded-2xl border border-line bg-surface p-4">
+                <p className="text-[17px] font-extrabold text-pine">{t}</p>
+                <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">{b}</p>
+              </div>
+            ))}
+          </div>
+        ) : null}
         <div className="mt-5 space-y-3">
           {meals.map(({ k, label, sub, Icon }) => (
             <button
