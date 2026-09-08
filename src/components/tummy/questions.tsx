@@ -324,12 +324,34 @@ function QuestionFlow({
 
         {!done && needBristol ? (
           <div className="mt-4">
+            <button
+              onClick={() => setShowScale((v) => !v)}
+              className="mb-3 flex min-h-[56px] w-full items-center gap-3 rounded-2xl border-2 border-line bg-surface px-4 text-left"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-teal text-[16px] font-black text-teal">
+                i
+              </span>
+              <span className="min-w-0 flex-1 text-[16px] font-extrabold text-pine">
+                {showScale ? "Hide consistency descriptions" : "Check consistency descriptions"}
+              </span>
+            </button>
+            {showScale ? (
+              <img
+                src={bristolScale}
+                alt="Bristol stool scale showing types 1 to 7, from separate hard lumps to entirely liquid"
+                width={1024}
+                height={1280}
+                loading="lazy"
+                className="mb-3 w-full rounded-2xl border border-line"
+              />
+            ) : null}
             <div className="flex gap-1.5">
               {[1, 2, 3, 4, 5, 6, 7].map((n) => (
                 <button
                   key={n}
                   onClick={() => {
                     setNeedBristol(false);
+                    setShowScale(false);
                     setAnswers((a) => ({ ...a, bristol: String(n) }));
                     store.addEntry("toilet", "Bowel movement", `Bristol type ${n}`);
                     advance([...turns, { from: "you", text: `Type ${n}` }], step + 1);
@@ -345,6 +367,7 @@ function QuestionFlow({
             </p>
           </div>
         ) : null}
+
 
         {!done && needNote ? (
           <div className="mt-4 space-y-2">
