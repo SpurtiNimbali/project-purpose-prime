@@ -836,9 +836,11 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
   }, [store]);
 
   useEffect(() => {
+    if (checking) return;
     const t = setInterval(() => setElapsed((e) => e + 1), 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [checking]);
+
 
   useEffect(() => {
     if (!toast) return;
