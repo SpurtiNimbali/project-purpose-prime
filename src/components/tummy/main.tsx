@@ -160,17 +160,11 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             </p>
           </div>
 
-          <div className="mt-4">
-            <Btn variant="secondary" onClick={() => store.go("progress")}>
-              See my progress
-            </Btn>
-          </div>
-          <div className="mt-3">
-            <Btn variant="secondary" onClick={() => store.go("logHub")}>
-              Open today's log anyway
-            </Btn>
-          </div>
+          <p className="mt-5 text-center text-[15px] font-semibold leading-snug text-pine-soft">
+            Rest up. Everything reopens tomorrow morning with your fasted recording.
+          </p>
         </ScreenBody>
+
       </Screen>
     );
   }
@@ -354,20 +348,31 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             store.startExtraSession();
             store.go("extraSession");
           }}
-          className="mt-4 flex min-h-[76px] w-full items-center gap-3 rounded-3xl border-2 border-teal bg-mint-soft px-4 text-left shadow-sm active:scale-[0.99]"
+          className="relative mt-4 w-full overflow-hidden rounded-3xl bg-pine px-5 py-5 text-left shadow-md active:scale-[0.99]"
         >
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal text-surface">
-            <IconMic width={24} height={24} />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[16px] font-extrabold text-pine">
-              Something feels different?
+          <span className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-teal/40" />
+          <span className="pointer-events-none absolute -bottom-12 right-10 h-28 w-28 rounded-full bg-blue/30" />
+          <span className="relative flex items-center gap-4">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-mint text-pine">
+              <IconMic width={26} height={26} />
             </span>
-            <span className="block text-[15px] font-semibold text-pine-soft">
-              Add an extra 2 minute recording — loud sounds, worse symptoms
+            <span className="min-w-0 flex-1">
+              <span className="block text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
+                Optional · anytime
+              </span>
+              <span className="mt-1 block text-[19px] font-extrabold leading-tight text-surface">
+                Something feels different?
+              </span>
+              <span className="mt-1 block text-[15px] font-semibold leading-snug text-mint/90">
+                Capture an extra 2 minute recording — loud gurgles, pain, a sudden change
+              </span>
+            </span>
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface/15 text-[20px] font-extrabold text-surface">
+              +
             </span>
           </span>
         </button>
+
 
 
         {/* quick log */}
