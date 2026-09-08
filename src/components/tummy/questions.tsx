@@ -466,9 +466,21 @@ export function EveningCheckinScreen({ store }: { store: TummyStore }) {
         store.addEntry(
           "symptom",
           "Evening check-in",
-          `GI symptoms ${a.giScore ?? "—"} of 5${a.giWordsNote ? ` · ${a.giWordsNote}` : ""}`,
+          `GI symptoms ${a.giScore ?? "—"} of 5${a.giWords ? ` · ${a.giWords}` : ""}${
+            a.giWordsNote ? ` · ${a.giWordsNote}` : ""
+          }`,
         );
+        if (a.intakeLogged === "No, some is missing" && a.intakeLoggedNote) {
+          store.addEntry("meal", "Added at the evening check-in", a.intakeLoggedNote);
+        }
+        if (a.missed === "Yes" && a.missedNote) {
+          store.addEntry("recording", "Missed sessions reported", a.missedNote);
+        }
+        if (a.unusualNote && a.unusualNote !== "Nothing to add") {
+          store.addEntry("activity", "Something unusual today", a.unusualNote);
+        }
         store.markQuestions("night");
+
         store.go(store.gender === "female" ? "periodCheck" : "home");
       }}
     />
