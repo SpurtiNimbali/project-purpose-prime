@@ -30,6 +30,8 @@ import {
 } from "./icons";
 import {
   AbdomenGuide,
+  PlacementTips,
+
   RecordTimer,
   SymptomGrid,
   SeveritySheet,
