@@ -446,7 +446,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
           <div className="mt-4">
             <Note tone="amber" title="Take your phone case off">
               A case leaves a gap between the microphone and your skin, and that gap loses most of
-              the sound we're listening for.
+              the sound.
             </Note>
           </div>
         ) : null}
