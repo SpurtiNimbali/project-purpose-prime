@@ -244,8 +244,7 @@ export function CaseReminderScreen({ store }: { store: TummyStore }) {
             Take your phone case off
           </h2>
           <p className="mt-2 text-[17px] font-semibold text-pine-soft">
-            Every recording needs bare phone against bare skin. If yours is stiff, ease it off from
-            one corner — it still has to come off.
+            The case has to come off for every recording — bare phone against bare skin.
           </p>
         </div>
         <button
