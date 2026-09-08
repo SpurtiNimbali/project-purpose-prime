@@ -97,23 +97,23 @@ export const MORNING_QS: FlowQ[] = [
 export const EVENING_QS: FlowQ[] = [
   {
     id: "intakeLogged",
-    q: "Was everything you ate and drank today logged?",
+    q: "Did you log everything you ate and drank today?",
     type: "single",
     options: ["Yes, all of it", "No, some is missing"],
     textIf: ["No, some is missing"],
-    followUp: "Tell me what's missing and roughly when — I'll add it to today.",
+    followUp: "What's missing, and roughly when? I'll add it to today.",
   },
   {
     id: "missed",
-    q: "Did you miss any sessions today?",
+    q: "Did you miss any recordings today?",
     type: "single",
-    options: ["No, all done", "Yes"],
-    textIf: ["Yes"],
+    options: ["No, I did them all", "Yes, one or more"],
+    textIf: ["Yes, one or more"],
     followUp: "Which ones, and what got in the way?",
   },
   {
     id: "difficulty",
-    q: "Any other difficulties with the schedule or the app today?",
+    q: "Was anything else about today hard to manage?",
     type: "single",
     options: ["No, it went fine", "Yes"],
     textIf: ["Yes"],
@@ -121,7 +121,7 @@ export const EVENING_QS: FlowQ[] = [
   },
   {
     id: "physical",
-    q: "How are you physically feeling compared with a usual evening?",
+    q: "How do you feel physically, compared with a usual evening?",
     type: "single",
     options: VS_USUAL,
   },
@@ -133,19 +133,23 @@ export const EVENING_QS: FlowQ[] = [
   },
   {
     id: "unusual",
-    q: "Anything unusual today — an exam, a stressful event, an argument?",
+    q: "Was today unusual in any way? An exam, a stressful event, an argument.",
     type: "text",
     optional: true,
-    hint: "Only the study team ever sees this. Say as much or as little as you like.",
+    hint: "Only the study team sees this.",
   },
-  { id: "giScore", q: "How would you rate your overall GI symptoms today?", type: "scale" },
+  {
+    id: "giScore",
+    q: "Overall, how bad were your gut symptoms today?",
+    type: "scale",
+  },
   {
     id: "giWords",
-    q: "In a few words — what were they like?",
+    q: "In a few words, what were they like?",
     type: "text",
     hint: "For example: bloating was very bad, nothing else.",
   },
-  { id: "anythingElse", q: "Anything else you'd like to share?", type: "text", optional: true },
+  { id: "anythingElse", q: "Anything else you'd like to tell us?", type: "text", optional: true },
   ...WATCH_QS,
 ];
 
