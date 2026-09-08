@@ -78,6 +78,8 @@ export type PlanItem = {
   offset?: number;
   /** meals only */
   meal?: Meal;
+  /** a diary entry for a meal or snack outside the study meal */
+  mealLog?: boolean;
 };
 
 /** Kept for older call sites — recordings only. */
@@ -286,6 +288,44 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
       meal,
     },
     ...post,
+    {
+      id: "logLunch",
+      kind: "meal",
+      label: "Log your lunch",
+      at: 12 * 60 + 30,
+      done: false,
+      window: "Photo and time, as soon as you can",
+      mealLog: true,
+      meal: "lunch",
+    },
+    {
+      id: "logSnackPm",
+      kind: "meal",
+      label: "Log your afternoon snack",
+      at: 16 * 60,
+      done: false,
+      window: "Photo, or a quick line of text",
+      mealLog: true,
+    },
+    {
+      id: "logDinner",
+      kind: "meal",
+      label: "Log your dinner",
+      at: 19 * 60,
+      done: false,
+      window: "Photo and time, as soon as you can",
+      mealLog: true,
+      meal: "dinner",
+    },
+    {
+      id: "logSnackEve",
+      kind: "meal",
+      label: "Log your evening snack",
+      at: 20 * 60 + 30,
+      done: false,
+      window: "Photo, or a quick line of text",
+      mealLog: true,
+    },
     {
       id: "qEvening",
       kind: "questions",
