@@ -528,9 +528,10 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
       <TopBar title="Technical setup" onBack={store.back} step="Step 7 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Different phones hear slightly differently. Telling us your handset lets us standardise
-          the audio across everyone in the study.
+          Every recording is made with the phone's own microphone, held on bare skin. Telling us
+          your handset lets us standardise the audio across everyone in the study.
         </p>
+
         <div className="mt-5 space-y-5">
           <Field label="Which kind of phone do you have?">
             <div className="flex gap-3">
