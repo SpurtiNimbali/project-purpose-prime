@@ -543,7 +543,7 @@ export function AbdomenGuide({ height = 250 }: { height?: number }) {
       {/* pointer to the phone */}
       <path d="M6 108h16" stroke={amber} strokeWidth="3" strokeLinecap="round" />
       <path d="M20 103l8 5-8 5z" fill={amber} />
-      <text x="18" y="92" fontSize="11" fill={amber} fontWeight="800">
+      <text x="6" y="88" fontSize="11" fill={amber} fontWeight="800">
         phone flat on skin
       </text>
       <text x="14" y="244" fontSize="11" fill={line} fontWeight="800">
