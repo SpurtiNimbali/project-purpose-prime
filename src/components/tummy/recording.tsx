@@ -1,4 +1,4 @@
-import placementArt from "@/assets/placement-guide-v2.png.asset.json";
+import placementArt from "@/assets/placement-main.png";
 import { useEffect, useRef, useState } from "react";
 import {
   Screen,
@@ -521,26 +521,28 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- positioning ---------------- */
 
-export function AbdomenGuide({ height = 300 }: { height?: number }) {
+export function AbdomenGuide() {
   return (
-    <figure className="relative mx-auto w-full max-w-[320px]" style={{ height }}>
+    <figure className="mx-auto w-full max-w-[340px]">
       <img
-        src={placementArt.url}
+        src={placementArt}
         alt="A seated participant holding a portrait phone against bare skin, 8 centimetres to their right and 3 centimetres below their belly button"
         loading="lazy"
         width={1254}
-        height={1254}
-        className="h-full w-full rounded-2xl object-contain"
+        height={872}
+        className="w-full rounded-2xl"
       />
-      <figcaption className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 text-[13px] font-bold text-mint">
-        <span className="rounded-full bg-amber/90 px-2.5 py-0.5 text-[12px] font-extrabold text-pine">
-          8 cm right · 3 cm down
-        </span>
-        from your belly button
-      </figcaption>
     </figure>
   );
 }
+
+const PLACEMENT_TIPS = [
+  { t: "Right lower belly", b: "8 cm to your right of the belly button, then 3 cm down." },
+  { t: "Microphone edge down", b: "The bottom edge of the phone — where the mic is — goes on the skin." },
+  { t: "Bare skin", b: "Case off, shirt lifted — nothing between the phone and your skin." },
+  { t: "Phone upright", b: "Hold it vertically, screen facing out towards you." },
+  { t: "Gentle, steady pressure", b: "Press just enough to keep full contact, and hold still." },
+];
 
 const POSITION_CHECKS = [
   {
