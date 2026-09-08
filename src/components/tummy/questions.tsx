@@ -282,6 +282,50 @@ function QuestionFlow({
               </div>
             ) : null}
 
+            {current.type === "duration" ? (
+              <div className="space-y-2">
+                <div className="flex gap-3">
+                  {(
+                    [
+                      { label: "Hours", value: durH, set: setDurH, max: 12 },
+                      { label: "Minutes", value: durM, set: setDurM, max: 55, step: 5 },
+                    ] as const
+                  ).map(({ label, value, set, max, step: st }) => (
+                    <label key={label} className="flex-1">
+                      <span className="mb-1 block text-[15px] font-extrabold text-pine-soft">
+                        {label}
+                      </span>
+                      <select
+                        value={value}
+                        onChange={(e) => set(Number(e.target.value))}
+                        className="min-h-[62px] w-full rounded-2xl border-2 border-line bg-surface px-4 text-[18px] font-extrabold text-pine"
+                      >
+                        {Array.from(
+                          { length: Math.floor(max / ((st as number | undefined) ?? 1)) + 1 },
+                          (_, i) => i * (((st as number | undefined) ?? 1) as number),
+                        ).map((n) => (
+                          <option key={n} value={n}>
+                            {n}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                </div>
+                <Btn
+                  onClick={() =>
+                    record(
+                      durH === 0 && durM === 0
+                        ? "Straight away"
+                        : `${durH ? `${durH} hr ` : ""}${durM ? `${durM} min` : ""}`.trim(),
+                    )
+                  }
+                >
+                  Save
+                </Btn>
+              </div>
+            ) : null}
+
             {current.type === "scale" ? (
               <>
                 <div className="flex gap-2">
