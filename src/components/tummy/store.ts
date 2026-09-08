@@ -128,6 +128,13 @@ export type TummyStore = {
   startExtraSession: () => void;
   meal: Meal;
   setMeal: (m: Meal) => void;
+  /** pick the study meal during onboarding — rebuilds the day's plan around it */
+  chooseStudyMeal: (m: Meal) => void;
+  /** tick off a scheduled diary item that matches what was just logged */
+  completeMealLog: (which: string) => void;
+  freezeUsed: boolean;
+  useFreeze: () => void;
+
   offset: 30 | 90 | 210;
   setOffset: (o: 30 | 90 | 210) => void;
   side: "right" | "left";
