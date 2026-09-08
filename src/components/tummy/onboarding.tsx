@@ -24,6 +24,9 @@ import {
   IconBowl,
   IconSunset,
   IconMoon,
+  IconClock,
+  IconCamera,
+
 } from "./icons";
 import {
   AbdomenGuide,
@@ -372,26 +375,37 @@ export function QuizScreen({ store }: { store: TummyStore }) {
 
 const DAY_STEPS = [
   {
-    t: "1 · Fasting recording",
-    b: "Soon after waking, before any food, drink or activity. Two minutes.",
+    t: "1 · Wake-up questions",
+    b: "A few quick questions as soon as you wake — sleep, and anything you've had to eat or drink.",
     Icon: IconSun,
   },
   {
-    t: "2 · Log your meal",
-    b: "Usually breakfast. Type it or record it out loud — your timers run from here.",
-    Icon: IconBowl,
-  },
-  {
-    t: "3 · Recordings across the next 3 hours",
-    b: "A short recording at each reminder. Only water in between, taken right after a recording.",
+    t: "2 · Fasted recording",
+    b: "Within 30 minutes of waking, before any food, drink or moving around. Two minutes, sitting still.",
     Icon: IconMic,
   },
   {
-    t: "4 · A few questions",
-    b: "Once after your morning recording, and once at the end of the day.",
+    t: "3 · Your study meal",
+    b: "One meal you choose. Record right before you start, log a photo, then tap when your last bite is done.",
+    Icon: IconBowl,
+  },
+  {
+    t: "4 · Recordings for 3.5 hours after",
+    b: "Straight after the meal, then every 30 minutes up to 3.5 hours. Nothing to eat or drink in that window — water only, right after a recording.",
+    Icon: IconClock,
+  },
+  {
+    t: "5 · Log the rest of your day",
+    b: "Every other meal, snack and drink — a photo and the time, or a quick voice note.",
+    Icon: IconCamera,
+  },
+  {
+    t: "6 · Evening check-in",
+    b: "A short set of questions before bed about how the day went.",
     Icon: IconMoon,
   },
 ];
+
 
 export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
   const [shown, setShown] = useState(1);
@@ -514,9 +528,10 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
       <TopBar title="Technical setup" onBack={store.back} step="Step 7 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Different phones hear slightly differently. Telling us your handset lets us standardise
-          the audio across everyone in the study.
+          Every recording is made with the phone's own microphone, held on bare skin. Telling us
+          your handset lets us standardise the audio across everyone in the study.
         </p>
+
         <div className="mt-5 space-y-5">
           <Field label="Which kind of phone do you have?">
             <div className="flex gap-3">
@@ -598,6 +613,21 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
               </span>
             </button>
           </Card>
+          <Card>
+            <div className="flex items-center gap-3">
+              <span className="text-teal">
+                <IconClock width={28} height={28} />
+              </span>
+              <div className="flex-1">
+                <p className="text-[17px] font-extrabold text-pine">Ruler app</p>
+                <p className="text-[16px] font-semibold text-pine-soft">
+                  You'll measure the spot on your belly — 8 cm right, 3 cm down from your belly
+                  button — with the ruler app on your phone, not by eye.
+                </p>
+              </div>
+            </div>
+          </Card>
+
         </div>
       </ScreenBody>
       <StickyFooter>
@@ -618,7 +648,7 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
     {
       k: "notif",
       label: "Reminders",
-      sub: "For your 30, 90 and 210 minute alarms",
+      sub: "For your fasted recording, your meal, and every 30 minutes after it",
       Icon: IconPhone,
     },
     {
