@@ -31,6 +31,7 @@ import {
 import {
   AbdomenGuide,
   PlacementTips,
+  PositionChecksGate,
 
   RecordTimer,
   SymptomGrid,
@@ -705,6 +706,7 @@ type Coach = { id: string; text: string; cta: string };
 export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const TOTAL = 45;
   const [stage, setStage] = useState<"case" | "position" | "record">("case");
+  const [posChecked, setPosChecked] = useState(false);
   const [left, setLeft] = useState(TOTAL);
   const [marks, setMarks] = useState<{ key: string; label: string; severity: number }[]>([]);
   const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
