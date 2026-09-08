@@ -1465,32 +1465,95 @@ export function SkipReasonScreen({ store }: { store: TummyStore }) {
 /* ---------------- extra session ---------------- */
 
 export function ExtraSessionScreen({ store }: { store: TummyStore }) {
+  const [reason, setReason] = useState<string>("");
+  const [symptom, setSymptom] = useState<{ key: string; label: string } | null>(null);
+  const [severity, setSeverity] = useState<number>(0);
+
+  const needsSymptom = reason === "Symptoms higher than normal" || reason === "Both";
+  const ready = reason !== "" && (!needsSymptom || (symptom !== null && severity > 0));
+
+  const start = () => {
+    if (needsSymptom && symptom) {
+      store.addEntry("symptom", symptom.label, `${SEV_LABELS[severity - 1]} · before extra recording`);
+    }
+    store.startExtraSession();
+    store.go("caseReminder");
+  };
+
   return (
     <Screen>
       <TopBar title="Extra recording" onBack={store.back} />
-      <ScreenBody className="flex flex-col">
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <Mascot src={MASCOT.wave} size={140} />
-          <h2 className="mt-4 text-[25px] font-extrabold leading-tight text-pine">
-            Noticing something unusual?
-          </h2>
-          <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
-            If your gut is unusually loud or busy, or your symptoms are worse than normal, record
-            two extra minutes at the same spot. We'll ask what prompted it afterwards.
-          </p>
+      <ScreenBody>
+        <MascotSays size={78} src={MASCOT.wave}>
+          Before we start — what made you want to record an extra session?
+        </MascotSays>
+        <div className="mt-5 space-y-3">
+          {["Unusually loud or frequent sounds", "Symptoms higher than normal", "Both", "Just curious"].map(
+            (r) => (
+              <button
+                key={r}
+                onClick={() => setReason(r)}
+                className={cn(
+                  "flex min-h-[64px] w-full items-center rounded-2xl border-2 bg-surface px-5 text-left text-[17px] font-extrabold text-pine",
+                  reason === r ? "border-teal bg-mint-soft" : "border-line",
+                )}
+              >
+                {r}
+              </button>
+            ),
+          )}
         </div>
-        <Note tone="blue" title="Same rules as always">
-          Case off, bare skin, quiet room, sit upright and still.
-        </Note>
+
+        {needsSymptom ? (
+          <>
+            <h3 className="mt-6 text-[18px] font-extrabold text-pine">Which symptom?</h3>
+            <div className="mt-3">
+              <SymptomGrid
+                onPick={(s) => {
+                  setSymptom(s);
+                  setSeverity(0);
+                }}
+                selectedKey={symptom?.key}
+              />
+            </div>
+            {symptom ? (
+              <>
+                <h3 className="mt-6 text-[18px] font-extrabold text-pine">
+                  How strong is it right now?
+                </h3>
+                <div className="mt-3 flex gap-2">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setSeverity(n)}
+                      className={cn(
+                        "min-h-[64px] flex-1 rounded-2xl border-2 text-[20px] font-extrabold",
+                        severity === n
+                          ? "border-teal bg-teal text-surface"
+                          : "border-line bg-surface text-pine",
+                      )}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-center text-[15px] font-semibold text-pine-soft">
+                  1 is very mild, 5 is very strong.
+                </p>
+              </>
+            ) : null}
+          </>
+        ) : null}
+
+        <div className="mt-6">
+          <Note tone="blue" title="Same rules as always">
+            Case off, bare skin, quiet room, sit upright and still for two minutes.
+          </Note>
+        </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn
-          onClick={() => {
-            store.startExtraSession();
-            store.go("caseReminder");
-          }}
-        >
-          Start an extra recording
+        <Btn disabled={!ready} onClick={start}>
+          Start the extra recording
         </Btn>
       </StickyFooter>
     </Screen>
@@ -1500,8 +1563,32 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
 /* ---------------- upload done ---------------- */
 
 export function UploadDoneScreen({ store }: { store: TummyStore }) {
-  const next = store.plan.find((p) => !p.done && p.kind === "recording");
-  const mins = next ? next.at - minutesNow() : null;
+  const next = store.plan.find((p) => !p.done);
+  const mins = next ? Math.max(0, next.at - minutesNow()) : null;
+
+  const title =
+    next?.kind === "recording"
+      ? "Next recording"
+      : next?.kind === "meal"
+        ? next.mealLog
+          ? "Next thing to log"
+          : "Your study meal"
+        : next
+          ? "Next questions"
+          : "All done for today";
+
+  const detail = !next
+    ? "Nothing more until tomorrow morning's fasted recording."
+    : next.kind === "recording" && next.sessionKind === "postMeal"
+      ? "Nothing to eat or drink until the window is over. If you really need water, have up to one cup now — right after this recording."
+      : next.kind === "meal" && !next.mealLog
+        ? next.id === "mealStart"
+          ? "Take a photo of the plate, then tap when you take your first bite."
+          : "Tap the moment your last bite is done — every recording after that is timed from it."
+        : next.kind === "meal"
+          ? "A photo and the time is all we need. A line of text is fine for a snack."
+          : "Nothing to do until then.";
+
   return (
     <Screen>
       <ScreenBody className="flex flex-col justify-center pt-14 text-center">
@@ -1514,16 +1601,14 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
         <div className="mt-5 rounded-3xl border border-line bg-surface p-5 text-left">
           <div className="flex items-center gap-2 text-teal">
             <IconClock width={22} height={22} />
-            <p className="text-[16px] font-extrabold">Next recording</p>
+            <p className="text-[16px] font-extrabold">{title}</p>
           </div>
           <p className="mt-1 text-[19px] font-extrabold text-pine">
-            {next ? `${untilLabel(Math.max(0, mins ?? 0))} · ${clockLabel(next.at)}` : "Tomorrow morning"}
+            {next
+              ? `${next.label} · ${untilLabel(mins ?? 0)} · ${clockLabel(next.at)}`
+              : "Tomorrow morning"}
           </p>
-          <p className="mt-1 text-[16px] font-semibold text-pine-soft">
-            {next && next.sessionKind === "postMeal"
-              ? "Nothing to eat or drink until the window is over. If you really need water, have up to one cup now — right after this recording."
-              : "Nothing to do until then."}
-          </p>
+          <p className="mt-1 text-[16px] font-semibold text-pine-soft">{detail}</p>
         </div>
       </ScreenBody>
       <StickyFooter>
@@ -1532,3 +1617,4 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
     </Screen>
   );
 }
+
