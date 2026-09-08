@@ -1072,6 +1072,7 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
 /* ---------------- which meal the recordings follow ---------------- */
 
 export function MealPickScreen({ store }: { store: TummyStore }) {
+  const [info, setInfo] = useState(false);
   const meals = [
     { k: "breakfast", label: "Breakfast", sub: "Recordings run through the morning", Icon: IconSun },
     { k: "lunch", label: "Lunch", sub: "Recordings run through the afternoon", Icon: IconBowl },
