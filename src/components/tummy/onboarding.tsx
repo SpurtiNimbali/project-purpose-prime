@@ -1170,9 +1170,15 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
                 }}
               />
             </div>
-            <p className="mt-4 text-[16px] font-semibold leading-snug text-pine-soft">
-              Add a time for each snack you usually have on a {tab === "weekday" ? "weekday" : "weekend day"}. Add as many as you like.
-            </p>
+            <div className="mt-4 rounded-2xl border-2 border-teal bg-mint-soft p-4">
+              <p className="text-[18px] font-extrabold leading-snug text-pine">
+                A rough guess is completely fine.
+              </p>
+              <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
+                These times never have to be exact. Just add roughly when you usually snack on a{" "}
+                {tab === "weekday" ? "weekday" : "weekend day"}, and add as many as you like.
+              </p>
+            </div>
             <div className="mt-3 space-y-3">
               {list.map((value, i) => (
                 <div
