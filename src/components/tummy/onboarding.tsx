@@ -380,32 +380,42 @@ export function QuizScreen({ store }: { store: TummyStore }) {
 const DAY_STEPS = [
   {
     t: "1 · Wake-up questions",
-    b: "A few quick questions as soon as you wake — sleep, and anything you've had to eat or drink.",
+    b: "A few quick questions on waking: sleep, and anything you have eaten or drunk.",
     Icon: IconSun,
   },
   {
     t: "2 · Fasted recording",
-    b: "Within 30 minutes of waking, before any food, drink or moving around. Two minutes, sitting still.",
+    b: "Within 30 minutes of waking, before food, drink or moving about. Two minutes, sitting still.",
     Icon: IconMic,
   },
   {
     t: "3 · Your study meal",
-    b: "One meal you choose. Record right before you start, log a photo, then tap when your last bite is done.",
+    b: "Record right before you start, add a photo, then tap when your last bite is done.",
     Icon: IconBowl,
   },
   {
     t: "4 · Recordings for 3.5 hours after",
-    b: "Straight after the meal, then every 30 minutes up to 3.5 hours. Nothing to eat or drink in that window — water only, right after a recording.",
+    b: "Straight after the meal, then every 30 minutes.",
     Icon: IconClock,
   },
   {
-    t: "5 · Log the rest of your day",
-    b: "Every other meal, snack and drink — a photo and the time, or a quick voice note.",
+    t: "5 · No food or drink in that window",
+    b: "Nothing at all until the last recording. Water only if you need it: up to one cup, straight after a recording.",
+    Icon: IconDroplet,
+  },
+  {
+    t: "6 · Quality matters more than quantity",
+    b: "If a session can't be done properly, skip it and tell us why. Missing one never ends your part in the study.",
+    Icon: IconShield,
+  },
+  {
+    t: "7 · Log the rest of your day",
+    b: "Every other meal, snack and drink: a photo and the time, or a quick voice note.",
     Icon: IconCamera,
   },
   {
-    t: "6 · Evening check-in",
-    b: "A short set of questions before bed about how the day went.",
+    t: "8 · Evening check-in",
+    b: "A short set of questions before bed.",
     Icon: IconMoon,
   },
 ];
