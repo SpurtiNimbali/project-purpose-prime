@@ -3,7 +3,6 @@ import { useState, useCallback } from "react";
 export type ScreenKey =
   // onboarding
   | "welcome"
-  | "studyIntro"
   | "subjectId"
   | "aboutYou"
   | "protocolIntro"

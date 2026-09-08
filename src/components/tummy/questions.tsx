@@ -20,8 +20,10 @@ import type { TummyStore } from "./store";
 export type FlowQ = {
   id: string;
   q: string;
-  type: "single" | "text" | "scale" | "time" | "bristol";
+  type: "single" | "text" | "scale" | "time" | "duration" | "bristol";
   options?: string[];
+  /** default value for time questions */
+  def?: string;
   /** answers that open a free-text follow-up */
   textIf?: string[];
   followUp?: string;
@@ -43,48 +45,48 @@ const WATCH_QS: FlowQ[] = [
     id: "watchWearing",
     q: "Are you wearing your smartwatch right now?",
     type: "single",
-    options: ["Yes", "No, it is charging", "No, other reason"],
-    textIf: ["No, other reason"],
+    options: ["Yes", "No, it's charging", "No, another reason"],
+    textIf: ["No, another reason"],
     followUp: "What's going on with it?",
   },
   {
     id: "watchBattery",
-    q: "Smartwatch battery level?",
+    q: "How much battery does it have?",
     type: "single",
-    options: ["Above 50%", "20 to 50%", "Below 20%"],
+    options: ["Above 50%", "20 to 50%", "Below 20%", "Not sure"],
   },
 ];
 
 export const MORNING_QS: FlowQ[] = [
-  { id: "bedTime", q: "What time did you get into bed last night?", type: "time" },
+  { id: "bedTime", q: "What time did you get into bed last night?", type: "time", def: "23:00" },
   {
     id: "latency",
     q: "How long did it take you to fall asleep?",
-    type: "single",
-    options: ["Under 15 min", "15 to 30 min", "30 to 60 min", "Over an hour"],
+    type: "duration",
+    hint: "A rough guess is fine.",
   },
-  { id: "wakeTime", q: "What time did you wake up?", type: "time" },
-  { id: "outOfBed", q: "And what time did you get out of bed?", type: "time" },
+  { id: "wakeTime", q: "What time did you wake up?", type: "time", def: "07:00" },
+  { id: "outOfBed", q: "What time did you get out of bed?", type: "time", def: "07:15" },
   {
     id: "intake",
-    q: "Have you had any food or drink yet this morning?",
+    q: "Have you had anything to eat or drink yet this morning?",
     type: "single",
     options: ["Nothing at all", "A few sips of water", "Yes, something else"],
     textIf: ["Yes, something else"],
     followUp: "What was it, and roughly when?",
     warnIf: ["Yes, something else"],
-    warn: "Just so you know — the morning recording is meant to be fasted. Nothing but a few sips of water before it. Tell me what you had and we'll note it for the team, and try to keep tomorrow's recording food-free.",
+    warn: "The morning recording is meant to be fasted: nothing but a few sips of water. Tell me what you had and I'll note it for the team.",
   },
   {
     id: "bathroom",
-    q: "Have you been to the bathroom since waking?",
+    q: "Have you been to the toilet since waking?",
     type: "single",
     options: ["No", "Yes, but no bowel movement", "Yes, a bowel movement"],
     bristolIf: ["Yes, a bowel movement"],
   },
   {
     id: "activity",
-    q: "Any physical activity since waking, other than going to the bathroom?",
+    q: "Any physical activity since waking, other than going to the toilet?",
     type: "single",
     options: ["No, straight to this", "Yes"],
     textIf: ["Yes"],
@@ -95,23 +97,23 @@ export const MORNING_QS: FlowQ[] = [
 export const EVENING_QS: FlowQ[] = [
   {
     id: "intakeLogged",
-    q: "Was everything you ate and drank today logged?",
+    q: "Did you log everything you ate and drank today?",
     type: "single",
     options: ["Yes, all of it", "No, some is missing"],
     textIf: ["No, some is missing"],
-    followUp: "Tell me what's missing and roughly when — I'll add it to today.",
+    followUp: "What's missing, and roughly when? I'll add it to today.",
   },
   {
     id: "missed",
-    q: "Did you miss any sessions today?",
+    q: "Did you miss any recordings today?",
     type: "single",
-    options: ["No, all done", "Yes"],
-    textIf: ["Yes"],
+    options: ["No, I did them all", "Yes, one or more"],
+    textIf: ["Yes, one or more"],
     followUp: "Which ones, and what got in the way?",
   },
   {
     id: "difficulty",
-    q: "Any other difficulties with the schedule or the app today?",
+    q: "Was anything else about today hard to manage?",
     type: "single",
     options: ["No, it went fine", "Yes"],
     textIf: ["Yes"],
@@ -119,7 +121,7 @@ export const EVENING_QS: FlowQ[] = [
   },
   {
     id: "physical",
-    q: "How are you physically feeling compared with a usual evening?",
+    q: "How do you feel physically, compared with a usual evening?",
     type: "single",
     options: VS_USUAL,
   },
@@ -131,19 +133,23 @@ export const EVENING_QS: FlowQ[] = [
   },
   {
     id: "unusual",
-    q: "Anything unusual today — an exam, a stressful event, an argument?",
+    q: "Was today unusual in any way? An exam, a stressful event, an argument.",
     type: "text",
     optional: true,
-    hint: "Only the study team ever sees this. Say as much or as little as you like.",
+    hint: "Only the study team sees this.",
   },
-  { id: "giScore", q: "How would you rate your overall GI symptoms today?", type: "scale" },
+  {
+    id: "giScore",
+    q: "Overall, how bad were your gut symptoms today?",
+    type: "scale",
+  },
   {
     id: "giWords",
-    q: "In a few words — what were they like?",
+    q: "In a few words, what were they like?",
     type: "text",
     hint: "For example: bloating was very bad, nothing else.",
   },
-  { id: "anythingElse", q: "Anything else you'd like to share?", type: "text", optional: true },
+  { id: "anythingElse", q: "Anything else you'd like to tell us?", type: "text", optional: true },
   ...WATCH_QS,
 ];
 
@@ -173,16 +179,19 @@ function QuestionFlow({
   const [needBristol, setNeedBristol] = useState(false);
   const [showScale, setShowScale] = useState(false);
 
-  const [time, setTime] = useState("07:00");
+  const [time, setTime] = useState(questions[0].def ?? "07:00");
+  const [durH, setDurH] = useState(0);
+  const [durM, setDurM] = useState(15);
   const done = step >= questions.length;
   const current = questions[Math.min(step, questions.length - 1)];
 
   const advance = (from: Turn[], n: number) => {
     setStep(n);
+    if (questions[n]?.def) setTime(questions[n].def as string);
     setTurns(
       n < questions.length
         ? [...from, { from: "bot", text: questions[n].q }]
-        : [...from, { from: "bot", text: "That's everything — thank you." }],
+        : [...from, { from: "bot", text: "That's everything. Thank you." }],
     );
   };
 
@@ -273,6 +282,50 @@ function QuestionFlow({
                   className="min-h-[62px] w-full rounded-2xl border-2 border-line bg-surface px-4 text-[18px] font-extrabold text-pine"
                 />
                 <Btn onClick={() => record(time)}>Save this time</Btn>
+              </div>
+            ) : null}
+
+            {current.type === "duration" ? (
+              <div className="space-y-2">
+                <div className="flex gap-3">
+                  {(
+                    [
+                      { label: "Hours", value: durH, set: setDurH, max: 12 },
+                      { label: "Minutes", value: durM, set: setDurM, max: 55, step: 5 },
+                    ] as const
+                  ).map(({ label, value, set, max, step: st }) => (
+                    <label key={label} className="flex-1">
+                      <span className="mb-1 block text-[15px] font-extrabold text-pine-soft">
+                        {label}
+                      </span>
+                      <select
+                        value={value}
+                        onChange={(e) => set(Number(e.target.value))}
+                        className="min-h-[62px] w-full rounded-2xl border-2 border-line bg-surface px-4 text-[18px] font-extrabold text-pine"
+                      >
+                        {Array.from(
+                          { length: Math.floor(max / ((st as number | undefined) ?? 1)) + 1 },
+                          (_, i) => i * (((st as number | undefined) ?? 1) as number),
+                        ).map((n) => (
+                          <option key={n} value={n}>
+                            {n}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                </div>
+                <Btn
+                  onClick={() =>
+                    record(
+                      durH === 0 && durM === 0
+                        ? "Straight away"
+                        : `${durH ? `${durH} hr ` : ""}${durM ? `${durM} min` : ""}`.trim(),
+                    )
+                  }
+                >
+                  Save
+                </Btn>
               </div>
             ) : null}
 

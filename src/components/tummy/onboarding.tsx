@@ -26,7 +26,8 @@ import {
   IconMoon,
   IconClock,
   IconCamera,
-
+  IconDroplet,
+  IconShield,
 } from "./icons";
 import {
   AbdomenGuide,
@@ -122,65 +123,6 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
             Check my ID
           </Btn>
         )}
-      </StickyFooter>
-    </Screen>
-  );
-}
-
-/* ---------------- study intro ---------------- */
-
-const INTRO_POINTS = [
-  {
-    title: "Seven days in a row",
-    body: "You take part on seven consecutive days. If life gets in the way, you can freeze the study for up to two days within a fortnight.",
-  },
-  {
-    title: "Ten recordings a day, about 20 minutes",
-    body: "One after you wake before eating, one right before your chosen meal, then one straight after it and every 30 minutes for the next three and a half hours.",
-  },
-  {
-    title: "Two minutes each, longer is welcome",
-    body: "Sit upright and still in a quiet room with the phone on the bare skin of your lower right belly. Two minutes is the minimum, keep going if you can.",
-  },
-  {
-    title: "Eating and drinking during the meal window",
-    body: "Once the meal ends, nothing to eat or drink until the last recording, apart from a small amount of water straight after a recording.",
-  },
-  {
-    title: "A short diary alongside",
-    body: "Questions when you wake and before bed, a few after each recording, and a photo and time for everything you eat or drink that day.",
-  },
-  {
-    title: "Quality matters more than quantity",
-    body: "If a session can't be done properly, skip it and tell us why. Missing a session never ends your part in the study.",
-  },
-];
-
-export function StudyIntroScreen({ store }: { store: TummyStore }) {
-  return (
-    <Screen>
-      <TopBar title="What the study involves" onBack={store.back} step="Step 2 of 9" />
-      <ScreenBody>
-        <div className="space-y-3">
-          {INTRO_POINTS.map((p, i) => (
-            <Card key={p.title}>
-              <div className="flex gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mint-soft text-[16px] font-extrabold text-teal">
-                  {i + 1}
-                </span>
-                <div>
-                  <p className="text-[17px] font-extrabold text-pine">{p.title}</p>
-                  <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-                    {p.body}
-                  </p>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </ScreenBody>
-      <StickyFooter>
-        <Btn onClick={() => store.go("video")}>Watch the short video</Btn>
       </StickyFooter>
     </Screen>
   );
@@ -379,32 +321,42 @@ export function QuizScreen({ store }: { store: TummyStore }) {
 const DAY_STEPS = [
   {
     t: "1 · Wake-up questions",
-    b: "A few quick questions as soon as you wake — sleep, and anything you've had to eat or drink.",
+    b: "A few quick questions on waking: sleep, and anything you have eaten or drunk.",
     Icon: IconSun,
   },
   {
     t: "2 · Fasted recording",
-    b: "Within 30 minutes of waking, before any food, drink or moving around. Two minutes, sitting still.",
+    b: "Within 30 minutes of waking, before food, drink or moving about. Two minutes, sitting still.",
     Icon: IconMic,
   },
   {
     t: "3 · Your study meal",
-    b: "One meal you choose. Record right before you start, log a photo, then tap when your last bite is done.",
+    b: "Record right before you start, add a photo, then tap when your last bite is done.",
     Icon: IconBowl,
   },
   {
     t: "4 · Recordings for 3.5 hours after",
-    b: "Straight after the meal, then every 30 minutes up to 3.5 hours. Nothing to eat or drink in that window — water only, right after a recording.",
+    b: "Straight after the meal, then every 30 minutes.",
     Icon: IconClock,
   },
   {
-    t: "5 · Log the rest of your day",
-    b: "Every other meal, snack and drink — a photo and the time, or a quick voice note.",
+    t: "5 · No food or drink in that window",
+    b: "Nothing at all until the last recording. Water only if you need it: up to one cup, straight after a recording.",
+    Icon: IconDroplet,
+  },
+  {
+    t: "6 · Quality matters more than quantity",
+    b: "If a session can't be done properly, skip it and tell us why. Missing one never ends your part in the study.",
+    Icon: IconShield,
+  },
+  {
+    t: "7 · Log the rest of your day",
+    b: "Every other meal, snack and drink: a photo and the time, or a quick voice note.",
     Icon: IconCamera,
   },
   {
-    t: "6 · Evening check-in",
-    b: "A short set of questions before bed about how the day went.",
+    t: "8 · Evening check-in",
+    b: "A short set of questions before bed.",
     Icon: IconMoon,
   },
 ];
@@ -445,7 +397,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
           <div className="mt-4">
             <Note tone="amber" title="Take your phone case off">
               A case leaves a gap between the microphone and your skin, and that gap loses most of
-              the sound we're listening for.
+              the sound.
             </Note>
           </div>
         ) : null}
@@ -705,7 +657,7 @@ type Coach = { id: string; text: string; cta: string };
 
 export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const TOTAL = 45;
-  const [stage, setStage] = useState<"case" | "position" | "record">("case");
+  const [stage, setStage] = useState<"intro" | "case" | "position" | "record">("intro");
   const [posChecked, setPosChecked] = useState(false);
   const [left, setLeft] = useState(TOTAL);
   const [marks, setMarks] = useState<{ key: string; label: string; severity: number }[]>([]);
@@ -785,6 +737,29 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
       </div>
     </div>
   );
+
+  /* stage 0 — get somewhere quiet */
+  if (stage === "intro") {
+    return (
+      <Screen>
+        <TopBar title="Practice recording" onBack={store.back} step="Step 9 of 9" />
+        <ScreenBody className="flex flex-col">
+          <div className="flex flex-1 flex-col items-center justify-center text-center">
+            <Mascot src={MASCOT.wave} size={170} />
+            <h2 className="mt-4 text-[26px] font-extrabold leading-tight text-pine">
+              Let's practice a recording
+            </h2>
+            <p className="mt-3 text-[17px] font-semibold leading-snug text-pine-soft">
+              Go somewhere quiet and hit start when you're ready. Nothing is uploaded.
+            </p>
+          </div>
+        </ScreenBody>
+        <StickyFooter>
+          <Btn onClick={() => setStage("case")}>Start</Btn>
+        </StickyFooter>
+      </Screen>
+    );
+  }
 
   /* stage 1 — case off, exactly like the real thing */
   if (stage === "case") {
@@ -1071,6 +1046,7 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
 /* ---------------- which meal the recordings follow ---------------- */
 
 export function MealPickScreen({ store }: { store: TummyStore }) {
+  const [info, setInfo] = useState(false);
   const meals = [
     { k: "breakfast", label: "Breakfast", sub: "Recordings run through the morning", Icon: IconSun },
     { k: "lunch", label: "Lunch", sub: "Recordings run through the afternoon", Icon: IconBowl },
@@ -1081,9 +1057,46 @@ export function MealPickScreen({ store }: { store: TummyStore }) {
       <TopBar title="Your study meal" onBack={store.back} step="Step 6 of 9" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.calm}>
-          Which meal would you like your recordings to follow? Pick the one you eat at the steadiest
-          time — it stays the same every study day.
+          Which meal would you like to do your bowel sound recordings around? Pick the one you
+          usually eat at similar times every day, and after which you'll have a private, quiet space
+          to record.
         </MascotSays>
+
+        <button
+          onClick={() => setInfo((v) => !v)}
+          className="mt-3 flex min-h-[56px] w-full items-center gap-3 rounded-2xl border-2 border-teal bg-surface px-4 text-left"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-teal text-[16px] font-black text-teal">
+            i
+          </span>
+          <span className="min-w-0 flex-1 text-[17px] font-extrabold text-pine">
+            Which meal should I pick?
+          </span>
+        </button>
+
+        {info ? (
+          <div className="mt-3 space-y-2">
+            {[
+              {
+                t: "Breakfast",
+                b: "Only if you work from home every day. Commuting after breakfast disrupts the recording schedule.",
+              },
+              {
+                t: "Lunch",
+                b: "Only if you have a private, quiet spot: a lactation room, private office, or a room you can book. Bathrooms are not allowed, flushing and other people are too noisy. Also a poor choice if you usually have meetings where you talk in the 3.5 hours after lunch, since you need to stay quiet and hold the phone in place.",
+              },
+              {
+                t: "Dinner",
+                b: "Only if you'll be awake for the 3.5 hours after it. If you usually are, we recommend dinner: no office meetings to work around, so it's the easiest to finish.",
+              },
+            ].map(({ t, b }) => (
+              <div key={t} className="rounded-2xl border border-line bg-surface p-4">
+                <p className="text-[17px] font-extrabold text-pine">{t}</p>
+                <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">{b}</p>
+              </div>
+            ))}
+          </div>
+        ) : null}
         <div className="mt-5 space-y-3">
           {meals.map(({ k, label, sub, Icon }) => (
             <button
@@ -1111,8 +1124,8 @@ export function MealPickScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="blue" title="What this changes">
-            Your day is built around this meal: a recording just before it, one straight after, then
-            every 30 minutes for three and a half hours. Your other meals and snacks just get logged.
+            A recording just before this meal, one straight after, then every 30 minutes for 3.5
+            hours. Other meals and snacks are only logged.
           </Note>
         </div>
       </ScreenBody>
@@ -1169,9 +1182,15 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
                 }}
               />
             </div>
-            <p className="mt-4 text-[16px] font-semibold leading-snug text-pine-soft">
-              Add a time for each snack you usually have on a {tab === "weekday" ? "weekday" : "weekend day"}. Add as many as you like.
-            </p>
+            <div className="mt-4 rounded-2xl border-2 border-teal bg-mint-soft p-4">
+              <p className="text-[18px] font-extrabold leading-snug text-pine">
+                A rough guess is completely fine.
+              </p>
+              <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
+                These times never have to be exact. Just add roughly when you usually snack on a{" "}
+                {tab === "weekday" ? "weekday" : "weekend day"}, and add as many as you like.
+              </p>
+            </div>
             <div className="mt-3 space-y-3">
               {list.map((value, i) => (
                 <div
@@ -1208,10 +1227,6 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
                 + Add another snack time
               </button>
             </div>
-            <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-pine-soft">
-              If you're not sure, a rough guess is completely fine — this doesn't have to be
-              accurate.
-            </p>
           </>
         ) : null}
       </ScreenBody>
@@ -1272,7 +1287,7 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("studyIntro")}>Continue</Btn>
+        <Btn onClick={() => store.go("video")}>Continue</Btn>
       </StickyFooter>
     </Screen>
   );
