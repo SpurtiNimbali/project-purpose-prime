@@ -300,7 +300,6 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           </span>
         </button>
 
-        <DemoClock store={store} />
 
         {/* quick log */}
         <div className="mt-5">
