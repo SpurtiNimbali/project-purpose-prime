@@ -25,7 +25,14 @@ import {
   IconSunset,
   IconMoon,
 } from "./icons";
-import { AbdomenGuide, RecordTimer, SymptomGrid, SeveritySheet } from "./recording";
+import {
+  AbdomenGuide,
+  RecordTimer,
+  SymptomGrid,
+  SeveritySheet,
+  QualityPanel,
+} from "./recording";
+
 import type { TummyStore } from "./store";
 
 import { cn } from "@/lib/utils";
@@ -237,12 +244,17 @@ const QUIZ = [
     hint: "Fasting means nothing at all in your stomach except water.",
   },
   {
-    q: "How long after your target meal are the three recordings?",
-    options: ["30 min, 90 min, 3 hrs", "1 hr, 2 hrs, 4 hrs", "Whenever I remember"],
+    q: "After your study meal, how often do you record?",
+    options: [
+      "Right after eating, then every 30 minutes for 3.5 hours",
+      "Once an hour until bedtime",
+      "Whenever I remember",
+    ],
     answer: 0,
-    why: "Those three moments capture the early, middle and late stages of digestion, which is what makes the data comparable.",
-    hint: "The last one is 3 hours after the meal, and the first is well within the first hour.",
+    why: "A recording right after the meal and then every 30 minutes for three and a half hours captures the whole of digestion, which is what makes the data comparable between people.",
+    hint: "It starts the moment the meal ends, and the gaps between recordings are short.",
   },
+
 ];
 
 
@@ -658,7 +670,7 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("practice")} disabled={!all}>
+        <Btn onClick={() => store.go("practiceRun")} disabled={!all}>
           Continue
         </Btn>
       </StickyFooter>
@@ -666,80 +678,7 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
   );
 }
 
-/* ---------------- practice part 1: sound check ---------------- */
 
-export function PracticeScreen({ store }: { store: TummyStore }) {
-  const [phase, setPhase] = useState<"idle" | "listening" | "noisy" | "clear">("idle");
-  const run = () => {
-    setPhase("listening");
-    setTimeout(() => setPhase((p) => (p === "listening" ? "noisy" : p)), 1800);
-  };
-  const retry = () => {
-    setPhase("listening");
-    setTimeout(() => setPhase("clear"), 1800);
-  };
-  return (
-    <Screen>
-      <TopBar title="Sound check" onBack={store.back} step="Step 9 of 9 · part 1 of 2" />
-      <ScreenBody>
-        <MascotSays size={78} src={MASCOT.calm}>
-          First a sound check, then a short practice recording. Set up exactly as you will for a
-          real one: case off, shirt lifted, phone flat on the skin of your belly.
-        </MascotSays>
-
-        <div className="mt-6 flex flex-col items-center">
-          <div
-            className={cn(
-              "flex h-[168px] w-[168px] items-center justify-center rounded-full border-[10px]",
-              phase === "listening"
-                ? "animate-pulse border-sage bg-mint-soft"
-                : phase === "noisy"
-                  ? "border-amber bg-amber-soft"
-                  : phase === "clear"
-                    ? "border-teal bg-mint-soft"
-                    : "border-line bg-surface",
-            )}
-          >
-            <span className="text-teal">
-              <IconMic width={64} height={64} />
-            </span>
-          </div>
-          <p className="mt-4 text-center text-[17px] font-extrabold text-pine">
-            {phase === "idle" && "Ready when you are"}
-            {phase === "listening" && "Listening…"}
-            {phase === "noisy" && "It's a bit loud in there"}
-            {phase === "clear" && "That's a clean room"}
-          </p>
-        </div>
-
-        {phase === "noisy" ? (
-          <div className="mt-5">
-            <Note tone="amber" title="Background noise detected">
-              We picked up a TV or fan. Move somewhere quieter, or turn it off, then try again.
-              We'll keep looping until it's clear.
-            </Note>
-          </div>
-        ) : null}
-        {phase === "clear" ? (
-          <div className="mt-5">
-            <Note tone="green" title="Noise check passed">
-              This spot works well. Try to use the same room each morning.
-            </Note>
-          </div>
-        ) : null}
-      </ScreenBody>
-      <StickyFooter>
-        {phase === "clear" ? (
-          <Btn onClick={() => store.go("practiceRun")}>Continue to the practice recording</Btn>
-        ) : (
-          <Btn onClick={phase === "noisy" ? retry : run} disabled={phase === "listening"}>
-            {phase === "noisy" ? "Try again" : "Start sound check"}
-          </Btn>
-        )}
-      </StickyFooter>
-    </Screen>
-  );
-}
 
 /* ---------------- practice part 2: dry run recording ---------------- */
 
@@ -754,6 +693,9 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const [toast, setToast] = useState<string | null>(null);
   const [seen, setSeen] = useState<string[]>([]);
   const [coach, setCoach] = useState<Coach | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const [passed, setPassed] = useState(false);
+
 
   const show = (c: Coach) => {
     setSeen((s) => (s.includes(c.id) ? s : [...s, c.id]));
@@ -832,7 +774,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
           title="Practice recording"
           onBack={store.back}
           dark
-          step="Step 9 of 9 · part 2 of 2"
+          step="Step 9 of 9"
         />
         {banner}
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center">
@@ -949,7 +891,20 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
         </div>
       ) : null}
 
-      {finished ? (
+      {finished && !passed ? (
+        <QualityPanel
+          pass={attempt > 0}
+          onRedo={() => {
+            setAttempt((a) => a + 1);
+            setLeft(TOTAL);
+            setMarks([]);
+            setStage("position");
+          }}
+          onContinue={() => setPassed(true)}
+        />
+      ) : null}
+
+      {finished && passed ? (
         <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
           <div className="rounded-[28px] bg-surface p-6 text-center">
             <Mascot src={MASCOT.cheer} size={140} className="mx-auto" />
@@ -958,8 +913,8 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
               {marks.length > 0
                 ? `You logged ${marks.length} symptom ${marks.length === 1 ? "mark" : "marks"}. `
                 : ""}
-              After a real recording you'll be asked a few short questions. That's all there is to it
-              — you're set.
+              After a real recording you'll get the same sound check, then a few short questions.
+              That's all there is to it — you're set.
             </p>
             <div className="mt-5">
               <Btn onClick={() => store.go("onboardDone")}>Continue</Btn>
@@ -967,6 +922,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
           </div>
         </div>
       ) : null}
+
     </Screen>
   );
 }
@@ -1078,12 +1034,69 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
             Next: weekend times
           </Btn>
         ) : (
-          <Btn onClick={() => store.go("snacking")}>Save my schedule</Btn>
+          <Btn onClick={() => store.go("mealPick")}>Save my schedule</Btn>
         )}
       </StickyFooter>
     </Screen>
   );
 }
+
+/* ---------------- which meal the recordings follow ---------------- */
+
+export function MealPickScreen({ store }: { store: TummyStore }) {
+  const meals = [
+    { k: "breakfast", label: "Breakfast", sub: "Recordings run through the morning", Icon: IconSun },
+    { k: "lunch", label: "Lunch", sub: "Recordings run through the afternoon", Icon: IconBowl },
+    { k: "dinner", label: "Dinner", sub: "Recordings run through the evening", Icon: IconSunset },
+  ] as const;
+  return (
+    <Screen>
+      <TopBar title="Your study meal" onBack={store.back} step="Step 6 of 9" />
+      <ScreenBody>
+        <MascotSays size={78} src={MASCOT.calm}>
+          Which meal would you like your recordings to follow? Pick the one you eat at the steadiest
+          time — it stays the same every study day.
+        </MascotSays>
+        <div className="mt-5 space-y-3">
+          {meals.map(({ k, label, sub, Icon }) => (
+            <button
+              key={k}
+              onClick={() => store.chooseStudyMeal(k)}
+              className={cn(
+                "flex min-h-[92px] w-full items-center gap-4 rounded-3xl border-2 bg-surface px-5 text-left",
+                store.meal === k ? "border-teal bg-mint-soft" : "border-line",
+              )}
+            >
+              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+                <Icon width={30} height={30} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[20px] font-extrabold text-pine">{label}</span>
+                <span className="block text-[15px] font-semibold text-pine-soft">{sub}</span>
+              </span>
+              {store.meal === k ? (
+                <span className="shrink-0 text-teal">
+                  <IconCheck width={24} height={24} />
+                </span>
+              ) : null}
+            </button>
+          ))}
+        </div>
+        <div className="mt-4">
+          <Note tone="blue" title="What this changes">
+            Your day is built around this meal: a recording just before it, one straight after, then
+            every 30 minutes for three and a half hours. Your other meals and snacks just get logged.
+          </Note>
+        </div>
+      </ScreenBody>
+      <StickyFooter>
+        <Btn onClick={() => store.go("snacking")}>Continue</Btn>
+      </StickyFooter>
+    </Screen>
+  );
+}
+
+
 
 /* ---------------- snacking ---------------- */
 
@@ -1091,7 +1104,14 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
   const [tab, setTab] = useState<"weekday" | "weekend">("weekday");
   const [snacks, setSnacks] = useState<"" | "yes" | "no">("");
   const [seenWeekend, setSeenWeekend] = useState(false);
-  const [picked, setPicked] = useState<Record<string, boolean>>({});
+  const [times, setTimes] = useState<Record<"weekday" | "weekend", string[]>>({
+    weekday: ["10:30"],
+    weekend: ["11:00"],
+  });
+
+  const list = times[tab];
+  const setList = (next: string[]) => setTimes((t) => ({ ...t, [tab]: next }));
+
   return (
     <Screen>
       <TopBar title="Snacking" onBack={store.back} step="Step 6 of 9" />
@@ -1123,56 +1143,43 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
               />
             </div>
             <p className="mt-4 text-[16px] font-semibold leading-snug text-pine-soft">
-              Tick only the snacks you actually have. Leave the others switched off.
+              Add a time for each snack you usually have on a {tab === "weekday" ? "weekday" : "weekend day"}. Add as many as you like.
             </p>
             <div className="mt-3 space-y-3">
-              {[
-                { label: "Morning snack", def: tab === "weekday" ? "10:30" : "11:00" },
-                { label: "Afternoon snack", def: tab === "weekday" ? "16:00" : "16:30" },
-                { label: "Evening snack", def: tab === "weekday" ? "21:00" : "21:30" },
-              ].map(({ label, def }) => {
-                const key = `${tab}-${label}`;
-                const on = picked[key] ?? false;
-                return (
-                  <div
-                    key={label}
-                    className={cn(
-                      "flex items-center gap-3 rounded-2xl border-2 p-4",
-                      on ? "border-teal bg-mint-soft" : "border-line bg-surface",
-                    )}
+              {list.map((value, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-2xl border-2 border-line bg-surface p-4"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+                    <IconBowl width={24} height={24} />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold text-pine">
+                    Snack {i + 1}
+                  </span>
+                  <input
+                    type="time"
+                    value={value}
+                    onChange={(e) =>
+                      setList(list.map((t, n) => (n === i ? e.target.value : t)))
+                    }
+                    className="min-h-[52px] shrink-0 rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine"
+                  />
+                  <button
+                    onClick={() => setList(list.filter((_, n) => n !== i))}
+                    aria-label={`Remove snack ${i + 1}`}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-wash text-[22px] font-extrabold text-pine-soft"
                   >
-                    <button
-                      onClick={() => setPicked((p) => ({ ...p, [key]: !on }))}
-                      aria-pressed={on}
-                      className="flex min-h-[52px] min-w-0 flex-1 items-center gap-3 text-left"
-                    >
-                      <span
-                        className={cn(
-                          "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border-2",
-                          on
-                            ? "border-teal bg-teal text-surface"
-                            : "border-line bg-wash text-pine-soft",
-                        )}
-                      >
-                        {on ? <IconCheck width={24} height={24} /> : <IconBowl width={24} height={24} />}
-                      </span>
-                      <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold text-pine">
-                        {label}
-                      </span>
-                    </button>
-                    {on ? (
-                      <input
-                        key={key}
-                        type="time"
-                        defaultValue={def}
-                        className="min-h-[52px] shrink-0 rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine"
-                      />
-                    ) : (
-                      <span className="shrink-0 text-[15px] font-bold text-pine-soft">Off</span>
-                    )}
-                  </div>
-                );
-              })}
+                    ×
+                  </button>
+                </div>
+              ))}
+              <button
+                onClick={() => setList([...list, "15:00"])}
+                className="flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-teal bg-surface text-[17px] font-extrabold text-teal"
+              >
+                + Add another snack time
+              </button>
             </div>
             <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-pine-soft">
               If you're not sure, a rough guess is completely fine — this doesn't have to be
@@ -1200,6 +1207,7 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
     </Screen>
   );
 }
+
 
 /* ---------------- about you ---------------- */
 

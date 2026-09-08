@@ -172,7 +172,15 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                       >
                         Skip this one and tell us why
                       </button>
+                    ) : p.kind === "meal" ? (
+                      <button
+                        onClick={() => store.missItem(p.id, "Meal skipped or not eaten")}
+                        className="mt-2 min-h-[48px] w-full text-[15px] font-extrabold text-amber-soft"
+                      >
+                        I skipped this meal
+                      </button>
                     ) : null}
+
                   </div>
                 ) : (
                   <div className="flex min-h-[56px] min-w-0 flex-1 items-center gap-3 rounded-2xl border border-line bg-surface px-4">
@@ -232,7 +240,9 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
 
 export function CaseReminderScreen({ store }: { store: TummyStore }) {
   const [why, setWhy] = useState(false);
-  const next = () => store.go(store.track === "fasting" ? "fastingCheck" : "sessionCheck");
+  // the wake-up questions already cover food and drink, so fasted sessions go straight on
+  const next = () => store.go(store.sessionKind === "fasted" ? "positioning" : "sessionCheck");
+
   return (
     <Screen>
       <TopBar title="Before we start" onBack={store.back} />
@@ -442,9 +452,13 @@ export function MealEndScreen({ store }: { store: TummyStore }) {
         </Btn>
         <div className="mt-3">
           <Btn variant="secondary" onClick={() => store.go("home")}>
-            Still eating
+            Return to the home screen
           </Btn>
         </div>
+        <p className="mt-2 text-center text-[15px] font-semibold text-pine-soft">
+          Still eating? Go back to home and come straight back here when your last bite is done.
+        </p>
+
       </StickyFooter>
     </Screen>
   );
@@ -609,7 +623,71 @@ export const SYMPTOMS = [
 
 export const SEV_LABELS = ["very mild", "mild", "moderate", "strong", "very strong"];
 
+/** Audio quality analysis shown straight after a recording, real or practice. */
+export function QualityPanel({
+  pass,
+  onRedo,
+  onContinue,
+}: {
+  pass: boolean;
+  onRedo: () => void;
+  onContinue: () => void;
+}) {
+  const [phase, setPhase] = useState<"checking" | "done">("checking");
+  useEffect(() => {
+    const t = setTimeout(() => setPhase("done"), 1800);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
+      <div className="rounded-[28px] bg-surface p-6 text-center">
+        {phase === "checking" ? (
+          <>
+            <span className="mx-auto flex h-[110px] w-[110px] animate-pulse items-center justify-center rounded-full bg-mint-soft text-teal">
+              <IconWave width={54} height={54} />
+            </span>
+            <h2 className="mt-4 text-[23px] font-extrabold text-pine">Checking the audio…</h2>
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
+              We listen for background noise, rustling and gaps in contact with your skin.
+            </p>
+          </>
+        ) : pass ? (
+          <>
+            <Mascot src={MASCOT.cheer} size={130} className="mx-auto" />
+            <h2 className="mt-3 text-[24px] font-extrabold text-pine">Good quality recording</h2>
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
+              Clear contact, quiet room, gut sounds coming through nicely. Nothing to redo.
+            </p>
+            <div className="mt-5">
+              <Btn onClick={onContinue}>Continue</Btn>
+            </div>
+          </>
+        ) : (
+          <>
+            <Mascot src={MASCOT.calm} size={130} className="mx-auto" />
+            <h2 className="mt-3 text-[24px] font-extrabold text-pine">
+              This one is too noisy to use
+            </h2>
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
+              We picked up rustling and background noise. Press the phone flat on bare skin, settle
+              somewhere quieter, and record it again — it only takes two minutes.
+            </p>
+            <div className="mt-5 space-y-3">
+              <Btn onClick={onRedo}>Record it again</Btn>
+              <Btn variant="secondary" onClick={onContinue}>
+                Keep it anyway
+              </Btn>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /** Big, legible ring shared by the real recording and the dry run. */
+
 export function RecordTimer({ elapsed, min }: { elapsed: number; min: number }) {
   const past = elapsed >= min;
   const shown = past ? elapsed : min - elapsed;
@@ -758,6 +836,9 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
   const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [confirmEnd, setConfirmEnd] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
   const startedRef = useRef(false);
   const left = Math.max(0, MIN_SECONDS - elapsed);
   const past = elapsed >= MIN_SECONDS;
@@ -769,9 +850,11 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
   }, [store]);
 
   useEffect(() => {
+    if (checking) return;
     const t = setInterval(() => setElapsed((e) => e + 1), 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [checking]);
+
 
   useEffect(() => {
     if (!toast) return;
@@ -816,7 +899,7 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       <div className="shrink-0 px-5 pb-7">
         {past ? (
           <>
-            <Btn onClick={() => store.go("postMeta")}>Finish and answer the questions</Btn>
+            <Btn onClick={() => setChecking(true)}>Finish and check the audio</Btn>
             <p className="mt-3 text-center text-[15px] font-bold text-mint">
               Or keep going — longer recordings are genuinely more useful.
             </p>
@@ -832,7 +915,7 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
             </p>
             <div className="mt-4 space-y-3">
               <Btn onClick={() => setConfirmEnd(false)}>Keep recording</Btn>
-              <Btn variant="secondary" onClick={() => store.go("postMeta")}>
+              <Btn variant="secondary" onClick={() => setChecking(true)}>
                 Stop anyway
               </Btn>
             </div>
@@ -857,11 +940,26 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
         />
       ) : null}
 
+      {checking ? (
+        <QualityPanel
+          pass={past || attempt > 0}
+          onRedo={() => {
+            setAttempt((a) => a + 1);
+            setChecking(false);
+            setConfirmEnd(false);
+            setElapsed(0);
+            store.resetMarks();
+          }}
+          onContinue={() => store.go("postMeta")}
+        />
+      ) : null}
+
       {toast ? (
         <div className="pointer-events-none absolute inset-x-5 top-[350px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
           {toast}
         </div>
       ) : null}
+
     </Screen>
   );
 }
@@ -1034,17 +1132,8 @@ function questionsFor(kind: SessionKind): Q[] {
   }
 
   if (kind === "extra") {
-    return [
-      ...common,
-      {
-        id: "why",
-        q: "What made you record this extra session?",
-        type: "single",
-        options: ["Unusually loud or frequent sounds", "Symptoms higher than normal", "Both"],
-      },
-      { id: "severity", q: "How strong is it right now?", type: "scale" },
-      { id: "describe", q: "Describe what you're feeling or hearing.", type: "text" },
-    ];
+    // why you're recording and how strong it feels are asked before the recording
+    return [...common];
   }
 
   // post-meal short set
@@ -1207,14 +1296,16 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
             >
               Record a voice note instead
             </Btn>
-            {current.optional && !needNote ? (
+            {(current.optional && !needNote) ||
+            (needNote && current.followUp?.startsWith("Anything")) ? (
               <button
                 onClick={() => submitNote(true)}
-                className="min-h-[48px] w-full text-[16px] font-extrabold text-pine-soft"
+                className="min-h-[52px] w-full rounded-2xl border-2 border-line bg-surface text-[16px] font-extrabold text-pine-soft"
               >
                 Nothing to add
               </button>
             ) : null}
+
           </div>
         ) : null}
 
@@ -1375,32 +1466,106 @@ export function SkipReasonScreen({ store }: { store: TummyStore }) {
 /* ---------------- extra session ---------------- */
 
 export function ExtraSessionScreen({ store }: { store: TummyStore }) {
+  const [reason, setReason] = useState<string>("");
+  const [symptom, setSymptom] = useState<{ key: string; label: string } | null>(null);
+  const [severity, setSeverity] = useState<number>(0);
+
+  const needsSymptom = reason === "Symptoms higher than normal" || reason === "Both";
+  const ready = reason !== "" && (!needsSymptom || (symptom !== null && severity > 0));
+
+  const start = () => {
+    if (needsSymptom && symptom) {
+      store.addEntry("symptom", symptom.label, `${SEV_LABELS[severity - 1]} · before extra recording`);
+    }
+    store.startExtraSession();
+    store.go("caseReminder");
+  };
+
   return (
     <Screen>
       <TopBar title="Extra recording" onBack={store.back} />
-      <ScreenBody className="flex flex-col">
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <Mascot src={MASCOT.wave} size={140} />
-          <h2 className="mt-4 text-[25px] font-extrabold leading-tight text-pine">
-            Noticing something unusual?
-          </h2>
-          <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
-            If your gut is unusually loud or busy, or your symptoms are worse than normal, record
-            two extra minutes at the same spot. We'll ask what prompted it afterwards.
-          </p>
+      <ScreenBody>
+        <MascotSays size={78} src={MASCOT.wave}>
+          Before we start — what made you want to record an extra session?
+        </MascotSays>
+        <div className="mt-5 space-y-3">
+          {["Unusually loud or frequent sounds", "Symptoms higher than normal", "Both", "Just curious"].map(
+            (r) => (
+              <button
+                key={r}
+                onClick={() => setReason(r)}
+                className={cn(
+                  "flex min-h-[64px] w-full items-center rounded-2xl border-2 bg-surface px-5 text-left text-[17px] font-extrabold text-pine",
+                  reason === r ? "border-teal bg-mint-soft" : "border-line",
+                )}
+              >
+                {r}
+              </button>
+            ),
+          )}
         </div>
-        <Note tone="blue" title="Same rules as always">
-          Case off, bare skin, quiet room, sit upright and still.
-        </Note>
+
+        {needsSymptom ? (
+          <>
+            <h3 className="mt-6 text-[18px] font-extrabold text-pine">Which symptom?</h3>
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              {SYMPTOMS.map(({ key, label, Icon }) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setSymptom({ key, label });
+                    setSeverity(0);
+                  }}
+                  className={cn(
+                    "flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border-2 bg-surface px-2",
+                    symptom?.key === key ? "border-teal bg-mint-soft" : "border-line",
+                  )}
+                >
+                  <span className="text-teal">
+                    <Icon width={28} height={28} />
+                  </span>
+                  <span className="text-[15px] font-extrabold text-pine">{label}</span>
+                </button>
+              ))}
+            </div>
+            {symptom ? (
+              <>
+                <h3 className="mt-6 text-[18px] font-extrabold text-pine">
+                  How strong is it right now?
+                </h3>
+                <div className="mt-3 flex gap-2">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setSeverity(n)}
+                      className={cn(
+                        "min-h-[64px] flex-1 rounded-2xl border-2 text-[20px] font-extrabold",
+                        severity === n
+                          ? "border-teal bg-teal text-surface"
+                          : "border-line bg-surface text-pine",
+                      )}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-center text-[15px] font-semibold text-pine-soft">
+                  1 is very mild, 5 is very strong.
+                </p>
+              </>
+            ) : null}
+          </>
+        ) : null}
+
+        <div className="mt-6">
+          <Note tone="blue" title="Same rules as always">
+            Case off, bare skin, quiet room, sit upright and still for two minutes.
+          </Note>
+        </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn
-          onClick={() => {
-            store.startExtraSession();
-            store.go("caseReminder");
-          }}
-        >
-          Start an extra recording
+        <Btn disabled={!ready} onClick={start}>
+          Start the extra recording
         </Btn>
       </StickyFooter>
     </Screen>
@@ -1410,8 +1575,32 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
 /* ---------------- upload done ---------------- */
 
 export function UploadDoneScreen({ store }: { store: TummyStore }) {
-  const next = store.plan.find((p) => !p.done && p.kind === "recording");
-  const mins = next ? next.at - minutesNow() : null;
+  const next = store.plan.find((p) => !p.done);
+  const mins = next ? Math.max(0, next.at - minutesNow()) : null;
+
+  const title =
+    next?.kind === "recording"
+      ? "Next recording"
+      : next?.kind === "meal"
+        ? next.mealLog
+          ? "Next thing to log"
+          : "Your study meal"
+        : next
+          ? "Next questions"
+          : "All done for today";
+
+  const detail = !next
+    ? "Nothing more until tomorrow morning's fasted recording."
+    : next.kind === "recording" && next.sessionKind === "postMeal"
+      ? "Nothing to eat or drink until the window is over. If you really need water, have up to one cup now — right after this recording."
+      : next.kind === "meal" && !next.mealLog
+        ? next.id === "mealStart"
+          ? "Take a photo of the plate, then tap when you take your first bite."
+          : "Tap the moment your last bite is done — every recording after that is timed from it."
+        : next.kind === "meal"
+          ? "A photo and the time is all we need. A line of text is fine for a snack."
+          : "Nothing to do until then.";
+
   return (
     <Screen>
       <ScreenBody className="flex flex-col justify-center pt-14 text-center">
@@ -1424,16 +1613,14 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
         <div className="mt-5 rounded-3xl border border-line bg-surface p-5 text-left">
           <div className="flex items-center gap-2 text-teal">
             <IconClock width={22} height={22} />
-            <p className="text-[16px] font-extrabold">Next recording</p>
+            <p className="text-[16px] font-extrabold">{title}</p>
           </div>
           <p className="mt-1 text-[19px] font-extrabold text-pine">
-            {next ? `${untilLabel(Math.max(0, mins ?? 0))} · ${clockLabel(next.at)}` : "Tomorrow morning"}
+            {next
+              ? `${next.label} · ${untilLabel(mins ?? 0)} · ${clockLabel(next.at)}`
+              : "Tomorrow morning"}
           </p>
-          <p className="mt-1 text-[16px] font-semibold text-pine-soft">
-            {next && next.sessionKind === "postMeal"
-              ? "Nothing to eat or drink until the window is over. If you really need water, have up to one cup now — right after this recording."
-              : "Nothing to do until then."}
-          </p>
+          <p className="mt-1 text-[16px] font-semibold text-pine-soft">{detail}</p>
         </div>
       </ScreenBody>
       <StickyFooter>
@@ -1442,3 +1629,4 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
     </Screen>
   );
 }
+

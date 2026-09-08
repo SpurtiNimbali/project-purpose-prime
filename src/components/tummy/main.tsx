@@ -285,10 +285,10 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             store.startExtraSession();
             store.go("extraSession");
           }}
-          className="mt-4 flex min-h-[64px] w-full items-center gap-3 rounded-3xl border border-line bg-surface px-4 text-left active:scale-[0.99]"
+          className="mt-4 flex min-h-[76px] w-full items-center gap-3 rounded-3xl border-2 border-teal bg-mint-soft px-4 text-left shadow-sm active:scale-[0.99]"
         >
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
-            <IconMic width={22} height={22} />
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal text-surface">
+            <IconMic width={24} height={24} />
           </span>
           <span className="min-w-0 flex-1">
             <span className="block text-[16px] font-extrabold text-pine">
@@ -661,6 +661,7 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
               (p) => p.id === store.activeItemId && p.mealLog && !p.done,
             );
             if (scheduled) store.completeItem(scheduled.id);
+            else store.completeMealLog(which);
             store.go("logHub");
           }}
         >
@@ -1048,12 +1049,22 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
                 <IconShield width={26} height={26} />
               </span>
-              <div>
-                <p className="text-[17px] font-extrabold text-pine">Streak freeze available</p>
-                <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-                  Miss one day and your streak stays intact. Life happens — this is a study, not a
-                  competition.
+              <div className="min-w-0 flex-1">
+                <p className="text-[17px] font-extrabold text-pine">
+                  {store.freezeUsed ? "Streak freeze used" : "Streak freeze available"}
                 </p>
+                <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
+                  {store.freezeUsed
+                    ? "You've used your one freeze for this study week. Your streak is safe for that day."
+                    : "Need a day off? Use your one freeze and your streak stays intact. Life happens — this is a study, not a competition."}
+                </p>
+                {!store.freezeUsed ? (
+                  <div className="mt-3">
+                    <Btn variant="secondary" onClick={() => store.useFreeze()}>
+                      Use my freeze day
+                    </Btn>
+                  </div>
+                ) : null}
               </div>
             </div>
           </Card>
@@ -1219,13 +1230,6 @@ export function ContactScreen({ store }: { store: TummyStore }) {
               t: "Message your study coordinator",
               b: "Scheduling, compensation, or anything about taking part. Replies within one working day.",
               Icon: IconSend,
-              action: () => store.go("contactForm"),
-              cta: "Write a message",
-            },
-            {
-              t: "Speak to the lead researcher",
-              b: "Questions about the science, your data, or how the recordings are used.",
-              Icon: IconUser,
               action: () => store.go("contactForm"),
               cta: "Write a message",
             },
