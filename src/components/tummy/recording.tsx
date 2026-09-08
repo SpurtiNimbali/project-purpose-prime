@@ -526,7 +526,7 @@ export function AbdomenGuide({ height = 250 }: { height?: number }) {
     <figure className="relative mx-auto w-full max-w-[320px]" style={{ height }}>
       <img
         src={placementArt}
-        alt="A person sitting upright on a chair, holding the phone flat against the lower right of the bare belly, screen facing out"
+        alt="A seated man holding a portrait phone against bare skin, 8 centimetres to his right and 3 centimetres below his belly button"
         loading="lazy"
         width={1024}
         height={768}
@@ -534,9 +534,9 @@ export function AbdomenGuide({ height = 250 }: { height?: number }) {
       />
       <figcaption className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 text-[13px] font-bold text-mint">
         <span className="rounded-full bg-amber/90 px-2.5 py-0.5 text-[12px] font-extrabold text-pine">
-          9 cm
+          8 cm right · 3 cm down
         </span>
-        below and to the right of your belly button
+        from your belly button
       </figcaption>
     </figure>
   );
@@ -563,8 +563,8 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
 
         <div className="mt-2 space-y-2">
           <p className="text-[18px] font-extrabold leading-snug text-surface">
-            Lift your shirt and place the bottom of the phone 9 cm below and to the right of your
-            belly button, flat against bare skin.
+            Lift your shirt. From your belly button, measure 8 cm toward your right, then 3 cm
+            down. Place the bottom edge of the phone there, flat against bare skin.
           </p>
           <p className="text-[16px] font-semibold leading-snug text-mint">
             Microphone end onto the skin. Case off. Sit upright, breathe normally and stay still —
