@@ -954,7 +954,20 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
         </div>
       ) : null}
 
-      {finished ? (
+      {finished && !passed ? (
+        <QualityPanel
+          pass={attempt > 0}
+          onRedo={() => {
+            setAttempt((a) => a + 1);
+            setLeft(TOTAL);
+            setMarks([]);
+            setStage("position");
+          }}
+          onContinue={() => setPassed(true)}
+        />
+      ) : null}
+
+      {finished && passed ? (
         <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
           <div className="rounded-[28px] bg-surface p-6 text-center">
             <Mascot src={MASCOT.cheer} size={140} className="mx-auto" />
@@ -963,8 +976,8 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
               {marks.length > 0
                 ? `You logged ${marks.length} symptom ${marks.length === 1 ? "mark" : "marks"}. `
                 : ""}
-              After a real recording you'll be asked a few short questions. That's all there is to it
-              — you're set.
+              After a real recording you'll get the same sound check, then a few short questions.
+              That's all there is to it — you're set.
             </p>
             <div className="mt-5">
               <Btn onClick={() => store.go("onboardDone")}>Continue</Btn>
@@ -972,6 +985,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
           </div>
         </div>
       ) : null}
+
     </Screen>
   );
 }
