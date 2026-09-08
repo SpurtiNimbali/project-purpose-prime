@@ -433,24 +433,8 @@ export function useTummyStore(): TummyStore {
   const [plan, setPlan] = useState<PlanItem[]>(() => createInitialPlan("breakfast"));
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const [lastRecordingAt, setLastRecordingAt] = useState<number | null>(null);
-  const [entries, setEntries] = useState<LogEntry[]>([
-    { id: "seed-1", kind: "sleep", label: "Wake-up questions", detail: "In bed 11:20 pm · up 7:05 am", time: "7:10 am" },
-    {
-      id: "seed-2",
-      kind: "recording",
-      label: "Gut sound recording",
-      detail: "Fasted morning",
-      time: "7:20 am",
-    },
-    { id: "seed-3", kind: "meal", label: "Breakfast", detail: "Oats and berries · photo added", time: "8:05 am" },
-    {
-      id: "seed-4",
-      kind: "recording",
-      label: "Gut sound recording",
-      detail: "Right after the meal",
-      time: "8:35 am",
-    },
-  ]);
+  const [entries, setEntries] = useState<LogEntry[]>([]);
+  const [demoTick, setDemoTick] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [questions, setQuestions] = useState({ morning: false, night: false });
 
