@@ -1248,32 +1248,54 @@ export function ContactScreen({ store }: { store: TummyStore }) {
           without leaving the study.
         </MascotSays>
         <div className="mt-5 space-y-3">
-          <Card onClick={() => store.setChatOpen(true)}>
-            <p className="text-[17px] font-extrabold text-pine">Ask me first</p>
-            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              Missed recordings, timings, reminders and app problems — I can usually answer straight
-              away.
-            </p>
-          </Card>
-          <Card onClick={() => store.go("contactForm")}>
-            <p className="text-[17px] font-extrabold text-pine">Message your study coordinator</p>
-            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              Scheduling, compensation, or anything about taking part. Replies within one working
-              day.
-            </p>
-          </Card>
-          <Card onClick={() => store.go("contactForm")}>
-            <p className="text-[17px] font-extrabold text-pine">Speak to the lead researcher</p>
-            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              Questions about the science, your data, or how the recordings are used.
-            </p>
-          </Card>
-          <Card onClick={() => store.go("contactForm")}>
-            <p className="text-[17px] font-extrabold text-pine">Raise a concern or complaint</p>
-            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              Goes to the study manager and, if you ask, the independent review board.
-            </p>
-          </Card>
+          {[
+            {
+              t: "Ask me first",
+              b: "Missed recordings, timings, reminders and app problems — I can usually answer straight away.",
+              Icon: IconChat,
+              action: () => store.setChatOpen(true),
+              cta: "Open chat",
+            },
+            {
+              t: "Message your study coordinator",
+              b: "Scheduling, compensation, or anything about taking part. Replies within one working day.",
+              Icon: IconMail,
+              action: () => store.go("contactForm"),
+              cta: "Write a message",
+            },
+            {
+              t: "Speak to the lead researcher",
+              b: "Questions about the science, your data, or how the recordings are used.",
+              Icon: IconUser,
+              action: () => store.go("contactForm"),
+              cta: "Write a message",
+            },
+            {
+              t: "Raise a concern or complaint",
+              b: "Goes to the study manager and, if you ask, the independent review board.",
+              Icon: IconShield,
+              action: () => store.go("contactForm"),
+              cta: "Write a message",
+            },
+          ].map(({ t, b, Icon, action, cta }) => (
+            <button
+              key={t}
+              onClick={action}
+              className="flex w-full items-center gap-3 rounded-3xl border border-line bg-surface p-4 text-left active:scale-[0.99]"
+            >
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+                <Icon width={24} height={24} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[17px] font-extrabold text-pine">{t}</span>
+                <span className="mt-1 block text-[16px] font-semibold leading-snug text-pine-soft">
+                  {b}
+                </span>
+                <span className="mt-1 block text-[15px] font-extrabold text-teal">{cta} →</span>
+              </span>
+              <span className="shrink-0 text-[22px] font-extrabold text-teal">›</span>
+            </button>
+          ))}
         </div>
         <div className="mt-4">
           <Note tone="green" title="Prefer to phone?">
