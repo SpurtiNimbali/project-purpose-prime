@@ -128,65 +128,6 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
   );
 }
 
-/* ---------------- study intro ---------------- */
-
-const INTRO_POINTS = [
-  {
-    title: "Seven days in a row",
-    body: "You take part on seven consecutive days. If life gets in the way, you can freeze the study for up to two days within a fortnight.",
-  },
-  {
-    title: "Ten recordings a day, about 20 minutes",
-    body: "One after you wake before eating, one right before your chosen meal, then one straight after it and every 30 minutes for the next three and a half hours.",
-  },
-  {
-    title: "Two minutes each, longer is welcome",
-    body: "Sit upright and still in a quiet room with the phone on the bare skin of your lower right belly. Two minutes is the minimum, keep going if you can.",
-  },
-  {
-    title: "Eating and drinking during the meal window",
-    body: "Once the meal ends, nothing to eat or drink until the last recording, apart from a small amount of water straight after a recording.",
-  },
-  {
-    title: "A short diary alongside",
-    body: "Questions when you wake and before bed, a few after each recording, and a photo and time for everything you eat or drink that day.",
-  },
-  {
-    title: "Quality matters more than quantity",
-    body: "If a session can't be done properly, skip it and tell us why. Missing a session never ends your part in the study.",
-  },
-];
-
-export function StudyIntroScreen({ store }: { store: TummyStore }) {
-  return (
-    <Screen>
-      <TopBar title="What the study involves" onBack={store.back} step="Step 2 of 9" />
-      <ScreenBody>
-        <div className="space-y-3">
-          {INTRO_POINTS.map((p, i) => (
-            <Card key={p.title}>
-              <div className="flex gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mint-soft text-[16px] font-extrabold text-teal">
-                  {i + 1}
-                </span>
-                <div>
-                  <p className="text-[17px] font-extrabold text-pine">{p.title}</p>
-                  <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-                    {p.body}
-                  </p>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </ScreenBody>
-      <StickyFooter>
-        <Btn onClick={() => store.go("video")}>Watch the short video</Btn>
-      </StickyFooter>
-    </Screen>
-  );
-}
-
 /* ---------------- instruction video ---------------- */
 
 export function VideoScreen({ store }: { store: TummyStore }) {
