@@ -527,9 +527,15 @@ export function useTummyStore(): TummyStore {
     setSessionKind("extra");
   }, []);
 
+  void demoTick;
   const nextTask = computeNextTask(plan);
 
   return {
+    demoNow: minutesNow(),
+    setDemoNow: (mins: number) => {
+      setDemoShift(mins - realMinutesNow());
+      setDemoTick((t) => t + 1);
+    },
     nextTask,
     gender,
     setGender,
