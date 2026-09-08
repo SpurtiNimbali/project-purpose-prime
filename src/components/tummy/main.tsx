@@ -108,6 +108,72 @@ export function HomeScreen({ store }: { store: TummyStore }) {
     store.go(task.screen);
   };
 
+  if (store.frozen) {
+    return (
+      <Screen>
+        <div className="shrink-0 bg-blue px-5 pb-6 pt-14 text-surface">
+          <div className="flex items-center gap-3">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-surface/15">
+              <IconSnowflake width={26} height={26} />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-surface/80">
+                Freeze day
+              </p>
+              <h1 className="truncate text-[22px] font-extrabold leading-tight">
+                Day {store.day} is paused
+              </h1>
+            </div>
+          </div>
+          <p className="mt-3 text-[16px] font-semibold leading-snug text-surface/85">
+            Nothing to record, log or answer today. Your streak stays safe and the schedule picks
+            up again tomorrow morning.
+          </p>
+        </div>
+
+        <ScreenBody className="pt-4">
+          <div className="rounded-3xl border-2 border-dashed border-blue/40 bg-surface px-4 py-4">
+            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-blue">
+              Today's rail · frozen
+            </p>
+            <div className="mt-3 flex items-start">
+              {store.plan.slice(0, 4).map((p) => (
+                <div key={p.id} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
+                  <span className="flex h-[28px] w-[28px] items-center justify-center rounded-full border-2 border-blue/40 bg-surface text-blue">
+                    <IconSnowflake width={15} height={15} />
+                  </span>
+                  <span className="w-full truncate text-center text-[12px] font-bold text-pine-soft">
+                    {clockLabel(p.at).replace(" ", "")}
+                  </span>
+                </div>
+              ))}
+              {store.plan.length > 4 ? (
+                <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-blue">
+                  •••
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-3 text-[15px] font-semibold leading-snug text-pine-soft">
+              All of today's sessions, meals and questions are on hold.
+            </p>
+          </div>
+
+          <div className="mt-4">
+            <Btn variant="secondary" onClick={() => store.go("progress")}>
+              See my progress
+            </Btn>
+          </div>
+          <div className="mt-3">
+            <Btn variant="secondary" onClick={() => store.go("logHub")}>
+              Open today's log anyway
+            </Btn>
+          </div>
+        </ScreenBody>
+      </Screen>
+    );
+  }
+
+
   return (
     <Screen>
       <div className="shrink-0 px-5 pb-1 pt-14">
