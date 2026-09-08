@@ -572,7 +572,28 @@ export const PLACEMENT_TIPS = [
     Icon: IconBalloon,
   },
 ];
-
+export function PlacementTips() {
+  return (
+    <div className="mt-4 space-y-2">
+      {PLACEMENT_TIPS.map(({ t, b, Icon }) => (
+        <div
+          key={t}
+          className="flex items-start gap-3 rounded-2xl bg-surface/10 px-4 py-3 text-surface"
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber text-pine">
+            <Icon width={20} height={20} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[16px] font-bold leading-snug">{t}</span>
+            <span className="mt-0.5 block text-[14px] font-semibold leading-snug text-mint">
+              {b}
+            </span>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 const POSITION_CHECKS = [
   {
@@ -592,8 +613,9 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
       <TopBar title="Positioning guide" onBack={store.back} dark step="Placement" />
       <div className={cn("flex-1 overflow-y-auto px-5 pb-6", gated && "blur-md")}>
         <AbdomenGuide />
-
         <PlacementTips />
+      </div>
+
 
       <div className="shrink-0 px-5 pb-7 pt-3">
         <Btn disabled={gated} onClick={() => store.go("recording")}>
