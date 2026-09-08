@@ -171,9 +171,24 @@ export function clockLabel(mins: number) {
   return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
-export function minutesNow() {
+/** Prototype-only clock shift, in minutes, so the demo can jump through the day. */
+let demoShift = 0;
+
+export function realMinutesNow() {
   const d = new Date();
   return d.getHours() * 60 + d.getMinutes();
+}
+
+export function getDemoShift() {
+  return demoShift;
+}
+
+export function setDemoShift(mins: number) {
+  demoShift = mins;
+}
+
+export function minutesNow() {
+  return ((realMinutesNow() + demoShift) % (24 * 60) + 24 * 60) % (24 * 60);
 }
 
 export function untilLabel(mins: number) {
