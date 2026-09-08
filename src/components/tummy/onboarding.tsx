@@ -613,20 +613,6 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
               </span>
             </button>
           </Card>
-          <Card>
-            <div className="flex items-center gap-3">
-              <span className="text-teal">
-                <IconClock width={28} height={28} />
-              </span>
-              <div className="flex-1">
-                <p className="text-[17px] font-extrabold text-pine">Ruler app</p>
-                <p className="text-[16px] font-semibold text-pine-soft">
-                  You'll measure the spot on your belly — 8 cm right, 3 cm down from your belly
-                  button — with the ruler app on your phone, not by eye.
-                </p>
-              </div>
-            </div>
-          </Card>
 
         </div>
       </ScreenBody>
