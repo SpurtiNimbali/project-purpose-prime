@@ -652,8 +652,6 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
       </div>
 
       {!checked ? <PositionChecksGate onDone={() => setChecked(true)} /> : null}
-
-      ) : null}
     </Screen>
   );
 }
