@@ -663,7 +663,7 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("practice")} disabled={!all}>
+        <Btn onClick={() => store.go("practiceRun")} disabled={!all}>
           Continue
         </Btn>
       </StickyFooter>
@@ -671,80 +671,7 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
   );
 }
 
-/* ---------------- practice part 1: sound check ---------------- */
 
-export function PracticeScreen({ store }: { store: TummyStore }) {
-  const [phase, setPhase] = useState<"idle" | "listening" | "noisy" | "clear">("idle");
-  const run = () => {
-    setPhase("listening");
-    setTimeout(() => setPhase((p) => (p === "listening" ? "noisy" : p)), 1800);
-  };
-  const retry = () => {
-    setPhase("listening");
-    setTimeout(() => setPhase("clear"), 1800);
-  };
-  return (
-    <Screen>
-      <TopBar title="Sound check" onBack={store.back} step="Step 9 of 9 · part 1 of 2" />
-      <ScreenBody>
-        <MascotSays size={78} src={MASCOT.calm}>
-          First a sound check, then a short practice recording. Set up exactly as you will for a
-          real one: case off, shirt lifted, phone flat on the skin of your belly.
-        </MascotSays>
-
-        <div className="mt-6 flex flex-col items-center">
-          <div
-            className={cn(
-              "flex h-[168px] w-[168px] items-center justify-center rounded-full border-[10px]",
-              phase === "listening"
-                ? "animate-pulse border-sage bg-mint-soft"
-                : phase === "noisy"
-                  ? "border-amber bg-amber-soft"
-                  : phase === "clear"
-                    ? "border-teal bg-mint-soft"
-                    : "border-line bg-surface",
-            )}
-          >
-            <span className="text-teal">
-              <IconMic width={64} height={64} />
-            </span>
-          </div>
-          <p className="mt-4 text-center text-[17px] font-extrabold text-pine">
-            {phase === "idle" && "Ready when you are"}
-            {phase === "listening" && "Listening…"}
-            {phase === "noisy" && "It's a bit loud in there"}
-            {phase === "clear" && "That's a clean room"}
-          </p>
-        </div>
-
-        {phase === "noisy" ? (
-          <div className="mt-5">
-            <Note tone="amber" title="Background noise detected">
-              We picked up a TV or fan. Move somewhere quieter, or turn it off, then try again.
-              We'll keep looping until it's clear.
-            </Note>
-          </div>
-        ) : null}
-        {phase === "clear" ? (
-          <div className="mt-5">
-            <Note tone="green" title="Noise check passed">
-              This spot works well. Try to use the same room each morning.
-            </Note>
-          </div>
-        ) : null}
-      </ScreenBody>
-      <StickyFooter>
-        {phase === "clear" ? (
-          <Btn onClick={() => store.go("practiceRun")}>Continue to the practice recording</Btn>
-        ) : (
-          <Btn onClick={phase === "noisy" ? retry : run} disabled={phase === "listening"}>
-            {phase === "noisy" ? "Try again" : "Start sound check"}
-          </Btn>
-        )}
-      </StickyFooter>
-    </Screen>
-  );
-}
 
 /* ---------------- practice part 2: dry run recording ---------------- */
 
