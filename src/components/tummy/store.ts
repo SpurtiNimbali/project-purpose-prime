@@ -402,6 +402,33 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
     };
   }
 
+  if (item.kind === "meal" && item.mealLog) {
+    if (due) {
+      return {
+        kind: "meal",
+        tag: "Meal logging",
+        title: item.label,
+        sub: "Add a photo and the time. A line of text is fine for a snack.",
+        cta: "Log it now",
+        screen: "logMeal",
+        state: "due",
+        minsUntil: null,
+        itemId: item.id,
+      };
+    }
+    return {
+      kind: "waiting",
+      tag: "Waiting",
+      title: item.label,
+      sub: `Nothing due until around ${clockLabel(item.at)}.`,
+      cta: "Open today's plan",
+      screen: "sessionHub",
+      state: "soon",
+      minsUntil: mins,
+      itemId: item.id,
+    };
+  }
+
   if (item.kind === "meal") {
     const start = item.id === "mealStart";
     if (due) {
