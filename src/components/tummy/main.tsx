@@ -33,6 +33,8 @@ import {
   IconUser,
   IconShield,
   IconSun,
+  IconSnowflake,
+
   IconBalloon,
   IconBolt,
   IconSpiral,
@@ -80,7 +82,8 @@ const HOME_LOGS: {
 
 export function HomeScreen({ store }: { store: TummyStore }) {
   useTick();
-  const task = computeNextTask(store.plan);
+  const task = store.frozen ? store.nextTask : computeNextTask(store.plan);
+
   const hour = Math.floor(store.demoNow / 60);
   const due = task.state === "due";
   const doneCount = store.plan.filter((p) => p.done).length;
@@ -106,6 +109,72 @@ export function HomeScreen({ store }: { store: TummyStore }) {
     if (task.itemId) store.startItem(task.itemId);
     store.go(task.screen);
   };
+
+  if (store.frozen) {
+    return (
+      <Screen>
+        <div className="shrink-0 bg-blue px-5 pb-6 pt-14 text-surface">
+          <div className="flex items-center gap-3">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-surface/15">
+              <IconSnowflake width={26} height={26} />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-surface/80">
+                Freeze day
+              </p>
+              <h1 className="truncate text-[22px] font-extrabold leading-tight">
+                Day {store.day} is paused
+              </h1>
+            </div>
+          </div>
+          <p className="mt-3 text-[16px] font-semibold leading-snug text-surface/85">
+            Nothing to record, log or answer today. Your streak stays safe and the schedule picks
+            up again tomorrow morning.
+          </p>
+        </div>
+
+        <ScreenBody className="pt-4">
+          <div className="rounded-3xl border-2 border-dashed border-blue/40 bg-surface px-4 py-4">
+            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-blue">
+              Today's rail · frozen
+            </p>
+            <div className="mt-3 flex items-start">
+              {store.plan.slice(0, 4).map((p) => (
+                <div key={p.id} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
+                  <span className="flex h-[28px] w-[28px] items-center justify-center rounded-full border-2 border-blue/40 bg-surface text-blue">
+                    <IconSnowflake width={15} height={15} />
+                  </span>
+                  <span className="w-full truncate text-center text-[12px] font-bold text-pine-soft">
+                    {clockLabel(p.at).replace(" ", "")}
+                  </span>
+                </div>
+              ))}
+              {store.plan.length > 4 ? (
+                <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-blue">
+                  •••
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-3 text-[15px] font-semibold leading-snug text-pine-soft">
+              All of today's sessions, meals and questions are on hold.
+            </p>
+          </div>
+
+          <div className="mt-4">
+            <Btn variant="secondary" onClick={() => store.go("progress")}>
+              See my progress
+            </Btn>
+          </div>
+          <div className="mt-3">
+            <Btn variant="secondary" onClick={() => store.go("logHub")}>
+              Open today's log anyway
+            </Btn>
+          </div>
+        </ScreenBody>
+      </Screen>
+    );
+  }
+
 
   return (
     <Screen>
@@ -1014,49 +1083,80 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
 
 export function ProgressScreen({ store }: { store: TummyStore }) {
   const days = [true, true, true, false, false, false, false];
+  const todayIdx = 3;
   return (
     <Screen>
       <TopBar title="Progress" />
       <ScreenBody>
-        <Card className="border-0 bg-teal text-surface">
+        <Card className={cn("border-0 text-surface", store.frozen ? "bg-blue" : "bg-teal")}>
           <div className="flex items-center gap-3">
             <Mascot src={MASCOT.cheer} size={72} />
             <div>
               <p className="text-[34px] font-extrabold leading-none">3 days</p>
-              <p className="text-[16px] font-bold text-mint">in a row · keep it going</p>
+              <p className="text-[16px] font-bold text-surface/85">
+                {store.frozen ? "streak frozen · safe until tomorrow" : "in a row · keep it going"}
+              </p>
             </div>
           </div>
           <div className="mt-4 flex justify-between">
-            {days.map((d, i) => (
-              <div key={i} className="flex flex-col items-center gap-1">
-                <span
-                  className={cn(
-                    "flex h-11 w-11 items-center justify-center rounded-full border-[3px]",
-                    d ? "border-mint bg-mint text-pine" : "border-surface/30 text-surface/50",
-                  )}
-                >
-                  {d ? <IconCheck width={20} height={20} /> : <IconSun width={18} height={18} />}
-                </span>
-                <span className="text-[13px] font-extrabold text-mint">{"MTWTFSS"[i]}</span>
-              </div>
-            ))}
+            {days.map((d, i) => {
+              const isFrozen = store.frozen && i === todayIdx;
+              return (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <span
+                    className={cn(
+                      "flex h-11 w-11 items-center justify-center rounded-full border-[3px]",
+                      isFrozen
+                        ? "border-surface bg-surface text-blue"
+                        : d
+                          ? "border-mint bg-mint text-pine"
+                          : "border-surface/30 text-surface/50",
+                    )}
+                  >
+                    {isFrozen ? (
+                      <IconSnowflake width={20} height={20} />
+                    ) : d ? (
+                      <IconCheck width={20} height={20} />
+                    ) : (
+                      <IconSun width={18} height={18} />
+                    )}
+                  </span>
+                  <span className="text-[13px] font-extrabold text-surface/85">{"MTWTFSS"[i]}</span>
+                </div>
+              );
+            })}
           </div>
         </Card>
 
         <div className="mt-4">
-          <Card>
+          <Card className={store.frozen ? "border-2 border-blue bg-surface" : undefined}>
             <div className="flex items-start gap-3">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
-                <IconShield width={26} height={26} />
+              <span
+                className={cn(
+                  "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
+                  store.frozen ? "bg-blue text-surface" : "bg-mint-soft text-teal",
+                )}
+              >
+                {store.frozen ? (
+                  <IconSnowflake width={26} height={26} />
+                ) : (
+                  <IconShield width={26} height={26} />
+                )}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-[17px] font-extrabold text-pine">
-                  {store.freezeUsed ? "Streak freeze used" : "Streak freeze available"}
+                  {store.frozen
+                    ? "Today is a freeze day"
+                    : store.freezeUsed
+                      ? "Streak freeze used"
+                      : "Streak freeze available"}
                 </p>
                 <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-                  {store.freezeUsed
-                    ? "You've used your one freeze for this study week. Your streak is safe for that day."
-                    : "Need a day off? Use your one freeze and your streak stays intact. Life happens — this is a study, not a competition."}
+                  {store.frozen
+                    ? "Everything is paused until tomorrow morning. Nothing counts as missed and your streak is protected."
+                    : store.freezeUsed
+                      ? "You've used your one freeze for this study week. Your streak is safe for that day."
+                      : "Need a day off? Use your one freeze and your streak stays intact. Life happens — this is a study, not a competition."}
                 </p>
                 {!store.freezeUsed ? (
                   <div className="mt-3">
@@ -1067,6 +1167,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                 ) : null}
               </div>
             </div>
+
           </Card>
         </div>
 

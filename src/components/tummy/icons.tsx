@@ -250,3 +250,13 @@ export const IconNavelPoint = (p: P) => (
     <path d="M16 14.6v2.8" />
   </Base>
 );
+
+/** Snowflake — freeze day. */
+export const IconSnowflake = (p: P) => (
+  <Base {...p}>
+    <path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9" />
+    <path d="M12 6.4 9.9 4.6M12 6.4l2.1-1.8M12 17.6l-2.1 1.8M12 17.6l2.1 1.8" />
+    <path d="m6.6 9 .3-2.7M6.6 9 4 9.6M17.4 15l-.3 2.7M17.4 15l2.6-.6" />
+    <path d="m17.4 9 2.6.6M17.4 9l-.3-2.7M6.6 15 4 14.4M6.6 15l.3 2.7" />
+  </Base>
+);
