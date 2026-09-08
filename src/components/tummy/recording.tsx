@@ -1,3 +1,4 @@
+import placementArt from "@/assets/placement-illustration.png";
 import { useEffect, useRef, useState } from "react";
 import {
   Screen,
@@ -507,83 +508,25 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 /* ---------------- positioning ---------------- */
 
 export function AbdomenGuide({ height = 250 }: { height?: number }) {
-  const ink = "#CFE8DA";
-  const faint = "rgba(207,232,218,0.45)";
-  const amber = "#E8A33D";
-  const s = {
-    fill: "none",
-    stroke: ink,
-    strokeWidth: 2.2,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-  };
   return (
-    <svg
-      viewBox="0 0 300 234"
-      width="100%"
-      height={height}
-      role="img"
-      aria-label="Illustration: a person sits upright and holds the phone flat against the lower right of the belly, about 9 cm from the belly button."
-    >
-      {/* soft organic backdrop */}
-      <path
-        d="M56 40q34-30 84-24 52 6 86 26 36 22 30 62-6 40-30 66-26 28-76 30-52 2-84-24-32-26-30-68 2-42 20-68z"
-        fill="rgba(143,201,172,0.14)"
+    <figure className="relative mx-auto w-full max-w-[320px]" style={{ height }}>
+      <img
+        src={placementArt}
+        alt="A person sitting upright on a chair, holding the phone flat against the lower right of the bare belly, screen facing out"
+        loading="lazy"
+        width={1024}
+        height={896}
+        className="h-full w-full object-contain"
       />
-      <circle cx="226" cy="52" r="12" fill={amber} opacity="0.8" />
-
-      {/* chair */}
-      <path d="M74 170h112" {...s} opacity="0.5" />
-      <path d="M186 170V86q0-6 6-8" {...s} opacity="0.5" />
-      <path d="M84 170v46M180 170v46" {...s} opacity="0.35" />
-
-      {/* head + neck */}
-      <circle cx="152" cy="50" r="16" {...s} />
-      <path d="M152 66v12" {...s} />
-
-      {/* back */}
-      <path d="M162 82q12 12 13 40 1 26 3 44" {...s} />
-      {/* chest, belly and lap */}
-      <path d="M142 82q-14 12-15 38-1 22 3 34 3 10 10 12" {...s} />
-
-      {/* arm resting on the phone */}
-      <path d="M158 88q-20 8-28 26" {...s} />
-      <path d="M130 114q-9 12-4 26" {...s} />
-
-      {/* thigh, shin, foot */}
-      <path d="M176 164H92q-9 0-9 9" {...s} />
-      <path d="M83 173v34" {...s} />
-      <path d="M83 207H60" {...s} />
-
-      {/* the phone, flat against the lower belly */}
-      <g transform="rotate(-8 124 140)">
-        <rect x="113" y="122" width="20" height="38" rx="5" fill="#F3FAF6" stroke="#143029" strokeWidth="2" />
-        <rect x="116" y="126" width="14" height="27" rx="2.5" fill="#FFFFFF" opacity="0.7" />
-        <circle cx="119" cy="157" r="1.3" fill="#2E7D6B" />
-        <circle cx="123" cy="157" r="1.3" fill="#2E7D6B" />
-        <circle cx="127" cy="157" r="1.3" fill="#2E7D6B" />
-      </g>
-
-      {/* quiet measurement note: navel to the phone */}
-      <circle cx="131" cy="112" r="3" fill={ink} opacity="0.8" />
-      <path d="M129 116l-4 12" stroke={faint} strokeWidth="1.6" strokeDasharray="3 4" />
-      <path d="M214 132h-74" stroke={faint} strokeWidth="1.4" />
-      <text x="220" y="128" fontSize="12" fill={amber} fontWeight="800">
-        9 cm
-      </text>
-      <text x="220" y="143" fontSize="10.5" fill={ink} opacity="0.75" fontWeight="600">
-        from the navel,
-      </text>
-      <text x="220" y="156" fontSize="10.5" fill={ink} opacity="0.75" fontWeight="600">
-        to your right
-      </text>
-    </svg>
+      <figcaption className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 text-[13px] font-bold text-mint">
+        <span className="rounded-full bg-amber/90 px-2.5 py-0.5 text-[12px] font-extrabold text-pine">
+          9 cm
+        </span>
+        below and to the right of your belly button
+      </figcaption>
+    </figure>
   );
 }
-
-
-
-
 
 const POSITION_CHECKS = [
   {
