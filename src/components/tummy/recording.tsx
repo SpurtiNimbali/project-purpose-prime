@@ -1,4 +1,4 @@
-import placementArt from "@/assets/recording-position-reference.png.asset.json";
+import placementArt from "@/assets/placement-guide-v2.png.asset.json";
 import { useEffect, useRef, useState } from "react";
 import {
   Screen,
@@ -521,15 +521,15 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- positioning ---------------- */
 
-export function AbdomenGuide({ height = 250 }: { height?: number }) {
+export function AbdomenGuide({ height = 300 }: { height?: number }) {
   return (
     <figure className="relative mx-auto w-full max-w-[320px]" style={{ height }}>
       <img
         src={placementArt.url}
         alt="A seated participant holding a portrait phone against bare skin, 8 centimetres to their right and 3 centimetres below their belly button"
         loading="lazy"
-        width={1024}
-        height={768}
+        width={1254}
+        height={1254}
         className="h-full w-full rounded-2xl object-contain"
       />
       <figcaption className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 text-[13px] font-bold text-mint">
