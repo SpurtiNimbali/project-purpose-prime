@@ -530,49 +530,51 @@ export function AbdomenGuide({ height = 250 }: { height?: number }) {
         d="M56 40q34-30 84-24 52 6 86 26 36 22 30 62-6 40-30 66-26 28-76 30-52 2-84-24-32-26-30-68 2-42 20-68z"
         fill="rgba(143,201,172,0.14)"
       />
-      <circle cx="232" cy="58" r="13" fill={amber} opacity="0.85" />
+      <circle cx="226" cy="52" r="12" fill={amber} opacity="0.8" />
 
-      {/* stool */}
-      <path d="M96 176h96" {...s} opacity="0.55" />
-      <path d="M108 176v40M182 176v40" {...s} opacity="0.4" />
+      {/* chair */}
+      <path d="M74 170h112" {...s} opacity="0.5" />
+      <path d="M186 170V86q0-6 6-8" {...s} opacity="0.5" />
+      <path d="M84 170v46M180 170v46" {...s} opacity="0.35" />
 
       {/* head + neck */}
-      <circle cx="152" cy="58" r="17" {...s} />
-      <path d="M150 75v9" {...s} />
+      <circle cx="152" cy="50" r="16" {...s} />
+      <path d="M152 66v12" {...s} />
 
-      {/* back and seat */}
-      <path d="M167 88q13 8 14 30 2 26 3 42 1 12 5 18" {...s} />
-      {/* chest, belly, lap */}
-      <path d="M137 90q-13 10-14 34-2 22 1 34 2 12 8 18h44" {...s} />
-      {/* upper arm and forearm reaching to the belly */}
-      <path d="M160 96q-22 8-30 26" {...s} />
-      <path d="M130 122q-8 14 0 26" {...s} />
+      {/* back */}
+      <path d="M162 82q12 12 13 40 1 26 3 44" {...s} />
+      {/* chest, belly and lap */}
+      <path d="M142 82q-14 12-15 38-1 22 3 34 3 10 10 12" {...s} />
+
+      {/* arm resting on the phone */}
+      <path d="M158 88q-20 8-28 26" {...s} />
+      <path d="M130 114q-9 12-4 26" {...s} />
 
       {/* thigh, shin, foot */}
-      <path d="M184 178h-50q-9 0-9 8" {...s} />
-      <path d="M125 186v34" {...s} />
-      <path d="M125 220h-24" {...s} />
+      <path d="M176 164H92q-9 0-9 9" {...s} />
+      <path d="M83 173v34" {...s} />
+      <path d="M83 207H60" {...s} />
 
       {/* the phone, flat against the lower belly */}
-      <g transform="rotate(-10 132 148)">
-        <rect x="122" y="130" width="19" height="37" rx="5" fill="#F3FAF6" stroke="#143029" strokeWidth="2" />
-        <rect x="125" y="134" width="13" height="27" rx="2.5" fill="#FFFFFF" opacity="0.7" />
-        <circle cx="128" cy="164" r="1.3" fill="#2E7D6B" />
-        <circle cx="131.5" cy="164" r="1.3" fill="#2E7D6B" />
-        <circle cx="135" cy="164" r="1.3" fill="#2E7D6B" />
+      <g transform="rotate(-8 124 140)">
+        <rect x="113" y="122" width="20" height="38" rx="5" fill="#F3FAF6" stroke="#143029" strokeWidth="2" />
+        <rect x="116" y="126" width="14" height="27" rx="2.5" fill="#FFFFFF" opacity="0.7" />
+        <circle cx="119" cy="157" r="1.3" fill="#2E7D6B" />
+        <circle cx="123" cy="157" r="1.3" fill="#2E7D6B" />
+        <circle cx="127" cy="157" r="1.3" fill="#2E7D6B" />
       </g>
 
       {/* quiet measurement note: navel to the phone */}
-      <circle cx="140" cy="126" r="3" fill={ink} opacity="0.8" />
-      <path d="M140 132v12" stroke={faint} strokeWidth="1.6" strokeDasharray="3 4" />
-      <path d="M206 128h-52" stroke={faint} strokeWidth="1.4" />
-      <text x="212" y="124" fontSize="12" fill={amber} fontWeight="800">
+      <circle cx="131" cy="112" r="3" fill={ink} opacity="0.8" />
+      <path d="M129 116l-4 12" stroke={faint} strokeWidth="1.6" strokeDasharray="3 4" />
+      <path d="M214 132h-74" stroke={faint} strokeWidth="1.4" />
+      <text x="220" y="128" fontSize="12" fill={amber} fontWeight="800">
         9 cm
       </text>
-      <text x="212" y="139" fontSize="10.5" fill={ink} opacity="0.75" fontWeight="600">
+      <text x="220" y="143" fontSize="10.5" fill={ink} opacity="0.75" fontWeight="600">
         from the navel,
       </text>
-      <text x="212" y="152" fontSize="10.5" fill={ink} opacity="0.75" fontWeight="600">
+      <text x="220" y="156" fontSize="10.5" fill={ink} opacity="0.75" fontWeight="600">
         to your right
       </text>
     </svg>
