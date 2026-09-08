@@ -1096,7 +1096,14 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
   const [tab, setTab] = useState<"weekday" | "weekend">("weekday");
   const [snacks, setSnacks] = useState<"" | "yes" | "no">("");
   const [seenWeekend, setSeenWeekend] = useState(false);
-  const [picked, setPicked] = useState<Record<string, boolean>>({});
+  const [times, setTimes] = useState<Record<"weekday" | "weekend", string[]>>({
+    weekday: ["10:30"],
+    weekend: ["11:00"],
+  });
+
+  const list = times[tab];
+  const setList = (next: string[]) => setTimes((t) => ({ ...t, [tab]: next }));
+
   return (
     <Screen>
       <TopBar title="Snacking" onBack={store.back} step="Step 6 of 9" />
@@ -1128,56 +1135,43 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
               />
             </div>
             <p className="mt-4 text-[16px] font-semibold leading-snug text-pine-soft">
-              Tick only the snacks you actually have. Leave the others switched off.
+              Add a time for each snack you usually have on a {tab === "weekday" ? "weekday" : "weekend day"}. Add as many as you like.
             </p>
             <div className="mt-3 space-y-3">
-              {[
-                { label: "Morning snack", def: tab === "weekday" ? "10:30" : "11:00" },
-                { label: "Afternoon snack", def: tab === "weekday" ? "16:00" : "16:30" },
-                { label: "Evening snack", def: tab === "weekday" ? "21:00" : "21:30" },
-              ].map(({ label, def }) => {
-                const key = `${tab}-${label}`;
-                const on = picked[key] ?? false;
-                return (
-                  <div
-                    key={label}
-                    className={cn(
-                      "flex items-center gap-3 rounded-2xl border-2 p-4",
-                      on ? "border-teal bg-mint-soft" : "border-line bg-surface",
-                    )}
+              {list.map((value, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-2xl border-2 border-line bg-surface p-4"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+                    <IconBowl width={24} height={24} />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold text-pine">
+                    Snack {i + 1}
+                  </span>
+                  <input
+                    type="time"
+                    value={value}
+                    onChange={(e) =>
+                      setList(list.map((t, n) => (n === i ? e.target.value : t)))
+                    }
+                    className="min-h-[52px] shrink-0 rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine"
+                  />
+                  <button
+                    onClick={() => setList(list.filter((_, n) => n !== i))}
+                    aria-label={`Remove snack ${i + 1}`}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-wash text-[22px] font-extrabold text-pine-soft"
                   >
-                    <button
-                      onClick={() => setPicked((p) => ({ ...p, [key]: !on }))}
-                      aria-pressed={on}
-                      className="flex min-h-[52px] min-w-0 flex-1 items-center gap-3 text-left"
-                    >
-                      <span
-                        className={cn(
-                          "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border-2",
-                          on
-                            ? "border-teal bg-teal text-surface"
-                            : "border-line bg-wash text-pine-soft",
-                        )}
-                      >
-                        {on ? <IconCheck width={24} height={24} /> : <IconBowl width={24} height={24} />}
-                      </span>
-                      <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold text-pine">
-                        {label}
-                      </span>
-                    </button>
-                    {on ? (
-                      <input
-                        key={key}
-                        type="time"
-                        defaultValue={def}
-                        className="min-h-[52px] shrink-0 rounded-xl border-2 border-line bg-wash px-3 text-[17px] font-extrabold text-pine"
-                      />
-                    ) : (
-                      <span className="shrink-0 text-[15px] font-bold text-pine-soft">Off</span>
-                    )}
-                  </div>
-                );
-              })}
+                    ×
+                  </button>
+                </div>
+              ))}
+              <button
+                onClick={() => setList([...list, "15:00"])}
+                className="flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-teal bg-surface text-[17px] font-extrabold text-teal"
+              >
+                + Add another snack time
+              </button>
             </div>
             <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-pine-soft">
               If you're not sure, a rough guess is completely fine — this doesn't have to be
@@ -1205,6 +1199,7 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
     </Screen>
   );
 }
+
 
 /* ---------------- about you ---------------- */
 
