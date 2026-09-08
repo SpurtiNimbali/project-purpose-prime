@@ -155,6 +155,9 @@ export type TummyStore = {
   markQuestions: (when: "morning" | "night") => void;
   nextTask: NextTask;
   gender: Gender;
+  /** prototype clock: current simulated minutes from midnight */
+  demoNow: number;
+  setDemoNow: (mins: number) => void;
   setGender: (g: Gender) => void;
 };
 
