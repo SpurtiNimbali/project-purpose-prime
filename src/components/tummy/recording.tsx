@@ -506,69 +506,136 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- positioning ---------------- */
 
-export function AbdomenGuide({ height = 230 }: { height?: number }) {
+export function AbdomenGuide({ height = 250 }: { height?: number }) {
   const line = "#8FC9AC";
+  const amber = "#E8A33D";
   return (
     <svg
-      viewBox="0 0 260 210"
+      viewBox="0 0 300 240"
       width="100%"
       height={height}
       role="img"
-      aria-label="Place the phone about 9 cm below and to the right of your belly button"
+      aria-label="Front view of the belly: the phone lies flat on bare skin, screen facing out, bottom edge pointing down, about 9 cm below and to your right of the belly button"
     >
-      {/* torso, simple outline */}
+      {/* torso: chest, waist, hips */}
       <path
-        d="M70 8c0 26-6 44-6 70s6 52 14 124h104c8-72 14-98 14-124s-6-44-6-70"
-        fill="rgba(143,201,172,0.08)"
+        d="M96 14c0 18-10 26-22 32 10 30 12 62 12 92 0 34 3 62 6 88h116c3-26 6-54 6-88 0-30 2-62 12-92-12-6-22-14-22-32"
+        fill="rgba(143,201,172,0.10)"
         stroke={line}
         strokeWidth="3"
-        strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* waistband */}
-      <path d="M74 172h104" stroke={line} strokeWidth="3" strokeLinecap="round" opacity="0.5" />
+      {/* rib line + waistband for orientation */}
+      <path
+        d="M92 78c18 10 98 10 116 0"
+        fill="none"
+        stroke={line}
+        strokeWidth="2"
+        opacity="0.45"
+      />
+      <path d="M86 196h128" stroke={line} strokeWidth="3" opacity="0.45" strokeLinecap="round" />
+
+      {/* body side labels — participant's right is the viewer's left */}
+      <text x="60" y="120" fontSize="11" fill={line} fontWeight="800" textAnchor="middle">
+        your right
+      </text>
 
       {/* belly button */}
-      <circle cx="130" cy="86" r="6" fill={line} />
-      <line x1="140" y1="82" x2="176" y2="66" stroke={line} strokeWidth="1.6" opacity="0.7" />
-      <text x="180" y="70" fontSize="11" fill={line} fontWeight="800">
+      <circle cx="150" cy="112" r="5.5" fill={line} />
+      <line x1="158" y1="108" x2="196" y2="94" stroke={line} strokeWidth="1.5" opacity="0.7" />
+      <text x="200" y="98" fontSize="11" fill={line} fontWeight="800">
         belly button
       </text>
 
-      {/* distance marker: down and to the participant's right (viewer's left) */}
+      {/* target zone: lower right quadrant */}
+      <circle
+        cx="118"
+        cy="150"
+        r="30"
+        fill="rgba(232,163,61,0.16)"
+        stroke={amber}
+        strokeWidth="2"
+        strokeDasharray="5 6"
+      />
+
+      {/* measured offset from the belly button */}
       <line
-        x1="130"
-        y1="94"
-        x2="103"
-        y2="120"
-        stroke="#E8A33D"
+        x1="150"
+        y1="118"
+        x2="118"
+        y2="150"
+        stroke={amber}
         strokeWidth="2.5"
         strokeDasharray="6 6"
         strokeLinecap="round"
       />
-      <rect x="52" y="86" width="44" height="22" rx="11" fill="#E8A33D" />
-      <text x="74" y="101" textAnchor="middle" fontSize="12" fill="#143029" fontWeight="900">
+      <rect x="140" y="152" width="46" height="22" rx="11" fill={amber} />
+      <text x="163" y="167" textAnchor="middle" fontSize="12" fill="#143029" fontWeight="900">
         9 cm
       </text>
 
-      {/* phone, mic end down onto the skin */}
-      <g transform="translate(80 116) rotate(-4)">
+      {/* the phone: flat on the skin, portrait, screen facing out */}
+      <g transform="translate(92 108)">
+        <rect
+          x="4"
+          y="6"
+          width="52"
+          height="94"
+          rx="11"
+          fill="rgba(20,48,41,0.18)"
+        />
         <rect
           x="0"
           y="0"
-          width="48"
-          height="84"
-          rx="10"
+          width="52"
+          height="94"
+          rx="11"
           fill="#E7F1EC"
           stroke="#143029"
           strokeWidth="2.5"
         />
-        <rect x="17" y="7" width="14" height="3.5" rx="1.75" fill="#8FC9AC" />
-        <circle cx="24" cy="74" r="4" fill="#2E7D6B" />
-        <text x="24" y="46" textAnchor="middle" fontSize="10" fill="#2E7D6B" fontWeight="900">
-          mic down
-        </text>
+        {/* screen */}
+        <rect
+          x="6"
+          y="8"
+          width="40"
+          height="78"
+          rx="6"
+          fill="#FFFFFF"
+          stroke={line}
+          strokeWidth="1.5"
+        />
+        {/* earpiece at the top */}
+        <rect x="19" y="4" width="14" height="3" rx="1.5" fill="#8FC9AC" />
+        {/* microphone holes on the bottom edge */}
+        <circle cx="21" cy="90" r="2" fill="#2E7D6B" />
+        <circle cx="26" cy="90" r="2" fill="#2E7D6B" />
+        <circle cx="31" cy="90" r="2" fill="#2E7D6B" />
       </g>
+
+      {/* orientation callouts */}
+      <text x="118" y="103" fontSize="10.5" fill="#2E7D6B" fontWeight="900" textAnchor="middle">
+        top
+      </text>
+      <line
+        x1="118"
+        y1="206"
+        x2="118"
+        y2="222"
+        stroke="#2E7D6B"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path d="M113 216l5 7 5-7" fill="none" stroke="#2E7D6B" strokeWidth="2" strokeLinecap="round" />
+      <text x="132" y="222" fontSize="11" fill="#2E7D6B" fontWeight="800">
+        mic end points down
+      </text>
+      <text x="200" y="140" fontSize="11" fill={line} fontWeight="800">
+        screen faces
+      </text>
+      <text x="200" y="154" fontSize="11" fill={line} fontWeight="800">
+        away from you
+      </text>
     </svg>
   );
 }
