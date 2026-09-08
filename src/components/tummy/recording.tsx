@@ -507,94 +507,78 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 /* ---------------- positioning ---------------- */
 
 export function AbdomenGuide({ height = 250 }: { height?: number }) {
-  const line = "#8FC9AC";
-  const soft = "rgba(143,201,172,0.35)";
+  const ink = "#CFE8DA";
+  const faint = "rgba(207,232,218,0.45)";
   const amber = "#E8A33D";
-  const stroke = { fill: "none", stroke: line, strokeWidth: 2.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  const s = {
+    fill: "none",
+    stroke: ink,
+    strokeWidth: 2.2,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+  };
   return (
     <svg
-      viewBox="0 0 300 250"
+      viewBox="0 0 300 234"
       width="100%"
       height={height}
       role="img"
-      aria-label="Left: sit upright on a chair and hold the phone flat against the belly. Right: front view of the belly with the phone 9 cm to your right of the belly button."
+      aria-label="Illustration: a person sits upright and holds the phone flat against the lower right of the belly, about 9 cm from the belly button."
     >
-      {/* ---------- (a) seated side view ---------- */}
-      {/* chair */}
-      <path d="M28 168h78M104 168V70M104 70q9 3 9 12v86M40 168v54M100 168v54" {...stroke} opacity="0.5" />
-      {/* head + back */}
-      <ellipse cx="70" cy="42" rx="15" ry="18" {...stroke} />
-      <path d="M79 58q12 6 14 22 4 34 3 60 0 16-4 28" {...stroke} />
+      {/* soft organic backdrop */}
+      <path
+        d="M56 40q34-30 84-24 52 6 86 26 36 22 30 62-6 40-30 66-26 28-76 30-52 2-84-24-32-26-30-68 2-42 20-68z"
+        fill="rgba(143,201,172,0.14)"
+      />
+      <circle cx="232" cy="58" r="13" fill={amber} opacity="0.85" />
+
+      {/* stool */}
+      <path d="M96 176h96" {...s} opacity="0.55" />
+      <path d="M108 176v40M182 176v40" {...s} opacity="0.4" />
+
+      {/* head + neck */}
+      <circle cx="152" cy="58" r="17" {...s} />
+      <path d="M150 75v9" {...s} />
+
+      {/* back and seat */}
+      <path d="M167 88q13 8 14 30 2 26 3 42 1 12 5 18" {...s} />
       {/* chest, belly, lap */}
-      <path d="M60 60q-10 8-12 24-3 20-2 34 1 14 6 22" {...stroke} />
-      <path d="M52 140q-4 14 4 22h37" {...stroke} />
-      {/* thigh + lower leg + foot */}
-      <path d="M93 162H34q-6 0-6 6t6 6h8" {...stroke} />
-      <path d="M30 174v40q0 6 6 6" {...stroke} />
-      <path d="M36 220h-18q-6 0-6 5t6 5h30" {...stroke} />
-      {/* phone flat on the belly, screen facing out */}
-      <g transform="rotate(-8 52 128)">
-        <rect x="34" y="112" width="17" height="34" rx="4" fill="#E7F1EC" stroke="#143029" strokeWidth="2.2" />
-        <rect x="37" y="116" width="11" height="24" rx="2" fill="#FFFFFF" stroke={line} strokeWidth="1.2" />
-        <circle cx="39.5" cy="144" r="1.4" fill="#2E7D6B" />
-        <circle cx="42.5" cy="144" r="1.4" fill="#2E7D6B" />
-        <circle cx="45.5" cy="144" r="1.4" fill="#2E7D6B" />
+      <path d="M137 90q-13 10-14 34-2 22 1 34 2 12 8 18h44" {...s} />
+      {/* upper arm and forearm reaching to the belly */}
+      <path d="M160 96q-22 8-30 26" {...s} />
+      <path d="M130 122q-8 14 0 26" {...s} />
+
+      {/* thigh, shin, foot */}
+      <path d="M184 178h-50q-9 0-9 8" {...s} />
+      <path d="M125 186v34" {...s} />
+      <path d="M125 220h-24" {...s} />
+
+      {/* the phone, flat against the lower belly */}
+      <g transform="rotate(-10 132 148)">
+        <rect x="122" y="130" width="19" height="37" rx="5" fill="#F3FAF6" stroke="#143029" strokeWidth="2" />
+        <rect x="125" y="134" width="13" height="27" rx="2.5" fill="#FFFFFF" opacity="0.7" />
+        <circle cx="128" cy="164" r="1.3" fill="#2E7D6B" />
+        <circle cx="131.5" cy="164" r="1.3" fill="#2E7D6B" />
+        <circle cx="135" cy="164" r="1.3" fill="#2E7D6B" />
       </g>
-      {/* pointer to the phone */}
-      <path d="M6 108h16" stroke={amber} strokeWidth="3" strokeLinecap="round" />
-      <path d="M20 103l8 5-8 5z" fill={amber} />
-      <text x="6" y="88" fontSize="11" fill={amber} fontWeight="800">
-        phone flat on skin
-      </text>
-      <text x="14" y="244" fontSize="11" fill={line} fontWeight="800">
-        sit upright, feet on the floor
-      </text>
 
-      {/* ---------- divider ---------- */}
-      <line x1="140" y1="18" x2="140" y2="232" stroke={soft} strokeWidth="1.5" strokeDasharray="4 6" />
-
-      {/* ---------- (b) front view of the belly ---------- */}
-      {/* torso sides + hips */}
-      <path d="M168 24q-6 40-4 66 2 18-2 34-4 18 2 34l6 34" {...stroke} />
-      <path d="M280 24q6 40 4 66-2 18 2 34 4 18-2 34l-6 34" {...stroke} />
-      {/* rib arch + waist guide */}
-      <path d="M188 84q36-30 72 0" {...stroke} opacity="0.5" />
-      <line x1="164" y1="128" x2="286" y2="128" stroke={soft} strokeWidth="1.5" strokeDasharray="4 5" />
-      {/* belly button */}
-      <circle cx="225" cy="128" r="7" fill="none" stroke={line} strokeWidth="2.4" />
-      <path d="M221 124l8 8M229 124l-8 8" stroke={line} strokeWidth="2" strokeLinecap="round" />
-      <text x="225" y="112" fontSize="10.5" fill={line} fontWeight="800" textAnchor="middle">
-        belly button
-      </text>
-      {/* 9 cm each way, right side is the target */}
-      <path d="M218 128h-32" stroke={line} strokeWidth="2" strokeLinecap="round" />
-      <path d="M191 123l-7 5 7 5z" fill={line} />
-      <path d="M232 128h32" stroke={amber} strokeWidth="2.6" strokeLinecap="round" />
-      <path d="M259 123l7 5-7 5z" fill={amber} />
-      <text x="200" y="148" fontSize="11" fill={line} fontWeight="800" textAnchor="middle">
+      {/* quiet measurement note: navel to the phone */}
+      <circle cx="140" cy="126" r="3" fill={ink} opacity="0.8" />
+      <path d="M140 132v12" stroke={faint} strokeWidth="1.6" strokeDasharray="3 4" />
+      <path d="M206 128h-52" stroke={faint} strokeWidth="1.4" />
+      <text x="212" y="124" fontSize="12" fill={amber} fontWeight="800">
         9 cm
       </text>
-      <text x="252" y="148" fontSize="11" fill={amber} fontWeight="900" textAnchor="middle">
-        9 cm
+      <text x="212" y="139" fontSize="10.5" fill={ink} opacity="0.75" fontWeight="600">
+        from the navel,
       </text>
-      {/* target spots */}
-      <circle cx="182" cy="128" r="8" fill={line} opacity="0.3" />
-      <circle cx="268" cy="128" r="10" fill={amber} opacity="0.85" />
-      <text x="182" y="172" fontSize="11" fill={line} fontWeight="800" textAnchor="middle">
-        left
-      </text>
-      <text x="268" y="172" fontSize="12" fill={amber} fontWeight="900" textAnchor="middle">
-        your right
-      </text>
-      <text x="225" y="200" fontSize="11" fill={amber} fontWeight="800" textAnchor="middle">
-        place the phone here
-      </text>
-      <text x="225" y="216" fontSize="10.5" fill={line} fontWeight="700" textAnchor="middle">
-        mic end down, screen facing out
+      <text x="212" y="152" fontSize="10.5" fill={ink} opacity="0.75" fontWeight="600">
+        to your right
       </text>
     </svg>
   );
 }
+
 
 
 
