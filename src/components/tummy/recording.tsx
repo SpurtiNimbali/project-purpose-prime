@@ -1,4 +1,4 @@
-import placementArt from "@/assets/placement-illustration.png";
+import placementArt from "@/assets/recording-position-reference.png.asset.json";
 import { useEffect, useRef, useState } from "react";
 import {
   Screen,
@@ -525,12 +525,12 @@ export function AbdomenGuide({ height = 250 }: { height?: number }) {
   return (
     <figure className="relative mx-auto w-full max-w-[320px]" style={{ height }}>
       <img
-        src={placementArt}
-        alt="A seated man holding a portrait phone against bare skin, 8 centimetres to his right and 3 centimetres below his belly button"
+        src={placementArt.url}
+        alt="A seated participant holding a portrait phone against bare skin, 8 centimetres to their right and 3 centimetres below their belly button"
         loading="lazy"
         width={1024}
         height={768}
-        className="h-full w-full object-contain"
+        className="h-full w-full rounded-2xl object-contain"
       />
       <figcaption className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 text-[13px] font-bold text-mint">
         <span className="rounded-full bg-amber/90 px-2.5 py-0.5 text-[12px] font-extrabold text-pine">
