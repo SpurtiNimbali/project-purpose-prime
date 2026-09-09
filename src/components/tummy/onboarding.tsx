@@ -56,8 +56,7 @@ export function WelcomeScreen({ store }: { store: TummyStore }) {
           Stanford School of Medicine
         </p>
         <p className="mt-4 text-[17px] font-semibold leading-relaxed text-pine-soft">
-          A one-week study listening to the sounds your gut makes. I'll walk you through every step,
-          and nothing here is a test.
+          A one-week study of your gut sounds. I'll walk you through it — this isn't a test.
         </p>
       </div>
       <StickyFooter>
@@ -84,8 +83,7 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
       <TopBar title="Your subject ID" onBack={store.back} step="Step 1 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Enter the ID printed on the card your study coordinator gave you. We check it against the
-          study database, your name is never stored in this app.
+          Enter the ID on your coordinator card. Your name is never stored.
         </p>
         <div className="mt-5 space-y-3">
           <Field label="Subject ID">
@@ -157,11 +155,11 @@ export function VideoScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4 space-y-3">
           <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-            The video shows exactly how to place the phone, how still to sit, and what a good
-            recording sounds like. There's a short quiz afterwards so we know the setup is clear.
+            How to place the phone, how still to sit, and what a good recording sounds like. A short
+            quiz follows.
           </p>
-          <Note tone="blue" title="Captions and transcript">
-            Tap the transcript button in the player if you'd rather read along.
+          <Note tone="blue" title="Captions">
+            Use the transcript button if you'd rather read.
           </Note>
         </div>
       </ScreenBody>
@@ -181,15 +179,15 @@ const QUIZ = [
     q: "Where should the phone sit during a recording?",
     options: ["On top of my shirt", "Directly on bare skin, case off", "In my pocket"],
     answer: 1,
-    why: "Clothing and cases hold the microphone away from your skin, and gut sounds are far too quiet to survive that gap.",
-    hint: "Think about what has to touch your skin for a very quiet sound to be picked up.",
+    why: "Clothes and cases hold the mic off the skin. Gut sounds are too quiet to get through.",
+    hint: "The mic has to touch bare skin.",
   },
   {
     q: "You had a coffee 20 minutes ago. Can you do the fasting recording?",
     options: ["Yes, coffee doesn't count", "No, that breaks the fast"],
     answer: 1,
-    why: "Anything other than a sip of water changes your gut activity, so the recording would no longer be a fasting one.",
-    hint: "Fasting means nothing at all in your stomach except water.",
+    why: "Anything but water breaks the fast.",
+    hint: "Fasting means nothing except water.",
   },
   {
     q: "After your study meal, how often do you record?",
@@ -199,8 +197,8 @@ const QUIZ = [
       "Whenever I remember",
     ],
     answer: 0,
-    why: "A recording right after the meal and then every 30 minutes for three and a half hours captures the whole of digestion, which is what makes the data comparable between people.",
-    hint: "It starts the moment the meal ends, and the gaps between recordings are short.",
+    why: "That cadence captures digestion the same way for everyone.",
+    hint: "It starts when the meal ends, every 30 minutes.",
   },
 
 ];
@@ -232,11 +230,11 @@ export function QuizScreen({ store }: { store: TummyStore }) {
         <MascotSays size={78} src={correct ? MASCOT.cheer : MASCOT.calm}>
           {pick === null
             ? qi === 0
-              ? "One question at a time. Pick the answer you think is right, you'll need the right one before we move on."
-              : "Nice. Here's the next one."
+              ? "One at a time. You need the right answer to move on."
+              : "Next one."
             : correct
-              ? "That's it. Read the reason, then carry on."
-              : "Not quite, have another go. Take your time, there's no penalty."}
+              ? "That's it."
+              : "Not quite — try again."}
         </MascotSays>
 
         <div className="mt-3 flex gap-1.5">
@@ -341,12 +339,12 @@ const DAY_STEPS = [
   },
   {
     t: "5 · No food or drink in that window",
-    b: "Nothing at all until the last recording. Water only if you need it: up to one cup, straight after a recording.",
+    b: "Nothing until the last recording. Water only if you need it: one cup, right after a recording.",
     Icon: IconDroplet,
   },
   {
     t: "6 · Quality matters more than quantity",
-    b: "If a session can't be done properly, skip it and tell us why. Missing one never ends your part in the study.",
+    b: "If you can't do it properly, skip and say why. Missing one never ends the study.",
     Icon: IconShield,
   },
   {
@@ -370,8 +368,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
       <TopBar title="How a day works" onBack={store.back} step="Step 5 of 9" />
       <ScreenBody>
         <MascotSays size={78}>
-          Every day has the same shape. I'll show you one step at a time, read each one, then tap
-          for the next.
+          Same shape every day. One step at a time.
         </MascotSays>
         <div className="mt-5 space-y-3">
           {DAY_STEPS.slice(0, shown).map(({ t, b, Icon }, i) => (
@@ -396,8 +393,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
         {all ? (
           <div className="mt-4">
             <Note tone="amber" title="Take your phone case off">
-              A case leaves a gap between the microphone and your skin, and that gap loses most of
-              the sound.
+              A case leaves a gap the mic can't hear through.
             </Note>
           </div>
         ) : null}
@@ -483,8 +479,7 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
       <TopBar title="Technical setup" onBack={store.back} step="Step 7 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Every recording is made with the phone's own microphone, held on bare skin. Telling us
-          your handset lets us standardise the audio across everyone in the study.
+          We use your phone's mic. The model helps us standardise audio.
         </p>
 
         <div className="mt-5 space-y-5">
@@ -543,8 +538,7 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
               <div className="flex-1">
                 <p className="text-[17px] font-extrabold text-pine">Case check</p>
                 <p className="text-[16px] font-semibold text-pine-soft">
-                  The case has to come off for every recording, even if yours is stiff. Take your
-                  time and work it off from one corner.
+                  The case comes off every time. Work it off from a corner if it's stiff.
                 </p>
               </div>
             </div>
@@ -595,7 +589,7 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
     {
       k: "dnd",
       label: "Do not disturb",
-      sub: "Switched on only for the 2 minutes of a recording session, never the rest of the day",
+      sub: "On for the recording only",
       Icon: IconLock,
     },
   ];
@@ -605,16 +599,8 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
       <TopBar title="Permissions" onBack={store.back} step="Step 8 of 9" />
       <ScreenBody>
         <Note tone="green" title="Audio stays private">
-          Recordings are encrypted and labelled with your subject ID only. No one on the study team
-          can link them back to you by name.
+          Recordings are labelled with your subject ID only.
         </Note>
-        <div className="mt-3">
-          <Note tone="blue" title="Do not disturb is only for recordings">
-            We turn it on when a recording session starts and turn it straight back off when the
-            session ends. Calls and messages come through normally at every other moment of the
-            day.
-          </Note>
-        </div>
         <div className="mt-4 space-y-3">
           {items.map(({ k, label, sub, Icon }) => (
             <Card key={k}>
@@ -689,25 +675,25 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
     if (notSeen("dnd")) {
       show({
         id: "dnd",
-        text: "You're recording now. Do not disturb is on for this session only, and it switches off the moment the recording ends.",
+        text: "Do not disturb is on until this recording ends.",
         cta: "Got it",
       });
     } else if (elapsed >= 4 && notSeen("timer")) {
       show({
         id: "timer",
-        text: "The time left is always in the middle of the ring. The ring fills as the recording runs, so you can see progress at a glance.",
+        text: "Time left is in the middle of the ring. The ring fills as you record.",
         cta: "Makes sense",
       });
     } else if (elapsed >= 9 && notSeen("symptom")) {
       show({
         id: "symptom",
-        text: "Feel a gurgle, a cramp, anything? Tap its icon up top, try one now. The buttons sit away from the microphone end.",
+        text: "Feel something? Tap an icon up top — try one now.",
         cta: "Let me try",
       });
     } else if (left <= 15 && left > 0 && notSeen("timeleft")) {
       show({
         id: "timeleft",
-        text: "Under fifteen seconds left. When it hits zero the recording saves itself and a few short questions follow.",
+        text: "Under 15 seconds. It saves when the ring fills, then a few questions.",
         cta: "Okay",
       });
     }
@@ -779,9 +765,8 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
           <h2 className="mt-5 text-[24px] font-extrabold leading-tight text-surface">
             Take your phone case off
           </h2>
-          <p className="mt-2 text-[16px] font-semibold leading-snug text-mint">
-            Every real recording starts here. Bare phone against bare skin, a case holds the
-            microphone away from you.
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-mint">
+            Bare phone on bare skin. A case holds the mic away from you.
           </p>
         </div>
         <div className="shrink-0 px-5 pb-7">
@@ -988,7 +973,7 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
       <TopBar title="Daily schedule" onBack={store.back} step="Step 6 of 9" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.cheer}>
-          Tell me when you usually eat and sleep. Weekends are usually different, so I ask for both.
+          Usual eat and sleep times — weekdays and weekends.
         </MascotSays>
         <div className="mt-5">
           <DayTypeTabs
@@ -1021,8 +1006,7 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
           ))}
         </div>
         <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-pine-soft">
-          These times are for reminders only, no worries at all if they move around from day to
-          day.
+          Reminders only. Fine if the times move.
         </p>
       </ScreenBody>
       <StickyFooter>
@@ -1046,64 +1030,43 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
 /* ---------------- which meal the recordings follow ---------------- */
 
 export function MealPickScreen({ store }: { store: TummyStore }) {
-  const [info, setInfo] = useState(false);
   const meals = [
-    { k: "breakfast", label: "Breakfast", sub: "Recordings run through the morning", Icon: IconSun },
-    { k: "lunch", label: "Lunch", sub: "Recordings run through the afternoon", Icon: IconBowl },
-    { k: "dinner", label: "Dinner", sub: "Recordings run through the evening", Icon: IconSunset },
-  ] as const;
+    {
+      k: "breakfast" as const,
+      label: "Breakfast",
+      when: "Recordings run through the morning",
+      why: "Only if you work from home. A commute after breakfast breaks the recording window.",
+      Icon: IconSun,
+    },
+    {
+      k: "lunch" as const,
+      label: "Lunch",
+      when: "Recordings run through the afternoon",
+      why: "Need a private quiet room — not a bathroom. Skip if you have talking meetings in the 3.5 hours after.",
+      Icon: IconBowl,
+    },
+    {
+      k: "dinner" as const,
+      label: "Dinner",
+      when: "Recordings run through the evening",
+      why: "Only if you'll stay up 3.5 hours after. Usually easiest: no office meetings to work around.",
+      Icon: IconSunset,
+    },
+  ];
   return (
     <Screen>
       <TopBar title="Your study meal" onBack={store.back} step="Step 6 of 9" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.calm}>
-          Which meal would you like to do your bowel sound recordings around? Pick the one you
-          usually eat at similar times every day, and after which you'll have a private, quiet space
-          to record.
+          Pick the meal you eat at a steady time, with a quiet place to record after.
         </MascotSays>
-
-        <button
-          onClick={() => setInfo((v) => !v)}
-          className="mt-3 flex min-h-[56px] w-full items-center gap-3 rounded-2xl border-2 border-teal bg-surface px-4 text-left"
-        >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-teal text-[16px] font-black text-teal">
-            i
-          </span>
-          <span className="min-w-0 flex-1 text-[17px] font-extrabold text-pine">
-            Which meal should I pick?
-          </span>
-        </button>
-
-        {info ? (
-          <div className="mt-3 space-y-2">
-            {[
-              {
-                t: "Breakfast",
-                b: "Only if you work from home every day. Commuting after breakfast disrupts the recording schedule.",
-              },
-              {
-                t: "Lunch",
-                b: "Only if you have a private, quiet spot: a lactation room, private office, or a room you can book. Bathrooms are not allowed, flushing and other people are too noisy. Also a poor choice if you usually have meetings where you talk in the 3.5 hours after lunch, since you need to stay quiet and hold the phone in place.",
-              },
-              {
-                t: "Dinner",
-                b: "Only if you'll be awake for the 3.5 hours after it. If you usually are, we recommend dinner: no office meetings to work around, so it's the easiest to finish.",
-              },
-            ].map(({ t, b }) => (
-              <div key={t} className="rounded-2xl border border-line bg-surface p-4">
-                <p className="text-[17px] font-extrabold text-pine">{t}</p>
-                <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">{b}</p>
-              </div>
-            ))}
-          </div>
-        ) : null}
         <div className="mt-5 space-y-3">
-          {meals.map(({ k, label, sub, Icon }) => (
+          {meals.map(({ k, label, when, why, Icon }) => (
             <button
               key={k}
               onClick={() => store.chooseStudyMeal(k)}
               className={cn(
-                "flex min-h-[92px] w-full items-center gap-4 rounded-3xl border-2 bg-surface px-5 text-left",
+                "flex w-full items-start gap-4 rounded-3xl border-2 bg-surface px-5 py-4 text-left",
                 store.meal === k ? "border-teal bg-mint-soft" : "border-line",
               )}
             >
@@ -1111,22 +1074,21 @@ export function MealPickScreen({ store }: { store: TummyStore }) {
                 <Icon width={30} height={30} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[20px] font-extrabold text-pine">{label}</span>
-                <span className="block text-[15px] font-semibold text-pine-soft">{sub}</span>
-              </span>
-              {store.meal === k ? (
-                <span className="shrink-0 text-teal">
-                  <IconCheck width={24} height={24} />
+                <span className="flex items-center gap-2">
+                  <span className="block text-[20px] font-extrabold text-pine">{label}</span>
+                  {store.meal === k ? (
+                    <span className="shrink-0 text-teal">
+                      <IconCheck width={22} height={22} />
+                    </span>
+                  ) : null}
                 </span>
-              ) : null}
+                <span className="mt-0.5 block text-[15px] font-semibold text-pine-soft">{when}</span>
+                <span className="mt-2 block text-[15px] font-semibold leading-snug text-pine">
+                  {why}
+                </span>
+              </span>
             </button>
           ))}
-        </div>
-        <div className="mt-4">
-          <Note tone="blue" title="What this changes">
-            A recording just before this meal, one straight after, then every 30 minutes for 3.5
-            hours. Other meals and snacks are only logged.
-          </Note>
         </div>
       </ScreenBody>
       <StickyFooter>
@@ -1183,12 +1145,9 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
               />
             </div>
             <div className="mt-4 rounded-2xl border-2 border-teal bg-mint-soft p-4">
-              <p className="text-[18px] font-extrabold leading-snug text-pine">
-                A rough guess is completely fine.
-              </p>
-              <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-                These times never have to be exact. Just add roughly when you usually snack on a{" "}
-                {tab === "weekday" ? "weekday" : "weekend day"}, and add as many as you like.
+              <p className="text-[16px] font-semibold leading-snug text-pine">
+                A rough guess is fine. Add the times you usually snack on a{" "}
+                {tab === "weekday" ? "weekday" : "weekend"}.
               </p>
             </div>
             <div className="mt-3 space-y-3">
@@ -1259,8 +1218,7 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
       <TopBar title="About you" onBack={store.back} step="Step 2 of 9" />
       <ScreenBody>
         <MascotSays size={78}>
-          One quick question. Gut activity differs between people, so the study team records this
-          alongside your subject ID.
+          Gut activity differs by person. If you're female, evening includes one cycle question.
         </MascotSays>
         <div className="mt-5 space-y-2">
           {(
@@ -1281,8 +1239,7 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="green" title="Why we ask">
-            If you're female, we'll add one short question about your cycle to the evening check-in,
-            because it can change gut symptoms.
+            Cycle timing can change gut symptoms.
           </Note>
         </div>
       </ScreenBody>
@@ -1303,8 +1260,7 @@ export function OnboardDoneScreen({ store }: { store: TummyStore }) {
           You're all set up
         </h1>
         <p className="mt-3 text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Day 1 begins with your fasting recording tomorrow morning. I'll nudge you shortly after
-          your wake-up time.
+          Day 1 starts tomorrow morning, after you wake.
         </p>
       </div>
       <StickyFooter>

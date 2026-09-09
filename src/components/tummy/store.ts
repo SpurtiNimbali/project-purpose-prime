@@ -360,7 +360,7 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
       kind: "done",
       tag: "All done",
       title: "Everything is done for today",
-      sub: "Nothing more until tomorrow morning's fasted recording.",
+        sub: "Nothing until tomorrow morning.",
       cta: "Open today's log",
       screen: "logHub",
       state: "clear",
@@ -384,12 +384,12 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
         title: item.label,
         sub:
           item.sessionKind === "fasted"
-            ? "Before any food, drink or moving around. Case off, quiet room, sit upright."
+            ? "Before food, drink, or moving around. Case off, quiet room, sit upright."
             : item.sessionKind === "preMeal"
               ? "Record now, then start eating straight away."
               : mins < -20
-                ? "This one is late, record now, or skip it and tell us why."
-                : "Case off, quiet room, sit upright and still. Two minutes minimum.",
+                ? "This one is late — record now, or skip and say why."
+                : "Case off, quiet room, sit still. Two minutes minimum.",
         cta: "Start recording",
         screen: "caseReminder",
         state: "due",
@@ -450,8 +450,8 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
         tag: "Meal logging",
         title: start ? item.label : "Finished eating?",
         sub: start
-          ? "Photo of the plate, then tap when you take the first bite."
-          : "Tap the moment your last bite is done, every recording after this is timed from it.",
+          ? "Photo of the plate, then tap at the first bite."
+          : "Tap when the last bite is done. Recordings time from that.",
         cta: start ? "Start the meal" : "I've finished eating",
         screen: start ? "mealCapture" : "mealEnd",
         state: "due",
@@ -480,8 +480,8 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
       tag: evening ? "Evening check-in" : "Wake-up questions",
       title: evening ? "A few questions about your day" : "A few questions before you record",
       sub: evening
-        ? "Intake, missed sessions, how you felt today, about three minutes."
-        : "Sleep times, food or drink, bathroom and activity since waking.",
+        ? "What you ate, what you missed, how you felt — about three minutes."
+        : "Sleep, food or drink, bathroom, and activity since waking.",
       cta: "Answer questions",
       screen: evening ? "eveningCheckin" : "morningQuestions",
       state: "due",
@@ -624,7 +624,7 @@ export function useTummyStore(): TummyStore {
         kind: "done",
         tag: "Freeze day",
         title: "Today is a freeze day",
-        sub: "Nothing to record, log or answer today. Your streak stays safe and the schedule picks up again tomorrow morning.",
+        sub: "Nothing to do today. The study picks up tomorrow.",
         cta: "Open today's log",
         screen: "logHub",
         state: "clear",
@@ -674,7 +674,7 @@ export function useTummyStore(): TummyStore {
           id: `${Date.now()}-freeze`,
           kind: "recording",
           label: "Freeze day used",
-          detail: "Today's recordings, meals and questions are paused. Your streak is safe.",
+          detail: "Today is paused.",
           time: nowLabel(),
         },
       ]);

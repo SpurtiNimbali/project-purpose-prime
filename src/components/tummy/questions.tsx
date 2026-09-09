@@ -75,7 +75,7 @@ export const MORNING_QS: FlowQ[] = [
     textIf: ["Yes, something else"],
     followUp: "What was it, and roughly when?",
     warnIf: ["Yes, something else"],
-    warn: "The morning recording is meant to be fasted: nothing but a few sips of water. Tell me what you had and I'll note it for the team.",
+    warn: "The morning recording should be fasted. I'll note what you had.",
   },
   {
     id: "bathroom",
@@ -101,7 +101,7 @@ export const EVENING_QS: FlowQ[] = [
     type: "single",
     options: ["Yes, all of it", "No, some is missing"],
     textIf: ["No, some is missing"],
-    followUp: "What's missing, and roughly when? I'll add it to today.",
+    followUp: "What's missing, and roughly when?",
   },
   {
     id: "missed",
@@ -466,7 +466,7 @@ export function MorningQuestionsScreen({ store }: { store: TummyStore }) {
     <QuestionFlow
       store={store}
       title="Before your first recording"
-      intro="Good morning. A few quick questions before the fasted recording, try not to eat, drink or move around until it's done."
+      intro="A few questions before the fasted recording. Try not to eat, drink, or move around until it's done."
       questions={MORNING_QS}
       finishLabel="Start the fasted recording"
       onFinish={(a) => {
@@ -509,7 +509,7 @@ export function EveningCheckinScreen({ store }: { store: TummyStore }) {
     <QuestionFlow
       store={store}
       title="Evening check-in"
-      intro="Last thing today. Everything here stays with the study team, so please be straight with me, honest gaps are far more useful than tidy guesses."
+      intro="Last thing today. Honest gaps are more useful than tidy guesses."
       questions={EVENING_QS}
       finishLabel="Finish the day"
       onFinish={(a) => {

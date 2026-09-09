@@ -364,7 +364,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 Something feels different?
               </span>
               <span className="mt-1 block text-[15px] font-semibold leading-snug text-mint/90">
-                Capture an extra 2 minute recording, loud gurgles, pain, a sudden change
+                Extra 2-minute recording — loud gurgles, pain, a sudden change
               </span>
             </span>
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface/15 text-[20px] font-extrabold text-surface">
@@ -603,8 +603,8 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
             </div>
 
             <div className="mt-4">
-              <Note tone="green" title="Everything is saved against your subject ID">
-                You can add anything you forgot later in the day, nothing locks.
+              <Note tone="green" title="Nothing locks">
+                Add anything you forgot later today.
               </Note>
             </div>
           </>
@@ -645,8 +645,8 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
         </button>
         <p className="mt-2 text-[15px] font-semibold text-pine-soft">
           {isSnack
-            ? "A photo is best, but a quick line of text is fine for snacks."
-            : "Photos are needed for every meal and drink. Add several if one shot doesn't cover it."}
+            ? "A photo is best. Text is fine for a snack."
+            : "Photos for meals and drinks. Add another if one shot doesn't cover it."}
         </p>
         <div className="mt-4">
           <Field label="What time was this?">
@@ -850,7 +850,7 @@ export function LogSleepScreen({ store }: { store: TummyStore }) {
             </>
           ) : (
             <Note tone="green" title="Sleep logged">
-              Thanks, that helps us read this morning's fasting recording.
+              Thanks.
             </Note>
           )}
         </div>
@@ -978,7 +978,7 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
       <TopBar title="Log toilet habits" onBack={store.back} />
       <ScreenBody>
         <Note tone="green" title="Only your subject ID is attached">
-          This is routine research data. Nothing here is shared with anyone outside the study team.
+          Routine research data. Not shared outside the study team.
         </Note>
         <div className="mt-4 space-y-4">
           <Field label="When was it?">
@@ -1186,8 +1186,8 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
             </div>
             {extras > 0 ? (
               <p className="mt-3 text-[15px] font-semibold text-pine-soft">
-                Plus {extras} extra {extras === 1 ? "recording" : "recordings"} you added yourself —
-                these are a bonus, not part of the {REQUIRED}.
+                Plus {extras} extra {extras === 1 ? "recording" : "recordings"} — bonus, not part of
+                the {REQUIRED}.
               </p>
             ) : null}
           </Card>
@@ -1203,7 +1203,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               <span className="text-[16px] font-bold text-pine-soft">/{mealsTotal}</span>
             </p>
             <p className="mt-1 text-[15px] font-semibold leading-snug text-pine-soft">
-              Everything eaten and drunk, photographed and timed.
+              Photographed and timed.
             </p>
           </Card>
           <Card>
@@ -1245,17 +1245,16 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                 </p>
                 <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
                   {store.frozen
-                    ? "Everything is paused until tomorrow morning. Nothing counts as missed and the seven days simply extend by one."
+                    ? "Paused until tomorrow. Nothing counts as missed. The seven days extend by one."
                     : store.freezeUsed
-                      ? "You've used your freeze for this study period. The rest of the days run back to back."
-                      : "Life happens. Pause a whole day once and the study picks up where it left off, no session counts as missed."}
+                      ? "You've used your one freeze. The rest of the days run back to back."
+                      : "Pause one whole day. Nothing that day counts as missed."}
                 </p>
                 {!store.freezeUsed ? (
                   <>
                     <div className="mt-3 rounded-2xl border-2 border-amber bg-amber/15 px-4 py-3">
                       <p className="text-[15px] font-bold leading-snug text-pine">
-                        You get one freeze for the whole study, and it can't be undone once you
-                        use it. Only use it on a day you truly can't take part.
+                        One freeze for the whole study. It can't be undone.
                       </p>
                     </div>
                     <div className="mt-3">
@@ -1278,9 +1277,8 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
           <Card>
             <p className="text-[17px] font-extrabold text-pine">Missing a session is fine</p>
             <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              A quiet, well-placed two minutes is worth more than a rushed one. If a session is
-              missed or compromised, tell us why, that note is data too, and it never removes you
-              from the study.
+              A clean two minutes beats a rushed one. Tell us why if you skip — the note is data
+              too, and it never removes you from the study.
             </p>
           </Card>
         </div>
@@ -1291,8 +1289,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
           <div className="w-full rounded-t-[28px] bg-cream px-5 pb-7 pt-6">
             <p className="text-[20px] font-extrabold text-pine">Use your only freeze day?</p>
             <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
-              This pauses today's recordings, logs and questions. You get one freeze for the whole
-              study and this cannot be undone.
+              Pauses today. One freeze for the whole study. Can't be undone.
             </p>
             <div className="mt-5 space-y-3">
               <Btn
@@ -1367,8 +1364,7 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
 
         <div className="mt-4">
           <Note tone="green" title="Your data is anonymous">
-            Recordings and logs are stored against your subject ID. Message your coordinator
-            with any questions.
+            Everything is stored against your subject ID.
           </Note>
         </div>
 
@@ -1409,8 +1405,7 @@ export function PeriodCheckScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="green" title="Why we ask">
-            Cycle timing can change gut symptoms, so this helps the team read your recordings
-            properly. It's stored against your subject ID only.
+            Cycle timing can change gut symptoms.
           </Note>
         </div>
       </ScreenBody>
@@ -1426,21 +1421,20 @@ export function ContactScreen({ store }: { store: TummyStore }) {
       <TopBar title="Contact the study team" onBack={store.back} />
       <ScreenBody>
         <MascotSays size={78}>
-          Tell me what's going on and I'll point you to the right person. Most things can be sorted
-          without leaving the study.
+          What's going on? I'll point you to the right person.
         </MascotSays>
         <div className="mt-5 space-y-3">
           {[
             {
               t: "Ask me first",
-              b: "Missed recordings, timings, reminders and app problems, I can usually answer straight away.",
+              b: "Missed recordings, timings, reminders, app problems.",
               Icon: IconChat,
               action: () => store.setChatOpen(true),
               cta: "Open chat",
             },
             {
               t: "Message your study coordinator",
-              b: "Scheduling, compensation, or anything about taking part. Replies within one working day.",
+              b: "Scheduling, compensation, taking part. Reply within one working day.",
               Icon: IconSend,
               action: () => store.go("contactForm"),
               cta: "Write a message",
@@ -1473,8 +1467,8 @@ export function ContactScreen({ store }: { store: TummyStore }) {
           ))}
         </div>
         <div className="mt-4">
-          <Note tone="green" title="Prefer to talk it through?">
-            Send a message any time, your coordinator replies on weekdays, 9am to 5pm.
+          <Note tone="green" title="Prefer to talk?">
+            Coordinator replies weekdays, 9am to 5pm.
           </Note>
         </div>
       </ScreenBody>
@@ -1493,12 +1487,11 @@ export function ContactFormScreen({ store }: { store: TummyStore }) {
         {sent ? (
           <>
             <MascotSays src={MASCOT.cheer} size={78}>
-              Sent. Someone from the study team will come back to you within one working day.
+              Sent. Someone will reply within one working day.
             </MascotSays>
             <div className="mt-4">
               <Note tone="green" title="Nothing changes in the meantime">
-                Keep recording as usual, if you need to pause, say so and the team will arrange it
-                with you.
+                Keep recording as usual. If you need to pause, say so.
               </Note>
             </div>
           </>
@@ -1530,7 +1523,7 @@ export function ContactFormScreen({ store }: { store: TummyStore }) {
             </div>
             <div className="mt-4">
               <Note tone="blue" title="Want a quicker answer?">
-                Ask Tummy in the chat, timing and app questions are usually answered instantly.
+                Ask Tummy in the chat for timing and app questions.
               </Note>
             </div>
           </>

@@ -143,7 +143,7 @@ function reply(store: TummyStore, raw: string): Msg[] {
 
   if (/record|gut sound|session|mic/.test(t)) {
     return say(
-      "Recordings I can't do for you, take the case off, sit somewhere quiet and I'll run the two minutes with you.",
+      "I can't record for you. Case off, somewhere quiet, and I'll run the two minutes with you.",
       {
         label: "Start recording",
         run: () => {
@@ -167,7 +167,7 @@ function reply(store: TummyStore, raw: string): Msg[] {
 
   if (/case|position|9 ?cm|belly/.test(t)) {
     return say(
-      "Case off, bare phone on bare skin, about 9 cm below and to the right of your belly button. One two-minute recording, that's it.",
+      "Case off, bare skin, 8 cm right and 3 cm down from your belly button. Two minutes.",
     );
   }
   return say(
@@ -181,7 +181,7 @@ export function AssistantSheet({ store }: { store: TummyStore }) {
     {
       id: uid(),
       from: "tummy",
-      text: "Hi, I'm Tummy. Tell me what you ate, drank or felt and I'll log it. No forms.",
+      text: "Hi, I'm Tummy. Tell me what you ate, drank, or felt and I'll log it.",
     },
   ]);
   const [text, setText] = useState("");

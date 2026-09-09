@@ -260,7 +260,7 @@ export function CaseReminderScreen({ store }: { store: TummyStore }) {
             Take your phone case off
           </h2>
           <p className="mt-2 text-[17px] font-semibold text-pine-soft">
-            The case has to come off for every recording, bare phone against bare skin.
+            Bare phone against bare skin, every time.
           </p>
         </div>
         <button
@@ -271,8 +271,7 @@ export function CaseReminderScreen({ store }: { store: TummyStore }) {
         </button>
         {why ? (
           <Note tone="amber" title="Why the case matters">
-            A case creates a gap between the microphone and your skin. Gut sounds are quiet and low,
-            so even a couple of millimetres of air loses most of the signal.
+            Even a few millimetres of air blocks most of the sound.
           </Note>
         ) : null}
       </ScreenBody>
@@ -296,13 +295,11 @@ export function FastingCheckScreen({ store }: { store: TummyStore }) {
             Still fasted, and within 30 minutes of waking?
           </h2>
           <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
-            Nothing eaten or drunk, a few slow sips of water are fine if you really needed them. No
-            walking about; the bathroom is fine. Sitting up in bed counts, lying down doesn't.
+            Nothing but a few sips of water. Bathroom is fine. Sitting up counts; lying down doesn't.
           </p>
         </div>
         <Note tone="amber" title="If either is a no">
-          Skip this morning's recording and tell us why. We'd much rather have a gap than a
-          recording we can't use.
+          Skip and tell us why. A gap beats a recording we can't use.
         </Note>
       </ScreenBody>
       <StickyFooter>
@@ -330,8 +327,7 @@ export function WhichMealScreen({ store }: { store: TummyStore }) {
       <TopBar title="Which meal?" onBack={store.back} />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Pick the one meal your recordings will follow. It stays the same every study day, so
-          choose the meal you're most likely to eat at a steady time.
+          Same meal every study day. Pick the one you eat at a steady time.
         </p>
         <div className="mt-5 space-y-3">
           {meals.map(({ k, label, Icon }) => (
@@ -355,7 +351,7 @@ export function WhichMealScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="amber" title="This can't change later">
-            Every study day uses the same meal, so the recordings can be compared with each other.
+            Same meal every day, so the recordings can be compared.
           </Note>
         </div>
       </ScreenBody>
@@ -385,10 +381,10 @@ export function MealCaptureScreen({ store }: { store: TummyStore }) {
           </span>
         </button>
         <p className="mt-2 text-[15px] font-semibold text-pine-soft">
-          More than one photo is welcome when a single shot doesn't capture everything.
+          Add another photo if one shot doesn't cover it.
         </p>
         <div className="mt-4">
-          <Field label="What's in it?" hint="A short description, or a voice note if it's easier.">
+          <Field label="What's in it?" hint="A line of text, or a voice note.">
             <TextInput
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
@@ -398,9 +394,8 @@ export function MealCaptureScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="blue" title="Timers start when you finish, not now">
-            Tap below as you take the first bite. When you're done eating, tap "I've finished" and
-            the app sets every recording from that moment: right away, then every 30 minutes for
-            three and a half hours.
+            Tap as you take the first bite. After the last bite, recordings run every 30 minutes for
+            3.5 hours.
           </Note>
         </div>
       </ScreenBody>
@@ -437,8 +432,7 @@ export function MealEndScreen({ store }: { store: TummyStore }) {
             Tap the moment your last bite is done
           </h2>
           <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
-            Everything after this is measured from the end of your meal, so accuracy here matters
-            more than anywhere else.
+            Every recording after this is timed from now.
           </p>
         </div>
         <Note tone="amber" title="From now until the last recording">
@@ -461,7 +455,7 @@ export function MealEndScreen({ store }: { store: TummyStore }) {
           </Btn>
         </div>
         <p className="mt-2 text-center text-[15px] font-semibold text-pine-soft">
-          Still eating? Go back to home and come straight back here when your last bite is done.
+          Still eating? Come back when the last bite is done.
         </p>
 
       </StickyFooter>
@@ -492,7 +486,7 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
               ? "This recording has to sit immediately before the first bite."
               : extra
                 ? "Same site and same rules as your scheduled sessions."
-                : "No snacks, no drinks other than water, and water only if it was straight after a recording, at least 15 minutes ago."}
+                : "No snacks. Water only if it was right after a recording, at least 15 minutes ago."}
           </p>
         </div>
         <Note tone="amber" title="Quality over quantity">
@@ -935,7 +929,7 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
         <RecordTimer elapsed={elapsed} min={MIN_SECONDS} />
         <p className="mt-5 text-center text-[16px] font-bold text-mint">
           {past
-            ? "Two minutes done, every extra minute helps. Stay still as long as you can."
+            ? "Two minutes done. Stay still as long as you can."
             : "Keep still until the ring fills"}
         </p>
         <p className="mt-1 text-[15px] font-bold text-surface/70">
@@ -1398,8 +1392,7 @@ export function SnackSkipScreen({ store }: { store: TummyStore }) {
       <TopBar title="Something was eaten or drunk" onBack={store.back} />
       <ScreenBody>
         <MascotSays src={MASCOT.calm} size={80}>
-          Thank you for being honest, this is exactly what we need. Inaccurate data is far worse
-          than a missing session.
+          Thanks for saying so. A gap is better than a bad recording.
         </MascotSays>
         {skipped === null ? (
           <>
@@ -1414,16 +1407,15 @@ export function SnackSkipScreen({ store }: { store: TummyStore }) {
             </div>
             <div className="mt-4">
               <Note tone="amber" title="What happens now">
-                Every remaining recording in this meal window gets skipped. If you truly can't wait
-                next time, hold off until at least 2 to 2.5 hours after the meal.
+                Remaining post-meal recordings are skipped. Next time, wait until 2–2.5 hours after
+                the meal if you can.
               </Note>
             </div>
           </>
         ) : (
           <div className="mt-4">
             <Note tone="green" title={`${skipped} recording${skipped === 1 ? "" : "s"} skipped`}>
-              Logged against today. Your next task is the evening check-in, everything else carries
-              on as normal tomorrow.
+              Next up is the evening check-in.
             </Note>
           </div>
         )}
@@ -1469,8 +1461,7 @@ export function SkipReasonScreen({ store }: { store: TummyStore }) {
       <TopBar title="Skip this session" onBack={store.back} />
       <ScreenBody>
         <MascotSays src={MASCOT.calm} size={80}>
-          Skipping is fine. A clean dataset with gaps is worth much more than a recording we can't
-          use, just tell us what happened.
+          Skipping is fine. Just tell us what happened.
         </MascotSays>
         <p className="mt-4 text-[16px] font-extrabold text-pine">
           {item ? item.label : "This recording"}
@@ -1538,7 +1529,7 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
       <TopBar title="Extra recording" onBack={store.back} />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.wave}>
-          Before we start, what made you want to record an extra session?
+          Why an extra recording?
         </MascotSays>
         <div className="mt-5 space-y-3">
           {["Unusually loud or frequent sounds", "Symptoms higher than normal", "Both", "Just curious"].map(
@@ -1610,8 +1601,8 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
         ) : null}
 
         <div className="mt-6">
-          <Note tone="blue" title="Same rules as always">
-            Case off, bare skin, quiet room, sit upright and still for two minutes.
+          <Note tone="blue" title="Same rules">
+            Case off, bare skin, quiet room, still for two minutes.
           </Note>
         </div>
       </ScreenBody>
@@ -1644,7 +1635,7 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
   const detail = !next
     ? "Nothing more until tomorrow morning's fasted recording."
     : next.kind === "recording" && next.sessionKind === "postMeal"
-      ? "Nothing to eat or drink until the window is over. If you really need water, have up to one cup now, right after this recording."
+      ? "Nothing to eat or drink until the window is over. Water: one cup now, if you need it."
       : next.kind === "meal" && !next.mealLog
         ? next.id === "mealStart"
           ? "Take a photo of the plate, then tap when you take your first bite."
