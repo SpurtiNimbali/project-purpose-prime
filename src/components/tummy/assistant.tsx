@@ -77,17 +77,17 @@ function reply(store: TummyStore, raw: string): Msg[] {
     },
   });
 
-  // hydration — logged automatically
+  // hydration, logged automatically
   if (/water|drink|drank|hydrat|glass|sip/.test(t) && !/food|ate|meal/.test(t)) {
     const glasses = Number((t.match(/(\d+)\s*(glass|cup)/) || [])[1] || 1);
     store.addEntry("hydration", "Water", `${glasses} glass${glasses > 1 ? "es" : ""}`);
     return say(
-      `Logged — ${glasses} glass${glasses > 1 ? "es" : ""} of water at ${nowLabel()}. Nothing else needed.`,
+      `Logged, ${glasses} glass${glasses > 1 ? "es" : ""} of water at ${nowLabel()}. Nothing else needed.`,
       openLog(),
     );
   }
 
-  // symptoms — logged automatically with a severity guess
+  // symptoms, logged automatically with a severity guess
   const sym = SYMPTOM_WORDS.find(([re]) => re.test(t));
   if (sym) {
     const sev = severityFrom(t);
@@ -104,7 +104,7 @@ function reply(store: TummyStore, raw: string): Msg[] {
     );
   }
 
-  // meals — logged automatically from the description
+  // meals, logged automatically from the description
   if (/meal|breakfast|lunch|dinner|snack|ate|eat|had|bar|toast|coffee|banana/.test(t)) {
     const slot = mealSlot(t);
     const food = foodFrom(raw);
@@ -138,12 +138,12 @@ function reply(store: TummyStore, raw: string): Msg[] {
     const hrs = (t.match(/(\d+(?:\.\d+)?)\s*(hr|hour)/) || [])[1];
     const quality = /bad|poor|badly|rough|awful/.test(t) ? "slept poorly" : "slept well";
     store.addEntry("sleep", "Sleep", `${hrs ? `${hrs} hrs · ` : ""}${quality}`);
-    return say(`Logged last night's sleep${hrs ? ` — ${hrs} hours` : ""}, ${quality}.`, openLog());
+    return say(`Logged last night's sleep${hrs ? `, ${hrs} hours` : ""}, ${quality}.`, openLog());
   }
 
   if (/record|gut sound|session|mic/.test(t)) {
     return say(
-      "Recordings I can't do for you — take the case off, sit somewhere quiet and I'll run the two minutes with you.",
+      "Recordings I can't do for you, take the case off, sit somewhere quiet and I'll run the two minutes with you.",
       {
         label: "Start recording",
         run: () => {
@@ -171,7 +171,7 @@ function reply(store: TummyStore, raw: string): Msg[] {
     );
   }
   return say(
-    "Tell me what happened in plain words — \"I had a protein bar\", \"two glasses of water\", \"bloating, quite bad\" — and I'll log it straight away.",
+    "Tell me in plain words: \"I had a protein bar\", \"two glasses of water\", \"bloating, quite bad\". I'll log it straight away.",
   );
 }
 
@@ -181,7 +181,7 @@ export function AssistantSheet({ store }: { store: TummyStore }) {
     {
       id: uid(),
       from: "tummy",
-      text: "Hi — I'm Tummy. Tell me what you ate, drank or felt and I will log it straight away — no forms.",
+      text: "Hi, I'm Tummy. Tell me what you ate, drank or felt and I'll log it. No forms.",
     },
   ]);
   const [text, setText] = useState("");

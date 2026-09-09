@@ -288,12 +288,10 @@ function QuestionFlow({
             {current.type === "duration" ? (
               <div className="space-y-2">
                 <div className="flex gap-3">
-                  {(
-                    [
-                      { label: "Hours", value: durH, set: setDurH, max: 12 },
-                      { label: "Minutes", value: durM, set: setDurM, max: 55, step: 5 },
-                    ] as const
-                  ).map(({ label, value, set, max, step: st }) => (
+                  {[
+                    { label: "Hours", value: durH, set: setDurH, max: 12, st: 1 },
+                    { label: "Minutes", value: durM, set: setDurM, max: 55, st: 5 },
+                  ].map(({ label, value, set, max, st }) => (
                     <label key={label} className="flex-1">
                       <span className="mb-1 block text-[15px] font-extrabold text-pine-soft">
                         {label}
@@ -303,14 +301,13 @@ function QuestionFlow({
                         onChange={(e) => set(Number(e.target.value))}
                         className="min-h-[62px] w-full rounded-2xl border-2 border-line bg-surface px-4 text-[18px] font-extrabold text-pine"
                       >
-                        {Array.from(
-                          { length: Math.floor(max / ((st as number | undefined) ?? 1)) + 1 },
-                          (_, i) => i * (((st as number | undefined) ?? 1) as number),
-                        ).map((n) => (
-                          <option key={n} value={n}>
-                            {n}
-                          </option>
-                        ))}
+                        {Array.from({ length: Math.floor(max / st) + 1 }, (_, i) => i * st).map(
+                          (n) => (
+                            <option key={n} value={n}>
+                              {n}
+                            </option>
+                          ),
+                        )}
                       </select>
                     </label>
                   ))}
@@ -343,8 +340,8 @@ function QuestionFlow({
                   ))}
                 </div>
                 <div className="mt-2 flex justify-between text-[14px] font-bold text-pine-soft">
-                  <span>1 — none</span>
-                  <span>5 — severe</span>
+                  <span>1 = none</span>
+                  <span>5 = severe</span>
                 </div>
               </>
             ) : null}
@@ -449,7 +446,7 @@ function QuestionFlow({
         {lowBattery ? (
           <div className="mt-4">
             <Note tone="amber" title="Please charge your smartwatch now">
-              Put it on the charger and back on your wrist before you sleep — the overnight data
+              Put it on the charger and back on your wrist before you sleep, the overnight data
               matters a great deal to us.
             </Note>
           </div>
@@ -469,7 +466,7 @@ export function MorningQuestionsScreen({ store }: { store: TummyStore }) {
     <QuestionFlow
       store={store}
       title="Before your first recording"
-      intro="Good morning. A few quick questions before the fasted recording — try not to eat, drink or move around until it's done."
+      intro="Good morning. A few quick questions before the fasted recording, try not to eat, drink or move around until it's done."
       questions={MORNING_QS}
       finishLabel="Start the fasted recording"
       onFinish={(a) => {
@@ -512,7 +509,7 @@ export function EveningCheckinScreen({ store }: { store: TummyStore }) {
     <QuestionFlow
       store={store}
       title="Evening check-in"
-      intro="Last thing today. Everything here stays with the study team, so please be straight with me — honest gaps are far more useful than tidy guesses."
+      intro="Last thing today. Everything here stays with the study team, so please be straight with me, honest gaps are far more useful than tidy guesses."
       questions={EVENING_QS}
       finishLabel="Finish the day"
       onFinish={(a) => {

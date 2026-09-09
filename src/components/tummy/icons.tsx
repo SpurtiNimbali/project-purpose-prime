@@ -251,7 +251,7 @@ export const IconNavelPoint = (p: P) => (
   </Base>
 );
 
-/** Snowflake — freeze day. */
+/** Snowflake, freeze day. */
 export const IconSnowflake = (p: P) => (
   <Base {...p}>
     <path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9" />
@@ -261,7 +261,7 @@ export const IconSnowflake = (p: P) => (
   </Base>
 );
 
-/** Ruler — measured placement. */
+/** Ruler, measured placement. */
 export const IconRuler = (p: P) => (
   <Base {...p}>
     <rect x="2.6" y="8.4" width="18.8" height="7.2" rx="1.6" transform="rotate(-12 12 12)" />
