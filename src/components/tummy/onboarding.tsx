@@ -31,8 +31,8 @@ import {
 } from "./icons";
 import {
   AbdomenGuide,
-  PlacementChecklist,
-
+  PlacementTips,
+  PositionChecksGate,
   RecordTimer,
   SymptomGrid,
   SeveritySheet,
@@ -391,14 +391,6 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
             </p>
           ) : null}
         </div>
-        {all ? (
-          <div className="mt-4">
-            <Note tone="amber" title="Take your phone case off">
-              A case leaves a gap between the microphone and your skin, and that gap loses most of
-              the sound.
-            </Note>
-          </div>
-        ) : null}
       </ScreenBody>
       <StickyFooter>
         {all ? (
@@ -655,7 +647,8 @@ type Coach = { id: string; text: string; cta: string };
 export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const TOTAL = 45;
   const [stage, setStage] = useState<"intro" | "case" | "position" | "record">("intro");
-  const [posReady, setPosReady] = useState(false);
+  const [posChecked, setPosChecked] = useState(false);
+  const [posTipsSeen, setPosTipsSeen] = useState(false);
   const [left, setLeft] = useState(TOTAL);
   const [marks, setMarks] = useState<{ key: string; label: string; severity: number }[]>([]);
   const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
@@ -793,19 +786,25 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
       <Screen dark className="relative">
         <TopBar title="Positioning guide" onBack={() => setStage("case")} dark step="Practice" />
         {banner}
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 pt-2">
+        <div className={cn("min-h-0 flex-1 overflow-y-auto px-5 pt-2", !posChecked && "blur-md")}>
           <AbdomenGuide />
           <p className="mt-3 text-[16px] font-semibold leading-snug text-mint">
             Bottom of the phone on that spot, screen facing out.
           </p>
-          <PlacementChecklist onReady={setPosReady} />
+          <PlacementTips onAllSeen={() => setPosTipsSeen(true)} />
         </div>
 
         <div className="shrink-0 px-5 pb-7 pt-3">
-          <Btn disabled={!posReady} onClick={() => setStage("record")}>
+          <Btn disabled={!posChecked || !posTipsSeen} onClick={() => setStage("record")}>
             I'm in position
           </Btn>
+          {posChecked && !posTipsSeen ? (
+            <p className="mt-2 text-center text-[15px] font-semibold text-mint">
+              Read each placement rule to continue.
+            </p>
+          ) : null}
         </div>
+        {!posChecked ? <PositionChecksGate onDone={() => setPosChecked(true)} /> : null}
       </Screen>
     );
   }

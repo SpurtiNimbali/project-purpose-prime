@@ -1201,7 +1201,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
           <Card>
             <div className="flex items-center gap-2 text-teal">
               <IconChart width={22} height={22} />
-              <p className="text-[17px] font-extrabold text-pine">Today's recordings</p>
+              <p className="text-[17px] font-extrabold text-pine">Today</p>
             </div>
             <div className="mt-3 h-5 w-full overflow-hidden rounded-full bg-wash">
               <div
@@ -1210,7 +1210,8 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               />
             </div>
             <p className="mt-2 text-[16px] font-extrabold text-teal">
-              {recDone} of {REQUIRED} done · {minutes} minutes recorded
+              {recDone} of {REQUIRED} recordings · {minutes} min
+              {extras > 0 ? ` · +${extras} extra` : ""}
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {recs.map((p) => (
@@ -1225,32 +1226,26 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                 </span>
               ))}
             </div>
-            {extras > 0 ? (
-              <p className="mt-3 text-[15px] font-semibold text-pine-soft">
-                Plus {extras} extra {extras === 1 ? "recording" : "recordings"}
-              </p>
-            ) : null}
-          </Card>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <Card>
-            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-              Food &amp; drink
-            </p>
-            <p className="mt-1 text-[26px] font-extrabold leading-none text-pine">
-              {mealsDone}
-              <span className="text-[16px] font-bold text-pine-soft">/{mealsTotal}</span>
-            </p>
-          </Card>
-          <Card>
-            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-              Questionnaires
-            </p>
-            <p className="mt-1 text-[26px] font-extrabold leading-none text-pine">
-              {qDone}
-              <span className="text-[16px] font-bold text-pine-soft">/{qTotal}</span>
-            </p>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-wash px-3 py-3">
+                <p className="text-[13px] font-extrabold uppercase tracking-[0.12em] text-teal">
+                  Meals
+                </p>
+                <p className="mt-1 text-[22px] font-extrabold leading-none text-pine">
+                  {mealsDone}
+                  <span className="text-[15px] font-bold text-pine-soft">/{mealsTotal}</span>
+                </p>
+              </div>
+              <div className="rounded-2xl bg-wash px-3 py-3">
+                <p className="text-[13px] font-extrabold uppercase tracking-[0.12em] text-teal">
+                  Questions
+                </p>
+                <p className="mt-1 text-[22px] font-extrabold leading-none text-pine">
+                  {qDone}
+                  <span className="text-[15px] font-bold text-pine-soft">/{qTotal}</span>
+                </p>
+              </div>
+            </div>
           </Card>
         </div>
 
@@ -1275,45 +1270,24 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                     ? "Today is a freeze day"
                     : store.freezeUsed
                       ? "Freeze day used"
-                      : "Freeze day available"}
+                      : "Freeze day"}
                 </p>
                 <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
                   {store.frozen
-                    ? "Paused until tomorrow. Nothing today counts as missed, and the seven days extend by one."
+                    ? "Paused until tomorrow. Nothing today counts as missed."
                     : store.freezeUsed
                       ? "You've used your one freeze. The remaining days run back to back."
-                      : "Pause one whole day if you need it. Nothing that day counts as missed."}
+                      : "Pause one day if you need it. You get one, and it can't be undone."}
                 </p>
                 {!store.freezeUsed ? (
-                  <>
-                    <div className="mt-3 rounded-2xl border-2 border-amber bg-amber/15 px-4 py-3">
-                      <p className="text-[15px] font-bold leading-snug text-pine">
-                        You get one freeze for the whole study, and it can't be undone.
-                      </p>
-                    </div>
-                    <div className="mt-3">
-                      <Btn
-                        variant="secondary"
-                        onClick={() => setConfirmFreeze(true)}
-                      >
-                        Use my freeze day
-                      </Btn>
-                    </div>
-                  </>
+                  <div className="mt-3">
+                    <Btn variant="secondary" onClick={() => setConfirmFreeze(true)}>
+                      Use my freeze day
+                    </Btn>
+                  </div>
                 ) : null}
-
               </div>
             </div>
-          </Card>
-        </div>
-
-        <div className="mt-4">
-          <Card>
-            <p className="text-[17px] font-extrabold text-pine">Missing a session is fine</p>
-            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              A clean two minutes is more useful than a rushed one. If you skip, tell us why. That
-              note is data too, and it never removes you from the study.
-            </p>
           </Card>
         </div>
       </ScreenBody>
