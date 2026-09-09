@@ -85,7 +85,7 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
           Enter the ID printed on the card your study coordinator gave you. We check it against the
-          study database — your name is never stored in this app.
+          study database, your name is never stored in this app.
         </p>
         <div className="mt-5 space-y-3">
           <Field label="Subject ID">
@@ -232,11 +232,11 @@ export function QuizScreen({ store }: { store: TummyStore }) {
         <MascotSays size={78} src={correct ? MASCOT.cheer : MASCOT.calm}>
           {pick === null
             ? qi === 0
-              ? "One question at a time. Pick the answer you think is right — you'll need the right one before we move on."
+              ? "One question at a time. Pick the answer you think is right, you'll need the right one before we move on."
               : "Nice. Here's the next one."
             : correct
               ? "That's it. Read the reason, then carry on."
-              : "Not quite — have another go. Take your time, there's no penalty."}
+              : "Not quite, have another go. Take your time, there's no penalty."}
         </MascotSays>
 
         <div className="mt-3 flex gap-1.5">
@@ -370,7 +370,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
       <TopBar title="How a day works" onBack={store.back} step="Step 5 of 9" />
       <ScreenBody>
         <MascotSays size={78}>
-          Every day has the same shape. I'll show you one step at a time — read each one, then tap
+          Every day has the same shape. I'll show you one step at a time, read each one, then tap
           for the next.
         </MascotSays>
         <div className="mt-5 space-y-3">
@@ -406,7 +406,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
         {all ? (
           <Btn onClick={() => store.go("scheduling")}>Continue</Btn>
         ) : (
-          <Btn onClick={() => setShown((s) => s + 1)}>Got it — next step</Btn>
+          <Btn onClick={() => setShown((s) => s + 1)}>Got it, next step</Btn>
         )}
       </StickyFooter>
     </Screen>
@@ -595,7 +595,7 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
     {
       k: "dnd",
       label: "Do not disturb",
-      sub: "Switched on only for the 2 minutes of a recording session — never the rest of the day",
+      sub: "Switched on only for the 2 minutes of a recording session, never the rest of the day",
       Icon: IconLock,
     },
   ];
@@ -701,7 +701,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
     } else if (elapsed >= 9 && notSeen("symptom")) {
       show({
         id: "symptom",
-        text: "Feel a gurgle, a cramp, anything? Tap its icon up top — try one now. The buttons sit away from the microphone end.",
+        text: "Feel a gurgle, a cramp, anything? Tap its icon up top, try one now. The buttons sit away from the microphone end.",
         cta: "Let me try",
       });
     } else if (left <= 15 && left > 0 && notSeen("timeleft")) {
@@ -738,7 +738,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
     </div>
   );
 
-  /* stage 0 — get somewhere quiet */
+  /* stage 0, get somewhere quiet */
   if (stage === "intro") {
     return (
       <Screen>
@@ -761,7 +761,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
     );
   }
 
-  /* stage 1 — case off, exactly like the real thing */
+  /* stage 1, case off, exactly like the real thing */
   if (stage === "case") {
     return (
       <Screen dark className="relative">
@@ -780,7 +780,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
             Take your phone case off
           </h2>
           <p className="mt-2 text-[16px] font-semibold leading-snug text-mint">
-            Every real recording starts here. Bare phone against bare skin — a case holds the
+            Every real recording starts here. Bare phone against bare skin, a case holds the
             microphone away from you.
           </p>
         </div>
@@ -791,7 +791,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
     );
   }
 
-  /* stage 2 — positioning guide, exactly like the real thing */
+  /* stage 2, positioning guide, exactly like the real thing */
   if (stage === "position") {
     return (
       <Screen dark className="relative">
@@ -821,7 +821,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
   }
 
 
-  /* stage 3 — the run itself, identical UI to a real recording */
+  /* stage 3, the run itself, identical UI to a real recording */
   return (
     <Screen dark className="relative">
       {banner}
@@ -861,7 +861,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
               <div className="flex items-end gap-3">
                 <Mascot src={MASCOT.calm} size={78} />
                 <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[16px] font-semibold leading-snug text-pine">
-                  Now say how strong it is, 1 to 5. It saves the moment you tap a number — no save
+                  Now say how strong it is, 1 to 5. It saves the moment you tap a number, no save
                   button, and the time is stamped for you.
                 </p>
               </div>
@@ -916,7 +916,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
                 ? `You logged ${marks.length} symptom ${marks.length === 1 ? "mark" : "marks"}. `
                 : ""}
               After a real recording you'll get the same sound check, then a few short questions.
-              That's all there is to it — you're set.
+              That's all there is to it, you're set.
             </p>
             <div className="mt-5">
               <Btn onClick={() => store.go("onboardDone")}>Continue</Btn>
@@ -1021,7 +1021,7 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
           ))}
         </div>
         <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-pine-soft">
-          These times are for reminders only — no worries at all if they move around from day to
+          These times are for reminders only, no worries at all if they move around from day to
           day.
         </p>
       </ScreenBody>

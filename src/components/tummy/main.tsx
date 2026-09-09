@@ -281,7 +281,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           </button>
         </div>
 
-        {/* day rail — recordings, meals and question blocks */}
+        {/* day rail, recordings, meals and question blocks */}
         <div className="mt-5 rounded-3xl border border-line bg-surface px-4 py-4">
           <div className="flex items-end justify-between gap-3">
             <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
@@ -364,7 +364,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 Something feels different?
               </span>
               <span className="mt-1 block text-[15px] font-semibold leading-snug text-mint/90">
-                Capture an extra 2 minute recording — loud gurgles, pain, a sudden change
+                Capture an extra 2 minute recording, loud gurgles, pain, a sudden change
               </span>
             </span>
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface/15 text-[20px] font-extrabold text-surface">
@@ -604,7 +604,7 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
 
             <div className="mt-4">
               <Note tone="green" title="Everything is saved against your subject ID">
-                You can add anything you forgot later in the day — nothing locks.
+                You can add anything you forgot later in the day, nothing locks.
               </Note>
             </div>
           </>
@@ -639,7 +639,7 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
           <IconCamera width={44} height={44} />
           <span className="text-[17px] font-extrabold">
             {photo
-              ? `${photos} photo${photos === 1 ? "" : "s"} — add another`
+              ? `${photos} photo${photos === 1 ? "" : "s"}, add another`
               : "Photo of what you had"}
           </span>
         </button>
@@ -850,7 +850,7 @@ export function LogSleepScreen({ store }: { store: TummyStore }) {
             </>
           ) : (
             <Note tone="green" title="Sleep logged">
-              Thanks — that helps us read this morning's fasting recording.
+              Thanks, that helps us read this morning's fasting recording.
             </Note>
           )}
         </div>
@@ -1159,7 +1159,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               <p className="text-[17px] font-extrabold text-pine">Today's recordings</p>
             </div>
             <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              The protocol asks for {REQUIRED} recordings — about 20 minutes of sound — across the
+              The protocol asks for {REQUIRED} recordings, about 20 minutes of sound, across the
               fasted session, your chosen meal and the 3.5 hours after it.
             </p>
             <div className="mt-4 h-5 w-full overflow-hidden rounded-full bg-wash">
@@ -1248,7 +1248,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                     ? "Everything is paused until tomorrow morning. Nothing counts as missed and the seven days simply extend by one."
                     : store.freezeUsed
                       ? "You've used your freeze for this study period. The rest of the days run back to back."
-                      : "Life happens. Pause a whole day once and the study picks up where it left off — no session counts as missed."}
+                      : "Life happens. Pause a whole day once and the study picks up where it left off, no session counts as missed."}
                 </p>
                 {!store.freezeUsed ? (
                   <>
@@ -1279,7 +1279,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
             <p className="text-[17px] font-extrabold text-pine">Missing a session is fine</p>
             <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
               A quiet, well-placed two minutes is worth more than a rushed one. If a session is
-              missed or compromised, tell us why — that note is data too, and it never removes you
+              missed or compromised, tell us why, that note is data too, and it never removes you
               from the study.
             </p>
           </Card>
@@ -1393,7 +1393,7 @@ export function PeriodCheckScreen({ store }: { store: TummyStore }) {
       <TopBar title="Evening check-in" onBack={store.back} />
       <ScreenBody>
         <MascotSays src={MASCOT.calm} size={78}>
-          Last one for today — are you on your period right now?
+          Last one for today, are you on your period right now?
         </MascotSays>
         <div className="mt-5 space-y-2">
           {["Yes", "No", "Not sure", "Prefer not to say"].map((o) => (
@@ -1433,7 +1433,7 @@ export function ContactScreen({ store }: { store: TummyStore }) {
           {[
             {
               t: "Ask me first",
-              b: "Missed recordings, timings, reminders and app problems — I can usually answer straight away.",
+              b: "Missed recordings, timings, reminders and app problems, I can usually answer straight away.",
               Icon: IconChat,
               action: () => store.setChatOpen(true),
               cta: "Open chat",
@@ -1474,7 +1474,7 @@ export function ContactScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="green" title="Prefer to talk it through?">
-            Send a message any time — your coordinator replies on weekdays, 9am to 5pm.
+            Send a message any time, your coordinator replies on weekdays, 9am to 5pm.
           </Note>
         </div>
       </ScreenBody>
@@ -1497,7 +1497,7 @@ export function ContactFormScreen({ store }: { store: TummyStore }) {
             </MascotSays>
             <div className="mt-4">
               <Note tone="green" title="Nothing changes in the meantime">
-                Keep recording as usual — if you need to pause, say so and the team will arrange it
+                Keep recording as usual, if you need to pause, say so and the team will arrange it
                 with you.
               </Note>
             </div>
@@ -1530,7 +1530,7 @@ export function ContactFormScreen({ store }: { store: TummyStore }) {
             </div>
             <div className="mt-4">
               <Note tone="blue" title="Want a quicker answer?">
-                Ask Tummy in the chat — timing and app questions are usually answered instantly.
+                Ask Tummy in the chat, timing and app questions are usually answered instantly.
               </Note>
             </div>
           </>

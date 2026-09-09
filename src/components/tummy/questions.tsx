@@ -340,8 +340,8 @@ function QuestionFlow({
                   ))}
                 </div>
                 <div className="mt-2 flex justify-between text-[14px] font-bold text-pine-soft">
-                  <span>1 — none</span>
-                  <span>5 — severe</span>
+                  <span>1 = none</span>
+                  <span>5 = severe</span>
                 </div>
               </>
             ) : null}
@@ -446,7 +446,7 @@ function QuestionFlow({
         {lowBattery ? (
           <div className="mt-4">
             <Note tone="amber" title="Please charge your smartwatch now">
-              Put it on the charger and back on your wrist before you sleep — the overnight data
+              Put it on the charger and back on your wrist before you sleep, the overnight data
               matters a great deal to us.
             </Note>
           </div>
@@ -466,7 +466,7 @@ export function MorningQuestionsScreen({ store }: { store: TummyStore }) {
     <QuestionFlow
       store={store}
       title="Before your first recording"
-      intro="Good morning. A few quick questions before the fasted recording — try not to eat, drink or move around until it's done."
+      intro="Good morning. A few quick questions before the fasted recording, try not to eat, drink or move around until it's done."
       questions={MORNING_QS}
       finishLabel="Start the fasted recording"
       onFinish={(a) => {
@@ -509,7 +509,7 @@ export function EveningCheckinScreen({ store }: { store: TummyStore }) {
     <QuestionFlow
       store={store}
       title="Evening check-in"
-      intro="Last thing today. Everything here stays with the study team, so please be straight with me — honest gaps are far more useful than tidy guesses."
+      intro="Last thing today. Everything here stays with the study team, so please be straight with me, honest gaps are far more useful than tidy guesses."
       questions={EVENING_QS}
       finishLabel="Finish the day"
       onFinish={(a) => {

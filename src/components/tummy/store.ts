@@ -73,7 +73,7 @@ export type PlanItem = {
   /** recordings only */
   fasting?: boolean;
   sessionKind?: SessionKind;
-  /** minutes after the end of the study meal — post-meal recordings only */
+  /** minutes after the end of the study meal, post-meal recordings only */
   offset?: number;
   /** meals only */
   meal?: Meal;
@@ -81,7 +81,7 @@ export type PlanItem = {
   mealLog?: boolean;
 };
 
-/** Kept for older call sites — recordings only. */
+/** Kept for older call sites, recordings only. */
 export type Session = PlanItem;
 
 export type NextTask = {
@@ -127,12 +127,12 @@ export type TummyStore = {
   startExtraSession: () => void;
   meal: Meal;
   setMeal: (m: Meal) => void;
-  /** pick the study meal during onboarding — rebuilds the day's plan around it */
+  /** pick the study meal during onboarding, rebuilds the day's plan around it */
   chooseStudyMeal: (m: Meal) => void;
   /** tick off a scheduled diary item that matches what was just logged */
   completeMealLog: (which: string) => void;
   freezeUsed: boolean;
-  /** today's plan is paused — no recordings, meals or questions expected */
+  /** today's plan is paused, no recordings, meals or questions expected */
   frozen: boolean;
   useFreeze: () => void;
 
@@ -151,7 +151,7 @@ export type TummyStore = {
   startItem: (id: string) => void;
   completeItem: (id: string) => void;
   missItem: (id: string, reason?: string) => void;
-  /** snack or non-water drink inside the meal window — skip everything after it */
+  /** snack or non-water drink inside the meal window, skip everything after it */
   skipRemainingAfterSnack: (reason: string) => number;
   completeSession: (id: string) => void;
   /** minutes-from-midnight of the last finished recording, for the water rule */
@@ -215,7 +215,7 @@ export function untilLabel(mins: number) {
 }
 
 export const WINDOW_RULE =
-  "Nothing to eat or drink until the 3.5 hour recording is done. Water only if you really need it — up to one cup, taken straight after a recording.";
+  "Nothing to eat or drink until the 3.5 hour recording is done. Water only if you really need it, up to one cup, taken straight after a recording.";
 
 export const QUALITY_RULE =
   "Quality over quantity. If you can't record properly, skip the session and tell us why. Clean audio with gaps is worth far more than a bad recording.";
@@ -313,7 +313,7 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
     {
       id: "mealStart",
       kind: "meal",
-      label: `${mealName} — start eating`,
+      label: `${mealName}, start eating`,
       at: mealStartAt,
       done: false,
       window: "Tap when you take the first bite",
@@ -322,10 +322,10 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
     {
       id: "mealEnd",
       kind: "meal",
-      label: `${mealName} — finished eating`,
+      label: `${mealName}, finished eating`,
       at: mealEndAt,
       done: false,
-      window: "Tap the moment you finish — all timers start here",
+      window: "Tap the moment you finish, all timers start here",
       meal,
     },
     ...post,
@@ -388,7 +388,7 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
             : item.sessionKind === "preMeal"
               ? "Record now, then start eating straight away."
               : mins < -20
-                ? "This one is late — record now, or skip it and tell us why."
+                ? "This one is late, record now, or skip it and tell us why."
                 : "Case off, quiet room, sit upright and still. Two minutes minimum.",
         cta: "Start recording",
         screen: "caseReminder",
@@ -451,7 +451,7 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
         title: start ? item.label : "Finished eating?",
         sub: start
           ? "Photo of the plate, then tap when you take the first bite."
-          : "Tap the moment your last bite is done — every recording after this is timed from it.",
+          : "Tap the moment your last bite is done, every recording after this is timed from it.",
         cta: start ? "Start the meal" : "I've finished eating",
         screen: start ? "mealCapture" : "mealEnd",
         state: "due",
@@ -480,7 +480,7 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
       tag: evening ? "Evening check-in" : "Wake-up questions",
       title: evening ? "A few questions about your day" : "A few questions before you record",
       sub: evening
-        ? "Intake, missed sessions, how you felt today — about three minutes."
+        ? "Intake, missed sessions, how you felt today, about three minutes."
         : "Sleep times, food or drink, bathroom and activity since waking.",
       cta: "Answer questions",
       screen: evening ? "eveningCheckin" : "morningQuestions",
