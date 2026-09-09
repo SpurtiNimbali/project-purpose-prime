@@ -364,7 +364,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 Something feels different?
               </span>
               <span className="mt-1 block text-[15px] font-semibold leading-snug text-mint/90">
-                Extra 2-minute recording — loud gurgles, pain, a sudden change
+                Extra 2-minute recording: loud gurgles, pain, a sudden change
               </span>
             </span>
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface/15 text-[20px] font-extrabold text-surface">
@@ -1072,7 +1072,7 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
             store.addEntry(
               "toilet",
               "Toilet habits",
-              `Consistency ${consistency || "—"}${urgency ? ` · urgency: ${urgency.toLowerCase()}` : ""}`,
+              `Consistency ${consistency || "-"}${urgency ? ` · urgency: ${urgency.toLowerCase()}` : ""}`,
             );
             store.go("logHub");
           }}
@@ -1186,7 +1186,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
             </div>
             {extras > 0 ? (
               <p className="mt-3 text-[15px] font-semibold text-pine-soft">
-                Plus {extras} extra {extras === 1 ? "recording" : "recordings"} — bonus, not part of
+                Plus {extras} extra {extras === 1 ? "recording" : "recordings"}. Bonus, not part of
                 the {REQUIRED}.
               </p>
             ) : null}
@@ -1277,7 +1277,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
           <Card>
             <p className="text-[17px] font-extrabold text-pine">Missing a session is fine</p>
             <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              A clean two minutes beats a rushed one. Tell us why if you skip — the note is data
+              A clean two minutes beats a rushed one. Tell us why if you skip. The note is data
               too, and it never removes you from the study.
             </p>
           </Card>

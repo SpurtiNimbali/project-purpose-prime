@@ -473,7 +473,7 @@ export function MorningQuestionsScreen({ store }: { store: TummyStore }) {
         store.addEntry(
           "sleep",
           "Wake-up questions",
-          `In bed ${a.bedTime ?? "—"} · awake ${a.wakeTime ?? "—"}${
+          `In bed ${a.bedTime ?? "-"} · awake ${a.wakeTime ?? "-"}${
             a.latency ? ` · fell asleep in ${a.latency.toLowerCase()}` : ""
           }`,
         );
@@ -516,7 +516,7 @@ export function EveningCheckinScreen({ store }: { store: TummyStore }) {
         store.addEntry(
           "symptom",
           "Evening check-in",
-          `GI symptoms ${a.giScore ?? "—"} of 5${a.giWords ? ` · ${a.giWords}` : ""}${
+          `GI symptoms ${a.giScore ?? "-"} of 5${a.giWords ? ` · ${a.giWords}` : ""}${
             a.giWordsNote ? ` · ${a.giWordsNote}` : ""
           }`,
         );

@@ -56,7 +56,7 @@ export function WelcomeScreen({ store }: { store: TummyStore }) {
           Stanford School of Medicine
         </p>
         <p className="mt-4 text-[17px] font-semibold leading-relaxed text-pine-soft">
-          A one-week study of your gut sounds. I'll walk you through it — this isn't a test.
+          A one-week study of your gut sounds. I'll walk you through it. This isn't a test.
         </p>
       </div>
       <StickyFooter>
@@ -234,7 +234,7 @@ export function QuizScreen({ store }: { store: TummyStore }) {
               : "Next one."
             : correct
               ? "That's it."
-              : "Not quite — try again."}
+              : "Not quite. Try again."}
         </MascotSays>
 
         <div className="mt-3 flex gap-1.5">
@@ -687,7 +687,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
     } else if (elapsed >= 9 && notSeen("symptom")) {
       show({
         id: "symptom",
-        text: "Feel something? Tap an icon up top — try one now.",
+        text: "Feel something? Tap an icon up top. Try one now.",
         cta: "Let me try",
       });
     } else if (left <= 15 && left > 0 && notSeen("timeleft")) {
@@ -973,7 +973,7 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
       <TopBar title="Daily schedule" onBack={store.back} step="Step 6 of 9" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.cheer}>
-          Usual eat and sleep times — weekdays and weekends.
+          Usual eat and sleep times, weekdays and weekends.
         </MascotSays>
         <div className="mt-5">
           <DayTypeTabs
@@ -1042,7 +1042,7 @@ export function MealPickScreen({ store }: { store: TummyStore }) {
       k: "lunch" as const,
       label: "Lunch",
       when: "Recordings run through the afternoon",
-      why: "Need a private quiet room — not a bathroom. Skip if you have talking meetings in the 3.5 hours after.",
+      why: "Need a private quiet room, not a bathroom. Skip if you have talking meetings in the 3.5 hours after.",
       Icon: IconBowl,
     },
     {

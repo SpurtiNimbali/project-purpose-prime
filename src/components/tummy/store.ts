@@ -388,7 +388,7 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
             : item.sessionKind === "preMeal"
               ? "Record now, then start eating straight away."
               : mins < -20
-                ? "This one is late — record now, or skip and say why."
+                ? "This one is late. Record now, or skip and say why."
                 : "Case off, quiet room, sit still. Two minutes minimum.",
         cta: "Start recording",
         screen: "caseReminder",
@@ -480,7 +480,7 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
       tag: evening ? "Evening check-in" : "Wake-up questions",
       title: evening ? "A few questions about your day" : "A few questions before you record",
       sub: evening
-        ? "What you ate, what you missed, how you felt — about three minutes."
+        ? "What you ate, what you missed, how you felt. About three minutes."
         : "Sleep, food or drink, bathroom, and activity since waking.",
       cta: "Answer questions",
       screen: evening ? "eveningCheckin" : "morningQuestions",

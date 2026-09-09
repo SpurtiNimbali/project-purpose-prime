@@ -54,7 +54,7 @@ import {
   ContactFormScreen,
 } from "@/components/tummy/main";
 
-const TITLE = "Tummy — Stanford bowel sound study companion";
+const TITLE = "Tummy: Stanford bowel sound study companion";
 const DESC =
   "Tummy guides participants in the Stanford School of Medicine bowel sound study through daily recordings, meal, sleep and symptom logging.";
 
