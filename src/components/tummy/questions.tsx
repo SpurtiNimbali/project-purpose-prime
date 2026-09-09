@@ -74,7 +74,7 @@ export const MORNING_QS: FlowQ[] = [
     textIf: ["Yes, something else"],
     followUp: "What was it, and roughly when?",
     warnIf: ["Yes, something else"],
-    warn: "The morning recording is meant to be fasted. I'll note what you had so the team can interpret it.",
+    warn: "This recording is meant to capture your gut before anything except water. Food or drink changes that activity, so this take will not count as a fasting baseline. I'll still save what you had and when, so the team can read the audio in context. Record anyway if you can sit still for two minutes, or skip this one if you can't.",
   },
   { id: "wakeTime", q: "What time did you wake up?", type: "time", def: "07:00" },
   {

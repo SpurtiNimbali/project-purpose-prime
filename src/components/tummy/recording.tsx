@@ -28,13 +28,9 @@ import {
   IconBalloon,
   IconBolt,
   IconSpiral,
-  IconRuler,
-
   IconDizzy,
   IconWind,
   IconLock,
-  IconShield,
-  IconChart,
   IconX,
 
 } from "./icons";
@@ -539,129 +535,66 @@ export function AbdomenGuide() {
   );
 }
 
-export const PLACEMENT_TIPS = [
-  {
-    t: "Right lower belly",
-    b: "8 cm to the right of your belly button, then 3 cm down.",
-    Icon: IconRuler,
-  },
-  {
-    t: "Microphone edge down",
-    b: "The bottom edge of the phone sits on that point.",
-    Icon: IconMic,
-  },
-  {
-    t: "Bare skin",
-    b: "Case off, shirt lifted. No fabric between the phone and your skin.",
-    Icon: IconShield,
-  },
-  {
-    t: "Same way every time",
-    b: "Hold the phone upright, screen facing out, every session.",
-    Icon: IconPhone,
-  },
-  {
-    t: "Measure, don't guess",
-    b: "Use a ruler rather than guessing by eye.",
-    Icon: IconChart,
-  },
+const PLACEMENT_CHECKS = [
+  "8 cm right of your belly button, then 3 cm down",
+  "Case off, microphone on bare skin",
+  "Sit upright, don't talk, light pressure only",
+  "Quiet room: TV, radio, and fans off",
 ];
 
-/** Placement rules, revealed one at a time so each one gets read. */
-export function PlacementTips({ onAllSeen }: { onAllSeen?: () => void }) {
-  const [shown, setShown] = useState(1);
-  const all = shown >= PLACEMENT_TIPS.length;
+/** One short checklist. Nothing records until every line is ticked. */
+export function PlacementChecklist({ onReady }: { onReady?: (ready: boolean) => void }) {
+  const [done, setDone] = useState<boolean[]>(() => PLACEMENT_CHECKS.map(() => false));
+  const ready = done.every(Boolean);
   return (
     <div className="mt-4 space-y-2">
-      {PLACEMENT_TIPS.slice(0, shown).map(({ t, b, Icon }) => (
-        <div
-          key={t}
-          className="flex items-center gap-3 rounded-2xl bg-surface/10 px-3 py-2 text-surface"
-        >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber text-pine">
-            <Icon width={18} height={18} />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[15px] font-bold leading-snug">{t}</span>
-            <span className="block text-[13px] font-semibold leading-snug text-mint">{b}</span>
-          </span>
-        </div>
-      ))}
-      {!all ? (
+      {PLACEMENT_CHECKS.map((line, i) => (
         <button
+          key={line}
           onClick={() => {
-            const next = shown + 1;
-            setShown(next);
-            if (next >= PLACEMENT_TIPS.length) onAllSeen?.();
+            const next = done.map((v, n) => (n === i ? !v : v));
+            setDone(next);
+            onReady?.(next.every(Boolean));
           }}
-          className="min-h-[48px] w-full rounded-2xl border-2 border-mint text-[15px] font-extrabold text-mint"
+          className={cn(
+            "flex min-h-[56px] w-full items-center gap-3 rounded-2xl px-3 text-left",
+            done[i] ? "bg-mint/20" : "bg-surface/10",
+          )}
         >
-          Next rule · {shown} of {PLACEMENT_TIPS.length}
-        </button>
-      ) : null}
-    </div>
-  );
-}
-
-const POSITION_CHECKS = [
-  { t: "Case off", b: "Nothing between the phone and your skin." },
-  { t: "Quiet room", b: "Turn off the TV, radio, and fans. Close the door if you can." },
-  { t: "Sitting upright, no talking", b: "Feet on the floor, breathe normally, and stay still." },
-  { t: "Gentle pressure only", b: "Just enough to keep contact. Pressing harder muffles the sound." },
-];
-
-/** The three one-at-a-time checks shown over a blurred positioning guide. */
-export function PositionChecksGate({ onDone }: { onDone: () => void }) {
-  const [step, setStep] = useState(0);
-  const check = POSITION_CHECKS[Math.min(step, POSITION_CHECKS.length - 1)];
-  return (
-    <div className="absolute inset-0 z-30 flex flex-col justify-end bg-pine/70 px-5 pb-10">
-      <div className="rounded-3xl bg-surface p-5">
-        <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-          Check {step + 1} of {POSITION_CHECKS.length}
-        </p>
-        <p className="mt-2 text-[22px] font-extrabold leading-tight text-pine">{check.t}</p>
-        <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">{check.b}</p>
-        <div className="mt-5">
-          <Btn
-            onClick={() => {
-              if (step + 1 >= POSITION_CHECKS.length) onDone();
-              else setStep((s) => s + 1);
-            }}
+          <span
+            className={cn(
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-[3px]",
+              done[i] ? "border-mint bg-mint text-pine" : "border-surface/30",
+            )}
           >
-            Done, it's ready
-          </Btn>
-        </div>
-      </div>
+            {done[i] ? <IconCheck width={16} height={16} /> : null}
+          </span>
+          <span className="min-w-0 flex-1 text-[15px] font-bold leading-snug text-surface">
+            {line}
+          </span>
+        </button>
+      ))}
     </div>
   );
 }
 
 export function PositioningScreen({ store }: { store: TummyStore }) {
-  const [checked, setChecked] = useState(false);
-  const [tipsSeen, setTipsSeen] = useState(false);
-  const ready = checked && tipsSeen;
+  const [ready, setReady] = useState(false);
   return (
-    <Screen dark className="relative">
-      <TopBar title="Positioning guide" onBack={store.back} dark step="Placement" />
-      <div className={cn("flex-1 overflow-y-auto px-5 pb-6", !checked && "blur-md")}>
+    <Screen dark>
+      <TopBar title="Positioning" onBack={store.back} dark step="Placement" />
+      <div className="flex-1 overflow-y-auto px-5 pb-6">
         <AbdomenGuide />
-        <PlacementTips onAllSeen={() => setTipsSeen(true)} />
+        <p className="mt-3 text-[16px] font-semibold leading-snug text-mint">
+          Bottom of the phone on that spot, screen facing out.
+        </p>
+        <PlacementChecklist onReady={setReady} />
       </div>
-
-
       <div className="shrink-0 px-5 pb-7 pt-3">
         <Btn disabled={!ready} onClick={() => store.go("recording")}>
           I'm in position
         </Btn>
-        {checked && !tipsSeen ? (
-          <p className="mt-2 text-center text-[15px] font-semibold text-mint">
-            Read each placement rule to continue.
-          </p>
-        ) : null}
       </div>
-
-      {!checked ? <PositionChecksGate onDone={() => setChecked(true)} /> : null}
     </Screen>
   );
 }
@@ -1052,22 +985,13 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- post-recording questions ---------------- */
 
-/** Places you could actually sit and record, usually at home after waking. */
-export const HOME_LOCATIONS = [
-  "Bedroom",
-  "Living room, on a chair or sofa",
-  "Kitchen or dining table",
-  "Another room at home",
-  "Other",
-];
-
-/** Places you could privately sit still for two minutes during the day. */
-export const DAY_LOCATIONS = [
+export const RECORD_LOCATIONS = [
   "At home",
-  "Private room at work",
-  "At my desk or in an office",
-  "School or campus, in a private room",
+  "At work or in an office",
+  "School or campus",
+  "Outside",
   "In a car",
+  "Someone else's home",
   "Other",
 ];
 
@@ -1113,7 +1037,7 @@ function questionsFor(kind: SessionKind): Q[] {
       id: "location",
       q: "Where did you record?",
       type: "single",
-      options: kind === "fasted" ? HOME_LOCATIONS : DAY_LOCATIONS,
+      options: RECORD_LOCATIONS,
       textIf: ["Other"],
       followUp: "Where was it?",
     },
