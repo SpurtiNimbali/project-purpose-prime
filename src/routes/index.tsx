@@ -31,6 +31,7 @@ import {
   PostMetaScreen,
   SnackSkipScreen,
   SkipReasonScreen,
+  MissedWindowSheet,
   ExtraSessionScreen,
   UploadDoneScreen,
 } from "@/components/tummy/recording";
@@ -153,6 +154,7 @@ function TummyApp() {
         {showAssistantButton ? <AssistantButton store={store} dark={dark} /> : null}
         {TAB_SCREENS.includes(s) ? <TabBar store={store} /> : null}
         {showAssistant ? <AssistantSheet store={store} /> : null}
+        {!ONBOARD_SCREENS.includes(s) ? <MissedWindowSheet store={store} /> : null}
       </div>
     </main>
   );

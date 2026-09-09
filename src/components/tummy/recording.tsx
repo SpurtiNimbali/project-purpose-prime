@@ -133,8 +133,10 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                 </div>
 
                 {isNext ? (
-                  <div className="min-w-0 flex-1 rounded-2xl bg-teal p-4 text-surface">
-                    <div className="flex items-center gap-3">
+                  <div className="relative min-w-0 flex-1 overflow-hidden rounded-2xl bg-teal p-4 text-surface shadow-md">
+                    <span className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-mint/25" />
+                    <span className="pointer-events-none absolute -bottom-12 left-6 h-24 w-24 rounded-full bg-pine/15" />
+                    <div className="relative flex items-center gap-3">
                       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface/15">
                         <Icon width={22} height={22} />
                       </span>
@@ -153,7 +155,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                     </div>
                     <button
                       onClick={() => open(p)}
-                      className="mt-3 flex min-h-[56px] w-full items-center justify-center rounded-xl bg-surface text-[17px] font-extrabold text-teal active:scale-[0.99]"
+                      className="relative mt-3 flex min-h-[56px] w-full items-center justify-center rounded-xl bg-surface text-[17px] font-extrabold text-teal active:scale-[0.99]"
                     >
                       {p.kind === "recording"
                         ? "Start this recording"
@@ -169,14 +171,14 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                           store.startItem(p.id);
                           store.go("skipReason");
                         }}
-                        className="mt-2 min-h-[48px] w-full text-[15px] font-extrabold text-amber-soft"
+                        className="relative mt-2 min-h-[48px] w-full text-[15px] font-extrabold text-amber-soft"
                       >
                         Skip this one and tell us why
                       </button>
                     ) : p.kind === "meal" ? (
                       <button
                         onClick={() => store.missItem(p.id, "Meal skipped or not eaten")}
-                        className="mt-2 min-h-[48px] w-full text-[15px] font-extrabold text-amber-soft"
+                        className="relative mt-2 min-h-[48px] w-full text-[15px] font-extrabold text-amber-soft"
                       >
                         I skipped this meal
                       </button>
@@ -242,7 +244,12 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
 export function CaseReminderScreen({ store }: { store: TummyStore }) {
   const [why, setWhy] = useState(false);
   // the wake-up questions already cover food and drink, so fasted sessions go straight on
-  const next = () => store.go(store.sessionKind === "fasted" ? "positioning" : "sessionCheck");
+  const next = () =>
+    store.go(
+      store.sessionKind === "fasted" || store.sessionKind === "extra"
+        ? "positioning"
+        : "sessionCheck",
+    );
 
   return (
     <Screen>
@@ -467,7 +474,6 @@ export function MealEndScreen({ store }: { store: TummyStore }) {
 
 export function SessionCheckScreen({ store }: { store: TummyStore }) {
   const preMeal = store.sessionKind === "preMeal";
-  const extra = store.sessionKind === "extra";
   return (
     <Screen>
       <TopBar title="Quick check" onBack={store.back} />
@@ -477,16 +483,12 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
           <h2 className="mt-4 text-center text-[24px] font-extrabold leading-tight text-pine">
             {preMeal
               ? "Are you about to start eating, right after this recording?"
-              : extra
-                ? "Quiet room, case off, sitting upright?"
-                : "Have you had anything at all since the meal?"}
+              : "Have you had anything at all since the meal?"}
           </h2>
           <p className="mt-3 text-center text-[17px] font-semibold leading-snug text-pine-soft">
             {preMeal
               ? "This recording has to happen immediately before the first bite."
-              : extra
-                ? "Same place on the belly, and the same rules as your scheduled sessions."
-                : "No snacks. Water only if it was right after a recording, and at least 15 minutes ago."}
+              : "No snacks. Water only if it was right after a recording, and at least 15 minutes ago."}
           </p>
         </div>
         <Note tone="amber" title="Quality over quantity">
@@ -495,22 +497,14 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
       </ScreenBody>
       <StickyFooter>
         <Btn onClick={() => store.go("positioning")}>
-          {preMeal
-            ? "Yes, eating straight after"
-            : extra
-              ? "All set, let's record"
-              : "Nothing since the meal"}
+          {preMeal ? "Yes, eating straight after" : "Nothing since the meal"}
         </Btn>
         <div className="mt-3">
           <Btn
             variant="danger"
-            onClick={() => store.go(preMeal || extra ? "skipReason" : "snackSkip")}
+            onClick={() => store.go(preMeal ? "skipReason" : "snackSkip")}
           >
-            {preMeal
-              ? "Not yet, skip this one"
-              : extra
-                ? "Not right now"
-                : "I had a snack or a drink"}
+            {preMeal ? "Not yet, skip this one" : "I had a snack or a drink"}
           </Btn>
         </div>
       </StickyFooter>
@@ -933,6 +927,20 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
           onCancel={() => setPending(null)}
           onPick={(n) => {
             store.addMark({ ...pending, severity: n });
+            const session =
+              store.sessionKind === "fasted"
+                ? "fasted recording"
+                : store.sessionKind === "preMeal"
+                  ? "pre-meal recording"
+                  : store.sessionKind === "extra"
+                    ? "extra recording"
+                    : "post-meal recording";
+            const at = `${String(Math.floor(pending.at / 60)).padStart(2, "0")}:${String(pending.at % 60).padStart(2, "0")}`;
+            store.addEntry(
+              "symptom",
+              pending.label,
+              `${SEV_LABELS[n - 1]} · ${session} · ${at}`,
+            );
             setPending(null);
             setToast(`${pending.label} · ${SEV_LABELS[n - 1]} saved`);
           }}
@@ -1432,21 +1440,38 @@ export function SnackSkipScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- skipping a session ---------------- */
 
-const SKIP_REASONS = [
-  "I ate or drank something other than water",
-  "More than 30 minutes have passed since I woke up",
-  "I had a snack or a drink during the meal window",
-  "I drank water in the last 15 minutes",
+const SKIP_PLACE = [
   "I didn't have a quiet, private place",
   "I couldn't sit still and upright for two minutes",
-  "I forgot, or I was asleep",
   "Something else",
 ];
+
+const SNACK_IN_WINDOW = "I had a snack or a drink during the meal window";
+
+function skipReasonsFor(kind?: SessionKind) {
+  if (kind === "fasted") {
+    return [
+      "I ate or drank something other than water",
+      "More than 30 minutes have passed since I woke up",
+      "I drank water in the last 15 minutes",
+      ...SKIP_PLACE,
+    ];
+  }
+  if (kind === "preMeal") {
+    return ["I'm not about to start eating", "I already started eating", ...SKIP_PLACE];
+  }
+  if (kind === "postMeal") {
+    return [SNACK_IN_WINDOW, "I drank water in the last 15 minutes", ...SKIP_PLACE];
+  }
+  return ["I changed my mind", ...SKIP_PLACE];
+}
 
 export function SkipReasonScreen({ store }: { store: TummyStore }) {
   const [reason, setReason] = useState("");
   const [other, setOther] = useState("");
   const item = store.plan.find((p) => p.id === store.activeItemId);
+  const kind = item?.sessionKind ?? store.sessionKind;
+  const reasons = skipReasonsFor(kind);
   return (
     <Screen>
       <TopBar title="Skip this session" onBack={store.back} />
@@ -1458,7 +1483,7 @@ export function SkipReasonScreen({ store }: { store: TummyStore }) {
           {item ? item.label : "This recording"}
         </p>
         <div className="mt-2 space-y-2">
-          {SKIP_REASONS.map((r) => (
+          {reasons.map((r) => (
             <Choice key={r} label={r} selected={reason === r} onClick={() => setReason(r)} />
           ))}
         </div>
@@ -1478,7 +1503,7 @@ export function SkipReasonScreen({ store }: { store: TummyStore }) {
           onClick={() => {
             const text = reason === "Something else" ? other.trim() : reason;
             if (store.activeItemId) store.missItem(store.activeItemId, text);
-            if (reason === "I had a snack or a drink during the meal window") {
+            if (reason === SNACK_IN_WINDOW) {
               store.go("snackSkip");
               return;
             }
@@ -1494,6 +1519,62 @@ export function SkipReasonScreen({ store }: { store: TummyStore }) {
         </div>
       </StickyFooter>
     </Screen>
+  );
+}
+
+export function MissedWindowSheet({ store }: { store: TummyStore }) {
+  const ask = store.pendingMissAsk;
+  const [note, setNote] = useState("");
+  const [voice, setVoice] = useState(false);
+  if (!ask) return null;
+  const ready = note.trim().length > 0 || voice;
+  return (
+    <div className="absolute inset-0 z-50 flex flex-col justify-end bg-pine/45 px-5 pb-8 backdrop-blur-sm">
+      <div className="rounded-[28px] bg-surface p-5">
+        <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+          Window closed
+        </p>
+        <p className="mt-2 text-[22px] font-extrabold leading-tight text-pine">{ask.label}</p>
+        <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
+          This recording was marked missed because the time passed. What got in the way?
+        </p>
+        <div className="mt-4">
+          <TextInput
+            value={note}
+            onChange={(e) => {
+              setNote(e.target.value);
+              if (e.target.value) setVoice(false);
+            }}
+            placeholder="Type it, or record a voice note"
+          />
+        </div>
+        <button
+          onClick={() => {
+            setVoice((v) => !v);
+            if (!voice) setNote("");
+          }}
+          className={cn(
+            "mt-3 flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl border-2 text-[16px] font-extrabold",
+            voice ? "border-teal bg-mint-soft text-teal" : "border-line bg-wash text-pine",
+          )}
+        >
+          <IconMic width={22} height={22} />
+          {voice ? "Voice note saved" : "Record a voice note"}
+        </button>
+        <div className="mt-4">
+          <Btn
+            disabled={!ready}
+            onClick={() => {
+              store.explainMiss(voice ? "Voice note about a missed recording" : note.trim());
+              setNote("");
+              setVoice(false);
+            }}
+          >
+            Save this note
+          </Btn>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1519,9 +1600,21 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
     <Screen>
       <TopBar title="Extra recording" onBack={store.back} />
       <ScreenBody>
-        <MascotSays size={78} src={MASCOT.wave}>
-          What made you want an extra recording?
-        </MascotSays>
+        <div className="relative overflow-hidden rounded-3xl bg-pine px-5 py-5 shadow-md">
+          <span className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-teal/40" />
+          <span className="pointer-events-none absolute -bottom-12 right-16 h-24 w-24 rounded-full bg-blue/30" />
+          <div className="relative flex items-center gap-4">
+            <Mascot src={MASCOT.wave} size={72} />
+            <div className="min-w-0">
+              <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
+                Optional · two minutes
+              </p>
+              <p className="mt-1 text-[19px] font-extrabold leading-tight text-surface">
+                What made you want an extra recording?
+              </p>
+            </div>
+          </div>
+        </div>
         <div className="mt-5 space-y-3">
           {["Unusually loud or frequent sounds", "Symptoms higher than normal", "Both", "Just curious"].map(
             (r) => (
@@ -1644,17 +1737,20 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
           Uploaded, with {store.marks.length} symptom{" "}
           {store.marks.length === 1 ? "mark" : "marks"} timestamped on the audio.
         </p>
-        <div className="mt-5 rounded-3xl border border-line bg-surface p-5 text-left">
-          <div className="flex items-center gap-2 text-teal">
-            <IconClock width={22} height={22} />
-            <p className="text-[16px] font-extrabold">{title}</p>
+        <div className="relative mt-5 overflow-hidden rounded-3xl bg-pine p-5 text-left shadow-md">
+          <span className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-teal/40" />
+          <span className="pointer-events-none absolute -bottom-14 left-8 h-28 w-28 rounded-full bg-blue/25" />
+          <div className="relative">
+            <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
+              {title}
+            </p>
+            <p className="mt-1 text-[19px] font-extrabold leading-tight text-surface">
+              {next
+                ? `${next.label} · ${untilLabel(mins ?? 0)} · ${clockLabel(next.at)}`
+                : "Tomorrow morning"}
+            </p>
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-mint/90">{detail}</p>
           </div>
-          <p className="mt-1 text-[19px] font-extrabold text-pine">
-            {next
-              ? `${next.label} · ${untilLabel(mins ?? 0)} · ${clockLabel(next.at)}`
-              : "Tomorrow morning"}
-          </p>
-          <p className="mt-1 text-[16px] font-semibold text-pine-soft">{detail}</p>
         </div>
       </ScreenBody>
       <StickyFooter>

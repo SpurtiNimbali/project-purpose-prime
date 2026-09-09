@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 export type ScreenKey =
   // onboarding
@@ -69,6 +69,8 @@ export type PlanItem = {
   done: boolean;
   missed?: boolean;
   reason?: string;
+  /** auto-missed because the window closed; still needs a why note */
+  needsWhy?: boolean;
   window: string;
   /** recordings only */
   fasting?: boolean;
@@ -151,6 +153,9 @@ export type TummyStore = {
   startItem: (id: string) => void;
   completeItem: (id: string) => void;
   missItem: (id: string, reason?: string) => void;
+  /** recording auto-closed after its window; ask why in a popup */
+  pendingMissAsk: { id: string; label: string } | null;
+  explainMiss: (note: string) => void;
   /** snack or non-water drink inside the meal window, skip everything after it */
   skipRemainingAfterSnack: (reason: string) => number;
   completeSession: (id: string) => void;
@@ -202,6 +207,24 @@ export function setDemoShift(mins: number) {
 
 export function minutesNow() {
   return ((realMinutesNow() + demoShift) % (24 * 60) + 24 * 60) % (24 * 60);
+}
+
+const IN_FLIGHT_SCREENS: ScreenKey[] = [
+  "caseReminder",
+  "fastingCheck",
+  "sessionCheck",
+  "positioning",
+  "recording",
+  "postMeta",
+  "skipReason",
+  "snackSkip",
+];
+
+function recordingWindowClosesAt(item: PlanItem) {
+  if (item.sessionKind === "fasted") return item.at + 30;
+  if (item.sessionKind === "preMeal") return item.at + 15;
+  if (item.sessionKind === "postMeal") return item.at + 25;
+  return item.at + 20;
 }
 
 export function untilLabel(mins: number) {
@@ -522,6 +545,9 @@ export function useTummyStore(): TummyStore {
   const [questions, setQuestions] = useState({ morning: false, night: false });
   const [freezeUsed, setFreezeUsed] = useState(false);
   const [frozen, setFrozen] = useState(false);
+  const [pendingMissAsk, setPendingMissAsk] = useState<{ id: string; label: string } | null>(
+    null,
+  );
 
   const chooseStudyMeal = useCallback((m: Meal) => {
     setMeal(m);
@@ -559,7 +585,9 @@ export function useTummyStore(): TummyStore {
 
   const missItem = useCallback((id: string, reason?: string) => {
     setPlan((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, done: true, missed: true, reason } : p)),
+      prev.map((p) =>
+        p.id === id ? { ...p, done: true, missed: true, needsWhy: false, reason } : p,
+      ),
     );
     setEntries((prev) => [
       ...prev,
@@ -580,7 +608,7 @@ export function useTummyStore(): TummyStore {
         prev.map((p) => {
           if (p.sessionKind === "postMeal" && !p.done) {
             count += 1;
-            return { ...p, done: true, missed: true, reason };
+            return { ...p, done: true, missed: true, needsWhy: false, reason };
           }
           return p;
         }),
@@ -599,6 +627,61 @@ export function useTummyStore(): TummyStore {
     },
     [],
   );
+
+  useEffect(() => {
+    if (frozen) return;
+    const now = minutesNow();
+    const screen = stack[stack.length - 1];
+    const inFlight = IN_FLIGHT_SCREENS.includes(screen);
+    setPlan((prev) => {
+      let changed = false;
+      const next = prev.map((p) => {
+        if (p.kind !== "recording" || p.done) return p;
+        if (inFlight && p.id === activeItemId) return p;
+        const closes = recordingWindowClosesAt(p);
+        if (now <= closes) return p;
+        changed = true;
+        return {
+          ...p,
+          done: true,
+          missed: true,
+          needsWhy: now <= closes + 40,
+          reason: "Window closed",
+        };
+      });
+      return changed ? next : prev;
+    });
+  }, [demoTick, frozen, stack, activeItemId]);
+
+  useEffect(() => {
+    const ask = plan.find((p) => p.kind === "recording" && p.needsWhy);
+    setPendingMissAsk(ask ? { id: ask.id, label: ask.label } : null);
+  }, [plan]);
+
+  const explainMiss = useCallback((note: string) => {
+    setPlan((prev) => {
+      const target = prev.find((p) => p.needsWhy);
+      if (!target) return prev;
+      return prev.map((p) =>
+        p.id === target.id ? { ...p, needsWhy: false, reason: note } : p,
+      );
+    });
+    setEntries((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}-miss-why`,
+        kind: "recording",
+        label: "Missed recording",
+        detail: note,
+        time: nowLabel(),
+      },
+    ]);
+  }, []);
+
+  useEffect(() => {
+    const t = setInterval(() => setDemoTick((n) => n + 1), 15_000);
+    return () => clearInterval(t);
+  }, []);
 
   const startItem = useCallback(
     (id: string) => {
@@ -665,7 +748,7 @@ export function useTummyStore(): TummyStore {
       setFrozen(true);
       setPlan((prev) =>
         prev.map((p) =>
-          p.done ? p : { ...p, done: true, missed: true, reason: "Freeze day" },
+          p.done ? p : { ...p, done: true, missed: true, needsWhy: false, reason: "Freeze day" },
         ),
       );
       setEntries((prev) => [
@@ -710,6 +793,8 @@ export function useTummyStore(): TummyStore {
     startItem,
     completeItem,
     missItem,
+    pendingMissAsk,
+    explainMiss,
     skipRemainingAfterSnack,
     completeSession: completeItem,
     lastRecordingAt,

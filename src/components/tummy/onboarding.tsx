@@ -47,8 +47,10 @@ import { cn } from "@/lib/utils";
 
 export function WelcomeScreen({ store }: { store: TummyStore }) {
   return (
-    <Screen className="bg-wash">
-      <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+    <Screen className="relative overflow-hidden bg-wash">
+      <span className="pointer-events-none absolute -right-16 top-16 h-56 w-56 rounded-full bg-mint/35" />
+      <span className="pointer-events-none absolute -left-20 bottom-32 h-48 w-48 rounded-full bg-teal/10" />
+      <div className="relative flex flex-1 flex-col items-center justify-center px-6 text-center">
         <Mascot src={MASCOT.wave} size={200} />
         <h1 className="mt-4 text-[34px] font-extrabold leading-tight text-pine">Tummy</h1>
         <p className="mt-1 text-[15px] font-extrabold uppercase tracking-[0.14em] text-teal">
@@ -1270,8 +1272,10 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
 
 export function OnboardDoneScreen({ store }: { store: TummyStore }) {
   return (
-    <Screen>
-      <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+    <Screen className="relative overflow-hidden bg-wash">
+      <span className="pointer-events-none absolute -left-16 top-20 h-52 w-52 rounded-full bg-mint/40" />
+      <span className="pointer-events-none absolute -right-20 bottom-28 h-48 w-48 rounded-full bg-teal/10" />
+      <div className="relative flex flex-1 flex-col items-center justify-center px-6 text-center">
         <Mascot src={MASCOT.cheer} size={190} />
         <h1 className="mt-4 text-[28px] font-extrabold leading-tight text-pine">
           You're all set up

@@ -337,10 +337,13 @@ export function AssistantHint({ store }: { store: TummyStore }) {
   return (
     <button
       onClick={() => store.setChatOpen(true)}
-      className="flex w-full items-center gap-3 rounded-3xl border-2 border-dashed border-teal/40 bg-mint-soft/60 px-4 py-4 text-left"
+      className="relative flex w-full items-center gap-3 overflow-hidden rounded-3xl bg-mint-soft px-4 py-4 text-left shadow-sm"
     >
-      <Mascot src={MASCOT.calm} size={44} />
-      <span className="min-w-0 flex-1">
+      <span className="pointer-events-none absolute -right-6 -bottom-10 h-24 w-24 rounded-full bg-teal/10" />
+      <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface">
+        <Mascot src={MASCOT.calm} size={44} />
+      </span>
+      <span className="relative min-w-0 flex-1">
         <span className="block text-[16px] font-extrabold text-pine">
           Or tell Tummy what happened
         </span>
@@ -348,7 +351,7 @@ export function AssistantHint({ store }: { store: TummyStore }) {
           "I had a coffee and a slice of toast"
         </span>
       </span>
-      <span className="shrink-0 text-teal">
+      <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal text-surface">
         <IconCheck width={22} height={22} />
       </span>
     </button>

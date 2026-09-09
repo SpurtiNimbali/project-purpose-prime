@@ -113,8 +113,10 @@ export function HomeScreen({ store }: { store: TummyStore }) {
   if (store.frozen) {
     return (
       <Screen>
-        <div className="shrink-0 bg-blue px-5 pb-6 pt-14 text-surface">
-          <div className="flex items-center gap-3">
+        <div className="relative shrink-0 overflow-hidden bg-blue px-5 pb-6 pt-14 text-surface">
+          <span className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-surface/15" />
+          <span className="pointer-events-none absolute -bottom-16 left-6 h-32 w-32 rounded-full bg-pine/20" />
+          <div className="relative flex items-center gap-3">
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-surface/15">
               <IconSnowflake width={26} height={26} />
             </span>
@@ -127,7 +129,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
               </h1>
             </div>
           </div>
-          <p className="mt-3 text-[16px] font-semibold leading-snug text-surface/85">
+          <p className="relative mt-3 text-[16px] font-semibold leading-snug text-surface/85">
             Nothing to record, log, or answer today. Your streak stays safe, and the schedule
             picks up again tomorrow morning.
           </p>
@@ -174,7 +176,9 @@ export function HomeScreen({ store }: { store: TummyStore }) {
     <Screen>
       <div className="shrink-0 px-5 pb-1 pt-14">
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-          <Mascot size={48} />
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-mint-soft">
+            <Mascot size={48} />
+          </span>
           <div className="min-w-0">
             <p className="text-[15px] font-bold text-pine-soft">
               {hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening"}
@@ -193,11 +197,17 @@ export function HomeScreen({ store }: { store: TummyStore }) {
         <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">Next up</p>
         <div
           className={cn(
-            "mt-2 rounded-[28px] p-5",
-            due ? "bg-teal text-surface" : "border border-line bg-surface text-pine",
+            "relative mt-2 overflow-hidden rounded-[28px] p-5",
+            due ? "bg-teal text-surface shadow-md" : "border border-line bg-surface text-pine",
           )}
         >
-          <div className="flex items-center gap-3">
+          {due ? (
+            <>
+              <span className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-mint/25" />
+              <span className="pointer-events-none absolute -bottom-14 left-8 h-28 w-28 rounded-full bg-pine/15" />
+            </>
+          ) : null}
+          <div className="relative flex items-center gap-3">
             <span
               className={cn(
                 "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
@@ -221,7 +231,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
 
           <p
             className={cn(
-              "mt-3 text-[16px] font-semibold leading-snug",
+              "relative mt-3 text-[16px] font-semibold leading-snug",
               due ? "text-mint" : "text-pine-soft",
             )}
           >
@@ -260,7 +270,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 store.go("skipReason");
               }}
               className={cn(
-                "mt-3 min-h-[54px] w-full rounded-2xl border-2 text-[16px] font-extrabold active:scale-[0.99]",
+                "relative mt-3 min-h-[54px] w-full rounded-2xl border-2 text-[16px] font-extrabold active:scale-[0.99]",
                 due
                   ? "border-surface/40 bg-surface/10 text-surface"
                   : "border-line bg-wash text-pine",
@@ -273,7 +283,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           <button
             onClick={startTask}
             className={cn(
-              "mt-4 flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl text-[18px] font-extrabold active:scale-[0.99]",
+              "relative mt-4 flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl text-[18px] font-extrabold active:scale-[0.99]",
               due ? "bg-surface text-teal" : "bg-teal text-surface",
             )}
           >
@@ -395,15 +405,15 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 <button
                   key={k}
                   onClick={() => store.go(k)}
-                  className="relative flex min-h-[86px] flex-col items-center justify-center gap-1.5 rounded-2xl border border-line bg-surface px-1 active:scale-[0.98]"
+                  className="relative flex min-h-[86px] flex-col items-center justify-center gap-1.5 overflow-hidden rounded-2xl border border-line bg-surface px-1 shadow-sm active:scale-[0.98]"
                 >
                   {count > 0 ? (
-                    <span className="absolute right-1.5 top-1.5 flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-mint-soft px-1 text-[13px] font-extrabold text-teal">
+                    <span className="absolute right-1.5 top-1.5 z-10 flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-mint-soft px-1 text-[13px] font-extrabold text-teal">
                       {count}
                     </span>
                   ) : null}
-                  <span className="text-teal">
-                    <Icon width={26} height={26} />
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-mint-soft text-teal">
+                    <Icon width={22} height={22} />
                   </span>
                   <span className="w-full truncate text-center text-[14px] font-extrabold text-pine">
                     {label}
@@ -514,9 +524,9 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
                 <button
                   key={k}
                   onClick={() => store.go(k)}
-                  className="relative flex min-h-[126px] flex-col justify-between rounded-[26px] border border-line bg-surface p-4 text-left active:scale-[0.99]"
+                  className="relative flex min-h-[126px] flex-col justify-between rounded-[26px] border border-line bg-surface p-4 text-left shadow-sm active:scale-[0.99]"
                 >
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-mint-soft text-teal">
                     <Icon width={26} height={26} />
                   </span>
                   <span>
@@ -616,9 +626,35 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
   );
 }
 
+function mealChoiceFromItem(item?: { meal?: string; label: string }) {
+  if (!item) return "";
+  if (item.meal) return item.meal[0].toUpperCase() + item.meal.slice(1);
+  if (/snack/i.test(item.label)) return "Snack";
+  return "";
+}
+
+function defaultLoggedMeal(store: TummyStore) {
+  const active = store.plan.find((p) => p.id === store.activeItemId && p.kind === "meal");
+  const fromActive = mealChoiceFromItem(active);
+  if (fromActive) return fromActive;
+
+  if (store.nextTask.screen === "logMeal" && store.nextTask.itemId) {
+    const fromTask = mealChoiceFromItem(
+      store.plan.find((p) => p.id === store.nextTask.itemId && p.kind === "meal"),
+    );
+    if (fromTask) return fromTask;
+  }
+
+  const hour = Math.floor(store.demoNow / 60);
+  if (hour < 11) return "Breakfast";
+  if (hour < 16) return "Lunch";
+  if (hour < 21) return "Dinner";
+  return "Snack";
+}
+
 export function LogMealScreen({ store }: { store: TummyStore }) {
   const [photos, setPhotos] = useState(0);
-  const [which, setWhich] = useState("");
+  const [which, setWhich] = useState(() => defaultLoggedMeal(store));
   const [desc, setDesc] = useState("");
   const [time, setTime] = useState(
     new Date().toTimeString().slice(0, 5),
@@ -1109,8 +1145,15 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
     <Screen>
       <TopBar title="Progress" />
       <ScreenBody>
-        <Card className={cn("border-0 text-surface", store.frozen ? "bg-blue" : "bg-teal")}>
-          <div className="flex items-center gap-3">
+        <Card
+          className={cn(
+            "relative overflow-hidden border-0 text-surface shadow-md",
+            store.frozen ? "bg-blue" : "bg-teal",
+          )}
+        >
+          <span className="pointer-events-none absolute -right-12 -top-14 h-40 w-40 rounded-full bg-mint/25" />
+          <span className="pointer-events-none absolute -bottom-16 left-10 h-32 w-32 rounded-full bg-pine/15" />
+          <div className="relative flex items-center gap-3">
             <Mascot src={MASCOT.cheer} size={72} />
             <div className="min-w-0">
               <p className="text-[34px] font-extrabold leading-none">Day {store.day} of 7</p>
@@ -1121,7 +1164,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               </p>
             </div>
           </div>
-          <div className="mt-4 flex justify-between">
+          <div className="relative mt-4 flex justify-between">
             {days.map((d, i) => {
               const isFrozen = store.frozen && i === todayIdx;
               const isToday = i === todayIdx;
@@ -1361,11 +1404,27 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
         </div>
 
         <div className="mt-4 space-y-3">
+          <button
+            onClick={() => store.go("contact")}
+            className="relative flex w-full items-center gap-3 overflow-hidden rounded-3xl bg-teal px-5 py-4 text-left shadow-md active:scale-[0.99]"
+          >
+            <span className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-mint/25" />
+            <span className="pointer-events-none absolute -bottom-12 left-16 h-24 w-24 rounded-full bg-pine/15" />
+            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface">
+              <IconChat width={24} height={24} />
+            </span>
+            <span className="relative min-w-0 flex-1">
+              <span className="block text-[17px] font-extrabold text-surface">
+                Contact the study team
+              </span>
+              <span className="mt-0.5 block text-[15px] font-semibold leading-snug text-mint/90">
+                Questions, a missed session, or a concern
+              </span>
+            </span>
+            <span className="relative shrink-0 text-[22px] font-extrabold text-surface">›</span>
+          </button>
           <Btn variant="secondary" onClick={() => store.go("welcome")}>
             Restart the walkthrough
-          </Btn>
-          <Btn variant="secondary" onClick={() => store.go("contact")}>
-            Contact the study team
           </Btn>
         </div>
       </ScreenBody>
@@ -1439,25 +1498,63 @@ export function ContactScreen({ store }: { store: TummyStore }) {
               action: () => store.go("contactForm"),
               cta: "Write a message",
             },
-          ].map(({ t, b, Icon, action, cta }) => (
+          ].map(({ t, b, Icon, action, cta }) => {
+            const featured = t === "Ask me first";
+            return (
             <button
               key={t}
               onClick={action}
-              className="flex w-full items-center gap-3 rounded-3xl border border-line bg-surface p-4 text-left active:scale-[0.99]"
+              className={cn(
+                "relative flex w-full items-center gap-3 overflow-hidden rounded-3xl p-4 text-left shadow-sm active:scale-[0.99]",
+                featured ? "bg-teal text-surface shadow-md" : "border border-line bg-surface",
+              )}
             >
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+              {featured ? (
+                <>
+                  <span className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-mint/25" />
+                  <span className="pointer-events-none absolute -bottom-12 left-10 h-24 w-24 rounded-full bg-pine/15" />
+                </>
+              ) : null}
+              <span
+                className={cn(
+                  "relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full",
+                  featured ? "bg-surface/15 text-surface" : "bg-mint-soft text-teal",
+                )}
+              >
                 <Icon width={24} height={24} />
               </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[17px] font-extrabold text-pine">{t}</span>
-                <span className="mt-1 block text-[16px] font-semibold leading-snug text-pine-soft">
+              <span className="relative min-w-0 flex-1">
+                <span className={cn("block text-[17px] font-extrabold", featured ? "text-surface" : "text-pine")}>
+                  {t}
+                </span>
+                <span
+                  className={cn(
+                    "mt-1 block text-[16px] font-semibold leading-snug",
+                    featured ? "text-mint/90" : "text-pine-soft",
+                  )}
+                >
                   {b}
                 </span>
-                <span className="mt-1 block text-[15px] font-extrabold text-teal">{cta} →</span>
+                <span
+                  className={cn(
+                    "mt-1 block text-[15px] font-extrabold",
+                    featured ? "text-mint" : "text-teal",
+                  )}
+                >
+                  {cta} →
+                </span>
               </span>
-              <span className="shrink-0 text-[22px] font-extrabold text-teal">›</span>
+              <span
+                className={cn(
+                  "relative shrink-0 text-[22px] font-extrabold",
+                  featured ? "text-surface" : "text-teal",
+                )}
+              >
+                ›
+              </span>
             </button>
-          ))}
+            );
+          })}
         </div>
         <div className="mt-4">
           <Note tone="green" title="Prefer to talk it through?">
