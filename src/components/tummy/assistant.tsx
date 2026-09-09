@@ -171,7 +171,7 @@ function reply(store: TummyStore, raw: string): Msg[] {
     );
   }
   return say(
-    "Tell me what happened in plain words, \"I had a protein bar\", \"two glasses of water\", \"bloating, quite bad\", and I'll log it straight away.",
+    "Tell me in plain words: \"I had a protein bar\", \"two glasses of water\", \"bloating, quite bad\". I'll log it straight away.",
   );
 }
 
@@ -181,7 +181,7 @@ export function AssistantSheet({ store }: { store: TummyStore }) {
     {
       id: uid(),
       from: "tummy",
-      text: "Hi, I'm Tummy. Tell me what you ate, drank or felt and I will log it straight away, no forms.",
+      text: "Hi, I'm Tummy. Tell me what you ate, drank or felt and I'll log it. No forms.",
     },
   ]);
   const [text, setText] = useState("");

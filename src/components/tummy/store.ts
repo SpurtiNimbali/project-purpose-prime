@@ -215,10 +215,10 @@ export function untilLabel(mins: number) {
 }
 
 export const WINDOW_RULE =
-  "Nothing to eat or drink until the 3.5 hour recording is done. Water only if you really need it, up to one cup, taken straight after a recording.";
+  "No food or drink until the 3.5 hours are up. Water only if you need it: one cup, straight after a recording.";
 
 export const QUALITY_RULE =
-  "Quality over quantity. If you can't record properly, skip the session and tell us why. Clean audio with gaps is worth far more than a bad recording.";
+  "Quality over quantity. If you can't record properly, skip it and tell us why.";
 
 /** Post-meal recording offsets in minutes, measured from the END of the meal. */
 export const POST_MEAL_OFFSETS = [0, 30, 60, 90, 120, 150, 180, 210];
