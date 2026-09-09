@@ -34,7 +34,13 @@ export type FlowQ = {
   /** answers that trigger a warning message */
   warnIf?: string[];
   warn?: string;
+  /** skip this question unless a previous answer matches */
+  skipUnless?: { id: string; values: string[] };
 };
+
+function shouldSkip(q: FlowQ, answers: Record<string, string>) {
+  return !!q.skipUnless && !q.skipUnless.values.includes(answers[q.skipUnless.id] ?? "");
+}
 
 type Turn = { from: "bot" | "you"; text: string; warn?: boolean };
 
@@ -54,19 +60,12 @@ const WATCH_QS: FlowQ[] = [
     q: "How much battery does it have?",
     type: "single",
     options: ["Above 50%", "20 to 50%", "Below 20%", "Not sure"],
+    skipUnless: { id: "watchWearing", values: ["Yes"] },
   },
 ];
 
 export const MORNING_QS: FlowQ[] = [
   { id: "bedTime", q: "What time did you get into bed last night?", type: "time", def: "23:00" },
-  {
-    id: "latency",
-    q: "How long did it take you to fall asleep?",
-    type: "duration",
-    hint: "A rough guess is fine.",
-  },
-  { id: "wakeTime", q: "What time did you wake up?", type: "time", def: "07:00" },
-  { id: "outOfBed", q: "What time did you get out of bed?", type: "time", def: "07:15" },
   {
     id: "intake",
     q: "Have you had anything to eat or drink yet this morning?",
@@ -75,8 +74,9 @@ export const MORNING_QS: FlowQ[] = [
     textIf: ["Yes, something else"],
     followUp: "What was it, and roughly when?",
     warnIf: ["Yes, something else"],
-    warn: "The morning recording should be fasted. I'll note what you had.",
+    warn: "The morning recording is meant to be fasted. I'll note what you had so the team can interpret it.",
   },
+  { id: "wakeTime", q: "What time did you wake up?", type: "time", def: "07:00" },
   {
     id: "bathroom",
     q: "Have you been to the toilet since waking?",
@@ -85,13 +85,20 @@ export const MORNING_QS: FlowQ[] = [
     bristolIf: ["Yes, a bowel movement"],
   },
   {
+    id: "latency",
+    q: "How long did it take you to fall asleep?",
+    type: "duration",
+    hint: "A rough guess is fine.",
+  },
+  {
     id: "activity",
     q: "Any physical activity since waking, other than going to the toilet?",
     type: "single",
-    options: ["No, straight to this", "Yes"],
+    options: ["No", "Yes"],
     textIf: ["Yes"],
     followUp: "What did you do?",
   },
+  { id: "outOfBed", q: "What time did you get out of bed?", type: "time", def: "07:15" },
 ];
 
 export const EVENING_QS: FlowQ[] = [
@@ -104,39 +111,18 @@ export const EVENING_QS: FlowQ[] = [
     followUp: "What's missing, and roughly when?",
   },
   {
-    id: "missed",
-    q: "Did you miss any recordings today?",
-    type: "single",
-    options: ["No, I did them all", "Yes, one or more"],
-    textIf: ["Yes, one or more"],
-    followUp: "Which ones, and what got in the way?",
-  },
-  {
-    id: "difficulty",
-    q: "Was anything else about today hard to manage?",
-    type: "single",
-    options: ["No, it went fine", "Yes"],
-    textIf: ["Yes"],
-    followUp: "What made it hard?",
-  },
-  {
     id: "physical",
     q: "How do you feel physically, compared with a usual evening?",
     type: "single",
     options: VS_USUAL,
   },
   {
-    id: "emotional",
-    q: "And emotionally, compared with a usual evening?",
+    id: "missed",
+    q: "Did you miss any recordings today?",
     type: "single",
-    options: VS_USUAL,
-  },
-  {
-    id: "unusual",
-    q: "Was today unusual in any way? An exam, a stressful event, an argument.",
-    type: "text",
-    optional: true,
-    hint: "Only the study team sees this.",
+    options: ["No, I did them all", "Yes, one or more"],
+    textIf: ["Yes, one or more"],
+    followUp: "Which ones, and what got in the way?",
   },
   {
     id: "giScore",
@@ -147,7 +133,29 @@ export const EVENING_QS: FlowQ[] = [
     id: "giWords",
     q: "In a few words, what were they like?",
     type: "text",
-    hint: "For example: bloating was very bad, nothing else.",
+    optional: true,
+    hint: "For example: bloating was very bad, nothing else. Skip this if you had none.",
+  },
+  {
+    id: "emotional",
+    q: "How do you feel emotionally, compared with a usual evening?",
+    type: "single",
+    options: VS_USUAL,
+  },
+  {
+    id: "unusual",
+    q: "Was today unusual in any way? An exam, a stressful event, an argument?",
+    type: "text",
+    optional: true,
+    hint: "Only the study team sees this.",
+  },
+  {
+    id: "difficulty",
+    q: "Was anything else about today hard to manage?",
+    type: "single",
+    options: ["No, it went fine", "Yes"],
+    textIf: ["Yes"],
+    followUp: "What made it hard?",
   },
   { id: "anythingElse", q: "Anything else you'd like to tell us?", type: "text", optional: true },
   ...WATCH_QS,
@@ -185,6 +193,12 @@ function QuestionFlow({
   const done = step >= questions.length;
   const current = questions[Math.min(step, questions.length - 1)];
 
+  const nextAskable = (from: number, given: Record<string, string>) => {
+    let n = from;
+    while (n < questions.length && shouldSkip(questions[n], given)) n += 1;
+    return n;
+  };
+
   const advance = (from: Turn[], n: number) => {
     setStep(n);
     if (questions[n]?.def) setTime(questions[n].def as string);
@@ -196,7 +210,8 @@ function QuestionFlow({
   };
 
   const record = (value: string) => {
-    setAnswers((a) => ({ ...a, [current.id]: value }));
+    const given = { ...answers, [current.id]: value };
+    setAnswers(given);
     const next: Turn[] = [...turns, { from: "you", text: value }];
     if (current.warnIf?.includes(value) && current.warn) {
       next.push({ from: "bot", text: current.warn, warn: true });
@@ -211,14 +226,15 @@ function QuestionFlow({
       setTurns([...next, { from: "bot", text: current.followUp ?? "Tell me a little more." }]);
       return;
     }
-    advance(next, step + 1);
+    advance(next, nextAskable(step + 1, given));
   };
 
   const submitNote = (skipped?: boolean) => {
     const text = skipped ? "Nothing to add" : note || "A voice note";
+    const given = { ...answers, [`${current.id}Note`]: text };
     setNeedNote(false);
-    setAnswers((a) => ({ ...a, [`${current.id}Note`]: text }));
-    advance([...turns, { from: "you", text }], step + 1);
+    setAnswers(given);
+    advance([...turns, { from: "you", text }], nextAskable(step + 1, given));
     setNote("");
   };
 
@@ -406,9 +422,13 @@ function QuestionFlow({
                   onClick={() => {
                     setNeedBristol(false);
                     setShowScale(false);
-                    setAnswers((a) => ({ ...a, bristol: String(n) }));
+                    const given = { ...answers, bristol: String(n) };
+                    setAnswers(given);
                     store.addEntry("toilet", "Bowel movement", `Bristol type ${n}`);
-                    advance([...turns, { from: "you", text: `Type ${n}` }], step + 1);
+                    advance(
+                      [...turns, { from: "you", text: `Type ${n}` }],
+                      nextAskable(step + 1, given),
+                    );
                   }}
                   className="h-[62px] flex-1 rounded-xl border-2 border-line bg-surface text-[17px] font-extrabold text-pine"
                 >
@@ -446,8 +466,8 @@ function QuestionFlow({
         {lowBattery ? (
           <div className="mt-4">
             <Note tone="amber" title="Please charge your smartwatch now">
-              Put it on the charger and back on your wrist before you sleep, the overnight data
-              matters a great deal to us.
+              Put it on the charger now, and back on your wrist before you sleep. The overnight
+              data matters a great deal to us.
             </Note>
           </div>
         ) : null}
@@ -466,7 +486,7 @@ export function MorningQuestionsScreen({ store }: { store: TummyStore }) {
     <QuestionFlow
       store={store}
       title="Before your first recording"
-      intro="A few questions before the fasted recording. Try not to eat, drink, or move around until it's done."
+      intro="A few questions before your fasted recording. Try not to eat, drink, or move around until it's done."
       questions={MORNING_QS}
       finishLabel="Start the fasted recording"
       onFinish={(a) => {
@@ -509,7 +529,7 @@ export function EveningCheckinScreen({ store }: { store: TummyStore }) {
     <QuestionFlow
       store={store}
       title="Evening check-in"
-      intro="Last thing today. Honest gaps are more useful than tidy guesses."
+      intro="Last thing for today. Honest gaps are more useful to the study than tidy guesses."
       questions={EVENING_QS}
       finishLabel="Finish the day"
       onFinish={(a) => {

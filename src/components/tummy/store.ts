@@ -215,10 +215,10 @@ export function untilLabel(mins: number) {
 }
 
 export const WINDOW_RULE =
-  "No food or drink until the 3.5 hours are up. Water only if you need it: one cup, straight after a recording.";
+  "Please don't eat or drink until the 3.5 hours are up. If you need water, one cup, right after a recording.";
 
 export const QUALITY_RULE =
-  "Quality over quantity. If you can't record properly, skip it and tell us why.";
+  "A usable recording matters more than a complete set. If you can't do this one properly, skip it and tell us why.";
 
 /** Post-meal recording offsets in minutes, measured from the END of the meal. */
 export const POST_MEAL_OFFSETS = [0, 30, 60, 90, 120, 150, 180, 210];
@@ -360,7 +360,7 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
       kind: "done",
       tag: "All done",
       title: "Everything is done for today",
-        sub: "Nothing until tomorrow morning.",
+        sub: "Nothing more until tomorrow morning.",
       cta: "Open today's log",
       screen: "logHub",
       state: "clear",
@@ -386,10 +386,10 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
           item.sessionKind === "fasted"
             ? "Before food, drink, or moving around. Case off, quiet room, sit upright."
             : item.sessionKind === "preMeal"
-              ? "Record now, then start eating straight away."
+              ? "Record now, then start eating as soon as you finish."
               : mins < -20
-                ? "This one is late. Record now, or skip and say why."
-                : "Case off, quiet room, sit still. Two minutes minimum.",
+                ? "This recording is late. You can still do it now, or skip it and tell us why."
+                : "Case off, quiet room, sit still. Two minutes is the minimum.",
         cta: "Start recording",
         screen: "caseReminder",
         state: "due",
@@ -403,7 +403,7 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
       kind: "waiting",
       tag: "Waiting",
       title: item.label,
-      sub: `You're clear until ${clockLabel(item.at)}.`,
+      sub: `You're free until ${clockLabel(item.at)}.`,
       note: item.sessionKind === "postMeal" ? WINDOW_RULE : undefined,
       cta: "Open today's plan",
       screen: "sessionHub",
@@ -421,7 +421,7 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
         kind: "meal",
         tag: "Meal logging",
         title: item.label,
-        sub: "Add a photo and the time. A line of text is fine for a snack.",
+        sub: "Add a photo and the time. For a snack, a short description is enough.",
         cta: "Log it now",
         screen: "logMeal",
         state: "due",
@@ -450,8 +450,8 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
         tag: "Meal logging",
         title: start ? item.label : "Finished eating?",
         sub: start
-          ? "Photo of the plate, then tap at the first bite."
-          : "Tap when the last bite is done. Recordings time from that.",
+          ? "Take a photo of the plate, then tap when you take the first bite."
+          : "Tap when your last bite is done. Every recording after that is timed from that moment.",
         cta: start ? "Start the meal" : "I've finished eating",
         screen: start ? "mealCapture" : "mealEnd",
         state: "due",
@@ -480,8 +480,8 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
       tag: evening ? "Evening check-in" : "Wake-up questions",
       title: evening ? "A few questions about your day" : "A few questions before you record",
       sub: evening
-        ? "What you ate, what you missed, how you felt. About three minutes."
-        : "Sleep, food or drink, bathroom, and activity since waking.",
+        ? "What you ate, anything you missed, and how you felt. About three minutes."
+        : "Sleep, anything you've eaten or drunk, bathroom, and activity since waking.",
       cta: "Answer questions",
       screen: evening ? "eveningCheckin" : "morningQuestions",
       state: "due",

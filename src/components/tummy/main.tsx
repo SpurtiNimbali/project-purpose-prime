@@ -128,8 +128,8 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             </div>
           </div>
           <p className="mt-3 text-[16px] font-semibold leading-snug text-surface/85">
-            Nothing to record, log or answer today. Your streak stays safe and the schedule picks
-            up again tomorrow morning.
+            Nothing to record, log, or answer today. Your streak stays safe, and the schedule
+            picks up again tomorrow morning.
           </p>
         </div>
 
@@ -161,7 +161,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           </div>
 
           <p className="mt-5 text-center text-[15px] font-semibold leading-snug text-pine-soft">
-            Rest up. Everything reopens tomorrow morning with your fasted recording.
+            Rest today. Everything reopens tomorrow morning with your fasted recording.
           </p>
         </ScreenBody>
 
@@ -364,7 +364,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 Something feels different?
               </span>
               <span className="mt-1 block text-[15px] font-semibold leading-snug text-mint/90">
-                Extra 2-minute recording: loud gurgles, pain, a sudden change
+                An extra two-minute recording if you notice loud gurgles, pain, or a sudden change
               </span>
             </span>
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface/15 text-[20px] font-extrabold text-surface">
@@ -431,36 +431,36 @@ const LOG_ITEMS: {
   {
     k: "logMeal",
     label: "Meal or snack",
-    sub: "Photo or description",
+    sub: "A photo, or a short description",
     Icon: IconBowl,
     kind: "meal",
   },
   {
     k: "logHydration",
     label: "Drinks",
-    sub: "Water, tea, anything fizzy",
+    sub: "Water, tea, or anything fizzy",
     Icon: IconDroplet,
     kind: "hydration",
   },
   {
     k: "logSymptom",
     label: "Symptom",
-    sub: "Type and how strong",
+    sub: "What it is, and how strong",
     Icon: IconWave,
     kind: "symptom",
   },
   {
     k: "logToilet",
     label: "Toilet habits",
-    sub: "Timing and consistency",
+    sub: "When, and what it was like",
     Icon: IconToilet,
     kind: "toilet",
   },
-  { k: "logSleep", label: "Sleep", sub: "Last night's rest", Icon: IconMoon, kind: "sleep" },
+  { k: "logSleep", label: "Sleep", sub: "How last night went", Icon: IconMoon, kind: "sleep" },
   {
     k: "logActivity",
     label: "Activity",
-    sub: "Walks, workouts, rest",
+    sub: "Walks, workouts, or rest",
     Icon: IconRun,
     kind: "activity",
   },
@@ -486,7 +486,9 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
       <div className="shrink-0 px-5 pb-3 pt-14">
         <h1 className="text-[24px] font-extrabold leading-tight text-pine">Logging</h1>
         <p className="mt-1 text-[16px] font-semibold text-pine-soft">
-          {entries.length} things logged today · nothing has to be in order
+          {entries.length === 1
+            ? "1 thing logged today. Add the rest whenever you remember."
+            : `${entries.length} things logged today. Add the rest whenever you remember.`}
         </p>
         <div className="mt-4 flex rounded-2xl bg-surface p-1">
           {(["add", "today"] as const).map((t) => (
@@ -603,8 +605,8 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
             </div>
 
             <div className="mt-4">
-              <Note tone="green" title="Nothing locks">
-                Add anything you forgot later today.
+              <Note tone="green" title="Everything is saved against your subject ID">
+                You can add anything you forgot later in the day. Nothing locks.
               </Note>
             </div>
           </>
@@ -645,8 +647,8 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
         </button>
         <p className="mt-2 text-[15px] font-semibold text-pine-soft">
           {isSnack
-            ? "A photo is best. Text is fine for a snack."
-            : "Photos for meals and drinks. Add another if one shot doesn't cover it."}
+            ? "A photo is best. A short description is fine for a snack."
+            : "Please add a photo for meals and drinks. Add another if one shot doesn't cover it."}
         </p>
         <div className="mt-4">
           <Field label="What time was this?">
@@ -808,7 +810,7 @@ export function LogSleepScreen({ store }: { store: TummyStore }) {
   const [answers, setAnswers] = useState<string[]>([]);
   const qs = [
     { q: "How did you sleep last night?", options: ["Well", "So-so", "Badly"] },
-    { q: "Roughly how many hours?", options: ["Under 5", "5 to 6", "7 to 8", "More than 8"] },
+    { q: "Roughly how many hours?", options: ["Under 5", "5 to 6", "6 to 7", "7 to 8", "More than 8"] },
     { q: "Did you wake up during the night?", options: ["No", "Once", "A few times"] },
   ];
   const done = step >= qs.length;
@@ -817,7 +819,7 @@ export function LogSleepScreen({ store }: { store: TummyStore }) {
       <TopBar title="Log sleep" onBack={store.back} />
       <ScreenBody>
         <MascotSays src={MASCOT.calm} size={72}>
-          Three taps and we're done.
+          Three quick questions, then we're done.
         </MascotSays>
         <div className="mt-4 space-y-3">
           {answers.map((a, i) => (
@@ -850,7 +852,7 @@ export function LogSleepScreen({ store }: { store: TummyStore }) {
             </>
           ) : (
             <Note tone="green" title="Sleep logged">
-              Thanks.
+              Thanks, that helps us read this morning's fasting recording.
             </Note>
           )}
         </div>
@@ -978,7 +980,7 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
       <TopBar title="Log toilet habits" onBack={store.back} />
       <ScreenBody>
         <Note tone="green" title="Only your subject ID is attached">
-          Routine research data. Not shared outside the study team.
+          This is routine research data. Nothing here is shared with anyone outside the study team.
         </Note>
         <div className="mt-4 space-y-4">
           <Field label="When was it?">
@@ -1114,8 +1116,8 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               <p className="text-[34px] font-extrabold leading-none">Day {store.day} of 7</p>
               <p className="text-[16px] font-bold text-surface/85">
                 {store.frozen
-                  ? "freeze day · streak safe until tomorrow"
-                  : "seven consecutive study days"}
+                  ? "Freeze day. Your streak stays safe until tomorrow."
+                  : "Seven consecutive study days"}
               </p>
             </div>
           </div>
@@ -1158,11 +1160,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               <IconChart width={22} height={22} />
               <p className="text-[17px] font-extrabold text-pine">Today's recordings</p>
             </div>
-            <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              The protocol asks for {REQUIRED} recordings, about 20 minutes of sound, across the
-              fasted session, your chosen meal and the 3.5 hours after it.
-            </p>
-            <div className="mt-4 h-5 w-full overflow-hidden rounded-full bg-wash">
+            <div className="mt-3 h-5 w-full overflow-hidden rounded-full bg-wash">
               <div
                 className="h-full rounded-full bg-sage transition-all"
                 style={{ width: `${pct}%` }}
@@ -1186,8 +1184,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
             </div>
             {extras > 0 ? (
               <p className="mt-3 text-[15px] font-semibold text-pine-soft">
-                Plus {extras} extra {extras === 1 ? "recording" : "recordings"}. Bonus, not part of
-                the {REQUIRED}.
+                Plus {extras} extra {extras === 1 ? "recording" : "recordings"}
               </p>
             ) : null}
           </Card>
@@ -1202,9 +1199,6 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               {mealsDone}
               <span className="text-[16px] font-bold text-pine-soft">/{mealsTotal}</span>
             </p>
-            <p className="mt-1 text-[15px] font-semibold leading-snug text-pine-soft">
-              Photographed and timed.
-            </p>
           </Card>
           <Card>
             <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
@@ -1213,9 +1207,6 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
             <p className="mt-1 text-[26px] font-extrabold leading-none text-pine">
               {qDone}
               <span className="text-[16px] font-bold text-pine-soft">/{qTotal}</span>
-            </p>
-            <p className="mt-1 text-[15px] font-semibold leading-snug text-pine-soft">
-              Morning, around your meal and the evening check-in.
             </p>
           </Card>
         </div>
@@ -1245,16 +1236,16 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                 </p>
                 <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
                   {store.frozen
-                    ? "Paused until tomorrow. Nothing counts as missed. The seven days extend by one."
+                    ? "Paused until tomorrow. Nothing today counts as missed, and the seven days extend by one."
                     : store.freezeUsed
-                      ? "You've used your one freeze. The rest of the days run back to back."
-                      : "Pause one whole day. Nothing that day counts as missed."}
+                      ? "You've used your one freeze. The remaining days run back to back."
+                      : "Pause one whole day if you need it. Nothing that day counts as missed."}
                 </p>
                 {!store.freezeUsed ? (
                   <>
                     <div className="mt-3 rounded-2xl border-2 border-amber bg-amber/15 px-4 py-3">
                       <p className="text-[15px] font-bold leading-snug text-pine">
-                        One freeze for the whole study. It can't be undone.
+                        You get one freeze for the whole study, and it can't be undone.
                       </p>
                     </div>
                     <div className="mt-3">
@@ -1277,8 +1268,8 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
           <Card>
             <p className="text-[17px] font-extrabold text-pine">Missing a session is fine</p>
             <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-              A clean two minutes beats a rushed one. Tell us why if you skip. The note is data
-              too, and it never removes you from the study.
+              A clean two minutes is more useful than a rushed one. If you skip, tell us why. That
+              note is data too, and it never removes you from the study.
             </p>
           </Card>
         </div>
@@ -1289,7 +1280,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
           <div className="w-full rounded-t-[28px] bg-cream px-5 pb-7 pt-6">
             <p className="text-[20px] font-extrabold text-pine">Use your only freeze day?</p>
             <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
-              Pauses today. One freeze for the whole study. Can't be undone.
+              This pauses today. You get one freeze for the whole study, and it can't be undone.
             </p>
             <div className="mt-5 space-y-3">
               <Btn
@@ -1364,7 +1355,8 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
 
         <div className="mt-4">
           <Note tone="green" title="Your data is anonymous">
-            Everything is stored against your subject ID.
+            Recordings and logs are stored against your subject ID. Message your coordinator if
+            you have questions.
           </Note>
         </div>
 
@@ -1389,7 +1381,7 @@ export function PeriodCheckScreen({ store }: { store: TummyStore }) {
       <TopBar title="Evening check-in" onBack={store.back} />
       <ScreenBody>
         <MascotSays src={MASCOT.calm} size={78}>
-          Last one for today, are you on your period right now?
+          Last question for today. Are you on your period right now?
         </MascotSays>
         <div className="mt-5 space-y-2">
           {["Yes", "No", "Not sure", "Prefer not to say"].map((o) => (
@@ -1405,7 +1397,8 @@ export function PeriodCheckScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="green" title="Why we ask">
-            Cycle timing can change gut symptoms.
+            Cycle timing can change gut symptoms, so this helps the team read your recordings in
+            context. It's stored against your subject ID only.
           </Note>
         </div>
       </ScreenBody>
@@ -1421,27 +1414,27 @@ export function ContactScreen({ store }: { store: TummyStore }) {
       <TopBar title="Contact the study team" onBack={store.back} />
       <ScreenBody>
         <MascotSays size={78}>
-          What's going on? I'll point you to the right person.
+          What's going on? I'll point you to the right place.
         </MascotSays>
         <div className="mt-5 space-y-3">
           {[
             {
               t: "Ask me first",
-              b: "Missed recordings, timings, reminders, app problems.",
+              b: "Missed recordings, timings, reminders, or trouble with the app.",
               Icon: IconChat,
               action: () => store.setChatOpen(true),
               cta: "Open chat",
             },
             {
               t: "Message your study coordinator",
-              b: "Scheduling, compensation, taking part. Reply within one working day.",
+              b: "Scheduling, compensation, or taking part. They reply within one working day.",
               Icon: IconSend,
               action: () => store.go("contactForm"),
               cta: "Write a message",
             },
             {
               t: "Raise a concern or complaint",
-              b: "Goes to the study manager and, if you ask, the independent review board.",
+              b: "This goes to the study manager and, if you ask, the independent review board.",
               Icon: IconShield,
               action: () => store.go("contactForm"),
               cta: "Write a message",
@@ -1467,8 +1460,8 @@ export function ContactScreen({ store }: { store: TummyStore }) {
           ))}
         </div>
         <div className="mt-4">
-          <Note tone="green" title="Prefer to talk?">
-            Coordinator replies weekdays, 9am to 5pm.
+          <Note tone="green" title="Prefer to talk it through?">
+            Send a message any time. Your coordinator replies on weekdays, 9am to 5pm.
           </Note>
         </div>
       </ScreenBody>
@@ -1487,11 +1480,12 @@ export function ContactFormScreen({ store }: { store: TummyStore }) {
         {sent ? (
           <>
             <MascotSays src={MASCOT.cheer} size={78}>
-              Sent. Someone will reply within one working day.
+              Sent. Someone on the team will reply within one working day.
             </MascotSays>
             <div className="mt-4">
               <Note tone="green" title="Nothing changes in the meantime">
-                Keep recording as usual. If you need to pause, say so.
+                Keep recording as usual. If you need to pause, say so and the team will arrange it
+                with you.
               </Note>
             </div>
           </>
@@ -1523,7 +1517,7 @@ export function ContactFormScreen({ store }: { store: TummyStore }) {
             </div>
             <div className="mt-4">
               <Note tone="blue" title="Want a quicker answer?">
-                Ask Tummy in the chat for timing and app questions.
+                Ask Tummy in the chat. Timing and app questions are usually answered instantly.
               </Note>
             </div>
           </>

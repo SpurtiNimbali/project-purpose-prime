@@ -219,7 +219,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
 
           {!next ? (
             <p className="mt-2 rounded-2xl bg-mint-soft px-4 py-4 text-center text-[16px] font-bold text-pine">
-              Everything is done today. Nothing more until tomorrow morning.
+              Everything for today is done. Nothing more until tomorrow morning.
             </p>
           ) : null}
 
@@ -260,7 +260,7 @@ export function CaseReminderScreen({ store }: { store: TummyStore }) {
             Take your phone case off
           </h2>
           <p className="mt-2 text-[17px] font-semibold text-pine-soft">
-            Bare phone against bare skin, every time.
+            The bare phone sits against bare skin every time.
           </p>
         </div>
         <button
@@ -271,7 +271,8 @@ export function CaseReminderScreen({ store }: { store: TummyStore }) {
         </button>
         {why ? (
           <Note tone="amber" title="Why the case matters">
-            Even a few millimetres of air blocks most of the sound.
+            A case creates a gap between the microphone and your skin. Gut sounds are quiet and low,
+            so even a couple of millimetres of air loses most of the signal.
           </Note>
         ) : null}
       </ScreenBody>
@@ -295,11 +296,13 @@ export function FastingCheckScreen({ store }: { store: TummyStore }) {
             Still fasted, and within 30 minutes of waking?
           </h2>
           <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
-            Nothing but a few sips of water. Bathroom is fine. Sitting up counts; lying down doesn't.
+            Nothing except a few sips of water. Using the bathroom is fine. Sitting up counts;
+            still lying down does not.
           </p>
         </div>
         <Note tone="amber" title="If either is a no">
-          Skip and tell us why. A gap beats a recording we can't use.
+          Skip this morning's recording and tell us why. A gap is more useful than a recording we
+          can't use.
         </Note>
       </ScreenBody>
       <StickyFooter>
@@ -327,7 +330,7 @@ export function WhichMealScreen({ store }: { store: TummyStore }) {
       <TopBar title="Which meal?" onBack={store.back} />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Same meal every study day. Pick the one you eat at a steady time.
+          You'll use the same meal every study day. Pick the one you eat at a steady time.
         </p>
         <div className="mt-5 space-y-3">
           {meals.map(({ k, label, Icon }) => (
@@ -351,7 +354,7 @@ export function WhichMealScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="amber" title="This can't change later">
-            Same meal every day, so the recordings can be compared.
+            Every study day uses the same meal, so we can compare the recordings with each other.
           </Note>
         </div>
       </ScreenBody>
@@ -381,7 +384,7 @@ export function MealCaptureScreen({ store }: { store: TummyStore }) {
           </span>
         </button>
         <p className="mt-2 text-[15px] font-semibold text-pine-soft">
-          Add another photo if one shot doesn't cover it.
+          Add another photo if one shot doesn't show the whole plate.
         </p>
         <div className="mt-4">
           <Field label="What's in it?" hint="A line of text, or a voice note.">
@@ -394,8 +397,9 @@ export function MealCaptureScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="blue" title="Timers start when you finish, not now">
-            Tap as you take the first bite. After the last bite, recordings run every 30 minutes for
-            3.5 hours.
+            Tap below as you take the first bite. When you finish eating, tap I've finished. From
+            that moment the app schedules a recording right away, then every 30 minutes for 3.5
+            hours.
           </Note>
         </div>
       </ScreenBody>
@@ -432,7 +436,7 @@ export function MealEndScreen({ store }: { store: TummyStore }) {
             Tap the moment your last bite is done
           </h2>
           <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
-            Every recording after this is timed from now.
+            Every recording after this is timed from this moment.
           </p>
         </div>
         <Note tone="amber" title="From now until the last recording">
@@ -483,10 +487,10 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
           </h2>
           <p className="mt-3 text-center text-[17px] font-semibold leading-snug text-pine-soft">
             {preMeal
-              ? "This recording has to sit immediately before the first bite."
+              ? "This recording has to happen immediately before the first bite."
               : extra
-                ? "Same site and same rules as your scheduled sessions."
-                : "No snacks. Water only if it was right after a recording, at least 15 minutes ago."}
+                ? "Same place on the belly, and the same rules as your scheduled sessions."
+                : "No snacks. Water only if it was right after a recording, and at least 15 minutes ago."}
           </p>
         </div>
         <Note tone="amber" title="Quality over quantity">
@@ -538,7 +542,7 @@ export function AbdomenGuide() {
 export const PLACEMENT_TIPS = [
   {
     t: "Right lower belly",
-    b: "8 cm right of your belly button, then 3 cm down.",
+    b: "8 cm to the right of your belly button, then 3 cm down.",
     Icon: IconRuler,
   },
   {
@@ -548,23 +552,23 @@ export const PLACEMENT_TIPS = [
   },
   {
     t: "Bare skin",
-    b: "Case off, shirt lifted. No fabric in between.",
+    b: "Case off, shirt lifted. No fabric between the phone and your skin.",
     Icon: IconShield,
   },
   {
     t: "Same way every time",
-    b: "Phone upright, screen facing out, every session.",
+    b: "Hold the phone upright, screen facing out, every session.",
     Icon: IconPhone,
   },
   {
     t: "Measure, don't guess",
-    b: "Use a ruler rather than your eye.",
+    b: "Use a ruler rather than guessing by eye.",
     Icon: IconChart,
   },
 ];
 
 /** Placement rules, revealed one at a time so each one gets read. */
-export function PlacementTips() {
+export function PlacementTips({ onAllSeen }: { onAllSeen?: () => void }) {
   const [shown, setShown] = useState(1);
   const all = shown >= PLACEMENT_TIPS.length;
   return (
@@ -585,7 +589,11 @@ export function PlacementTips() {
       ))}
       {!all ? (
         <button
-          onClick={() => setShown((s) => s + 1)}
+          onClick={() => {
+            const next = shown + 1;
+            setShown(next);
+            if (next >= PLACEMENT_TIPS.length) onAllSeen?.();
+          }}
           className="min-h-[48px] w-full rounded-2xl border-2 border-mint text-[15px] font-extrabold text-mint"
         >
           Next rule · {shown} of {PLACEMENT_TIPS.length}
@@ -597,9 +605,9 @@ export function PlacementTips() {
 
 const POSITION_CHECKS = [
   { t: "Case off", b: "Nothing between the phone and your skin." },
-  { t: "Quiet room", b: "TV, radio and fans off. Close the door if you can." },
-  { t: "Sitting upright, no talking", b: "Feet on the floor, breathe normally, stay still." },
-  { t: "Gentle pressure only", b: "Just enough to keep skin contact. Pressing harder muffles it." },
+  { t: "Quiet room", b: "Turn off the TV, radio, and fans. Close the door if you can." },
+  { t: "Sitting upright, no talking", b: "Feet on the floor, breathe normally, and stay still." },
+  { t: "Gentle pressure only", b: "Just enough to keep contact. Pressing harder muffles the sound." },
 ];
 
 /** The three one-at-a-time checks shown over a blurred positioning guide. */
@@ -631,19 +639,26 @@ export function PositionChecksGate({ onDone }: { onDone: () => void }) {
 
 export function PositioningScreen({ store }: { store: TummyStore }) {
   const [checked, setChecked] = useState(false);
+  const [tipsSeen, setTipsSeen] = useState(false);
+  const ready = checked && tipsSeen;
   return (
     <Screen dark className="relative">
       <TopBar title="Positioning guide" onBack={store.back} dark step="Placement" />
       <div className={cn("flex-1 overflow-y-auto px-5 pb-6", !checked && "blur-md")}>
         <AbdomenGuide />
-        <PlacementTips />
+        <PlacementTips onAllSeen={() => setTipsSeen(true)} />
       </div>
 
 
       <div className="shrink-0 px-5 pb-7 pt-3">
-        <Btn disabled={!checked} onClick={() => store.go("recording")}>
+        <Btn disabled={!ready} onClick={() => store.go("recording")}>
           I'm in position
         </Btn>
+        {checked && !tipsSeen ? (
+          <p className="mt-2 text-center text-[15px] font-semibold text-mint">
+            Read each placement rule to continue.
+          </p>
+        ) : null}
       </div>
 
       {!checked ? <PositionChecksGate onDone={() => setChecked(true)} /> : null}
@@ -681,7 +696,7 @@ export function QualityPanel({
   }, []);
 
   return (
-    <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
+    <div className="absolute inset-0 z-50 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
       <div className="rounded-[28px] bg-surface p-6 text-center">
         {phase === "checking" ? (
           <>
@@ -690,7 +705,8 @@ export function QualityPanel({
             </span>
             <h2 className="mt-4 text-[23px] font-extrabold text-pine">Checking the audio…</h2>
             <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
-              We listen for background noise, rustling and gaps in contact with your skin.
+              We listen for background noise, rustling, and any gap between the phone and your
+              skin.
             </p>
           </>
         ) : pass ? (
@@ -698,7 +714,7 @@ export function QualityPanel({
             <Mascot src={MASCOT.cheer} size={130} className="mx-auto" />
             <h2 className="mt-3 text-[24px] font-extrabold text-pine">Good quality recording</h2>
             <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
-              Clear contact, quiet room, gut sounds coming through nicely. Nothing to redo.
+              Clear contact, a quiet room, and gut sounds coming through. Nothing to redo.
             </p>
             <div className="mt-5">
               <Btn onClick={onContinue}>Continue</Btn>
@@ -711,8 +727,8 @@ export function QualityPanel({
               This one is too noisy to use
             </h2>
             <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
-              We picked up rustling and background noise. Press the phone flat on bare skin, settle
-              somewhere quieter, and record it again, it only takes two minutes.
+              We picked up rustling or background noise. Press the phone flat on bare skin, find a
+              quieter spot, and try again. It only takes two minutes.
             </p>
             <div className="mt-5 space-y-3">
               <Btn onClick={onRedo}>Record it again</Btn>
@@ -825,7 +841,7 @@ export function SeveritySheet({
   onCancel: () => void;
 }) {
   return (
-    <div className="absolute inset-0 z-20 flex flex-col bg-pine/70 backdrop-blur-sm">
+    <div className="absolute inset-0 z-40 flex flex-col bg-pine/70 backdrop-blur-sm">
       <div className="rounded-b-[32px] bg-pine px-5 pb-6 pt-14 ring-1 ring-surface/15">
         <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
@@ -916,20 +932,27 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
             <IconLock width={20} height={20} />
           </span>
           <p className="flex-1 text-[15px] font-extrabold text-surface">
-            Do not disturb is on · don't leave this screen
+            Do not disturb is on. Stay on this screen.
           </p>
         </div>
       </div>
 
       {/* symptom taps at TOP, bottom of the phone is against the mic */}
-      <SymptomGrid counts={counts} onPick={(key, label) => setPending({ key, label, at: elapsed })} />
+      <SymptomGrid
+        counts={counts}
+        disabled={!!pending || confirmEnd || checking}
+        onPick={(key, label) => {
+          setConfirmEnd(false);
+          setPending({ key, label, at: elapsed });
+        }}
+      />
 
       {/* timer */}
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
         <RecordTimer elapsed={elapsed} min={MIN_SECONDS} />
         <p className="mt-5 text-center text-[16px] font-bold text-mint">
           {past
-            ? "Two minutes done. Stay still as long as you can."
+            ? "Two minutes is done. Stay still a little longer if you can."
             : "Keep still until the ring fills"}
         </p>
         <p className="mt-1 text-[15px] font-bold text-surface/70">
@@ -940,36 +963,38 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
       <div className="shrink-0 px-5 pb-7">
         {past ? (
           <>
-            <Btn onClick={() => setChecking(true)}>Finish and check the audio</Btn>
+            <Btn onClick={() => {
+              setPending(null);
+              setConfirmEnd(false);
+              setChecking(true);
+            }}>
+              Finish and check the audio
+            </Btn>
             <p className="mt-3 text-center text-[15px] font-bold text-mint">
-              Or keep going, longer recordings are genuinely more useful.
+              You can keep going. Longer recordings give us more to work with.
             </p>
           </>
-        ) : confirmEnd ? (
-          <div className="rounded-3xl bg-surface p-5 text-center">
-            <p className="text-[20px] font-extrabold leading-tight text-pine">
-              Are you sure? {left} seconds left
-            </p>
-            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
-              Two minutes is the minimum the study can use. Stay still and I'll tell you the moment
-              you're there.
-            </p>
-            <div className="mt-4 space-y-3">
-              <Btn onClick={() => setConfirmEnd(false)}>Keep recording</Btn>
-              <Btn variant="secondary" onClick={() => setChecking(true)}>
-                Stop anyway
-              </Btn>
-            </div>
-          </div>
         ) : (
-          <Btn variant="secondary" onClick={() => setConfirmEnd(true)}>
+          <Btn
+            variant="secondary"
+            disabled={!!pending}
+            onClick={() => {
+              setPending(null);
+              setConfirmEnd(true);
+            }}
+          >
             Stop early
           </Btn>
         )}
       </div>
 
-      {/* severity picker, top sheet, saves on tap */}
-      {pending ? (
+      {toast && !pending && !confirmEnd && !checking ? (
+        <div className="pointer-events-none absolute inset-x-5 top-[72px] z-50 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
+          {toast}
+        </div>
+      ) : null}
+
+      {pending && !checking ? (
         <SeveritySheet
           pending={pending}
           onCancel={() => setPending(null)}
@@ -981,6 +1006,31 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
         />
       ) : null}
 
+      {confirmEnd && !pending && !checking ? (
+        <div className="absolute inset-0 z-40 flex flex-col justify-end bg-pine/80 px-5 pb-10 backdrop-blur-md">
+          <div className="rounded-[28px] bg-surface p-5 text-center">
+            <p className="text-[20px] font-extrabold leading-tight text-pine">
+              Are you sure? {left} seconds left
+            </p>
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
+              Two minutes is the minimum we can use. Stay still and I'll tell you when you're there.
+            </p>
+            <div className="mt-4 space-y-3">
+              <Btn onClick={() => setConfirmEnd(false)}>Keep recording</Btn>
+              <Btn
+                variant="secondary"
+                onClick={() => {
+                  setConfirmEnd(false);
+                  setChecking(true);
+                }}
+              >
+                Stop anyway
+              </Btn>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {checking ? (
         <QualityPanel
           pass={past || attempt > 0}
@@ -988,17 +1038,12 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
             setAttempt((a) => a + 1);
             setChecking(false);
             setConfirmEnd(false);
+            setPending(null);
             setElapsed(0);
             store.resetMarks();
           }}
           onContinue={() => store.go("postMeta")}
         />
-      ) : null}
-
-      {toast ? (
-        <div className="pointer-events-none absolute inset-x-5 top-[350px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
-          {toast}
-        </div>
       ) : null}
 
     </Screen>
@@ -1007,24 +1052,31 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- post-recording questions ---------------- */
 
+/** Places you could actually sit and record, usually at home after waking. */
 export const HOME_LOCATIONS = [
-  "Own bed",
-  "Chair or sofa",
+  "Bedroom",
+  "Living room, on a chair or sofa",
   "Kitchen or dining table",
-  "Bathroom",
-  "Partner's bed or bedroom",
   "Another room at home",
   "Other",
 ];
 
+/** Places you could privately sit still for two minutes during the day. */
 export const DAY_LOCATIONS = [
-  "Home",
-  "Workplace, own desk or office",
-  "Workplace, private room",
-  "School or campus",
-  "Restaurant or cafe",
-  "Car",
-  "Outdoors",
+  "At home",
+  "Private room at work",
+  "At my desk or in an office",
+  "School or campus, in a private room",
+  "In a car",
+  "Other",
+];
+
+const SLEEP_LOCATIONS = [
+  "My own bed",
+  "A partner's or shared bed",
+  "A sofa or guest bed",
+  "Away from home, like a hotel",
+  "I was up most of the night",
   "Other",
 ];
 
@@ -1037,7 +1089,13 @@ type Q = {
   textIf?: string[];
   followUp?: string;
   optional?: boolean;
+  /** skip this question unless a previous answer matches */
+  skipUnless?: { id: string; values: string[] };
 };
+
+function shouldSkip(q: Q, answers: Record<string, string>) {
+  return !!q.skipUnless && !q.skipUnless.values.includes(answers[q.skipUnless.id] ?? "");
+}
 
 const VS_USUAL = ["Better than usual", "Same as usual", "Worse than usual"];
 
@@ -1045,7 +1103,7 @@ function questionsFor(kind: SessionKind): Q[] {
   const common: Q[] = [
     {
       id: "ordinary",
-      q: "Anything out of the ordinary during that recording, noise, an interruption, a cough?",
+      q: "Anything out of the ordinary during that recording? Noise, an interruption, a cough?",
       type: "single",
       options: ["No, it was clean", "Yes"],
       textIf: ["Yes"],
@@ -1066,15 +1124,16 @@ function questionsFor(kind: SessionKind): Q[] {
       id: "watchWearing",
       q: "Are you wearing your smartwatch right now?",
       type: "single",
-      options: ["Yes", "No, it is charging", "No, other reason"],
-      textIf: ["No, other reason"],
+      options: ["Yes", "No, it's charging", "No, another reason"],
+      textIf: ["No, another reason"],
       followUp: "What's going on with it?",
     },
     {
       id: "watchBattery",
-      q: "Smartwatch battery level?",
+      q: "How much battery does your smartwatch have?",
       type: "single",
-      options: ["Above 50%", "20 to 50%", "Below 20%"],
+      options: ["Above 50%", "20 to 50%", "Below 20%", "Not sure"],
+      skipUnless: { id: "watchWearing", values: ["Yes"] },
     },
   ];
 
@@ -1083,30 +1142,11 @@ function questionsFor(kind: SessionKind): Q[] {
       ...common,
       {
         id: "sleepPlace",
-        q: "And where did you sleep last night?",
+        q: "Where did you sleep last night?",
         type: "single",
-        options: HOME_LOCATIONS,
+        options: SLEEP_LOCATIONS,
         textIf: ["Other"],
-        followUp: "Where was it?",
-      },
-      {
-        id: "enoughSleep",
-        q: "Did you get enough sleep?",
-        type: "single",
-        options: ["Yes", "No", "Not sure"],
-      },
-      {
-        id: "wakeCount",
-        q: "How many times did you wake during the night?",
-        type: "single",
-        options: ["None", "Once", "Twice", "Three times", "Four or more"],
-      },
-      { id: "rested", q: "How rested do you feel right now?", type: "scale" },
-      {
-        id: "sleepUnusual",
-        q: "Anything unusual about last night's sleep?",
-        type: "text",
-        optional: true,
+        followUp: "Where did you sleep?",
       },
       {
         id: "physical",
@@ -1117,20 +1157,39 @@ function questionsFor(kind: SessionKind): Q[] {
         followUp: "What's different this morning?",
       },
       {
-        id: "emotional",
-        q: "And emotionally, compared with a usual morning?",
+        id: "enoughSleep",
+        q: "Did you get enough sleep?",
         type: "single",
-        options: VS_USUAL,
-        textIf: ["Better than usual", "Worse than usual"],
-        followUp: "What's different this morning?",
+        options: ["Yes", "No", "Not sure"],
       },
       {
         id: "giAm",
         q: "Any gut symptoms this morning?",
         type: "single",
-        options: ["None", "Yes"],
+        options: ["No", "Yes"],
         textIf: ["Yes"],
         followUp: "Which ones, and how strong?",
+      },
+      {
+        id: "wakeCount",
+        q: "How many times did you wake during the night?",
+        type: "single",
+        options: ["None", "Once", "Twice", "Three times", "Four or more"],
+      },
+      {
+        id: "emotional",
+        q: "How do you feel emotionally, compared with a usual morning?",
+        type: "single",
+        options: VS_USUAL,
+        textIf: ["Better than usual", "Worse than usual"],
+        followUp: "What's different this morning?",
+      },
+      { id: "rested", q: "How rested do you feel right now?", type: "scale" },
+      {
+        id: "sleepUnusual",
+        q: "Anything unusual about last night's sleep?",
+        type: "text",
+        optional: true,
       },
       ...watch,
     ];
@@ -1146,6 +1205,12 @@ function questionsFor(kind: SessionKind): Q[] {
         options: ["Yes, eating now", "No, not yet"],
       },
       {
+        id: "physical",
+        q: "How do you feel physically, compared with usual?",
+        type: "single",
+        options: VS_USUAL,
+      },
+      {
         id: "strenuous",
         q: "Any strenuous activity in the last hour?",
         type: "single",
@@ -1154,24 +1219,18 @@ function questionsFor(kind: SessionKind): Q[] {
         followUp: "What did you do?",
       },
       {
-        id: "giSince",
-        q: "Any GI symptoms since the last recording?",
+        id: "emotional",
+        q: "How do you feel emotionally, compared with usual?",
         type: "single",
-        options: ["None", "Yes"],
+        options: VS_USUAL,
+      },
+      {
+        id: "giSince",
+        q: "Any gut symptoms since the last recording?",
+        type: "single",
+        options: ["No", "Yes"],
         textIf: ["Yes"],
         followUp: "Which ones, and how strong?",
-      },
-      {
-        id: "physical",
-        q: "How are you physically feeling compared with usual?",
-        type: "single",
-        options: VS_USUAL,
-      },
-      {
-        id: "emotional",
-        q: "And emotionally, compared with usual?",
-        type: "single",
-        options: VS_USUAL,
       },
       ...watch,
     ];
@@ -1215,34 +1274,41 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
   const done = step >= qs.length;
   const current = qs[Math.min(step, qs.length - 1)];
 
+  const nextAskable = (from: number, given: Record<string, string>) => {
+    let n = from;
+    while (n < qs.length && shouldSkip(qs[n], given)) n += 1;
+    return n;
+  };
+
   const advance = (from: Turn[], n: number) => {
     setStep(n);
     setTurns(
       n < qs.length
         ? [...from, { from: "bot", text: qs[n].q }]
-        : [...from, { from: "bot", text: "That's everything, saving your session." }],
+        : [...from, { from: "bot", text: "That's everything. Saving your session now." }],
     );
   };
 
   const answer = (value: string) => {
-    setAnswers((a) => ({ ...a, [current.id]: value }));
+    const given = { ...answers, [current.id]: value };
+    setAnswers(given);
     const next: Turn[] = [...turns, { from: "you", text: value }];
     if (current.textIf?.includes(value)) {
       setNeedNote(true);
       setTurns([
         ...next,
-        { from: "bot", text: current.followUp ?? "Tell us a little more, type it or say it." },
+        { from: "bot", text: current.followUp ?? "Tell us a little more. You can type it or say it." },
       ]);
       return;
     }
-    advance(next, step + 1);
+    advance(next, nextAskable(step + 1, given));
   };
 
   const submitNote = (skipped?: boolean) => {
     const text = skipped ? "Nothing to add" : note || "A voice note";
     setNeedNote(false);
     setAnswers((a) => ({ ...a, [`${current.id}Note`]: text }));
-    advance([...turns, { from: "you", text }], step + 1);
+    advance([...turns, { from: "you", text }], nextAskable(step + 1, { ...answers, [`${current.id}Note`]: text }));
     setNote("");
   };
 
@@ -1368,7 +1434,7 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
           <div className="mt-4">
             <Note tone="amber" title="Thanks for telling us">
               Because something was eaten or drunk in the window, the rest of today's post-meal
-              recordings get skipped. That's the right call, we'd rather have honest gaps.
+              recordings will be skipped. That's the right call. Honest gaps are more useful.
             </Note>
           </div>
         ) : null}
@@ -1392,12 +1458,12 @@ export function SnackSkipScreen({ store }: { store: TummyStore }) {
       <TopBar title="Something was eaten or drunk" onBack={store.back} />
       <ScreenBody>
         <MascotSays src={MASCOT.calm} size={80}>
-          Thanks for saying so. A gap is better than a bad recording.
+          Thank you for saying so. A gap is better than a recording we can't use.
         </MascotSays>
         {skipped === null ? (
           <>
             <div className="mt-4">
-              <Field label="What did you have?" hint="Roughly is fine, a bar, a coffee, juice.">
+              <Field label="What did you have?" hint="A rough description is fine: a bar, a coffee, juice.">
                 <TextInput
                   value={what}
                   onChange={(e) => setWhat(e.target.value)}
@@ -1407,15 +1473,16 @@ export function SnackSkipScreen({ store }: { store: TummyStore }) {
             </div>
             <div className="mt-4">
               <Note tone="amber" title="What happens now">
-                Remaining post-meal recordings are skipped. Next time, wait until 2–2.5 hours after
-                the meal if you can.
+                Every remaining recording in this meal window will be skipped. If you can't wait
+                next time, try to hold off until at least 2 to 2.5 hours after the meal.
               </Note>
             </div>
           </>
         ) : (
           <div className="mt-4">
             <Note tone="green" title={`${skipped} recording${skipped === 1 ? "" : "s"} skipped`}>
-              Next up is the evening check-in.
+              Logged against today. Your next task is the evening check-in. Everything else carries
+              on as normal tomorrow.
             </Note>
           </div>
         )}
@@ -1442,13 +1509,13 @@ export function SnackSkipScreen({ store }: { store: TummyStore }) {
 /* ---------------- skipping a session ---------------- */
 
 const SKIP_REASONS = [
-  "I ate or drank before the recording",
-  "More than 30 minutes passed since waking",
-  "I had a snack or a drink in the meal window",
-  "I drank water within 15 minutes of this time",
-  "No quiet or private place available",
-  "I couldn't sit still and upright for 2 minutes",
-  "I forgot or was asleep",
+  "I ate or drank something other than water",
+  "More than 30 minutes have passed since I woke up",
+  "I had a snack or a drink during the meal window",
+  "I drank water in the last 15 minutes",
+  "I didn't have a quiet, private place",
+  "I couldn't sit still and upright for two minutes",
+  "I forgot, or I was asleep",
   "Something else",
 ];
 
@@ -1461,7 +1528,7 @@ export function SkipReasonScreen({ store }: { store: TummyStore }) {
       <TopBar title="Skip this session" onBack={store.back} />
       <ScreenBody>
         <MascotSays src={MASCOT.calm} size={80}>
-          Skipping is fine. Just tell us what happened.
+          Skipping is the right call if you can't record properly. Tell us what got in the way.
         </MascotSays>
         <p className="mt-4 text-[16px] font-extrabold text-pine">
           {item ? item.label : "This recording"}
@@ -1487,7 +1554,7 @@ export function SkipReasonScreen({ store }: { store: TummyStore }) {
           onClick={() => {
             const text = reason === "Something else" ? other.trim() : reason;
             if (store.activeItemId) store.missItem(store.activeItemId, text);
-            if (reason === "I had a snack or a drink in the meal window") {
+            if (reason === "I had a snack or a drink during the meal window") {
               store.go("snackSkip");
               return;
             }
@@ -1529,7 +1596,7 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
       <TopBar title="Extra recording" onBack={store.back} />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.wave}>
-          Why an extra recording?
+          What made you want an extra recording?
         </MascotSays>
         <div className="mt-5 space-y-3">
           {["Unusually loud or frequent sounds", "Symptoms higher than normal", "Both", "Just curious"].map(
@@ -1601,8 +1668,8 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
         ) : null}
 
         <div className="mt-6">
-          <Note tone="blue" title="Same rules">
-            Case off, bare skin, quiet room, still for two minutes.
+          <Note tone="blue" title="Same rules as always">
+            Case off, bare skin, quiet room, sit upright and still for two minutes.
           </Note>
         </div>
       </ScreenBody>
@@ -1635,13 +1702,13 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
   const detail = !next
     ? "Nothing more until tomorrow morning's fasted recording."
     : next.kind === "recording" && next.sessionKind === "postMeal"
-      ? "Nothing to eat or drink until the window is over. Water: one cup now, if you need it."
+      ? "Please don't eat or drink until the window is over. If you need water, one cup now."
       : next.kind === "meal" && !next.mealLog
         ? next.id === "mealStart"
           ? "Take a photo of the plate, then tap when you take your first bite."
-          : "Tap the moment your last bite is done, every recording after that is timed from it."
+          : "Tap the moment your last bite is done. Every recording after that is timed from it."
         : next.kind === "meal"
-          ? "A photo and the time is all we need. A line of text is fine for a snack."
+          ? "A photo and the time is all we need. For a snack, a short description is enough."
           : "Nothing to do until then.";
 
   return (
@@ -1651,7 +1718,7 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
         <h1 className="mt-4 text-[26px] font-extrabold leading-tight text-pine">Session saved</h1>
         <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
           Uploaded, with {store.marks.length} symptom{" "}
-          {store.marks.length === 1 ? "mark" : "marks"} timestamped against the audio.
+          {store.marks.length === 1 ? "mark" : "marks"} timestamped on the audio.
         </p>
         <div className="mt-5 rounded-3xl border border-line bg-surface p-5 text-left">
           <div className="flex items-center gap-2 text-teal">

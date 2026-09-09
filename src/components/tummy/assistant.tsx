@@ -82,7 +82,7 @@ function reply(store: TummyStore, raw: string): Msg[] {
     const glasses = Number((t.match(/(\d+)\s*(glass|cup)/) || [])[1] || 1);
     store.addEntry("hydration", "Water", `${glasses} glass${glasses > 1 ? "es" : ""}`);
     return say(
-      `Logged, ${glasses} glass${glasses > 1 ? "es" : ""} of water at ${nowLabel()}. Nothing else needed.`,
+      `Logged ${glasses} glass${glasses > 1 ? "es" : ""} of water at ${nowLabel()}. Nothing else needed.`,
       openLog(),
     );
   }
@@ -115,7 +115,7 @@ function reply(store: TummyStore, raw: string): Msg[] {
     if (planItem) store.completeItem(planItem.id);
     return say(
       planItem
-        ? `Logged ${slot.toLowerCase()}: "${food}" at ${nowLabel()}. Your next three recordings are now timed from this meal.`
+        ? `Logged ${slot.toLowerCase()}: "${food}" at ${nowLabel()}.`
         : `Logged as a ${slot.toLowerCase()}: "${food}" at ${nowLabel()}.`,
       openLog(),
     );
@@ -143,7 +143,7 @@ function reply(store: TummyStore, raw: string): Msg[] {
 
   if (/record|gut sound|session|mic/.test(t)) {
     return say(
-      "I can't record for you. Case off, somewhere quiet, and I'll run the two minutes with you.",
+      "I can't start a recording from here. Take your case off, find somewhere quiet, and I'll run the two minutes with you.",
       {
         label: "Start recording",
         run: () => {
@@ -167,11 +167,11 @@ function reply(store: TummyStore, raw: string): Msg[] {
 
   if (/case|position|9 ?cm|belly/.test(t)) {
     return say(
-      "Case off, bare skin, 8 cm right and 3 cm down from your belly button. Two minutes.",
+      "Case off, bare skin, 8 cm to the right and 3 cm down from your belly button. Sit still for two minutes.",
     );
   }
   return say(
-    "Tell me in plain words: \"I had a protein bar\", \"two glasses of water\", \"bloating, quite bad\". I'll log it straight away.",
+    "Try it in plain words, like \"I had a protein bar\" or \"bloating, quite bad\". I'll log it straight away.",
   );
 }
 
@@ -181,7 +181,7 @@ export function AssistantSheet({ store }: { store: TummyStore }) {
     {
       id: uid(),
       from: "tummy",
-      text: "Hi, I'm Tummy. Tell me what you ate, drank, or felt and I'll log it.",
+      text: "Hi, I'm Tummy. Tell me what you ate, drank, or felt, and I'll log it for you.",
     },
   ]);
   const [text, setText] = useState("");
@@ -225,7 +225,7 @@ export function AssistantSheet({ store }: { store: TummyStore }) {
           <Mascot size={44} />
           <div className="min-w-0 flex-1">
             <p className="truncate text-[18px] font-extrabold text-pine">Ask Tummy</p>
-            <p className="text-[14px] font-bold text-teal">Logs things for you · always on</p>
+            <p className="text-[14px] font-bold text-teal">I'll log what you tell me</p>
           </div>
           <button
             onClick={() => store.setChatOpen(false)}
@@ -342,7 +342,7 @@ export function AssistantHint({ store }: { store: TummyStore }) {
       <Mascot src={MASCOT.calm} size={44} />
       <span className="min-w-0 flex-1">
         <span className="block text-[16px] font-extrabold text-pine">
-          Or just tell Tummy what happened
+          Or tell Tummy what happened
         </span>
         <span className="block text-[15px] font-semibold text-pine-soft">
           "I had a coffee and a slice of toast"

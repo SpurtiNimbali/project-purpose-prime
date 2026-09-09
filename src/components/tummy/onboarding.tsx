@@ -56,7 +56,7 @@ export function WelcomeScreen({ store }: { store: TummyStore }) {
           Stanford School of Medicine
         </p>
         <p className="mt-4 text-[17px] font-semibold leading-relaxed text-pine-soft">
-          A one-week study of your gut sounds. I'll walk you through it. This isn't a test.
+          I'll walk you through setup, then we'll record your gut sounds for one week.
         </p>
       </div>
       <StickyFooter>
@@ -83,7 +83,7 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
       <TopBar title="Your subject ID" onBack={store.back} step="Step 1 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Enter the ID on your coordinator card. Your name is never stored.
+          Type the ID on the card your coordinator gave you. We store that ID, never your name.
         </p>
         <div className="mt-5 space-y-3">
           <Field label="Subject ID">
@@ -105,7 +105,7 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
           ) : null}
           {state === "bad" ? (
             <Note tone="coral" title="We can't find that ID">
-              Double-check the card, or contact your coordinator through the Help page.
+              Check the card and try again, or message your coordinator from Help.
             </Note>
           ) : null}
         </div>
@@ -155,11 +155,11 @@ export function VideoScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4 space-y-3">
           <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-            How to place the phone, how still to sit, and what a good recording sounds like. A short
-            quiz follows.
+            This covers how to place the phone, how still to sit, and what a usable recording
+            sounds like. There's a short quiz after.
           </p>
-          <Note tone="blue" title="Captions">
-            Use the transcript button if you'd rather read.
+          <Note tone="blue" title="Captions and transcript">
+            If you'd rather read, open the transcript in the player.
           </Note>
         </div>
       </ScreenBody>
@@ -179,15 +179,15 @@ const QUIZ = [
     q: "Where should the phone sit during a recording?",
     options: ["On top of my shirt", "Directly on bare skin, case off", "In my pocket"],
     answer: 1,
-    why: "Clothes and cases hold the mic off the skin. Gut sounds are too quiet to get through.",
-    hint: "The mic has to touch bare skin.",
+    why: "A shirt or a case holds the microphone off your skin. Gut sounds are too quiet to travel through that gap.",
+    hint: "The microphone needs to touch bare skin.",
   },
   {
     q: "You had a coffee 20 minutes ago. Can you do the fasting recording?",
     options: ["Yes, coffee doesn't count", "No, that breaks the fast"],
     answer: 1,
-    why: "Anything but water breaks the fast.",
-    hint: "Fasting means nothing except water.",
+    why: "Coffee, food, or anything besides a sip of water changes your gut activity, so it wouldn't count as a fasting recording.",
+    hint: "Fasting here means nothing in your stomach except water.",
   },
   {
     q: "After your study meal, how often do you record?",
@@ -197,8 +197,8 @@ const QUIZ = [
       "Whenever I remember",
     ],
     answer: 0,
-    why: "That cadence captures digestion the same way for everyone.",
-    hint: "It starts when the meal ends, every 30 minutes.",
+    why: "Recording right after the meal, then every 30 minutes for 3.5 hours, follows digestion the same way for everyone in the study.",
+    hint: "It starts when the meal ends, and the recordings are 30 minutes apart.",
   },
 
 ];
@@ -230,11 +230,11 @@ export function QuizScreen({ store }: { store: TummyStore }) {
         <MascotSays size={78} src={correct ? MASCOT.cheer : MASCOT.calm}>
           {pick === null
             ? qi === 0
-              ? "One at a time. You need the right answer to move on."
-              : "Next one."
+              ? "A few questions to make sure the instructions landed. You'll need the right answer before we move on."
+              : "Here's the next one."
             : correct
-              ? "That's it."
-              : "Not quite. Try again."}
+              ? "That's the one. Read why, then we'll continue."
+              : "Not quite. Have another look."}
         </MascotSays>
 
         <div className="mt-3 flex gap-1.5">
@@ -319,7 +319,7 @@ export function QuizScreen({ store }: { store: TummyStore }) {
 const DAY_STEPS = [
   {
     t: "1 · Wake-up questions",
-    b: "A few quick questions on waking: sleep, and anything you have eaten or drunk.",
+    b: "A short set of questions when you wake: how you slept, and whether you've had anything to eat or drink.",
     Icon: IconSun,
   },
   {
@@ -329,32 +329,32 @@ const DAY_STEPS = [
   },
   {
     t: "3 · Your study meal",
-    b: "Record right before you start, add a photo, then tap when your last bite is done.",
+    b: "Record just before you start eating, add a photo of the plate, then tap when you take your last bite.",
     Icon: IconBowl,
   },
   {
     t: "4 · Recordings for 3.5 hours after",
-    b: "Straight after the meal, then every 30 minutes.",
+    b: "One recording as soon as you finish, then another every 30 minutes for 3.5 hours.",
     Icon: IconClock,
   },
   {
     t: "5 · No food or drink in that window",
-    b: "Nothing until the last recording. Water only if you need it: one cup, right after a recording.",
+    b: "Nothing to eat or drink until that last recording. If you need water, one cup, right after a recording.",
     Icon: IconDroplet,
   },
   {
     t: "6 · Quality matters more than quantity",
-    b: "If you can't do it properly, skip and say why. Missing one never ends the study.",
+    b: "If you can't record properly, skip it and tell us why. Missing one does not take you out of the study.",
     Icon: IconShield,
   },
   {
     t: "7 · Log the rest of your day",
-    b: "Every other meal, snack and drink: a photo and the time, or a quick voice note.",
+    b: "For every other meal, snack, and drink: a photo and the time, or a short voice note.",
     Icon: IconCamera,
   },
   {
     t: "8 · Evening check-in",
-    b: "A short set of questions before bed.",
+    b: "A few questions before you go to bed.",
     Icon: IconMoon,
   },
 ];
@@ -368,7 +368,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
       <TopBar title="How a day works" onBack={store.back} step="Step 5 of 9" />
       <ScreenBody>
         <MascotSays size={78}>
-          Same shape every day. One step at a time.
+          Every study day follows the same shape. I'll show you one step at a time.
         </MascotSays>
         <div className="mt-5 space-y-3">
           {DAY_STEPS.slice(0, shown).map(({ t, b, Icon }, i) => (
@@ -393,7 +393,8 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
         {all ? (
           <div className="mt-4">
             <Note tone="amber" title="Take your phone case off">
-              A case leaves a gap the mic can't hear through.
+              A case leaves a gap between the microphone and your skin, and that gap loses most of
+              the sound.
             </Note>
           </div>
         ) : null}
@@ -479,7 +480,8 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
       <TopBar title="Technical setup" onBack={store.back} step="Step 7 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          We use your phone's mic. The model helps us standardise audio.
+          Recordings use your phone's microphone. Telling us the model helps the team compare audio
+          across participants.
         </p>
 
         <div className="mt-5 space-y-5">
@@ -538,7 +540,8 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
               <div className="flex-1">
                 <p className="text-[17px] font-extrabold text-pine">Case check</p>
                 <p className="text-[16px] font-semibold text-pine-soft">
-                  The case comes off every time. Work it off from a corner if it's stiff.
+                  The case has to come off before every recording. If it's stiff, start from a
+                  corner.
                 </p>
               </div>
             </div>
@@ -579,17 +582,17 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
 export function PermissionsScreen({ store }: { store: TummyStore }) {
   const [granted, setGranted] = useState<Record<string, boolean>>({});
   const items = [
-    { k: "mic", label: "Microphone", sub: "To capture gut sounds", Icon: IconMic },
+    { k: "mic", label: "Microphone", sub: "So we can record your gut sounds", Icon: IconMic },
     {
       k: "notif",
       label: "Reminders",
-      sub: "For your fasted recording, your meal, and every 30 minutes after it",
+      sub: "For the fasted recording, your study meal, and each recording after it",
       Icon: IconPhone,
     },
     {
       k: "dnd",
       label: "Do not disturb",
-      sub: "On for the recording only",
+      sub: "On only while you record, then off again",
       Icon: IconLock,
     },
   ];
@@ -599,8 +602,15 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
       <TopBar title="Permissions" onBack={store.back} step="Step 8 of 9" />
       <ScreenBody>
         <Note tone="green" title="Audio stays private">
-          Recordings are labelled with your subject ID only.
+          Recordings are encrypted and labelled with your subject ID only. No one on the study team
+          can link them back to you by name.
         </Note>
+        <div className="mt-3">
+          <Note tone="blue" title="Do not disturb is only for recordings">
+            Do not disturb turns on when a recording starts and off the moment it ends. The rest of
+            the day, calls and messages come through as usual.
+          </Note>
+        </div>
         <div className="mt-4 space-y-3">
           {items.map(({ k, label, sub, Icon }) => (
             <Card key={k}>
@@ -645,6 +655,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const TOTAL = 45;
   const [stage, setStage] = useState<"intro" | "case" | "position" | "record">("intro");
   const [posChecked, setPosChecked] = useState(false);
+  const [posTipsSeen, setPosTipsSeen] = useState(false);
   const [left, setLeft] = useState(TOTAL);
   const [marks, setMarks] = useState<{ key: string; label: string; severity: number }[]>([]);
   const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
@@ -675,25 +686,25 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
     if (notSeen("dnd")) {
       show({
         id: "dnd",
-        text: "Do not disturb is on until this recording ends.",
+        text: "Do not disturb stays on until this recording ends, then it turns off on its own.",
         cta: "Got it",
       });
     } else if (elapsed >= 4 && notSeen("timer")) {
       show({
         id: "timer",
-        text: "Time left is in the middle of the ring. The ring fills as you record.",
+        text: "The number in the middle is time left. The ring fills as you record.",
         cta: "Makes sense",
       });
     } else if (elapsed >= 9 && notSeen("symptom")) {
       show({
         id: "symptom",
-        text: "Feel something? Tap an icon up top. Try one now.",
+        text: "If you feel something, tap an icon at the top. Try one now so you can see how it works.",
         cta: "Let me try",
       });
     } else if (left <= 15 && left > 0 && notSeen("timeleft")) {
       show({
         id: "timeleft",
-        text: "Under 15 seconds. It saves when the ring fills, then a few questions.",
+        text: "Under 15 seconds left. When the ring fills, we'll save this and ask a few questions.",
         cta: "Okay",
       });
     }
@@ -736,7 +747,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
               Let's practice a recording
             </h2>
             <p className="mt-3 text-[17px] font-semibold leading-snug text-pine-soft">
-              Go somewhere quiet and hit start when you're ready. Nothing is uploaded.
+              Find a quiet room and tap start when you're ready. Nothing from this run is uploaded.
             </p>
           </div>
         </ScreenBody>
@@ -766,7 +777,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
             Take your phone case off
           </h2>
             <p className="mt-2 text-[16px] font-semibold leading-snug text-mint">
-            Bare phone on bare skin. A case holds the mic away from you.
+            The bare phone sits on bare skin. A case leaves a gap the microphone can't hear through.
           </p>
         </div>
         <div className="shrink-0 px-5 pb-7">
@@ -789,15 +800,20 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
             and 3 cm down, flat on bare skin.
           </p>
           <p className="mt-2 text-[15px] font-semibold leading-snug text-mint">
-            Microphone end onto the skin. Sit upright, breathe normally, no talking.
+            Rest the microphone end on the skin. Sit upright, breathe normally, and don't talk.
           </p>
-          <PlacementTips />
+          <PlacementTips onAllSeen={() => setPosTipsSeen(true)} />
         </div>
 
         <div className="shrink-0 px-5 pb-7 pt-3">
-          <Btn disabled={!posChecked} onClick={() => setStage("record")}>
+          <Btn disabled={!posChecked || !posTipsSeen} onClick={() => setStage("record")}>
             I'm in position
           </Btn>
+          {posChecked && !posTipsSeen ? (
+            <p className="mt-2 text-center text-[15px] font-semibold text-mint">
+              Read each placement rule to continue.
+            </p>
+          ) : null}
         </div>
 
         {!posChecked ? <PositionChecksGate onDone={() => setPosChecked(true)} /> : null}
@@ -813,7 +829,11 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
 
       <SymptomGrid
         counts={counts}
-        onPick={(key, label) => setPending({ key, label, at: TOTAL - left })}
+        disabled={!!pending || !!coach || finished}
+        onPick={(key, label) => {
+          setCoach(null);
+          setPending({ key, label, at: TOTAL - left });
+        }}
       />
 
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
@@ -825,13 +845,40 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
       </div>
 
       <div className="shrink-0 px-5 pb-7">
-        <Btn variant="secondary" onClick={() => setLeft(0)} disabled={finished}>
+        <Btn
+          variant="secondary"
+          onClick={() => {
+            setPending(null);
+            setCoach(null);
+            setLeft(0);
+          }}
+          disabled={finished || !!pending}
+        >
           {finished ? "Practice complete" : "Finish early"}
         </Btn>
       </div>
 
-      {pending ? (
-        <>
+      {toast && !pending && !coach && !finished ? (
+        <div className="pointer-events-none absolute inset-x-5 top-[72px] z-50 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
+          {toast}
+        </div>
+      ) : null}
+
+      {pending && !finished ? (
+        notSeen("severity") ? (
+          <div className="absolute inset-0 z-40 flex flex-col justify-end bg-pine/80 px-5 pb-10 backdrop-blur-md">
+            <div className="flex items-end gap-3">
+              <Mascot src={MASCOT.calm} size={78} />
+              <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[16px] font-semibold leading-snug text-pine">
+                Now tell me how strong it feels, from 1 to 5. Tapping a number saves it and
+                stamps the time. There's no extra save button.
+              </p>
+            </div>
+            <div className="mt-4">
+              <Btn onClick={() => setSeen((s) => [...s, "severity"])}>Got it</Btn>
+            </div>
+          </div>
+        ) : (
           <SeveritySheet
             pending={pending}
             onCancel={() => setPending(null)}
@@ -841,30 +888,10 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
               setToast(`${pending.label} saved at level ${n}`);
             }}
           />
-          {notSeen("severity") ? (
-            <div className="absolute inset-x-0 bottom-0 top-[300px] z-30 flex flex-col justify-end bg-pine/70 px-5 pb-10 backdrop-blur-md">
-              <div className="flex items-end gap-3">
-                <Mascot src={MASCOT.calm} size={78} />
-                <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[16px] font-semibold leading-snug text-pine">
-                  Now say how strong it is, 1 to 5. It saves the moment you tap a number, no save
-                  button, and the time is stamped for you.
-                </p>
-              </div>
-              <div className="mt-4">
-                <Btn onClick={() => setSeen((s) => [...s, "severity"])}>Got it</Btn>
-              </div>
-            </div>
-          ) : null}
-        </>
+        )
       ) : null}
 
-      {toast ? (
-        <div className="pointer-events-none absolute inset-x-5 top-[360px] z-30 rounded-2xl bg-mint px-4 py-3 text-center text-[16px] font-extrabold text-pine shadow-lg">
-          {toast}
-        </div>
-      ) : null}
-
-      {coach ? (
+      {coach && !pending && !finished ? (
         <div className="absolute inset-0 z-40 flex flex-col justify-end bg-pine/70 px-5 pb-10 backdrop-blur-md">
           <div className="flex items-end gap-3">
             <Mascot src={MASCOT.calm} size={84} />
@@ -900,8 +927,8 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
               {marks.length > 0
                 ? `You logged ${marks.length} symptom ${marks.length === 1 ? "mark" : "marks"}. `
                 : ""}
-              After a real recording you'll get the same sound check, then a few short questions.
-              That's all there is to it, you're set.
+              After a real recording you'll get this same sound check, then a few short questions.
+              That's the whole flow.
             </p>
             <div className="mt-5">
               <Btn onClick={() => store.go("onboardDone")}>Continue</Btn>
@@ -973,7 +1000,7 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
       <TopBar title="Daily schedule" onBack={store.back} step="Step 6 of 9" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.cheer}>
-          Usual eat and sleep times, weekdays and weekends.
+          When do you usually eat and sleep? Weekends are often different, so I'll ask for both.
         </MascotSays>
         <div className="mt-5">
           <DayTypeTabs
@@ -1006,7 +1033,7 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
           ))}
         </div>
         <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-pine-soft">
-          Reminders only. Fine if the times move.
+          These times are only for reminders. It's fine if a day runs later.
         </p>
       </ScreenBody>
       <StickyFooter>
@@ -1035,21 +1062,21 @@ export function MealPickScreen({ store }: { store: TummyStore }) {
       k: "breakfast" as const,
       label: "Breakfast",
       when: "Recordings run through the morning",
-      why: "Only if you work from home. A commute after breakfast breaks the recording window.",
+      why: "Best if you work from home. A commute after breakfast usually breaks the 3.5-hour recording window.",
       Icon: IconSun,
     },
     {
       k: "lunch" as const,
       label: "Lunch",
       when: "Recordings run through the afternoon",
-      why: "Need a private quiet room, not a bathroom. Skip if you have talking meetings in the 3.5 hours after.",
+      why: "You'll need a private, quiet room, not a bathroom. Skip lunch if you have talking meetings in the 3.5 hours after.",
       Icon: IconBowl,
     },
     {
       k: "dinner" as const,
       label: "Dinner",
       when: "Recordings run through the evening",
-      why: "Only if you'll stay up 3.5 hours after. Usually easiest: no office meetings to work around.",
+      why: "Only if you'll still be awake 3.5 hours later. For most people this is the easiest, because there are no office meetings to work around.",
       Icon: IconSunset,
     },
   ];
@@ -1058,7 +1085,8 @@ export function MealPickScreen({ store }: { store: TummyStore }) {
       <TopBar title="Your study meal" onBack={store.back} step="Step 6 of 9" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.calm}>
-          Pick the meal you eat at a steady time, with a quiet place to record after.
+          Choose the meal you eat at a steady time, and after which you'll have a quiet, private
+          place to record.
         </MascotSays>
         <div className="mt-5 space-y-3">
           {meals.map(({ k, label, when, why, Icon }) => (
@@ -1146,7 +1174,7 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
             </div>
             <div className="mt-4 rounded-2xl border-2 border-teal bg-mint-soft p-4">
               <p className="text-[16px] font-semibold leading-snug text-pine">
-                A rough guess is fine. Add the times you usually snack on a{" "}
+                A rough guess is fine. Add the times you usually snack on a typical{" "}
                 {tab === "weekday" ? "weekday" : "weekend"}.
               </p>
             </div>
@@ -1218,7 +1246,8 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
       <TopBar title="About you" onBack={store.back} step="Step 2 of 9" />
       <ScreenBody>
         <MascotSays size={78}>
-          Gut activity differs by person. If you're female, evening includes one cycle question.
+          Gut activity differs from person to person. If you're female, the evening check-in
+          includes one menstrual cycle question.
         </MascotSays>
         <div className="mt-5 space-y-2">
           {(
@@ -1239,7 +1268,8 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="green" title="Why we ask">
-            Cycle timing can change gut symptoms.
+            Cycle timing can change gut symptoms, so this helps the team read your recordings in
+            context. It's stored against your subject ID only.
           </Note>
         </div>
       </ScreenBody>
@@ -1260,7 +1290,7 @@ export function OnboardDoneScreen({ store }: { store: TummyStore }) {
           You're all set up
         </h1>
         <p className="mt-3 text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Day 1 starts tomorrow morning, after you wake.
+          Day 1 starts tomorrow morning after you wake.
         </p>
       </div>
       <StickyFooter>
