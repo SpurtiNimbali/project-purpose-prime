@@ -169,12 +169,6 @@ export function HomeScreen({ store }: { store: TummyStore }) {
               </div>
             ))}
           </div>
-          <button
-            onClick={() => store.go("logHub")}
-            className="relative mt-5 flex min-h-[60px] w-full items-center justify-center overflow-hidden rounded-2xl bg-blue text-[18px] font-extrabold text-surface shadow-md active:scale-[0.99]"
-          >
-            Open today's log
-          </button>
         </ScreenBody>
       </Screen>
     );
@@ -1215,6 +1209,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
           </div>
         </Card>
 
+        {store.frozen ? null : (
         <div className="mt-4">
           <Card>
             <div className="flex items-center gap-2 text-teal">
@@ -1253,6 +1248,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
             </div>
           </Card>
         </div>
+        )}
 
         <div className="mt-4">
           {store.freezeUsed && !store.frozen ? (
