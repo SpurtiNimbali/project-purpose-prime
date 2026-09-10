@@ -295,7 +295,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
         <div className="mt-5 rounded-3xl border border-line bg-surface px-4 py-4">
           <div className="flex items-end justify-between gap-3">
             <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-              Today's rail
+              Today's tasks
             </p>
             <button
               onClick={() => store.go("sessionHub")}
@@ -374,7 +374,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 Something feels different?
               </span>
               <span className="mt-1 block text-[15px] font-semibold leading-snug text-mint/90">
-                An extra two-minute recording if you notice loud gurgles, pain, or a sudden change
+                Log an extra two-minute recording if you notice loud gurgles, pain, or a sudden change
               </span>
             </span>
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface/15 text-[20px] font-extrabold text-surface">
@@ -1213,19 +1213,6 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               {recDone} of {REQUIRED} recordings · {minutes} min
               {extras > 0 ? ` · +${extras} extra` : ""}
             </p>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {recs.map((p) => (
-                <span
-                  key={p.id}
-                  className={cn(
-                    "flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-[13px] font-extrabold",
-                    p.done ? "bg-teal text-surface" : "bg-wash text-pine-soft",
-                  )}
-                >
-                  {clockLabel(p.at).replace(" ", "")}
-                </span>
-              ))}
-            </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-2xl bg-wash px-3 py-3">
                 <p className="text-[13px] font-extrabold uppercase tracking-[0.12em] text-teal">
@@ -1250,57 +1237,74 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
         </div>
 
         <div className="mt-4">
-          <Card className={store.frozen ? "border-2 border-blue bg-surface" : undefined}>
-            <div className="flex items-start gap-3">
-              <span
-                className={cn(
-                  "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
-                  store.frozen ? "bg-blue text-surface" : "bg-mint-soft text-teal",
-                )}
-              >
-                {store.frozen ? (
-                  <IconSnowflake width={26} height={26} />
-                ) : (
-                  <IconShield width={26} height={26} />
-                )}
+          {store.freezeUsed && !store.frozen ? (
+            <div className="flex items-center gap-3 rounded-3xl border border-line bg-surface p-5">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-wash text-blue">
+                <IconSnowflake width={26} height={26} />
               </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[17px] font-extrabold text-pine">
-                  {store.frozen
-                    ? "Today is a freeze day"
-                    : store.freezeUsed
-                      ? "Freeze day used"
-                      : "Freeze day"}
+              <div className="min-w-0">
+                <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-blue">
+                  Used
                 </p>
-                <p className="mt-1 text-[16px] font-semibold leading-snug text-pine-soft">
-                  {store.frozen
-                    ? "Paused until tomorrow. Nothing today counts as missed."
-                    : store.freezeUsed
-                      ? "You've used your one freeze. The remaining days run back to back."
-                      : "Pause one day if you need it. You get one, and it can't be undone."}
+                <p className="mt-0.5 text-[17px] font-extrabold text-pine">Freeze day used</p>
+                <p className="mt-1 text-[15px] font-semibold leading-snug text-pine-soft">
+                  You've used your one freeze. The remaining days run back to back.
                 </p>
-                {!store.freezeUsed ? (
-                  <div className="mt-3">
-                    <Btn variant="secondary" onClick={() => setConfirmFreeze(true)}>
-                      Use my freeze day
-                    </Btn>
-                  </div>
-                ) : null}
               </div>
             </div>
-          </Card>
+          ) : (
+            <div className="relative overflow-hidden rounded-3xl bg-blue px-5 py-5 text-surface shadow-md">
+              <span className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-surface/15" />
+              <span className="pointer-events-none absolute -bottom-14 left-8 h-28 w-28 rounded-full bg-pine/20" />
+              <div className="relative flex items-start gap-3">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface/15">
+                  <IconSnowflake width={26} height={26} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-surface/80">
+                    {store.frozen ? "Paused today" : "Once only"}
+                  </p>
+                  <p className="mt-1 text-[19px] font-extrabold leading-tight">
+                    {store.frozen ? "Today is a freeze day" : "Need a pause?"}
+                  </p>
+                  <p className="mt-1 text-[15px] font-semibold leading-snug text-surface/85">
+                    {store.frozen
+                      ? "Nothing today counts as missed. The study picks up tomorrow morning."
+                      : "Pause one whole day if you need it. You get one freeze, and it can't be undone."}
+                  </p>
+                </div>
+              </div>
+              {!store.frozen ? (
+                <button
+                  onClick={() => setConfirmFreeze(true)}
+                  className="relative mt-4 flex min-h-[56px] w-full items-center justify-center rounded-2xl bg-surface text-[17px] font-extrabold text-blue active:scale-[0.99]"
+                >
+                  Use my freeze day
+                </button>
+              ) : null}
+            </div>
+          )}
         </div>
       </ScreenBody>
 
       {confirmFreeze ? (
         <div className="absolute inset-0 z-40 flex items-end bg-pine/45 backdrop-blur-sm">
-          <div className="w-full rounded-t-[28px] bg-cream px-5 pb-7 pt-6">
-            <p className="text-[20px] font-extrabold text-pine">Use your only freeze day?</p>
-            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
-              This pauses today. You get one freeze for the whole study, and it can't be undone.
+          <div className="w-full rounded-t-[32px] bg-surface px-5 pb-7 pt-6">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#e3eff4] text-blue">
+              <IconSnowflake width={28} height={28} />
+            </div>
+            <p className="text-center text-[13px] font-extrabold uppercase tracking-[0.14em] text-blue">
+              Once only
+            </p>
+            <p className="mt-1 text-center text-[22px] font-extrabold leading-tight text-pine">
+              Use your freeze day?
+            </p>
+            <p className="mt-2 text-center text-[16px] font-semibold leading-snug text-pine-soft">
+              Today pauses. Nothing counts as missed. You cannot undo this.
             </p>
             <div className="mt-5 space-y-3">
               <Btn
+                variant="blue"
                 onClick={() => {
                   setConfirmFreeze(false);
                   store.useFreeze();

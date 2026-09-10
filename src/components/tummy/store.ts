@@ -238,10 +238,10 @@ export function untilLabel(mins: number) {
 }
 
 export const WINDOW_RULE =
-  "Please don't eat or drink until the 3.5 hours are up. If you need water, one cup, right after a recording.";
+  "Please don't eat or drink until the 3.5 hours after your chosen meal are up. If thirsty, you may have one cup of water, right after a recording.";
 
 export const QUALITY_RULE =
-  "A usable recording matters more than a complete set. If you can't do this one properly, skip it and tell us why.";
+  "A usable recording matters more than a complete set. If you can't do this one properly, kindly skip it and tell us why.";
 
 /** Post-meal recording offsets in minutes, measured from the END of the meal. */
 export const POST_MEAL_OFFSETS = [0, 30, 60, 90, 120, 150, 180, 210];

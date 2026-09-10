@@ -427,7 +427,7 @@ export function StickyFooter({ children }: { children: ReactNode }) {
 
 const NAV: { key: ScreenKey; label: string; Icon: typeof IconHome }[] = [
   { key: "home", label: "Home", Icon: IconHome },
-  { key: "logHub", label: "Logging", Icon: IconBook },
+  { key: "logHub", label: "Log", Icon: IconBook },
   { key: "progress", label: "Progress", Icon: IconChart },
   { key: "profile", label: "Profile", Icon: IconUser },
 ];

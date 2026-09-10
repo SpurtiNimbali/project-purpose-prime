@@ -32,6 +32,7 @@ import {
 import {
   AbdomenGuide,
   PlacementTips,
+  PLACEMENT_TIPS,
   PositionChecksGate,
   RecordTimer,
   SymptomGrid,
@@ -57,14 +58,11 @@ export function WelcomeScreen({ store }: { store: TummyStore }) {
           Stanford School of Medicine
         </p>
         <p className="mt-4 text-[17px] font-semibold leading-relaxed text-pine-soft">
-          I'll walk you through setup, then we'll record your gut sounds for one week.
+          Thank you for participating in our study. Let me walk you through the initial setup first!
         </p>
       </div>
       <StickyFooter>
         <Btn onClick={() => store.go("subjectId")}>Get started</Btn>
-        <button className="mt-3 min-h-[48px] w-full text-[16px] font-extrabold text-teal">
-          I already have an account
-        </button>
       </StickyFooter>
     </Screen>
   );
@@ -81,10 +79,11 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
   };
   return (
     <Screen>
-      <TopBar title="Your subject ID" onBack={store.back} step="Step 1 of 9" />
+      <TopBar title="Subject ID" onBack={store.back} step="Step 1 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Type the ID on the card your coordinator gave you. We store that ID, never your name.
+          Enter the ID the study coordinator assigned you. We store all your data under this ID
+          only, never your name.
         </p>
         <div className="mt-5 space-y-3">
           <Field label="Subject ID">
@@ -106,13 +105,11 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
           ) : null}
           {state === "bad" ? (
             <Note tone="coral" title="We can't find that ID">
-              Check the card and try again, or message your coordinator from Help.
+              Check your Subject ID carefully and try again, or reach out to the study coordinator
+              from Help.
             </Note>
           ) : null}
         </div>
-        <p className="mt-4 text-[15px] font-semibold text-pine-soft">
-          Try STF-0142 to see a successful crosscheck.
-        </p>
       </ScreenBody>
       <StickyFooter>
         {state === "ok" ? (
@@ -156,8 +153,8 @@ export function VideoScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4 space-y-3">
           <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-            This covers how to place the phone, how still to sit, and what a usable recording
-            sounds like. There's a short quiz after.
+            This video covers how to position your phone on your body, the desired posture during
+            recordings, and what a usable recording sounds like. A short quiz will follow this.
           </p>
           <Note tone="blue" title="Captions and transcript">
             If you'd rather read, open the transcript in the player.
@@ -177,28 +174,28 @@ export function VideoScreen({ store }: { store: TummyStore }) {
 
 const QUIZ = [
   {
-    q: "Where should the phone sit during a recording?",
-    options: ["On top of my shirt", "Directly on bare skin, case off", "In my pocket"],
+    q: "Where should the phone be placed during a recording?",
+    options: ["On top of your shirt", "Directly on bare skin, with the case off"],
     answer: 1,
-    why: "A shirt or a case holds the microphone off your skin. Gut sounds are too quiet to travel through that gap.",
+    why: "A shirt or a phone case holds the microphone off your skin. Gut sounds are too quiet to carry across that gap.",
     hint: "The microphone needs to touch bare skin.",
   },
   {
-    q: "You had a coffee 20 minutes ago. Can you do the fasting recording?",
-    options: ["Yes, coffee doesn't count", "No, that breaks the fast"],
+    q: "You drank coffee 20 minutes ago. Can you still do a fasting recording?",
+    options: ["Yes, drinks are acceptable", "No, even drinks are not permitted"],
     answer: 1,
-    why: "Coffee, food, or anything besides a sip of water changes your gut activity, so it wouldn't count as a fasting recording.",
+    why: "Coffee, food, or anything other than a sip of water changes your gut activity, so the recording wouldn't count as fasting.",
     hint: "Fasting here means nothing in your stomach except water.",
   },
   {
-    q: "After your study meal, how often do you record?",
+    q: "After your chosen meal, when do you record?",
     options: [
+      "Once an hour, every hour, until bedtime",
       "Right after eating, then every 30 minutes for 3.5 hours",
-      "Once an hour until bedtime",
-      "Whenever I remember",
+      "Whenever you are available",
     ],
-    answer: 0,
-    why: "Recording right after the meal, then every 30 minutes for 3.5 hours, follows digestion the same way for everyone in the study.",
+    answer: 1,
+    why: "Recording right after the meal and then every 30 minutes for 3.5 hours keeps the timing consistent across everyone in the study, so the data can be analyzed accurately.",
     hint: "It starts when the meal ends, and the recordings are 30 minutes apart.",
   },
 
@@ -320,27 +317,27 @@ export function QuizScreen({ store }: { store: TummyStore }) {
 const DAY_STEPS = [
   {
     t: "1 · Wake-up questions",
-    b: "A short set of questions when you wake: how you slept, and whether you've had anything to eat or drink.",
+    b: "Answer a short set of questions when you wake up: how you slept, and whether you've had anything to eat or drink.",
     Icon: IconSun,
   },
   {
     t: "2 · Fasted recording",
-    b: "Within 30 minutes of waking, before food, drink or moving about. Two minutes, sitting still.",
+    b: "Record your gut sounds within 30 minutes of waking, before food, drink or moving about. Two minutes, sitting still.",
     Icon: IconMic,
   },
   {
     t: "3 · Your study meal",
-    b: "Record just before you start eating, add a photo of the plate, then tap when you take your last bite.",
+    b: "Record just before you start eating, add a photo of the plate, then record when you take your last bite.",
     Icon: IconBowl,
   },
   {
     t: "4 · Recordings for 3.5 hours after",
-    b: "One recording as soon as you finish, then another every 30 minutes for 3.5 hours.",
+    b: "Record your gut sounds as soon as you finish, then another every 30 minutes for the following 3.5 hours.",
     Icon: IconClock,
   },
   {
     t: "5 · No food or drink in that window",
-    b: "Nothing to eat or drink until that last recording. If you need water, one cup, right after a recording.",
+    b: "You should have nothing to eat or drink until that last recording. If you need water, one cup, right after a recording.",
     Icon: IconDroplet,
   },
   {
@@ -350,12 +347,12 @@ const DAY_STEPS = [
   },
   {
     t: "7 · Log the rest of your day",
-    b: "For every other meal, snack, and drink: a photo and the time, or a short voice note.",
+    b: "For every other meal, snack, drink, gut symptom, physical activity, sleep or bowel movement - log it in the app.",
     Icon: IconCamera,
   },
   {
     t: "8 · Evening check-in",
-    b: "A few questions before you go to bed.",
+    b: "Answer a few questions before you go to bed.",
     Icon: IconMoon,
   },
 ];
@@ -369,7 +366,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
       <TopBar title="How a day works" onBack={store.back} step="Step 5 of 9" />
       <ScreenBody>
         <MascotSays size={78}>
-          Every study day follows the same shape. I'll show you one step at a time.
+          Every study day follows the same schedule. Let me walk you through it, one step at a time.
         </MascotSays>
         <div className="mt-5 space-y-3">
           {DAY_STEPS.slice(0, shown).map(({ t, b, Icon }, i) => (
@@ -473,8 +470,8 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
       <TopBar title="Technical setup" onBack={store.back} step="Step 7 of 9" />
       <ScreenBody>
         <p className="text-[17px] font-semibold leading-relaxed text-pine-soft">
-          Recordings use your phone's microphone. Telling us the model helps the team compare audio
-          across participants.
+          Recordings use your phone's microphone. Telling us the model helps our study team analyze
+          your recordings accurately.
         </p>
 
         <div className="mt-5 space-y-5">
@@ -533,8 +530,8 @@ export function TechnicalSetupScreen({ store }: { store: TummyStore }) {
               <div className="flex-1">
                 <p className="text-[17px] font-extrabold text-pine">Case check</p>
                 <p className="text-[16px] font-semibold text-pine-soft">
-                  The case has to come off before every recording. If it's stiff, start from a
-                  corner.
+                  The case must come off before every recording. Recordings done with the case on
+                  severely deteriorate the quality of the recordings.
                 </p>
               </div>
             </div>
@@ -585,7 +582,7 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
     {
       k: "dnd",
       label: "Do not disturb",
-      sub: "On only while you record, then off again",
+      sub: "On only while you record",
       Icon: IconLock,
     },
   ];
@@ -600,8 +597,7 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
         </Note>
         <div className="mt-3">
           <Note tone="blue" title="Do not disturb is only for recordings">
-            Do not disturb turns on when a recording starts and off the moment it ends. The rest of
-            the day, calls and messages come through as usual.
+            Do not disturb turns on when a recording starts and off the moment it ends.
           </Note>
         </div>
         <div className="mt-4 space-y-3">
@@ -648,7 +644,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const TOTAL = 45;
   const [stage, setStage] = useState<"intro" | "case" | "position" | "record">("intro");
   const [posChecked, setPosChecked] = useState(false);
-  const [posTipsSeen, setPosTipsSeen] = useState(false);
+  const [posTipIndex, setPosTipIndex] = useState(0);
   const [left, setLeft] = useState(TOTAL);
   const [marks, setMarks] = useState<{ key: string; label: string; severity: number }[]>([]);
   const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
@@ -722,7 +718,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
           <IconLock width={20} height={20} />
         </span>
         <p className="flex-1 text-[15px] font-extrabold text-surface">
-          Dry run · nothing is uploaded
+          Dry run
         </p>
       </div>
     </div>
@@ -789,20 +785,23 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
         <div className={cn("min-h-0 flex-1 overflow-y-auto px-5 pt-2", !posChecked && "blur-md")}>
           <AbdomenGuide />
           <p className="mt-3 text-[16px] font-semibold leading-snug text-mint">
-            Bottom of the phone on that spot, screen facing out.
+            Bottom of the phone with the speakers on that spot, screen facing out.
           </p>
-          <PlacementTips onAllSeen={() => setPosTipsSeen(true)} />
+          <PlacementTips index={posTipIndex} />
         </div>
 
         <div className="shrink-0 px-5 pb-7 pt-3">
-          <Btn disabled={!posChecked || !posTipsSeen} onClick={() => setStage("record")}>
-            I'm in position
+          <Btn
+            disabled={!posChecked}
+            onClick={() => {
+              if (posTipIndex < PLACEMENT_TIPS.length - 1) setPosTipIndex((i) => i + 1);
+              else setStage("record");
+            }}
+          >
+            {posChecked && posTipIndex < PLACEMENT_TIPS.length - 1
+              ? `Next · ${posTipIndex + 1} of ${PLACEMENT_TIPS.length}`
+              : "I'm in position"}
           </Btn>
-          {posChecked && !posTipsSeen ? (
-            <p className="mt-2 text-center text-[15px] font-semibold text-mint">
-              Read each placement rule to continue.
-            </p>
-          ) : null}
         </div>
         {!posChecked ? <PositionChecksGate onDone={() => setPosChecked(true)} /> : null}
       </Screen>
@@ -826,7 +825,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
 
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-5">
         <RecordTimer elapsed={TOTAL - left} min={TOTAL} />
-        <p className="mt-5 text-[16px] font-bold text-mint">Keep still until the ring empties</p>
+        <p className="mt-5 text-[16px] font-bold text-mint">Keep still until the timer ends</p>
         <p className="mt-1 text-[15px] font-bold text-surface/70">
           {marks.length} symptom {marks.length === 1 ? "mark" : "marks"} recorded
         </p>
@@ -896,6 +895,7 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
       {finished && !passed ? (
         <QualityPanel
           pass={attempt > 0}
+          allowKeep={false}
           onRedo={() => {
             setAttempt((a) => a + 1);
             setLeft(TOTAL);
@@ -916,7 +916,6 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
                 ? `You logged ${marks.length} symptom ${marks.length === 1 ? "mark" : "marks"}. `
                 : ""}
               After a real recording you'll get this same sound check, then a few short questions.
-              That's the whole flow.
             </p>
             <div className="mt-5">
               <Btn onClick={() => store.go("onboardDone")}>Continue</Btn>
@@ -1021,7 +1020,7 @@ export function SchedulingScreen({ store }: { store: TummyStore }) {
           ))}
         </div>
         <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-pine-soft">
-          These times are only for reminders. It's fine if a day runs later.
+          These times are only for reminders.
         </p>
       </ScreenBody>
       <StickyFooter>
@@ -1073,8 +1072,7 @@ export function MealPickScreen({ store }: { store: TummyStore }) {
       <TopBar title="Your study meal" onBack={store.back} step="Step 6 of 9" />
       <ScreenBody>
         <MascotSays size={78} src={MASCOT.calm}>
-          Choose the meal you eat at a steady time, and after which you'll have a quiet, private
-          place to record.
+          Choose the meal you eat at a steady time, around which you wish to do your recordings.
         </MascotSays>
         <div className="mt-5 space-y-3">
           {meals.map(({ k, label, when, why, Icon }) => (
@@ -1234,8 +1232,8 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
       <TopBar title="About you" onBack={store.back} step="Step 2 of 9" />
       <ScreenBody>
         <MascotSays size={78}>
-          Gut activity differs from person to person. If you're female, the evening check-in
-          includes one menstrual cycle question.
+          Gut activity differs from person to person. If you're female, the evening check-in will
+          include just one menstrual cycle question.
         </MascotSays>
         <div className="mt-5 space-y-2">
           {(
@@ -1256,8 +1254,8 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
         </div>
         <div className="mt-4">
           <Note tone="green" title="Why we ask">
-            Cycle timing can change gut symptoms, so this helps the team read your recordings in
-            context. It's stored against your subject ID only.
+            Menstrual cycle timings can change gut symptoms, so this information helps the study
+            team analyze your recordings with the appropriate context.
           </Note>
         </div>
       </ScreenBody>

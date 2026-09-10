@@ -301,8 +301,7 @@ export function FastingCheckScreen({ store }: { store: TummyStore }) {
             Still fasted, and within 30 minutes of waking?
           </h2>
           <p className="mt-2 text-[17px] font-semibold leading-snug text-pine-soft">
-            Nothing except a few sips of water. Using the bathroom is fine. Sitting up counts;
-            still lying down does not.
+            Nothing except a few sips of water. Using the bathroom is fine.
           </p>
         </div>
         <Note tone="amber" title="If either is a no">
@@ -549,43 +548,29 @@ export const PLACEMENT_TIPS = [
   },
   {
     t: "Measure, don't guess",
-    b: "Use a ruler rather than guessing by eye.",
+    b: "Use the ruler app rather than guessing.",
     Icon: IconChart,
   },
 ];
 
-/** Placement rules, revealed one at a time so each one gets read. */
-export function PlacementTips({ onAllSeen }: { onAllSeen?: () => void }) {
-  const [shown, setShown] = useState(1);
-  const all = shown >= PLACEMENT_TIPS.length;
+/** One placement rule at a time. The footer button advances the index. */
+export function PlacementTips({ index }: { index: number }) {
+  const tip = PLACEMENT_TIPS[Math.min(index, PLACEMENT_TIPS.length - 1)];
+  const { t, b, Icon } = tip;
   return (
-    <div className="mt-4 space-y-2">
-      {PLACEMENT_TIPS.slice(0, shown).map(({ t, b, Icon }) => (
-        <div
-          key={t}
-          className="flex items-center gap-3 rounded-2xl bg-surface/10 px-3 py-2 text-surface"
-        >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber text-pine">
-            <Icon width={18} height={18} />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[15px] font-bold leading-snug">{t}</span>
-            <span className="block text-[13px] font-semibold leading-snug text-mint">{b}</span>
-          </span>
-        </div>
-      ))}
-      {!all ? (
-        <button
-          onClick={() => {
-            const next = shown + 1;
-            setShown(next);
-            if (next >= PLACEMENT_TIPS.length) onAllSeen?.();
-          }}
-          className="min-h-[48px] w-full rounded-2xl border-2 border-mint text-[15px] font-extrabold text-mint"
-        >
-          Next rule · {shown} of {PLACEMENT_TIPS.length}
-        </button>
-      ) : null}
+    <div className="mt-4">
+      <div
+        key={t}
+        className="flex items-center gap-3 rounded-2xl bg-surface/10 px-3 py-3 text-surface"
+      >
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber text-pine">
+          <Icon width={20} height={20} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[16px] font-bold leading-snug">{t}</span>
+          <span className="mt-0.5 block text-[14px] font-semibold leading-snug text-mint">{b}</span>
+        </span>
+      </div>
     </div>
   );
 }
@@ -626,27 +611,30 @@ export function PositionChecksGate({ onDone }: { onDone: () => void }) {
 
 export function PositioningScreen({ store }: { store: TummyStore }) {
   const [checked, setChecked] = useState(false);
-  const [tipsSeen, setTipsSeen] = useState(false);
-  const ready = checked && tipsSeen;
+  const [tipIndex, setTipIndex] = useState(0);
+  const lastTip = tipIndex >= PLACEMENT_TIPS.length - 1;
   return (
     <Screen dark className="relative">
       <TopBar title="Positioning guide" onBack={store.back} dark step="Placement" />
       <div className={cn("flex-1 overflow-y-auto px-5 pb-6", !checked && "blur-md")}>
         <AbdomenGuide />
         <p className="mt-3 text-[16px] font-semibold leading-snug text-mint">
-          Bottom of the phone on that spot, screen facing out.
+          Bottom of the phone with the speakers on that spot, screen facing out.
         </p>
-        <PlacementTips onAllSeen={() => setTipsSeen(true)} />
+        <PlacementTips index={tipIndex} />
       </div>
       <div className="shrink-0 px-5 pb-7 pt-3">
-        <Btn disabled={!ready} onClick={() => store.go("recording")}>
-          I'm in position
+        <Btn
+          disabled={!checked}
+          onClick={() => {
+            if (!lastTip) setTipIndex((i) => i + 1);
+            else store.go("recording");
+          }}
+        >
+          {checked && !lastTip
+            ? `Next · ${tipIndex + 1} of ${PLACEMENT_TIPS.length}`
+            : "I'm in position"}
         </Btn>
-        {checked && !tipsSeen ? (
-          <p className="mt-2 text-center text-[15px] font-semibold text-mint">
-            Read each placement rule to continue.
-          </p>
-        ) : null}
       </div>
       {!checked ? <PositionChecksGate onDone={() => setChecked(true)} /> : null}
     </Screen>
@@ -671,10 +659,13 @@ export function QualityPanel({
   pass,
   onRedo,
   onContinue,
+  allowKeep = true,
 }: {
   pass: boolean;
   onRedo: () => void;
   onContinue: () => void;
+  /** Real sessions can keep a noisy take. Practice cannot. */
+  allowKeep?: boolean;
 }) {
   const [phase, setPhase] = useState<"checking" | "done">("checking");
   useEffect(() => {
@@ -719,9 +710,11 @@ export function QualityPanel({
             </p>
             <div className="mt-5 space-y-3">
               <Btn onClick={onRedo}>Record it again</Btn>
-              <Btn variant="secondary" onClick={onContinue}>
-                Keep it anyway
-              </Btn>
+              {allowKeep ? (
+                <Btn variant="secondary" onClick={onContinue}>
+                  Keep it anyway
+                </Btn>
+              ) : null}
             </div>
           </>
         )}
@@ -1068,7 +1061,6 @@ const SLEEP_LOCATIONS = [
   "A partner's or shared bed",
   "A sofa or guest bed",
   "Away from home, like a hotel",
-  "I was up most of the night",
   "Other",
 ];
 
@@ -1465,8 +1457,7 @@ export function SnackSkipScreen({ store }: { store: TummyStore }) {
             </div>
             <div className="mt-4">
               <Note tone="amber" title="What happens now">
-                Every remaining recording in this meal window will be skipped. If you can't wait
-                next time, try to hold off until at least 2 to 2.5 hours after the meal.
+                Every remaining recording in this meal window will be skipped.
               </Note>
             </div>
           </>
@@ -1502,7 +1493,6 @@ export function SnackSkipScreen({ store }: { store: TummyStore }) {
 
 const SKIP_PLACE = [
   "I didn't have a quiet, private place",
-  "I couldn't sit still and upright for two minutes",
   "Something else",
 ];
 
