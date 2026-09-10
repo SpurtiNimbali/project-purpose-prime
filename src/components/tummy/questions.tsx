@@ -81,16 +81,7 @@ export const MORNING_QS: FlowQ[] = [
     textIf: ["Yes, something else"],
     followUp: "What was it, and roughly when?",
     warnIf: ["Yes, something else"],
-    warn: "This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. If it was just once, still do the recording. We only skip the fasted recording if this happens more than once. Please do not skip any meals because of this.",
-  },
-  {
-    id: "intakeTimes",
-    q: "Was that just once, or more than once?",
-    type: "single",
-    options: ["Just once", "More than once"],
-    skipUnless: { id: "intake", values: ["Yes, something else"] },
-    warnIf: ["More than once"],
-    warn: "We'll skip this morning's fasted recording. Please still eat and log your meals as usual today, and try to stay fasted before tomorrow's recording.",
+    warn: "This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. Record anyway today, and please do not skip any meals because of this. If this happens again on another day, we will skip that morning's fasted recording.",
   },
   { id: "outOfBed", q: "What time did you get out of bed?", type: "time", def: "07:15" },
   {
@@ -391,7 +382,7 @@ function QuestionFlow({
                 {current.optional ? (
                   <button
                     onClick={() => submitNote(true)}
-                    className="min-h-[48px] w-full text-[16px] font-extrabold text-pine-soft"
+                    className="min-h-[52px] w-full rounded-2xl border-2 border-line bg-surface text-[16px] font-extrabold text-pine-soft"
                   >
                     Nothing to add
                   </button>
@@ -520,12 +511,12 @@ export function MorningQuestionsScreen({ store }: { store: TummyStore }) {
         }
         store.markQuestions("morning");
 
-        const skipFasted =
-          a.intake === "Yes, something else" && a.intakeTimes === "More than once";
+        const brokeDays =
+          a.intake === "Yes, something else" ? store.noteBrokeFastDay() : store.brokeFastDays;
         const fasted = store.plan.find((p) => p.id === "fasted");
-        if (skipFasted) {
+        if (a.intake === "Yes, something else" && brokeDays >= 2) {
           if (fasted && !fasted.done) {
-            store.missItem(fasted.id, "Ate or drank more than once before fasting");
+            store.missItem(fasted.id, "Ate or drank before fasting on more than one day");
           }
           store.go("home");
           return;

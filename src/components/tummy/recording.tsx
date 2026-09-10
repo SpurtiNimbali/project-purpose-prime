@@ -50,27 +50,46 @@ import { cn } from "@/lib/utils";
 
 /* ---------------- session hub ---------------- */
 
-function ProgressRing({ done, total }: { done: number; total: number }) {
-  const r = 20;
+export function ProgressRing({ done, total }: { done: number; total: number }) {
+  const label = `${done}/${total}`;
+  const long = label.length >= 5;
+  const size = 56;
+  const stroke = 5;
+  const r = (size - stroke) / 2 - 1;
   const c = 2 * Math.PI * r;
   return (
-    <span className="relative flex h-[52px] w-[52px] shrink-0 items-center justify-center">
-      <svg width="52" height="52" viewBox="0 0 52 52" className="-rotate-90">
-        <circle cx="26" cy="26" r={r} fill="none" stroke="#CFE3D8" strokeWidth="6" />
+    <span
+      className="relative flex shrink-0 items-center justify-center"
+      style={{ width: size, height: size }}
+    >
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
         <circle
-          cx="26"
-          cy="26"
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke="#CFE3D8"
+          strokeWidth={stroke}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
           r={r}
           fill="none"
           stroke="#2E7D6B"
-          strokeWidth="6"
+          strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={c}
-          strokeDashoffset={c * (1 - done / total)}
+          strokeDashoffset={c * (1 - (total ? done / total : 0))}
         />
       </svg>
-      <span className="absolute text-[15px] font-extrabold tabular-nums text-pine">
-        {done}/{total}
+      <span
+        className={cn(
+          "absolute px-1 text-center font-extrabold leading-none tabular-nums tracking-tight text-pine",
+          long ? "text-[11px]" : "text-[14px]",
+        )}
+      >
+        {label}
       </span>
     </span>
   );
@@ -84,7 +103,6 @@ function planIcon(p: PlanItem) {
 
 export function SessionHubScreen({ store }: { store: TummyStore }) {
   const plan = store.plan;
-  const doneCount = plan.filter((p) => p.done).length;
   const next = store.frozen ? undefined : plan.find((p) => !p.done);
   const now = minutesNow();
 
@@ -110,7 +128,6 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
         title="Today's plan"
         onBack={store.back}
         step={`Day ${store.day} of 7`}
-        right={<ProgressRing done={doneCount} total={plan.length} />}
       />
       <div className="flex min-h-0 flex-1 flex-col px-5 pb-4">
         <div className="min-h-0 flex-1 overflow-y-auto">
@@ -127,21 +144,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                 Nothing is due. The schedule picks up again tomorrow morning.
               </p>
             </div>
-          ) : (
-            <div className="mb-4 flex items-center justify-between rounded-3xl border border-line bg-surface px-4 py-3 shadow-sm">
-              <div>
-                <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-teal">
-                  {next ? "Up next" : "All done"}
-                </p>
-                <p className="mt-0.5 text-[16px] font-extrabold text-pine">
-                  {doneCount} of {plan.length} finished
-                </p>
-              </div>
-              <span className="rounded-full bg-mint-soft px-3 py-2 text-[15px] font-extrabold text-teal">
-                Day {store.day}
-              </span>
-            </div>
-          )}
+          ) : null}
 
           {plan.map((p, i) => {
             const isNext = p.id === next?.id;
@@ -244,26 +247,19 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                         <Icon width={20} height={20} />
                       )}
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[16px] font-extrabold text-pine">
-                        {p.label}
-                      </span>
-                      <span className="mt-0.5 block text-[14px] font-semibold text-pine-soft">
-                        {p.window}
-                      </span>
+                    <span className="min-w-0 flex-1 truncate text-[16px] font-extrabold text-pine">
+                      {p.label}
                     </span>
-                    <span
-                      className={cn(
-                        "shrink-0 rounded-full px-3 py-1.5 text-[13px] font-extrabold",
-                        p.missed
-                          ? "bg-amber-soft text-pine"
-                          : p.done
-                            ? "bg-mint-soft text-teal"
-                            : "bg-wash text-pine-soft",
-                      )}
-                    >
-                      {p.missed ? "Missed" : p.done ? "Done" : clockLabel(p.at)}
-                    </span>
+                    {p.missed || !p.done ? (
+                      <span
+                        className={cn(
+                          "shrink-0 rounded-full px-3 py-1.5 text-[13px] font-extrabold",
+                          p.missed ? "bg-amber-soft text-pine" : "bg-wash text-pine-soft",
+                        )}
+                      >
+                        {p.missed ? "Missed" : clockLabel(p.at)}
+                      </span>
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -300,10 +296,6 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
             </span>
           </button>
         </div>
-
-        <p className="pt-3 text-center text-[15px] font-bold text-pine-soft">
-          {WINDOW_RULE}
-        </p>
       </div>
     </Screen>
   );

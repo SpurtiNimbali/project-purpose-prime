@@ -53,6 +53,7 @@ import {
   type ScreenKey,
   type TummyStore,
 } from "./store";
+import { ProgressRing } from "./recording";
 import { AssistantHint } from "./assistant";
 import { cn } from "@/lib/utils";
 
@@ -143,7 +144,6 @@ export function HomeScreen({ store }: { store: TummyStore }) {
         <ScreenBody className="pt-4">
           <div className="space-y-3">
             {[
-              { t: "Streak stays safe", b: "Using a freeze day does not count as a missed day." },
               { t: "Today's plan is on hold", b: "Recordings, meals, and questions wait until tomorrow." },
               { t: "Back in the morning", b: "Everything reopens with your fasted recording." },
             ].map(({ t, b }) => (
@@ -190,9 +190,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
               Day {store.day} of 7
             </h1>
           </div>
-          <span className="shrink-0 rounded-full bg-mint-soft px-3 py-2 text-[15px] font-extrabold text-teal">
-            {doneCount}/{store.plan.length}
-          </span>
+          <ProgressRing done={doneCount} total={store.plan.length} />
         </div>
       </div>
 

@@ -156,6 +156,10 @@ export type TummyStore = {
   missItem: (id: string, reason?: string) => void;
   /** undo an auto-miss so a recording can still be done */
   reopenItem: (id: string) => void;
+  /** days they reported food or drink before the fasted recording */
+  brokeFastDays: number;
+  /** count today as another broken-fast day; returns the new total */
+  noteBrokeFastDay: () => number;
   /** recording auto-closed after its window; ask why in a popup */
   pendingMissAsk: { id: string; label: string } | null;
   explainMiss: (note: string) => void;
@@ -552,6 +556,7 @@ export function useTummyStore(): TummyStore {
     null,
   );
   const [snackTimes, setSnackTimesState] = useState<number[]>([]);
+  const [brokeFastDays, setBrokeFastDays] = useState(0);
 
   const chooseStudyMeal = useCallback((m: Meal) => {
     setMeal(m);
@@ -751,6 +756,15 @@ export function useTummyStore(): TummyStore {
     setGender,
     snackTimes,
     setSnackTimes,
+    brokeFastDays,
+    noteBrokeFastDay: () => {
+      let next = brokeFastDays + 1;
+      setBrokeFastDays((n) => {
+        next = n + 1;
+        return next;
+      });
+      return next;
+    },
     questions,
     markQuestions: (when) => {
       setQuestions((q) => ({ ...q, [when]: true }));
