@@ -38,6 +38,7 @@ import {
   SymptomGrid,
   SeveritySheet,
   QualityPanel,
+  CaseOffLayout,
 } from "./recording";
 
 import type { TummyStore } from "./store";
@@ -750,29 +751,13 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
   /* stage 1, case off, exactly like the real thing */
   if (stage === "case") {
     return (
-      <Screen dark className="relative">
-        <TopBar
-          title="Practice recording"
-          onBack={store.back}
-          dark
-          step="Step 9 of 9"
-        />
-        {banner}
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center">
-          <span className="flex h-[132px] w-[132px] items-center justify-center rounded-full bg-surface/10 text-mint">
-            <IconPhone width={72} height={72} />
-          </span>
-          <h2 className="mt-5 text-[24px] font-extrabold leading-tight text-surface">
-            Take your phone case off
-          </h2>
-            <p className="mt-2 text-[16px] font-semibold leading-snug text-mint">
-            The bare phone sits on bare skin. A case leaves a gap the microphone can't hear through.
-          </p>
-        </div>
-        <div className="shrink-0 px-5 pb-7">
-          <Btn onClick={() => setStage("position")}>My case is off</Btn>
-        </div>
-      </Screen>
+      <CaseOffLayout
+        title="Practice recording"
+        step="Step 9 of 9"
+        onBack={store.back}
+        onContinue={() => setStage("position")}
+        banner={banner}
+      />
     );
   }
 
@@ -1124,8 +1109,8 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
   const [snacks, setSnacks] = useState<"" | "yes" | "no">("");
   const [seenWeekend, setSeenWeekend] = useState(false);
   const [times, setTimes] = useState<Record<"weekday" | "weekend", string[]>>({
-    weekday: ["10:30"],
-    weekend: ["11:00"],
+    weekday: [],
+    weekend: [],
   });
 
   const list = times[tab];
@@ -1217,7 +1202,19 @@ export function SnackingScreen({ store }: { store: TummyStore }) {
             Next: weekend snacks
           </Btn>
         ) : (
-          <Btn disabled={!snacks} onClick={() => store.go("technicalSetup")}>
+          <Btn
+            disabled={!snacks}
+            onClick={() => {
+              const mins = (snacks === "yes" ? times.weekday : [])
+                .map((t) => {
+                  const [h, m] = t.split(":").map(Number);
+                  return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : null;
+                })
+                .filter((n): n is number => n !== null);
+              store.setSnackTimes(mins);
+              store.go("technicalSetup");
+            }}
+          >
             Continue
           </Btn>
         )}
@@ -1263,7 +1260,9 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn onClick={() => store.go("video")}>Continue</Btn>
+        <Btn disabled={!store.gender} onClick={() => store.go("video")}>
+          Continue
+        </Btn>
       </StickyFooter>
     </Screen>
   );

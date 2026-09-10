@@ -81,7 +81,16 @@ export const MORNING_QS: FlowQ[] = [
     textIf: ["Yes, something else"],
     followUp: "What was it, and roughly when?",
     warnIf: ["Yes, something else"],
-    warn: "This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. Record anyway, and please do not skip any meals because of this. Eat and log your meals as usual today. Try to stay fasted before tomorrow's recording.",
+    warn: "This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. If it was just once, still do the recording. We only skip the fasted recording if this happens more than once. Please do not skip any meals because of this.",
+  },
+  {
+    id: "intakeTimes",
+    q: "Was that just once, or more than once?",
+    type: "single",
+    options: ["Just once", "More than once"],
+    skipUnless: { id: "intake", values: ["Yes, something else"] },
+    warnIf: ["More than once"],
+    warn: "We'll skip this morning's fasted recording. Please still eat and log your meals as usual today, and try to stay fasted before tomorrow's recording.",
   },
   { id: "outOfBed", q: "What time did you get out of bed?", type: "time", def: "07:15" },
   {
@@ -511,13 +520,19 @@ export function MorningQuestionsScreen({ store }: { store: TummyStore }) {
         }
         store.markQuestions("morning");
 
-        const fasted = store.plan.find((p) => p.id === "fasted" && !p.done);
-        if (fasted) {
-          store.startItem(fasted.id);
-          store.go("caseReminder");
-        } else {
+        const skipFasted =
+          a.intake === "Yes, something else" && a.intakeTimes === "More than once";
+        const fasted = store.plan.find((p) => p.id === "fasted");
+        if (skipFasted) {
+          if (fasted && !fasted.done) {
+            store.missItem(fasted.id, "Ate or drank more than once before fasting");
+          }
           store.go("home");
+          return;
         }
+        if (fasted?.done) store.reopenItem("fasted");
+        store.startItem("fasted");
+        store.go("caseReminder");
       }}
     />
   );

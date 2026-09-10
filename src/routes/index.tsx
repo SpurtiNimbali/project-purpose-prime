@@ -75,7 +75,7 @@ export const Route = createFileRoute("/")({
 });
 
 const TAB_SCREENS: ScreenKey[] = ["home", "logHub", "progress", "profile"];
-const DARK_SCREENS: ScreenKey[] = ["positioning", "recording", "practiceRun"];
+const DARK_SCREENS: ScreenKey[] = ["positioning", "recording", "practiceRun", "mealEnd"];
 const ONBOARD_SCREENS: ScreenKey[] = [
   "welcome",
   "subjectId",

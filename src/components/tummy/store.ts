@@ -154,6 +154,8 @@ export type TummyStore = {
   startItem: (id: string) => void;
   completeItem: (id: string) => void;
   missItem: (id: string, reason?: string) => void;
+  /** undo an auto-miss so a recording can still be done */
+  reopenItem: (id: string) => void;
   /** recording auto-closed after its window; ask why in a popup */
   pendingMissAsk: { id: string; label: string } | null;
   explainMiss: (note: string) => void;
@@ -170,7 +172,10 @@ export type TummyStore = {
   questions: { morning: boolean; night: boolean };
   markQuestions: (when: "morning" | "night") => void;
   nextTask: NextTask;
-  gender: Gender;
+  gender: Gender | null;
+  /** weekday snack times in minutes from midnight; empty if they don't snack */
+  snackTimes: number[];
+  setSnackTimes: (mins: number[]) => void;
   /** prototype clock: current simulated minutes from midnight */
   demoNow: number;
   setDemoNow: (mins: number) => void;
@@ -261,7 +266,7 @@ const MEAL_TIMES: Record<Meal, number> = {
   dinner: 19 * 60,
 };
 
-function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
+function createInitialPlan(meal: Meal = "breakfast", snackAts: number[] = []): PlanItem[] {
   const wake = 7 * 60; // 7:00 am
   const mealStartAt = MEAL_TIMES[meal];
   const mealEndAt = mealStartAt + 25;
@@ -293,14 +298,11 @@ function createInitialPlan(meal: Meal = "breakfast"): PlanItem[] {
       meal: m,
     }));
 
-  const snacks: PlanItem[] = [
-    { id: "logSnackPm", label: "Log your afternoon snack", at: 16 * 60 },
-    { id: "logSnackEve", label: "Log your evening snack", at: 20 * 60 + 30 },
-  ].map((s) => ({
-    id: s.id,
+  const snacks: PlanItem[] = snackAts.map((at, i) => ({
+    id: `log-snack-${i}`,
     kind: "meal" as const,
-    label: s.label,
-    at: s.at,
+    label: snackAts.length === 1 ? "Log your snack" : `Log your ${clockLabel(at)} snack`,
+    at,
     done: false,
     window: "Photo, or a quick line of text",
     mealLog: true,
@@ -529,7 +531,7 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
 export function useTummyStore(): TummyStore {
   const [stack, setStack] = useState<ScreenKey[]>(["welcome"]);
 
-  const [gender, setGender] = useState<Gender>("unsaid");
+  const [gender, setGender] = useState<Gender | null>(null);
   const [track, setTrack] = useState<Track>("fasting");
   const [sessionKind, setSessionKind] = useState<SessionKind>("fasted");
   const [meal, setMeal] = useState<Meal>("breakfast");
@@ -549,11 +551,21 @@ export function useTummyStore(): TummyStore {
   const [pendingMissAsk, setPendingMissAsk] = useState<{ id: string; label: string } | null>(
     null,
   );
+  const [snackTimes, setSnackTimesState] = useState<number[]>([]);
 
   const chooseStudyMeal = useCallback((m: Meal) => {
     setMeal(m);
-    setPlan(createInitialPlan(m));
-  }, []);
+    setPlan(createInitialPlan(m, snackTimes));
+  }, [snackTimes]);
+
+  const setSnackTimes = useCallback((mins: number[]) => {
+    setSnackTimesState(mins);
+    setPlan((prev) => {
+      const currentMeal =
+        prev.find((p) => p.id === "mealStart")?.meal ?? meal;
+      return createInitialPlan(currentMeal, mins);
+    });
+  }, [meal]);
 
 
   const go = useCallback((s: ScreenKey) => {
@@ -602,6 +614,16 @@ export function useTummyStore(): TummyStore {
     ]);
   }, []);
 
+  const reopenItem = useCallback((id: string) => {
+    setPlan((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? { ...p, done: false, missed: false, needsWhy: false, reason: undefined }
+          : p,
+      ),
+    );
+  }, []);
+
   const skipRemainingAfterSnack = useCallback(
     (reason: string) => {
       let count = 0;
@@ -639,6 +661,8 @@ export function useTummyStore(): TummyStore {
       const next = prev.map((p) => {
         if (p.kind !== "recording" || p.done) return p;
         if (inFlight && p.id === activeItemId) return p;
+        // wake-up questions sit in front of the fasted recording; don't close it underneath them
+        if (screen === "morningQuestions" && p.id === "fasted") return p;
         const closes = recordingWindowClosesAt(p);
         if (now <= closes) return p;
         changed = true;
@@ -725,6 +749,8 @@ export function useTummyStore(): TummyStore {
     nextTask,
     gender,
     setGender,
+    snackTimes,
+    setSnackTimes,
     questions,
     markQuestions: (when) => {
       setQuestions((q) => ({ ...q, [when]: true }));
@@ -794,6 +820,7 @@ export function useTummyStore(): TummyStore {
     startItem,
     completeItem,
     missItem,
+    reopenItem,
     pendingMissAsk,
     explainMiss,
     skipRemainingAfterSnack,

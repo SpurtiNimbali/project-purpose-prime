@@ -279,9 +279,13 @@ HOME_EXTRA_KICKER = Optional · anytime HOME_EXTRA_TITLE = Something feels diffe
 HOME_FREEZE_KICKER = Freeze day
 HOME_FREEZE_TITLE = Day {n} is paused
 HOME_FREEZE_BODY = Nothing to record, log, or answer today. Your streak stays safe, and the schedule picks up again tomorrow morning.
-HOME_FREEZE_RAIL = Today's rail · frozen
-HOME_FREEZE_HOLD = All of today's sessions, meals and questions are on hold.
-HOME_FREEZE_FOOT = Rest today. Everything reopens tomorrow morning with your fasted recording.
+HOME_FREEZE_SAFE = Streak stays safe
+HOME_FREEZE_SAFE_B = Using a freeze day does not count as a missed day.
+HOME_FREEZE_HOLD = Today's plan is on hold
+HOME_FREEZE_HOLD_B = Recordings, meals, and questions wait until tomorrow.
+HOME_FREEZE_BACK = Back in the morning
+HOME_FREEZE_BACK_B = Everything reopens with your fasted recording.
+HOME_FREEZE_CTA = Open today's log
 
 ### Home next-up (generated from the plan)
 
@@ -375,11 +379,7 @@ HUB_EXTRA = Record an extra session
 
 CASE_TITLE = Before we start
 CASE_H2 = Take your phone case off
-CASE_BODY = The bare phone sits against bare skin every time.
-CASE_WHY = Why?
-CASE_HIDE = Hide explanation
-CASE_NOTE_TITLE = Why the case matters
-CASE_NOTE_BODY = A case creates a gap between the microphone and your skin. Gut sounds are quiet and low, so even a couple of millimetres of air loses most of the signal.
+CASE_BODY = The bare phone sits on bare skin. A case leaves a gap the microphone can't hear through.
 CASE_CTA = My case is off
 
 ### Fasted check
@@ -429,7 +429,7 @@ MEALEND_FOOT = Still eating? Come back when the last bite is done.
 CHECK_TITLE = Quick check
 CHECK_PRE_TAG = Before the meal
 CHECK_POST_TAG = After the meal
-CHECK_PRE_H2 = Have you eaten anything before the upcoming meal?
+CHECK_PRE_H2 = Have you eaten anything else before the upcoming meal?
 CHECK_POST_H2 = Have you had anything at all since the meal?
 CHECK_PRE_BODY = This recording has to happen immediately before the first bite.
 CHECK_POST_BODY = No snacks. Water only if it was right after a recording, and at least 15 minutes ago.
@@ -623,7 +623,7 @@ AM_SCALE_HI = 5 = severe
 AM_WATCH_NOTE_TITLE = Please charge your smartwatch now
 AM_WATCH_NOTE_BODY = Put it on the charger now, and back on your wrist before you sleep. The overnight data matters a great deal to us.
 
-AM_BED = What time did you get into bed last night? AM_LATENCY = How long did it take you to fall asleep? AM_LATENCY_HINT = A rough guess is fine. AM_WAKE = What time did you wake up? AM_INTAKE = Have you had anything to eat or drink yet this morning? AM_INTAKE_NONE = Nothing at all AM_INTAKE_WATER = A few sips of water AM_INTAKE_YES = Yes, something else AM_INTAKE_MORE = What was it, and roughly when? AM_INTAKE_WARN = This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. Record anyway, and please do not skip any meals because of this. Eat and log your meals as usual today. Try to stay fasted before tomorrow's recording. AM_OUT = What time did you get out of bed? AM_TOILET = Have you been to the toilet since waking? AM_TOILET_NO = No AM_TOILET_PEE = Yes, but no bowel movement AM_TOILET_BM = Yes, a bowel movement AM_ACT = Any physical activity since waking, other than going to the toilet? AM_ACT_N = No AM_ACT_Y = Yes AM_ACT_MORE = What did you do?
+AM_BED = What time did you get into bed last night? AM_LATENCY = How long did it take you to fall asleep? AM_LATENCY_HINT = A rough guess is fine. AM_WAKE = What time did you wake up? AM_INTAKE = Have you had anything to eat or drink yet this morning? AM_INTAKE_NONE = Nothing at all AM_INTAKE_WATER = A few sips of water AM_INTAKE_YES = Yes, something else AM_INTAKE_MORE = What was it, and roughly when? AM_INTAKE_WARN = This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. If it was just once, still do the recording. We only skip the fasted recording if this happens more than once. Please do not skip any meals because of this. AM_INTAKE_TIMES = Was that just once, or more than once? AM_INTAKE_ONCE = Just once AM_INTAKE_MORE_THAN = More than once AM_INTAKE_TIMES_WARN = We'll skip this morning's fasted recording. Please still eat and log your meals as usual today, and try to stay fasted before tomorrow's recording. AM_OUT = What time did you get out of bed? AM_TOILET = Have you been to the toilet since waking? AM_TOILET_NO = No AM_TOILET_PEE = Yes, but no bowel movement AM_TOILET_BM = Yes, a bowel movement AM_ACT = Any physical activity since waking, other than going to the toilet? AM_ACT_N = No AM_ACT_Y = Yes AM_ACT_MORE = What did you do?
 
 ---
 

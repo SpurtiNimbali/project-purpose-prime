@@ -113,12 +113,12 @@ export function HomeScreen({ store }: { store: TummyStore }) {
   if (store.frozen) {
     return (
       <Screen>
-        <div className="relative shrink-0 overflow-hidden bg-blue px-5 pb-6 pt-14 text-surface">
-          <span className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-surface/15" />
-          <span className="pointer-events-none absolute -bottom-16 left-6 h-32 w-32 rounded-full bg-pine/20" />
+        <div className="relative shrink-0 overflow-hidden bg-blue px-5 pb-8 pt-14 text-surface">
+          <span className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full bg-surface/15" />
+          <span className="pointer-events-none absolute -bottom-16 left-4 h-36 w-36 rounded-full bg-pine/25" />
           <div className="relative flex items-center gap-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-surface/15">
-              <IconSnowflake width={26} height={26} />
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-surface/15">
+              <Mascot size={48} src={MASCOT.calm} />
             </span>
             <div className="min-w-0">
               <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-surface/80">
@@ -129,44 +129,47 @@ export function HomeScreen({ store }: { store: TummyStore }) {
               </h1>
             </div>
           </div>
-          <p className="relative mt-3 text-[16px] font-semibold leading-snug text-surface/85">
-            Nothing to record, log, or answer today. Your streak stays safe, and the schedule
-            picks up again tomorrow morning.
-          </p>
+          <div className="relative mt-5 flex flex-col items-center text-center">
+            <span className="flex h-[104px] w-[104px] items-center justify-center rounded-full bg-surface/15 text-surface">
+              <IconSnowflake width={52} height={52} />
+            </span>
+            <p className="mt-4 text-[17px] font-semibold leading-snug text-surface/90">
+              Nothing to record, log, or answer today. Your streak stays safe, and the schedule
+              picks up again tomorrow morning.
+            </p>
+          </div>
         </div>
 
         <ScreenBody className="pt-4">
-          <div className="rounded-3xl border-2 border-dashed border-blue/40 bg-surface px-4 py-4">
-            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-blue">
-              Today's rail · frozen
-            </p>
-            <div className="mt-3 flex items-start">
-              {store.plan.slice(0, 4).map((p) => (
-                <div key={p.id} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
-                  <span className="flex h-[28px] w-[28px] items-center justify-center rounded-full border-2 border-blue/40 bg-surface text-blue">
-                    <IconSnowflake width={15} height={15} />
-                  </span>
-                  <span className="w-full truncate text-center text-[12px] font-bold text-pine-soft">
-                    {clockLabel(p.at).replace(" ", "")}
-                  </span>
-                </div>
-              ))}
-              {store.plan.length > 4 ? (
-                <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-blue">
-                  •••
+          <div className="space-y-3">
+            {[
+              { t: "Streak stays safe", b: "Using a freeze day does not count as a missed day." },
+              { t: "Today's plan is on hold", b: "Recordings, meals, and questions wait until tomorrow." },
+              { t: "Back in the morning", b: "Everything reopens with your fasted recording." },
+            ].map(({ t, b }) => (
+              <div
+                key={t}
+                className="flex items-start gap-3 rounded-3xl border border-line bg-surface p-4 shadow-sm"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#e3eff4] text-blue">
+                  <IconSnowflake width={22} height={22} />
                 </span>
-              ) : null}
-            </div>
-            <p className="mt-3 text-[15px] font-semibold leading-snug text-pine-soft">
-              All of today's sessions, meals and questions are on hold.
-            </p>
+                <span className="min-w-0">
+                  <span className="block text-[17px] font-extrabold text-pine">{t}</span>
+                  <span className="mt-1 block text-[15px] font-semibold leading-snug text-pine-soft">
+                    {b}
+                  </span>
+                </span>
+              </div>
+            ))}
           </div>
-
-          <p className="mt-5 text-center text-[15px] font-semibold leading-snug text-pine-soft">
-            Rest today. Everything reopens tomorrow morning with your fasted recording.
-          </p>
+          <button
+            onClick={() => store.go("logHub")}
+            className="relative mt-5 flex min-h-[60px] w-full items-center justify-center overflow-hidden rounded-2xl bg-blue text-[18px] font-extrabold text-surface shadow-md active:scale-[0.99]"
+          >
+            Open today's log
+          </button>
         </ScreenBody>
-
       </Screen>
     );
   }
