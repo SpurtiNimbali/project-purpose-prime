@@ -82,6 +82,8 @@ export type PlanItem = {
   meal?: Meal;
   /** a diary entry for a meal or snack outside the study meal */
   mealLog?: boolean;
+  /** study meal: photo taken and first bite started */
+  started?: boolean;
 };
 
 /** Kept for older call sites, recordings only. */
@@ -153,6 +155,7 @@ export type TummyStore = {
   activeItemId: string | null;
   startItem: (id: string) => void;
   completeItem: (id: string) => void;
+  markMealStarted: () => void;
   missItem: (id: string, reason?: string) => void;
   /** undo an auto-miss so a recording can still be done */
   reopenItem: (id: string) => void;
@@ -233,8 +236,32 @@ const IN_FLIGHT_SCREENS: ScreenKey[] = [
 function recordingWindowClosesAt(item: PlanItem) {
   if (item.sessionKind === "fasted") return item.at + 30;
   if (item.sessionKind === "preMeal") return item.at + 15;
-  if (item.sessionKind === "postMeal") return item.at + 25;
+  if (item.sessionKind === "postMeal") return item.at + 10;
   return item.at + 20;
+}
+
+function studyMealFinished(plan: PlanItem[]) {
+  return plan.some((p) => p.id === "mealStart" && p.done && !p.missed);
+}
+
+/** Shift every leftover post-meal row (right after, then each 30 min slot) to this clock time. */
+function anchorPostMealTimes(plan: PlanItem[], endAt: number): PlanItem[] {
+  let changed = false;
+  const next = plan.map((p) => {
+    if (p.sessionKind !== "postMeal" || p.offset === undefined || p.done) return p;
+    const at = endAt + p.offset;
+    if (p.at === at) return p;
+    changed = true;
+    return { ...p, at };
+  });
+  return changed ? next : plan;
+}
+
+/** Time has passed and the person can still do the task. Post-meal rows wait until they finish eating. */
+export function isPastDue(item: PlanItem, now = minutesNow(), mealFinished = false) {
+  if (item.done) return false;
+  if (item.sessionKind === "postMeal" && !mealFinished) return false;
+  return now > item.at;
 }
 
 export function untilLabel(mins: number) {
@@ -343,19 +370,10 @@ function createInitialPlan(meal: Meal = "breakfast", snackAts: number[] = []): P
     {
       id: "mealStart",
       kind: "meal",
-      label: `${mealName}, start eating`,
+      label: `Log your ${mealName.toLowerCase()}`,
       at: mealStartAt,
       done: false,
-      window: "Tap when you take the first bite",
-      meal,
-    },
-    {
-      id: "mealEnd",
-      kind: "meal",
-      label: `${mealName}, finished eating`,
-      at: mealEndAt,
-      done: false,
-      window: "Tap the moment you finish, all timers start here",
+      window: "Photo, first bite, then tap when you finish",
       meal,
     },
     ...post,
@@ -473,17 +491,17 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
   }
 
   if (item.kind === "meal") {
-    const start = item.id === "mealStart";
+    const started = !!item.started;
     if (due) {
       return {
         kind: "meal",
         tag: "Meal logging",
-        title: start ? item.label : "Finished eating?",
-        sub: start
-          ? "Take a photo of the plate, then tap when you take the first bite."
-          : "Tap when your last bite is done. Every recording after that is timed from that moment.",
-        cta: start ? "Start the meal" : "I've finished eating",
-        screen: start ? "mealCapture" : "mealEnd",
+        title: item.label,
+        sub: started
+          ? "Tap when your last bite is done. Every recording after that is timed from that moment."
+          : "Take a photo of the plate, then tap when you take the first bite.",
+        cta: started ? "I've finished eating" : "Log your meal",
+        screen: started ? "mealEnd" : "mealCapture",
         state: "due",
         minsUntil: null,
         itemId: item.id,
@@ -586,26 +604,39 @@ export function useTummyStore(): TummyStore {
     const at = minutesNow();
     setPlan((prev) => {
       const completed = prev.find((p) => p.id === id);
-      return prev.map((p) => {
-        if (p.id === id)
-          return { ...p, done: true, at: completed?.kind === "meal" ? at : p.at };
-        // every post-meal recording is anchored to the END of the meal
-        if (id === "mealEnd" && p.sessionKind === "postMeal" && p.offset !== undefined) {
-          return { ...p, at: at + p.offset };
-        }
-        return p;
-      });
+      const marked = prev.map((p) =>
+        p.id === id
+          ? { ...p, done: true, at: completed?.kind === "meal" ? at : p.at }
+          : p,
+      );
+      // lock every post-meal recording to the moment they tap I've finished eating
+      return id === "mealStart" ? anchorPostMealTimes(marked, at) : marked;
     });
     
     const item = plan.find((p) => p.id === id);
     if (item?.kind === "recording") setLastRecordingAt(at);
   }, [plan]);
 
+  const markMealStarted = useCallback(() => {
+    const at = minutesNow();
+    setPlan((prev) =>
+      anchorPostMealTimes(
+        prev.map((p) => (p.id === "mealStart" ? { ...p, started: true, at } : p)),
+        at,
+      ),
+    );
+  }, []);
+
   const missItem = useCallback((id: string, reason?: string) => {
     setPlan((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, done: true, missed: true, needsWhy: false, reason } : p,
-      ),
+      prev.map((p) => {
+        if (p.id === id)
+          return { ...p, done: true, missed: true, needsWhy: false, reason };
+        if (id === "mealStart" && p.sessionKind === "postMeal" && !p.done) {
+          return { ...p, done: true, missed: true, needsWhy: false, reason };
+        }
+        return p;
+      }),
     );
     setEntries((prev) => [
       ...prev,
@@ -662,12 +693,18 @@ export function useTummyStore(): TummyStore {
     const screen = stack[stack.length - 1];
     const inFlight = IN_FLIGHT_SCREENS.includes(screen);
     setPlan((prev) => {
-      let changed = false;
-      const next = prev.map((p) => {
-        if (p.kind !== "recording" || p.done) return p;
+      const meal = prev.find((x) => x.id === "mealStart");
+      // While they are logging / eating, keep every post-meal time on a live clock
+      const working =
+        meal?.started && !meal.done ? anchorPostMealTimes(prev, now) : prev;
+
+      // Auto-miss only after they've tapped I've finished eating, using those live times
+      if (!studyMealFinished(working)) return working;
+
+      let changed = working !== prev;
+      const next = working.map((p) => {
+        if (p.sessionKind !== "postMeal" || p.done) return p;
         if (inFlight && p.id === activeItemId) return p;
-        // wake-up questions sit in front of the fasted recording; don't close it underneath them
-        if (screen === "morningQuestions" && p.id === "fasted") return p;
         const closes = recordingWindowClosesAt(p);
         if (now <= closes) return p;
         changed = true;
@@ -833,6 +870,7 @@ export function useTummyStore(): TummyStore {
     activeItemId,
     startItem,
     completeItem,
+    markMealStarted,
     missItem,
     reopenItem,
     pendingMissAsk,

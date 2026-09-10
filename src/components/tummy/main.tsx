@@ -48,6 +48,8 @@ import {
 import {
   clockLabel,
   computeNextTask,
+  isPastDue,
+  minutesNow,
   untilLabel,
   type LogKind,
   type ScreenKey,
@@ -87,6 +89,10 @@ export function HomeScreen({ store }: { store: TummyStore }) {
 
   const hour = Math.floor(store.demoNow / 60);
   const due = task.state === "due";
+  const now = minutesNow();
+  const mealFinished = store.plan.some((p) => p.id === "mealStart" && p.done && !p.missed);
+  const currentItem = store.plan.find((p) => p.id === task.itemId);
+  const currentPastDue = currentItem ? isPastDue(currentItem, now, mealFinished) : false;
   const doneCount = store.plan.filter((p) => p.done).length;
   const currentIndex = Math.max(0, store.plan.findIndex((p) => !p.done));
   const railStart = Math.min(
@@ -238,6 +244,11 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           >
             {task.sub}
           </p>
+          {currentPastDue && currentItem ? (
+            <p className="relative mt-2 text-[15px] font-extrabold text-amber">
+              Past due · {clockLabel(currentItem.at)}
+            </p>
+          ) : null}
 
           {task.note ? (
             <div className="mt-3 flex gap-3 rounded-2xl bg-amber-soft px-4 py-3">
@@ -314,6 +325,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 p.kind === "recording" ? IconMic : p.kind === "meal" ? IconBowl : IconList;
               const current = task.itemId === p.id;
               const planIndex = railStart + i;
+              const pastDue = isPastDue(p, now, mealFinished);
               return (
                 <button
                   key={p.id}
@@ -342,7 +354,12 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                   >
                     <RailIcon width={15} height={15} />
                   </span>
-                  <span className="w-full truncate text-center text-[12px] font-bold text-pine-soft">
+                  <span
+                    className={cn(
+                      "w-full truncate text-center text-[12px] font-bold",
+                      pastDue ? "text-amber" : "text-pine-soft",
+                    )}
+                  >
                     {clockLabel(p.at).replace(" ", "")}
                   </span>
                 </button>

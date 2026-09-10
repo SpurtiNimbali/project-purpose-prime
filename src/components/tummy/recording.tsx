@@ -38,6 +38,7 @@ import {
 } from "./icons";
 import {
   clockLabel,
+  isPastDue,
   minutesNow,
   untilLabel,
   QUALITY_RULE,
@@ -102,9 +103,16 @@ function planIcon(p: PlanItem) {
 }
 
 export function SessionHubScreen({ store }: { store: TummyStore }) {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setTick((n) => n + 1), 15_000);
+    return () => clearInterval(t);
+  }, []);
+
   const plan = store.plan;
   const next = store.frozen ? undefined : plan.find((p) => !p.done);
   const now = minutesNow();
+  const mealFinished = plan.some((p) => p.id === "mealStart" && p.done && !p.missed);
 
   const open = (p: PlanItem) => {
     if (store.frozen) return;
@@ -115,7 +123,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
       store.go("caseReminder");
     } else if (p.kind === "meal") {
       store.go(
-        p.mealLog ? "logMeal" : p.id === "mealEnd" ? "mealEnd" : "mealCapture",
+        p.mealLog ? "logMeal" : p.started ? "mealEnd" : "mealCapture",
       );
     } else {
       store.go(p.id === "qEvening" ? "eveningCheckin" : "morningQuestions");
@@ -148,9 +156,15 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
 
           {plan.map((p, i) => {
             const isNext = p.id === next?.id;
-            const late = !p.done && now - p.at > 45;
+            const pastDue = isPastDue(p, now, mealFinished);
+            const canOpen = !store.frozen && !p.done && (isNext || pastDue);
             const Icon = planIcon(p);
             const mins = p.at - now;
+            const timeLabel = pastDue
+              ? `Past due · ${clockLabel(p.at)}`
+              : mins > 10
+                ? `In ${untilLabel(mins)} · ${clockLabel(p.at)}`
+                : `Due now · ${clockLabel(p.at)}`;
             return (
               <div key={p.id} className="relative flex gap-3 pb-3">
                 <div className="flex w-[22px] shrink-0 flex-col items-center">
@@ -182,12 +196,13 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-[20px] font-extrabold leading-tight">{p.label}</p>
-                        <p className="mt-1 text-[15px] font-bold text-mint">
-                          {late
-                            ? "Window closing"
-                            : mins > 10
-                              ? `In ${untilLabel(mins)} · ${clockLabel(p.at)}`
-                              : `Due now · ${clockLabel(p.at)}`}
+                        <p
+                          className={cn(
+                            "mt-1 text-[15px] font-bold",
+                            pastDue ? "text-amber" : "text-mint",
+                          )}
+                        >
+                          {timeLabel}
                         </p>
                       </div>
                     </div>
@@ -200,9 +215,9 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                         : p.kind === "meal"
                           ? p.mealLog
                             ? "Log it now"
-                            : p.id === "mealEnd"
+                            : p.started
                               ? "I've finished eating"
-                              : "Log the meal and start eating"
+                              : "Log your meal"
                           : "Answer questions"}
                     </button>
                     {p.kind === "recording" ? (
@@ -226,9 +241,29 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                   </div>
                 ) : (
                   <div
+                    role={canOpen ? "button" : undefined}
+                    tabIndex={canOpen ? 0 : undefined}
+                    onClick={canOpen ? () => open(p) : undefined}
+                    onKeyDown={
+                      canOpen
+                        ? (e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              open(p);
+                            }
+                          }
+                        : undefined
+                    }
                     className={cn(
                       "flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-3xl border bg-surface px-4 shadow-sm",
-                      p.missed ? "border-amber/40" : p.done ? "border-teal/30" : "border-line",
+                      p.missed
+                        ? "border-amber/40"
+                        : p.done
+                          ? "border-teal/30"
+                          : pastDue
+                            ? "border-amber/50"
+                            : "border-line",
+                      canOpen ? "active:scale-[0.99]" : null,
                     )}
                   >
                     <span
@@ -238,7 +273,9 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                           ? "bg-amber-soft text-amber"
                           : p.done
                             ? "bg-teal text-surface"
-                            : "bg-mint-soft text-teal",
+                            : pastDue
+                              ? "bg-amber-soft text-amber"
+                              : "bg-mint-soft text-teal",
                       )}
                     >
                       {p.done && !p.missed ? (
@@ -254,10 +291,18 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                       <span
                         className={cn(
                           "shrink-0 rounded-full px-3 py-1.5 text-[13px] font-extrabold",
-                          p.missed ? "bg-amber-soft text-pine" : "bg-wash text-pine-soft",
+                          p.missed
+                            ? "bg-amber-soft text-pine"
+                            : pastDue
+                              ? "bg-amber-soft text-amber"
+                              : "bg-wash text-pine-soft",
                         )}
                       >
-                        {p.missed ? "Missed" : clockLabel(p.at)}
+                        {p.missed
+                          ? "Missed"
+                          : pastDue
+                            ? `Past due · ${clockLabel(p.at)}`
+                            : clockLabel(p.at)}
                       </span>
                     ) : null}
                   </div>
@@ -482,7 +527,7 @@ export function MealCaptureScreen({ store }: { store: TummyStore }) {
               store.meal[0].toUpperCase() + store.meal.slice(1),
               desc.trim() || `${photos} photo${photos === 1 ? "" : "s"}`,
             );
-            store.completeItem("mealStart");
+            store.markMealStarted();
             store.go("mealEnd");
           }}
         >
@@ -518,7 +563,7 @@ export function MealEndScreen({ store }: { store: TummyStore }) {
       <div className="shrink-0 px-5 pb-7">
         <Btn
           onClick={() => {
-            store.completeItem("mealEnd");
+            store.completeItem("mealStart");
             store.addEntry("meal", "Finished eating", "Recording timers set");
             store.go("sessionHub");
           }}
@@ -1928,9 +1973,9 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
     : next.kind === "recording" && next.sessionKind === "postMeal"
       ? "Please don't eat or drink until the window is over. If you need water, one cup now."
       : next.kind === "meal" && !next.mealLog
-        ? next.id === "mealStart"
-          ? "Take a photo of the plate, then tap when you take your first bite."
-          : "Tap the moment your last bite is done. Every recording after that is timed from it."
+        ? next.started
+          ? "Tap the moment your last bite is done. Every recording after that is timed from it."
+          : "Take a photo of the plate, then tap when you take your first bite."
         : next.kind === "meal"
           ? "A photo and the time is all we need. For a snack, a short description is enough."
           : "Nothing to do until then.";
