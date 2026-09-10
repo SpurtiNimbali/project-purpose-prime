@@ -74,7 +74,7 @@ export const MORNING_QS: FlowQ[] = [
     textIf: ["Yes, something else"],
     followUp: "What was it, and roughly when?",
     warnIf: ["Yes, something else"],
-    warn: "This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. For today, record anyway, but please ensure this doesn't repeat from tomorrow.",
+    warn: "This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. Record anyway, and please do not skip any meals because of this. Eat and log your meals as usual today. Try to stay fasted before tomorrow's recording.",
   },
   { id: "wakeTime", q: "What time did you wake up?", type: "time", def: "07:00" },
   {
@@ -493,19 +493,18 @@ export function MorningQuestionsScreen({ store }: { store: TummyStore }) {
         store.addEntry(
           "sleep",
           "Wake-up questions",
-          `In bed ${a.bedTime ?? "-"} · awake ${a.wakeTime ?? "-"}${
-            a.latency ? ` · fell asleep in ${a.latency.toLowerCase()}` : ""
-          }`,
+          [
+            `In bed ${a.bedTime ?? "-"} · awake ${a.wakeTime ?? "-"}`,
+            a.latency ? `fell asleep in ${a.latency.toLowerCase()}` : undefined,
+            a.intake === "Yes, something else"
+              ? `ate or drank before fasting: ${a.intakeNote ?? "details given"}`
+              : undefined,
+          ]
+            .filter(Boolean)
+            .join(" · "),
         );
         if (a.intake === "A few sips of water") {
           store.addEntry("hydration", "A few sips of water", "Before the fasted recording");
-        }
-        if (a.intake === "Yes, something else") {
-          store.addEntry(
-            "meal",
-            "Food or drink before fasting",
-            a.intakeNote ?? "Reported in the morning questions",
-          );
         }
         if (a.activity === "Yes") {
           store.addEntry("activity", "Morning activity", a.activityNote ?? "Reported on waking");

@@ -46,7 +46,8 @@ export type ScreenKey =
   | "progress"
   | "profile"
   | "contact"
-  | "contactForm";
+  | "contactForm"
+  | "contactComplaint";
 
 export type Gender = "female" | "male" | "other" | "unsaid";
 

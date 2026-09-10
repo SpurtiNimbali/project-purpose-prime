@@ -53,6 +53,7 @@ import {
   PeriodCheckScreen,
   ContactScreen,
   ContactFormScreen,
+  ContactComplaintScreen,
 } from "@/components/tummy/main";
 
 const TITLE = "Tummy: Stanford bowel sound study companion";
@@ -138,6 +139,7 @@ function TummyApp() {
     periodCheck: <PeriodCheckScreen store={store} />,
     contact: <ContactScreen store={store} />,
     contactForm: <ContactFormScreen store={store} />,
+    contactComplaint: <ContactComplaintScreen store={store} />,
   };
 
   const dark = DARK_SCREENS.includes(s);

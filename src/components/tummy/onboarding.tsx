@@ -332,7 +332,7 @@ const DAY_STEPS = [
   },
   {
     t: "4 · Recordings for 3.5 hours after",
-    b: "Record your gut sounds as soon as you finish, then another every 30 minutes for the following 3.5 hours.",
+    b: "Record your gut sounds as soon as you finish eating, then another every 30 minutes for the following 3.5 hours.",
     Icon: IconClock,
   },
   {
@@ -1233,7 +1233,7 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
       <ScreenBody>
         <MascotSays size={78}>
           Gut activity differs from person to person. If you're female, the evening check-in will
-          include just one menstrual cycle question.
+          include just one question related to your menstrual cycle.
         </MascotSays>
         <div className="mt-5 space-y-2">
           {(

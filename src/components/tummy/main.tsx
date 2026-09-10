@@ -1471,10 +1471,10 @@ export function ContactScreen({ store }: { store: TummyStore }) {
             },
             {
               t: "Raise a concern or complaint",
-              b: "This goes to the study manager and, if you ask, the independent review board.",
+              b: "Your concerns will be addressed directly by the study coordinator.",
               Icon: IconShield,
-              action: () => store.go("contactForm"),
-              cta: "Write a message",
+              action: () => store.go("contactComplaint"),
+              cta: "Write or record",
             },
           ].map(({ t, b, Icon, action, cta }) => {
             const featured = t === "Ask me first";
@@ -1572,7 +1572,6 @@ export function ContactFormScreen({ store }: { store: TummyStore }) {
                   "Scheduling or timings",
                   "The app isn't working",
                   "Compensation",
-                  "A concern or complaint",
                   "I'd like to pause or stop taking part",
                 ].map((t) => (
                   <Choice key={t} label={t} selected={topic === t} onClick={() => setTopic(t)} />
@@ -1604,6 +1603,102 @@ export function ContactFormScreen({ store }: { store: TummyStore }) {
         ) : (
           <Btn disabled={!topic} onClick={() => setSent(true)}>
             Send to the study team
+          </Btn>
+        )}
+      </StickyFooter>
+    </Screen>
+  );
+}
+
+export function ContactComplaintScreen({ store }: { store: TummyStore }) {
+  const [mode, setMode] = useState<"type" | "voice">("type");
+  const [msg, setMsg] = useState("");
+  const [recorded, setRecorded] = useState(false);
+  const [sent, setSent] = useState(false);
+  const ready = mode === "voice" ? recorded : msg.trim().length > 0;
+  return (
+    <Screen>
+      <TopBar title="Raise a concern or complaint" onBack={store.back} />
+      <ScreenBody>
+        {sent ? (
+          <>
+            <MascotSays src={MASCOT.cheer} size={78}>
+              Sent. The study coordinator will address this directly.
+            </MascotSays>
+            <div className="mt-4">
+              <Note tone="green" title="Nothing changes in the meantime">
+                Keep recording as usual. If you need to pause, say so and the team will arrange it
+                with you.
+              </Note>
+            </div>
+          </>
+        ) : (
+          <>
+            <MascotSays size={78}>
+              Write it in your own words, or record a voice note. This goes straight to the study
+              coordinator.
+            </MascotSays>
+            <div className="mt-5">
+              <Field label="What's going on?" hint="Type it out, or just say it out loud.">
+                <div className="mb-2 flex rounded-2xl bg-surface p-1">
+                  {(
+                    [
+                      { k: "type", label: "Type it" },
+                      { k: "voice", label: "Record it" },
+                    ] as const
+                  ).map(({ k, label }) => (
+                    <button
+                      key={k}
+                      onClick={() => setMode(k)}
+                      className={cn(
+                        "min-h-[52px] flex-1 rounded-xl text-[16px] font-extrabold",
+                        mode === k ? "bg-teal text-surface" : "text-pine-soft",
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {mode === "type" ? (
+                  <textarea
+                    value={msg}
+                    onChange={(e) => setMsg(e.target.value)}
+                    rows={6}
+                    placeholder="Tell us what happened, in your own words."
+                    className="w-full rounded-2xl border-2 border-line bg-surface p-4 text-[17px] font-semibold text-pine placeholder:text-pine-soft/60 focus:border-teal focus:outline-none"
+                  />
+                ) : (
+                  <button
+                    onClick={() => setRecorded((v) => !v)}
+                    className={cn(
+                      "flex min-h-[96px] w-full items-center gap-4 rounded-2xl border-2 px-5 text-left",
+                      recorded ? "border-teal bg-mint-soft" : "border-dashed border-line bg-surface",
+                    )}
+                  >
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-teal text-surface">
+                      <IconMic width={26} height={26} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[17px] font-extrabold text-pine">
+                        {recorded ? "Voice note saved · 12 sec" : "Hold to record your concern"}
+                      </span>
+                      <span className="block text-[15px] font-semibold text-pine-soft">
+                        {recorded ? "Tap to record again" : "We transcribe it for you"}
+                      </span>
+                    </span>
+                  </button>
+                )}
+              </Field>
+            </div>
+          </>
+        )}
+      </ScreenBody>
+      <StickyFooter>
+        {sent ? (
+          <Btn onClick={() => store.go("home")}>Back to home</Btn>
+        ) : (
+          <Btn disabled={!ready} onClick={() => setSent(true)}>
+            Send to the study coordinator
           </Btn>
         )}
       </StickyFooter>

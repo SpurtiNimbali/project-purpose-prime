@@ -65,7 +65,7 @@ SID_CONTINUE = Continue
 ### About you
 
 ABOUT_TITLE = About you  
-ABOUT_STEP = Step 2 of 9 ABOUT_SAY = Gut activity differs from person to person. If you're female, the evening check-in will include just one menstrual cycle question.  
+ABOUT_STEP = Step 2 of 9 ABOUT_SAY = Gut activity differs from person to person. If you're female, the evening check-in will include just one question related to your menstrual cycle.  
 ABOUT_FEMALE = Female  
 ABOUT_MALE = Male  
 ABOUT_OTHER = Another description  
@@ -123,7 +123,7 @@ DAY2_B = Record your gut sounds within 30 minutes of waking, before food, drink 
 DAY3_T = 3 · Your study meal   
 DAY3_B = Record just before you start eating, add a photo of the plate, then record when you take your last bite.  
 DAY4_T = 4 · Recordings for 3.5 hours after   
-DAY4_B = Record your gut sounds as soon as you finish, then another every 30 minutes for the following 3.5 hours.   
+DAY4_B = Record your gut sounds as soon as you finish eating, then another every 30 minutes for the following 3.5 hours.   
 DAY5_T = 5 · No food or drink in that window   
 DAY5_B = You should have nothing to eat or drink until that last recording. If you need water, one cup, right after a recording.   
 DAY6_T = 6 · Quality matters more than quantity   
@@ -626,7 +626,7 @@ AM_SCALE_HI = 5 = severe
 AM_WATCH_NOTE_TITLE = Please charge your smartwatch now
 AM_WATCH_NOTE_BODY = Put it on the charger now, and back on your wrist before you sleep. The overnight data matters a great deal to us.
 
-AM_BED = What time did you get into bed last night? AM_INTAKE = Have you had anything to eat or drink yet this morning? AM_INTAKE_NONE = Nothing at all AM_INTAKE_WATER = A few sips of water AM_INTAKE_YES = Yes, something else AM_INTAKE_MORE = What was it, and roughly when? AM_INTAKE_WARN = This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. For today, record anyway, but please ensure this doesn't repeat from tomorrow. AM_WAKE = What time did you wake up? AM_TOILET = Have you been to the toilet since waking? AM_TOILET_NO = No AM_TOILET_PEE = Yes, but no bowel movement AM_TOILET_BM = Yes, a bowel movement AM_LATENCY = How long did it take you to fall asleep? AM_LATENCY_HINT = A rough guess is fine. AM_ACT = Any physical activity since waking, other than going to the toilet? AM_ACT_N = No AM_ACT_Y = Yes AM_ACT_MORE = What did you do? AM_OUT = What time did you get out of bed?
+AM_BED = What time did you get into bed last night? AM_INTAKE = Have you had anything to eat or drink yet this morning? AM_INTAKE_NONE = Nothing at all AM_INTAKE_WATER = A few sips of water AM_INTAKE_YES = Yes, something else AM_INTAKE_MORE = What was it, and roughly when? AM_INTAKE_WARN = This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. Record anyway, and please do not skip any meals because of this. Eat and log your meals as usual today. Try to stay fasted before tomorrow's recording. AM_WAKE = What time did you wake up? AM_TOILET = Have you been to the toilet since waking? AM_TOILET_NO = No AM_TOILET_PEE = Yes, but no bowel movement AM_TOILET_BM = Yes, a bowel movement AM_LATENCY = How long did it take you to fall asleep? AM_LATENCY_HINT = A rough guess is fine. AM_ACT = Any physical activity since waking, other than going to the toilet? AM_ACT_N = No AM_ACT_Y = Yes AM_ACT_MORE = What did you do? AM_OUT = What time did you get out of bed?
 
 ---
 
@@ -872,8 +872,8 @@ CONTACT_COORD = Message your study coordinator
 CONTACT_COORD_B = Scheduling, compensation, or taking part. They reply within one working day.
 CONTACT_COORD_CTA = Write a message
 CONTACT_CONCERN = Raise a concern or complaint
-CONTACT_CONCERN_B = This goes to the study manager and, if you ask, the independent review board.
-CONTACT_CONCERN_CTA = Write a message
+CONTACT_CONCERN_B = Your concerns will be addressed directly by the study coordinator.
+CONTACT_CONCERN_CTA = Write or record
 CONTACT_NOTE_TITLE = Prefer to talk it through?
 CONTACT_NOTE_BODY = Send a message any time. Your coordinator replies on weekdays, 9am to 5pm.
 
@@ -882,8 +882,18 @@ FORM_ABOUT = What's it about?
 FORM_T1 = Scheduling or timings
 FORM_T2 = The app isn't working
 FORM_T3 = Compensation
-FORM_T4 = A concern or complaint
 FORM_T5 = I'd like to pause or stop taking part
+COMPLAINT_TITLE = Raise a concern or complaint
+COMPLAINT_SAY = Write it in your own words, or record a voice note. This goes straight to the study coordinator.
+COMPLAINT_LABEL = What's going on?
+COMPLAINT_HINT = Type it out, or just say it out loud.
+COMPLAINT_TYPE = Type it
+COMPLAINT_VOICE = Record it
+COMPLAINT_PLACEHOLDER = Tell us what happened, in your own words.
+COMPLAINT_HOLD = Hold to record your concern
+COMPLAINT_SAVED = Voice note saved · 12 sec
+COMPLAINT_SEND = Send to the study coordinator
+COMPLAINT_SENT = Sent. The study coordinator will address this directly.
 FORM_MORE = Tell us a bit more
 FORM_MORE_HINT = A sentence or two is plenty.
 FORM_PLACEHOLDER = What happened, and what would help?
