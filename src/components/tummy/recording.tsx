@@ -95,7 +95,9 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
       store.setSessionKind(p.sessionKind ?? (p.fasting ? "fasted" : "postMeal"));
       store.go("caseReminder");
     } else if (p.kind === "meal") {
-      store.go(p.id === "mealEnd" ? "mealEnd" : "mealCapture");
+      store.go(
+        p.mealLog ? "logMeal" : p.id === "mealEnd" ? "mealEnd" : "mealCapture",
+      );
     } else {
       store.go(p.id === "qEvening" ? "eveningCheckin" : "morningQuestions");
     }
@@ -162,9 +164,11 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                       {p.kind === "recording"
                         ? "Start this recording"
                         : p.kind === "meal"
-                          ? p.id === "mealEnd"
-                            ? "I've finished eating"
-                            : "Log the meal and start eating"
+                          ? p.mealLog
+                            ? "Log it now"
+                            : p.id === "mealEnd"
+                              ? "I've finished eating"
+                              : "Log the meal and start eating"
                           : "Answer questions"}
                     </button>
                     {p.kind === "recording" ? (
@@ -182,7 +186,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                         onClick={() => store.missItem(p.id, "Meal skipped or not eaten")}
                         className="relative mt-2 min-h-[48px] w-full text-[15px] font-extrabold text-amber-soft"
                       >
-                        I skipped this meal
+                        {p.mealLog ? "I didn't have this" : "I skipped this meal"}
                       </button>
                     ) : null}
 
@@ -478,37 +482,70 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
   return (
     <Screen>
       <TopBar title="Quick check" onBack={store.back} />
-      <ScreenBody className="flex flex-col">
-        <div className="flex flex-1 flex-col justify-center">
-          <Mascot src={MASCOT.calm} size={120} className="mx-auto" />
-          <h2 className="mt-4 text-center text-[24px] font-extrabold leading-tight text-pine">
-            {preMeal
-              ? "Are you about to start eating, right after this recording?"
-              : "Have you had anything at all since the meal?"}
-          </h2>
-          <p className="mt-3 text-center text-[17px] font-semibold leading-snug text-pine-soft">
-            {preMeal
-              ? "This recording has to happen immediately before the first bite."
-              : "No snacks. Water only if it was right after a recording, and at least 15 minutes ago."}
-          </p>
+      <ScreenBody>
+        <div className="relative overflow-hidden rounded-3xl bg-pine px-5 py-5 shadow-md">
+          <span className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-teal/40" />
+          <span className="pointer-events-none absolute -bottom-12 right-16 h-24 w-24 rounded-full bg-mint/20" />
+          <div className="relative flex items-center gap-4">
+            <Mascot src={MASCOT.calm} size={72} />
+            <div className="min-w-0">
+              <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
+                {preMeal ? "Before the meal" : "After the meal"}
+              </p>
+              <p className="mt-1 text-[19px] font-extrabold leading-tight text-surface">
+                {preMeal
+                  ? "Have you eaten anything before the upcoming meal?"
+                  : "Have you had anything at all since the meal?"}
+              </p>
+            </div>
+          </div>
         </div>
-        <Note tone="amber" title="Quality over quantity">
-          {QUALITY_RULE}
-        </Note>
-      </ScreenBody>
-      <StickyFooter>
-        <Btn onClick={() => store.go("positioning")}>
-          {preMeal ? "Yes, eating straight after" : "Nothing since the meal"}
-        </Btn>
-        <div className="mt-3">
-          <Btn
-            variant="danger"
-            onClick={() => store.go(preMeal ? "skipReason" : "snackSkip")}
+        <p className="mt-4 text-[16px] font-semibold leading-snug text-pine-soft">
+          {preMeal
+            ? "This recording has to happen immediately before the first bite."
+            : "No snacks. Water only if it was right after a recording, and at least 15 minutes ago."}
+        </p>
+        <div className="mt-5 space-y-3">
+          <button
+            onClick={() => store.go("positioning")}
+            className="relative flex w-full items-center gap-3 overflow-hidden rounded-3xl bg-teal p-4 text-left text-surface shadow-md active:scale-[0.99]"
           >
-            {preMeal ? "Not yet, skip this one" : "I had a snack or a drink"}
-          </Btn>
+            <span className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-mint/25" />
+            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface/15">
+              <IconCheck width={24} height={24} />
+            </span>
+            <span className="relative min-w-0 flex-1">
+              <span className="block text-[17px] font-extrabold">
+                {preMeal ? "No, nothing yet" : "Nothing since the meal"}
+              </span>
+              <span className="mt-1 block text-[15px] font-extrabold text-mint">Continue →</span>
+            </span>
+          </button>
+          <button
+            onClick={() => store.go(preMeal ? "skipReason" : "snackSkip")}
+            className="flex w-full items-center gap-3 rounded-3xl border border-line bg-surface p-4 text-left shadow-sm active:scale-[0.99]"
+          >
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-coral-soft text-coral">
+              <IconX width={22} height={22} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[17px] font-extrabold text-pine">
+                {preMeal ? "Yes, I already ate something" : "I had a snack or a drink"}
+              </span>
+              <span className="mt-1 block text-[15px] font-semibold text-pine-soft">
+                {preMeal
+                  ? "Skip this recording and tell us what you had."
+                  : "We'll skip the rest of this window."}
+              </span>
+            </span>
+          </button>
         </div>
-      </StickyFooter>
+        <div className="mt-4">
+          <Note tone="amber" title="Quality over quantity">
+            {QUALITY_RULE}
+          </Note>
+        </div>
+      </ScreenBody>
     </Screen>
   );
 }
@@ -576,7 +613,6 @@ export function PlacementTips({ index }: { index: number }) {
 }
 
 const POSITION_CHECKS = [
-  { t: "Case off", b: "Nothing between the phone and your skin." },
   { t: "Quiet room", b: "Turn off the TV, radio, and fans. Close the door if you can." },
   { t: "Sitting upright, no talking", b: "Feet on the floor, breathe normally, and stay still." },
   { t: "Gentle pressure only", b: "Just enough to keep contact. Pressing harder muffles the sound." },
@@ -1027,12 +1063,14 @@ export function RecordingScreen({ store }: { store: TummyStore }) {
 
       {checking ? (
         <QualityPanel
+          key={attempt}
           pass={past || attempt > 0}
           onRedo={() => {
             setAttempt((a) => a + 1);
             setChecking(false);
             setConfirmEnd(false);
             setPending(null);
+            setToast(null);
             setElapsed(0);
             store.resetMarks();
           }}
@@ -1071,6 +1109,8 @@ type Q = {
   options?: string[];
   /** answers that open a free-text follow-up */
   textIf?: string[];
+  /** answers that open the symptom icon + intensity picker */
+  symptomIf?: string[];
   followUp?: string;
   optional?: boolean;
   /** skip this question unless a previous answer matches */
@@ -1151,7 +1191,7 @@ function questionsFor(kind: SessionKind): Q[] {
         q: "Any gut symptoms this morning?",
         type: "single",
         options: ["No", "Yes"],
-        textIf: ["Yes"],
+        symptomIf: ["Yes"],
         followUp: "Which ones, and how strong?",
       },
       {
@@ -1213,7 +1253,7 @@ function questionsFor(kind: SessionKind): Q[] {
         q: "Any gut symptoms since the last recording?",
         type: "single",
         options: ["No", "Yes"],
-        textIf: ["Yes"],
+        symptomIf: ["Yes"],
         followUp: "Which ones, and how strong?",
       },
       ...watch,
@@ -1233,14 +1273,8 @@ function questionsFor(kind: SessionKind): Q[] {
       q: "Since the last recording, did you have any symptoms outside a recording?",
       type: "single",
       options: ["No", "Yes"],
-      textIf: ["Yes"],
-      followUp: "What did you feel, and roughly when?",
-    },
-    {
-      id: "snack",
-      q: "Any snacks or drinks since the last recording?",
-      type: "single",
-      options: ["Nothing at all", "Water, right after a recording", "Yes, something to eat or drink"],
+      symptomIf: ["Yes"],
+      followUp: "Which ones, and how strong?",
     },
   ];
 }
@@ -1255,6 +1289,9 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [note, setNote] = useState("");
   const [needNote, setNeedNote] = useState(false);
+  const [needSymptom, setNeedSymptom] = useState(false);
+  const [picked, setPicked] = useState<{ key: string; label: string } | null>(null);
+  const [sev, setSev] = useState(0);
   const done = step >= qs.length;
   const current = qs[Math.min(step, qs.length - 1)];
 
@@ -1277,6 +1314,13 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
     const given = { ...answers, [current.id]: value };
     setAnswers(given);
     const next: Turn[] = [...turns, { from: "you", text: value }];
+    if (current.symptomIf?.includes(value)) {
+      setNeedSymptom(true);
+      setPicked(null);
+      setSev(0);
+      setTurns([...next, { from: "bot", text: current.followUp ?? "Which ones, and how strong?" }]);
+      return;
+    }
     if (current.textIf?.includes(value)) {
       setNeedNote(true);
       setTurns([
@@ -1288,6 +1332,18 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
     advance(next, nextAskable(step + 1, given));
   };
 
+  const submitSymptom = () => {
+    if (!picked || sev < 1) return;
+    const text = `${picked.label} · ${SEV_LABELS[sev - 1]}`;
+    store.addEntry("symptom", picked.label, `${SEV_LABELS[sev - 1]} · after recording`);
+    const given = { ...answers, [`${current.id}Note`]: text };
+    setNeedSymptom(false);
+    setPicked(null);
+    setSev(0);
+    setAnswers(given);
+    advance([...turns, { from: "you", text }], nextAskable(step + 1, given));
+  };
+
   const submitNote = (skipped?: boolean) => {
     const text = skipped ? "Nothing to add" : note || "A voice note";
     setNeedNote(false);
@@ -1297,7 +1353,6 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
   };
 
   const lowBattery = answers["watchBattery"] === "Below 20%";
-  const snacked = answers["snack"] === "Yes, something to eat or drink";
 
   const finish = () => {
     if (store.activeItemId) store.completeItem(store.activeItemId);
@@ -1312,10 +1367,6 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
             ? "Extra session"
             : "Post-meal",
     );
-    if (snacked) {
-      store.go("snackSkip");
-      return;
-    }
     store.go("uploadDone");
   };
 
@@ -1347,7 +1398,7 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
           )}
         </div>
 
-        {!done && !needNote && current.type === "single" ? (
+        {!done && !needNote && !needSymptom && current.type === "single" ? (
           <div className="mt-4 space-y-2">
             {(current.options ?? []).map((o) => (
               <Choice key={o} label={o} onClick={() => answer(o)} />
@@ -1355,7 +1406,7 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
           </div>
         ) : null}
 
-        {!done && !needNote && current.type === "scale" ? (
+        {!done && !needNote && !needSymptom && current.type === "scale" ? (
           <div className="mt-4">
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((n) => (
@@ -1375,7 +1426,61 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
           </div>
         ) : null}
 
-        {!done && (needNote || current.type === "text") ? (
+        {!done && needSymptom ? (
+          <div className="mt-4">
+            <div className="grid grid-cols-3 gap-3">
+              {SYMPTOMS.map(({ key, label, Icon }) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setPicked({ key, label });
+                    setSev(0);
+                  }}
+                  className={cn(
+                    "flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border-2 bg-surface px-2",
+                    picked?.key === key ? "border-teal bg-mint-soft" : "border-line",
+                  )}
+                >
+                  <span className="text-teal">
+                    <Icon width={28} height={28} />
+                  </span>
+                  <span className="text-[15px] font-extrabold text-pine">{label}</span>
+                </button>
+              ))}
+            </div>
+            {picked ? (
+              <>
+                <p className="mt-5 text-[16px] font-extrabold text-pine">How strong is it?</p>
+                <div className="mt-3 flex gap-2">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setSev(n)}
+                      className={cn(
+                        "min-h-[64px] flex-1 rounded-2xl border-2 text-[20px] font-extrabold",
+                        sev === n
+                          ? "border-teal bg-teal text-surface"
+                          : "border-line bg-surface text-pine",
+                      )}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-center text-[15px] font-semibold text-pine-soft">
+                  1 is very mild, 5 is very strong.
+                </p>
+                <div className="mt-4">
+                  <Btn disabled={sev < 1} onClick={submitSymptom}>
+                    Save this symptom
+                  </Btn>
+                </div>
+              </>
+            ) : null}
+          </div>
+        ) : null}
+
+        {!done && !needSymptom && (needNote || current.type === "text") ? (
           <div className="mt-4 space-y-2">
             <TextInput
               value={note}
@@ -1410,15 +1515,6 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
             <Note tone="amber" title="Please charge your smartwatch">
               Below 20% won't last the night, and sleep data matters a lot to us. Put it on the
               charger now and back on your wrist before bed.
-            </Note>
-          </div>
-        ) : null}
-
-        {snacked && done ? (
-          <div className="mt-4">
-            <Note tone="amber" title="Thanks for telling us">
-              Because something was eaten or drunk in the window, the rest of today's post-meal
-              recordings will be skipped. That's the right call. Honest gaps are more useful.
             </Note>
           </div>
         ) : null}

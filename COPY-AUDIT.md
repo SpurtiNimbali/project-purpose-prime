@@ -65,7 +65,7 @@ SID_CONTINUE = Continue
 ### About you
 
 ABOUT_TITLE = About you  
-ABOUT_STEP = Step 2 of 9 ABOUT_SAY = Gut activity differs from person to person. If you're female, the evening check-in will include just one question related to your menstrual cycle.  
+ABOUT_STEP = Step 2 of 9 ABOUT_SAY = Gut activity differs from person to person. If you are a female, the evening check-in will include one additional question related to your menstrual cycle.  
 ABOUT_FEMALE = Female  
 ABOUT_MALE = Male  
 ABOUT_OTHER = Another description  
@@ -259,14 +259,12 @@ POS_IMG_ALT = A seated participant holding a portrait phone against bare skin, 8
 
 POS_TIP1_T = Right lower belly POS_TIP1_B = 8 cm to the right of your belly button, then 3 cm down. POS_TIP2_T = Microphone edge down POS_TIP2_B = The bottom edge of the phone sits on that point. POS_TIP3_T = Same way every time POS_TIP3_B = Hold the phone upright, screen facing out, every session. POS_TIP4_T = Measure, don't guess POS_TIP4_B = Use the ruler app rather than guessing.
 
-POS_CHK1_T = Case off
-POS_CHK1_B = Nothing between the phone and your skin.
-POS_CHK2_T = Quiet room
-POS_CHK2_B = Turn off the TV, radio, and fans. Close the door if you can.
-POS_CHK3_T = Sitting upright, no talking
-POS_CHK3_B = Feet on the floor, breathe normally, and stay still.
-POS_CHK4_T = Gentle pressure only
-POS_CHK4_B = Just enough to keep contact. Pressing harder muffles the sound.
+POS_CHK1_T = Quiet room
+POS_CHK1_B = Turn off the TV, radio, and fans. Close the door if you can.
+POS_CHK2_T = Sitting upright, no talking
+POS_CHK2_B = Feet on the floor, breathe normally, and stay still.
+POS_CHK3_T = Gentle pressure only
+POS_CHK3_B = Just enough to keep contact. Pressing harder muffles the sound.
 
 ---
 
@@ -429,15 +427,20 @@ MEALEND_FOOT = Still eating? Come back when the last bite is done.
 ### Quick check
 
 CHECK_TITLE = Quick check
-CHECK_PRE_H2 = Are you about to start eating, right after this recording?
+CHECK_PRE_TAG = Before the meal
+CHECK_POST_TAG = After the meal
+CHECK_PRE_H2 = Have you eaten anything before the upcoming meal?
 CHECK_POST_H2 = Have you had anything at all since the meal?
 CHECK_PRE_BODY = This recording has to happen immediately before the first bite.
 CHECK_POST_BODY = No snacks. Water only if it was right after a recording, and at least 15 minutes ago.
 CHECK_NOTE_TITLE = Quality over quantity
-CHECK_PRE_YES = Yes, eating straight after
+CHECK_PRE_YES = No, nothing yet
 CHECK_POST_YES = Nothing since the meal
-CHECK_PRE_NO = Not yet, skip this one
+CHECK_PRE_NO = Yes, I already ate something
 CHECK_POST_NO = I had a snack or a drink
+CHECK_PRE_NO_B = Skip this recording and tell us what you had.
+CHECK_POST_NO_B = We'll skip the rest of this window.
+CHECK_CONTINUE = Continue →
 
 ### Live recording
 
@@ -490,8 +493,6 @@ POST_SCALE_HI = 5 = fully
 POST_FINISH = Finish session
 POST_WATCH_TITLE = Please charge your smartwatch
 POST_WATCH_BODY = Below 20% won't last the night, and sleep data matters a lot to us. Put it on the charger now and back on your wrist before bed.
-POST_SNACK_TITLE = Thanks for telling us
-POST_SNACK_BODY = Because something was eaten or drunk in the window, the rest of today's post-meal recordings will be skipped. That's the right call. Honest gaps are more useful.
 
 POST_ORDINARY = Anything out of the ordinary during that recording? Noise, an interruption, a cough?
 POST_ORDINARY_NO = No, it was clean
@@ -541,11 +542,7 @@ PRE_GI_MORE = Which ones, and how strong?
 POST_OUTSIDE = Since the last recording, did you have any symptoms outside a recording?
 POST_OUTSIDE_N = No
 POST_OUTSIDE_Y = Yes
-POST_OUTSIDE_MORE = What did you feel, and roughly when?
-POST_SNACK_Q = Any snacks or drinks since the last recording?
-POST_SNACK_NONE = Nothing at all
-POST_SNACK_WATER = Water, right after a recording
-POST_SNACK_YES = Yes, something to eat or drink
+POST_OUTSIDE_MORE = Which ones, and how strong?
 
 ### Snack skip
 
@@ -626,7 +623,7 @@ AM_SCALE_HI = 5 = severe
 AM_WATCH_NOTE_TITLE = Please charge your smartwatch now
 AM_WATCH_NOTE_BODY = Put it on the charger now, and back on your wrist before you sleep. The overnight data matters a great deal to us.
 
-AM_BED = What time did you get into bed last night? AM_INTAKE = Have you had anything to eat or drink yet this morning? AM_INTAKE_NONE = Nothing at all AM_INTAKE_WATER = A few sips of water AM_INTAKE_YES = Yes, something else AM_INTAKE_MORE = What was it, and roughly when? AM_INTAKE_WARN = This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. Record anyway, and please do not skip any meals because of this. Eat and log your meals as usual today. Try to stay fasted before tomorrow's recording. AM_WAKE = What time did you wake up? AM_TOILET = Have you been to the toilet since waking? AM_TOILET_NO = No AM_TOILET_PEE = Yes, but no bowel movement AM_TOILET_BM = Yes, a bowel movement AM_LATENCY = How long did it take you to fall asleep? AM_LATENCY_HINT = A rough guess is fine. AM_ACT = Any physical activity since waking, other than going to the toilet? AM_ACT_N = No AM_ACT_Y = Yes AM_ACT_MORE = What did you do? AM_OUT = What time did you get out of bed?
+AM_BED = What time did you get into bed last night? AM_LATENCY = How long did it take you to fall asleep? AM_LATENCY_HINT = A rough guess is fine. AM_WAKE = What time did you wake up? AM_INTAKE = Have you had anything to eat or drink yet this morning? AM_INTAKE_NONE = Nothing at all AM_INTAKE_WATER = A few sips of water AM_INTAKE_YES = Yes, something else AM_INTAKE_MORE = What was it, and roughly when? AM_INTAKE_WARN = This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. Record anyway, and please do not skip any meals because of this. Eat and log your meals as usual today. Try to stay fasted before tomorrow's recording. AM_OUT = What time did you get out of bed? AM_TOILET = Have you been to the toilet since waking? AM_TOILET_NO = No AM_TOILET_PEE = Yes, but no bowel movement AM_TOILET_BM = Yes, a bowel movement AM_ACT = Any physical activity since waking, other than going to the toilet? AM_ACT_N = No AM_ACT_Y = Yes AM_ACT_MORE = What did you do?
 
 ---
 

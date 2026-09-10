@@ -894,13 +894,16 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
 
       {finished && !passed ? (
         <QualityPanel
+          key={attempt}
           pass={attempt > 0}
           allowKeep={false}
           onRedo={() => {
             setAttempt((a) => a + 1);
             setLeft(TOTAL);
             setMarks([]);
-            setStage("position");
+            setPending(null);
+            setCoach(null);
+            setToast(null);
           }}
           onContinue={() => setPassed(true)}
         />
@@ -1232,8 +1235,8 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
       <TopBar title="About you" onBack={store.back} step="Step 2 of 9" />
       <ScreenBody>
         <MascotSays size={78}>
-          Gut activity differs from person to person. If you're female, the evening check-in will
-          include just one question related to your menstrual cycle.
+          Gut activity differs from person to person. If you are a female, the evening check-in will
+          include one additional question related to your menstrual cycle.
         </MascotSays>
         <div className="mt-5 space-y-2">
           {(

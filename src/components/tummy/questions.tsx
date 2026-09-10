@@ -67,6 +67,13 @@ const WATCH_QS: FlowQ[] = [
 export const MORNING_QS: FlowQ[] = [
   { id: "bedTime", q: "What time did you get into bed last night?", type: "time", def: "23:00" },
   {
+    id: "latency",
+    q: "How long did it take you to fall asleep?",
+    type: "duration",
+    hint: "A rough guess is fine.",
+  },
+  { id: "wakeTime", q: "What time did you wake up?", type: "time", def: "07:00" },
+  {
     id: "intake",
     q: "Have you had anything to eat or drink yet this morning?",
     type: "single",
@@ -76,19 +83,13 @@ export const MORNING_QS: FlowQ[] = [
     warnIf: ["Yes, something else"],
     warn: "This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. Record anyway, and please do not skip any meals because of this. Eat and log your meals as usual today. Try to stay fasted before tomorrow's recording.",
   },
-  { id: "wakeTime", q: "What time did you wake up?", type: "time", def: "07:00" },
+  { id: "outOfBed", q: "What time did you get out of bed?", type: "time", def: "07:15" },
   {
     id: "bathroom",
     q: "Have you been to the toilet since waking?",
     type: "single",
     options: ["No", "Yes, but no bowel movement", "Yes, a bowel movement"],
     bristolIf: ["Yes, a bowel movement"],
-  },
-  {
-    id: "latency",
-    q: "How long did it take you to fall asleep?",
-    type: "duration",
-    hint: "A rough guess is fine.",
   },
   {
     id: "activity",
@@ -98,7 +99,6 @@ export const MORNING_QS: FlowQ[] = [
     textIf: ["Yes"],
     followUp: "What did you do?",
   },
-  { id: "outOfBed", q: "What time did you get out of bed?", type: "time", def: "07:15" },
 ];
 
 export const EVENING_QS: FlowQ[] = [
