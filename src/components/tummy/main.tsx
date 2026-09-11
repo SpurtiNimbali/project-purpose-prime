@@ -196,7 +196,9 @@ export function HomeScreen({ store }: { store: TummyStore }) {
       </div>
 
       <ScreenBody className="pb-[180px] pt-3">
-        <p className="text-[18px] font-extrabold tracking-tight text-teal">Next up</p>
+        <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+          Next up
+        </p>
         <div
           className={cn(
             "relative mt-2 overflow-hidden rounded-[28px] p-5",
@@ -292,18 +294,10 @@ export function HomeScreen({ store }: { store: TummyStore }) {
 
         {/* day rail, recordings, meals and question blocks */}
         <div className="mt-5 rounded-3xl border border-line bg-surface px-4 py-4">
-          <div className="flex items-end justify-between gap-3">
-            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-              Today's tasks
-            </p>
-            <button
-              onClick={() => store.go("sessionHub")}
-              className="shrink-0 rounded-full bg-mint-soft px-3 py-1.5 text-[14px] font-extrabold text-teal"
-            >
-              See today's plan
-            </button>
-          </div>
-          <div className="mt-3 flex items-start">
+          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+            Today's tasks
+          </p>
+          <div className="mt-4 flex items-start">
             {railStart > 0 ? (
               <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-teal" aria-label={`${railStart} earlier items`}>•••</span>
             ) : null}
@@ -356,6 +350,12 @@ export function HomeScreen({ store }: { store: TummyStore }) {
               <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-pine-soft" aria-label={`${store.plan.length - railStart - railItems.length} later items`}>•••</span>
             ) : null}
           </div>
+          <button
+            onClick={() => store.go("sessionHub")}
+            className="mt-4 flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-teal text-[16px] font-extrabold text-surface active:scale-[0.99]"
+          >
+            View today's plan
+          </button>
         </div>
 
         <button
@@ -363,24 +363,26 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             store.startExtraSession();
             store.go("extraSession");
           }}
-          className="relative mt-4 w-full overflow-hidden rounded-3xl border border-line bg-surface px-5 py-5 text-left shadow-sm active:scale-[0.99]"
+          className="relative mt-4 w-full overflow-hidden rounded-3xl bg-teal px-5 py-5 text-left shadow-md active:scale-[0.99]"
         >
+          <span className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-mint/25" />
+          <span className="pointer-events-none absolute -bottom-12 right-10 h-28 w-28 rounded-full bg-pine/15" />
           <span className="relative flex items-center gap-4">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-mint-soft text-teal">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface">
               <IconMic width={26} height={26} />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[12px] font-extrabold uppercase tracking-[0.16em] text-teal">
+              <span className="block text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
                 Optional · anytime
               </span>
-              <span className="mt-1 block text-[19px] font-extrabold leading-tight text-pine">
+              <span className="mt-1 block text-[19px] font-extrabold leading-tight text-surface">
                 Something feels different?
               </span>
-              <span className="mt-1 block text-[15px] font-semibold leading-snug text-pine-soft">
+              <span className="mt-1 block text-[15px] font-semibold leading-snug text-mint/90">
                 Log an extra 2 minute recording
               </span>
             </span>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mint-soft text-[20px] font-extrabold text-teal">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface/15 text-[20px] font-extrabold text-surface">
               +
             </span>
           </span>
@@ -429,15 +431,16 @@ export function HomeScreen({ store }: { store: TummyStore }) {
 const LOG_ITEMS: {
   k: ScreenKey;
   label: string;
+  sub: string;
   Icon: typeof IconBowl;
   kind: LogKind;
 }[] = [
-  { k: "logMeal", label: "Meal or snack", Icon: IconBowl, kind: "meal" },
-  { k: "logHydration", label: "Drinks", Icon: IconDroplet, kind: "hydration" },
-  { k: "logSymptom", label: "Symptom", Icon: IconWave, kind: "symptom" },
-  { k: "logToilet", label: "Toilet habits", Icon: IconToilet, kind: "toilet" },
-  { k: "logSleep", label: "Sleep", Icon: IconMoon, kind: "sleep" },
-  { k: "logActivity", label: "Activity", Icon: IconRun, kind: "activity" },
+  { k: "logMeal", label: "Meal or snack", sub: "Snap it, or say it", Icon: IconBowl, kind: "meal" },
+  { k: "logHydration", label: "Drinks", sub: "What you sipped", Icon: IconDroplet, kind: "hydration" },
+  { k: "logSymptom", label: "Symptom", sub: "How it felt", Icon: IconWave, kind: "symptom" },
+  { k: "logToilet", label: "Toilet habits", sub: "Just the basics", Icon: IconToilet, kind: "toilet" },
+  { k: "logSleep", label: "Sleep", sub: "How last night went", Icon: IconMoon, kind: "sleep" },
+  { k: "logActivity", label: "Activity", sub: "A walk, or a rest", Icon: IconRun, kind: "activity" },
 ];
 
 const KIND_ICON: Record<LogKind, typeof IconBowl> = {
@@ -484,17 +487,22 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
         {tab === "add" ? (
           <>
             <div className="grid grid-cols-2 gap-3">
-              {LOG_ITEMS.map(({ k, label, Icon, kind }) => (
+              {LOG_ITEMS.map(({ k, label, sub, Icon, kind }) => (
                 <button
                   key={k}
                   onClick={() => store.go(k)}
-                  className="relative flex min-h-[108px] flex-col justify-between rounded-[26px] border border-line bg-surface p-4 text-left shadow-sm active:scale-[0.99]"
+                  className="relative flex min-h-[114px] flex-col justify-between rounded-[26px] border border-line bg-surface p-4 text-left shadow-sm active:scale-[0.99]"
                 >
                   <span className="flex h-12 w-12 items-center justify-center rounded-full bg-mint-soft text-teal">
                     <Icon width={26} height={26} />
                   </span>
-                  <span className="block text-[17px] font-extrabold leading-tight text-pine">
-                    {label}
+                  <span>
+                    <span className="block text-[17px] font-extrabold leading-tight text-pine">
+                      {label}
+                    </span>
+                    <span className="mt-0.5 block text-[14px] font-semibold leading-snug text-pine-soft">
+                      {sub}
+                    </span>
                   </span>
                   {counts(kind) ? (
                     <span className="absolute right-3 top-3 flex h-7 min-w-7 items-center justify-center rounded-full bg-teal px-2 text-[14px] font-extrabold text-surface">

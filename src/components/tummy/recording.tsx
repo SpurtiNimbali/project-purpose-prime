@@ -322,21 +322,22 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
               store.startExtraSession();
               store.go("extraSession");
             }}
-            className="relative mt-2 w-full overflow-hidden rounded-3xl border border-line bg-surface px-5 py-5 text-left shadow-sm active:scale-[0.99]"
+            className="relative mt-2 w-full overflow-hidden rounded-3xl bg-teal px-5 py-5 text-left shadow-md active:scale-[0.99]"
           >
+            <span className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-mint/25" />
             <span className="relative flex items-center gap-3">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-mint-soft text-teal">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface">
                 <IconMic width={22} height={22} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[12px] font-extrabold uppercase tracking-[0.16em] text-teal">
+                <span className="block text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
                   Optional · anytime
                 </span>
-                <span className="mt-1 block text-[17px] font-extrabold leading-tight text-pine">
+                <span className="mt-1 block text-[17px] font-extrabold leading-tight text-surface">
                   Record an extra session
                 </span>
               </span>
-              <span className="text-[22px] font-extrabold text-teal">+</span>
+              <span className="text-[22px] font-extrabold text-surface">+</span>
             </span>
           </button>
         </div>
