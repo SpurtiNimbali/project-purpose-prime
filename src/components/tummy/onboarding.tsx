@@ -1231,7 +1231,9 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
     <Screen>
       <TopBar title="About you" onBack={store.back} step="Step 2 of 9" />
       <ScreenBody>
-        <h1 className="text-[26px] font-extrabold leading-tight text-pine">What's your gender?</h1>
+        <MascotSays src={MASCOT.calm} size={78}>
+          What's your gender?
+        </MascotSays>
         <div className="mt-5 space-y-2">
           {(
             [
