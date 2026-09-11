@@ -1215,6 +1215,8 @@ type Q = {
   options?: string[];
   /** answers that open a free-text follow-up */
   textIf?: string[];
+  /** better/worse: optional note on this same question, not a second ask */
+  explainIf?: string[];
   /** answers that open the symptom icon + intensity picker */
   symptomIf?: string[];
   followUp?: string;
@@ -1283,8 +1285,14 @@ function questionsFor(kind: SessionKind): Q[] {
         q: "How do you feel physically, compared with a usual morning?",
         type: "single",
         options: VS_USUAL,
-        textIf: ["Better than usual", "Worse than usual"],
-        followUp: "What's different this morning?",
+        explainIf: ["Better than usual", "Worse than usual"],
+      },
+      {
+        id: "emotional",
+        q: "How do you feel emotionally, compared with a usual morning?",
+        type: "single",
+        options: VS_USUAL,
+        explainIf: ["Better than usual", "Worse than usual"],
       },
       {
         id: "enoughSleep",
@@ -1305,14 +1313,6 @@ function questionsFor(kind: SessionKind): Q[] {
         q: "How many times did you wake during the night?",
         type: "single",
         options: ["None", "Once", "Twice", "Three times", "Four or more"],
-      },
-      {
-        id: "emotional",
-        q: "How do you feel emotionally, compared with a usual morning?",
-        type: "single",
-        options: VS_USUAL,
-        textIf: ["Better than usual", "Worse than usual"],
-        followUp: "What's different this morning?",
       },
       { id: "rested", q: "How rested do you feel right now?", type: "scale" },
       {
@@ -1339,6 +1339,7 @@ function questionsFor(kind: SessionKind): Q[] {
         q: "How do you feel physically, compared with usual?",
         type: "single",
         options: VS_USUAL,
+        explainIf: ["Better than usual", "Worse than usual"],
       },
       {
         id: "strenuous",
@@ -1353,6 +1354,7 @@ function questionsFor(kind: SessionKind): Q[] {
         q: "How do you feel emotionally, compared with usual?",
         type: "single",
         options: VS_USUAL,
+        explainIf: ["Better than usual", "Worse than usual"],
       },
       {
         id: "giSince",
@@ -1395,6 +1397,7 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [note, setNote] = useState("");
   const [needNote, setNeedNote] = useState(false);
+  const [needExplain, setNeedExplain] = useState(false);
   const [needSymptom, setNeedSymptom] = useState(false);
   const [picked, setPicked] = useState<{ key: string; label: string } | null>(null);
   const [sev, setSev] = useState(0);
@@ -1427,6 +1430,11 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
       setTurns([...next, { from: "bot", text: current.followUp ?? "Which ones, and how strong?" }]);
       return;
     }
+    if (current.explainIf?.includes(value)) {
+      setNeedExplain(true);
+      setTurns(next);
+      return;
+    }
     if (current.textIf?.includes(value)) {
       setNeedNote(true);
       setTurns([
@@ -1455,6 +1463,18 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
     setNeedNote(false);
     setAnswers((a) => ({ ...a, [`${current.id}Note`]: text }));
     advance([...turns, { from: "you", text }], nextAskable(step + 1, { ...answers, [`${current.id}Note`]: text }));
+    setNote("");
+  };
+
+  const submitExplain = (skipped?: boolean) => {
+    const text = skipped ? undefined : note.trim() || "A voice note";
+    const given = text ? { ...answers, [`${current.id}Note`]: text } : answers;
+    setNeedExplain(false);
+    setAnswers(given);
+    advance(
+      text ? [...turns, { from: "you", text }] : turns,
+      nextAskable(step + 1, given),
+    );
     setNote("");
   };
 
@@ -1504,7 +1524,7 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
           )}
         </div>
 
-        {!done && !needNote && !needSymptom && current.type === "single" ? (
+        {!done && !needNote && !needExplain && !needSymptom && current.type === "single" ? (
           <div className="mt-4 space-y-2">
             {(current.options ?? []).map((o) => (
               <Choice key={o} label={o} onClick={() => answer(o)} />
@@ -1512,7 +1532,7 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
           </div>
         ) : null}
 
-        {!done && !needNote && !needSymptom && current.type === "scale" ? (
+        {!done && !needNote && !needExplain && !needSymptom && current.type === "scale" ? (
           <div className="mt-4">
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((n) => (
@@ -1586,7 +1606,36 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
           </div>
         ) : null}
 
-        {!done && !needSymptom && (needNote || current.type === "text") ? (
+        {!done && needExplain ? (
+          <div className="mt-4 space-y-2">
+            <p className="text-[15px] font-semibold text-pine-soft">
+              Add a note if you want, or continue.
+            </p>
+            <TextInput
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Type your answer, or record it instead"
+            />
+            <Btn onClick={() => submitExplain()} disabled={note.trim().length === 0}>
+              Send
+            </Btn>
+            <Btn
+              variant="secondary"
+              onClick={() => submitExplain()}
+              icon={<IconMic width={22} height={22} />}
+            >
+              Record a voice note instead
+            </Btn>
+            <button
+              onClick={() => submitExplain(true)}
+              className="min-h-[52px] w-full rounded-2xl border-2 border-line bg-surface text-[16px] font-extrabold text-pine-soft"
+            >
+              Continue
+            </button>
+          </div>
+        ) : null}
+
+        {!done && !needSymptom && !needExplain && (needNote || current.type === "text") ? (
           <div className="mt-4 space-y-2">
             <TextInput
               value={note}

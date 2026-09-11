@@ -26,6 +26,8 @@ export type FlowQ = {
   def?: string;
   /** answers that open a free-text follow-up */
   textIf?: string[];
+  /** better/worse: optional note on this same question, not a second ask */
+  explainIf?: string[];
   followUp?: string;
   /** answers that open a Bristol-type follow-up */
   bristolIf?: string[];
@@ -115,6 +117,7 @@ export const EVENING_QS: FlowQ[] = [
     q: "How do you feel physically, compared with a usual evening?",
     type: "single",
     options: VS_USUAL,
+    explainIf: ["Better than usual", "Worse than usual"],
   },
   {
     id: "missed",
@@ -141,6 +144,7 @@ export const EVENING_QS: FlowQ[] = [
     q: "How do you feel emotionally, compared with a usual evening?",
     type: "single",
     options: VS_USUAL,
+    explainIf: ["Better than usual", "Worse than usual"],
   },
   {
     id: "unusual",
@@ -184,6 +188,7 @@ function QuestionFlow({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [note, setNote] = useState("");
   const [needNote, setNeedNote] = useState(false);
+  const [needExplain, setNeedExplain] = useState(false);
   const [needBristol, setNeedBristol] = useState(false);
   const [showScale, setShowScale] = useState(false);
 
@@ -221,6 +226,11 @@ function QuestionFlow({
       setTurns([...next, { from: "bot", text: "Which Bristol type was it, 1 to 7?" }]);
       return;
     }
+    if (current.explainIf?.includes(value)) {
+      setNeedExplain(true);
+      setTurns(next);
+      return;
+    }
     if (current.textIf?.includes(value)) {
       setNeedNote(true);
       setTurns([...next, { from: "bot", text: current.followUp ?? "Tell me a little more." }]);
@@ -235,6 +245,18 @@ function QuestionFlow({
     setNeedNote(false);
     setAnswers(given);
     advance([...turns, { from: "you", text }], nextAskable(step + 1, given));
+    setNote("");
+  };
+
+  const submitExplain = (skipped?: boolean) => {
+    const text = skipped ? undefined : note.trim() || "A voice note";
+    const given = text ? { ...answers, [`${current.id}Note`]: text } : answers;
+    setNeedExplain(false);
+    setAnswers(given);
+    advance(
+      text ? [...turns, { from: "you", text }] : turns,
+      nextAskable(step + 1, given),
+    );
     setNote("");
   };
 
@@ -275,7 +297,7 @@ function QuestionFlow({
           )}
         </div>
 
-        {!done && !needNote && !needBristol ? (
+        {!done && !needNote && !needExplain && !needBristol ? (
           <div className="mt-4">
             {current.hint ? (
               <p className="mb-2 text-[15px] font-semibold text-pine-soft">{current.hint}</p>
@@ -460,6 +482,35 @@ function QuestionFlow({
             >
               Record a voice note instead
             </Btn>
+          </div>
+        ) : null}
+
+        {!done && needExplain ? (
+          <div className="mt-4 space-y-2">
+            <p className="text-[15px] font-semibold text-pine-soft">
+              Add a note if you want, or continue.
+            </p>
+            <TextInput
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Type it, or record it instead"
+            />
+            <Btn onClick={() => submitExplain()} disabled={note.trim().length === 0}>
+              Send
+            </Btn>
+            <Btn
+              variant="secondary"
+              onClick={() => submitExplain()}
+              icon={<IconMic width={22} height={22} />}
+            >
+              Record a voice note instead
+            </Btn>
+            <button
+              onClick={() => submitExplain(true)}
+              className="min-h-[52px] w-full rounded-2xl border-2 border-line bg-surface text-[16px] font-extrabold text-pine-soft"
+            >
+              Continue
+            </button>
           </div>
         ) : null}
 

@@ -101,7 +101,7 @@ export function SubjectIdScreen({ store }: { store: TummyStore }) {
           {state === "checking" ? <Note tone="blue">Checking the study database…</Note> : null}
           {state === "ok" ? (
             <Note tone="green" title="ID confirmed">
-              Matched to cohort B, healthy group. Day 1 starts tomorrow morning.
+              Day 1 starts tomorrow morning.
             </Note>
           ) : null}
           {state === "bad" ? (
@@ -1231,10 +1231,7 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
     <Screen>
       <TopBar title="About you" onBack={store.back} step="Step 2 of 9" />
       <ScreenBody>
-        <MascotSays size={78}>
-          Gut activity differs from person to person. If you are a female, the evening check-in will
-          include one additional question related to your menstrual cycle.
-        </MascotSays>
+        <h1 className="text-[26px] font-extrabold leading-tight text-pine">What's your gender?</h1>
         <div className="mt-5 space-y-2">
           {(
             [
@@ -1251,12 +1248,6 @@ export function AboutYouScreen({ store }: { store: TummyStore }) {
               onClick={() => store.setGender(k)}
             />
           ))}
-        </div>
-        <div className="mt-4">
-          <Note tone="green" title="Why we ask">
-            Menstrual cycle timings can change gut symptoms, so this information helps the study
-            team analyze your recordings with the appropriate context.
-          </Note>
         </div>
       </ScreenBody>
       <StickyFooter>

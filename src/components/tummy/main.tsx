@@ -48,6 +48,7 @@ import {
 import {
   clockLabel,
   computeNextTask,
+  FREEZE_DAYS_ALLOWED,
   isPastDue,
   minutesNow,
   untilLabel,
@@ -195,7 +196,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
       </div>
 
       <ScreenBody className="pb-[180px] pt-3">
-        <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">Next up</p>
+        <p className="text-[28px] font-extrabold leading-none text-pine">Next up</p>
         <div
           className={cn(
             "relative mt-2 overflow-hidden rounded-[28px] p-5",
@@ -230,14 +231,6 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             </div>
           </div>
 
-          <p
-            className={cn(
-              "relative mt-3 text-[16px] font-semibold leading-snug",
-              due ? "text-mint" : "text-pine-soft",
-            )}
-          >
-            {task.sub}
-          </p>
           {currentPastDue && currentItem ? (
             <p className="relative mt-2 text-[15px] font-extrabold text-amber">
               Past due · {clockLabel(currentItem.at)}
@@ -1251,7 +1244,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
         )}
 
         <div className="mt-4">
-          {store.freezeUsed && !store.frozen ? (
+          {store.freezeDaysUsed >= FREEZE_DAYS_ALLOWED && !store.frozen ? (
             <div className="flex items-center gap-3 rounded-3xl border border-line bg-surface p-5">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-wash text-blue">
                 <IconSnowflake width={26} height={26} />
@@ -1260,9 +1253,9 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                 <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-blue">
                   Used
                 </p>
-                <p className="mt-0.5 text-[17px] font-extrabold text-pine">Freeze day used</p>
+                <p className="mt-0.5 text-[17px] font-extrabold text-pine">Both freeze days used</p>
                 <p className="mt-1 text-[15px] font-semibold leading-snug text-pine-soft">
-                  You've used your one freeze. The remaining days run back to back.
+                  You've used both freeze days. The remaining days run back to back.
                 </p>
               </div>
             </div>
@@ -1276,7 +1269,9 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-surface/80">
-                    {store.frozen ? "Paused today" : "Once only"}
+                    {store.frozen
+                      ? "Paused today"
+                      : `${store.freezeDaysUsed} of ${FREEZE_DAYS_ALLOWED} used`}
                   </p>
                   <p className="mt-1 text-[19px] font-extrabold leading-tight">
                     {store.frozen ? "Today is a freeze day" : "Need a pause?"}
@@ -1284,11 +1279,13 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                   <p className="mt-1 text-[15px] font-semibold leading-snug text-surface/85">
                     {store.frozen
                       ? "Nothing today counts as missed. The study picks up tomorrow morning."
-                      : "Pause one whole day if you need it. You get one freeze, and it can't be undone."}
+                      : store.freezeDaysUsed === 0
+                        ? "You can pause two days during the study if you need them. A freeze day cannot be undone."
+                        : "You have one freeze day left. A freeze day cannot be undone."}
                   </p>
                 </div>
               </div>
-              {!store.frozen ? (
+              {!store.frozen && store.freezeDaysUsed < FREEZE_DAYS_ALLOWED ? (
                 <button
                   onClick={() => setConfirmFreeze(true)}
                   className="relative mt-4 flex min-h-[56px] w-full items-center justify-center rounded-2xl bg-surface text-[17px] font-extrabold text-blue active:scale-[0.99]"
@@ -1308,10 +1305,10 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               <IconSnowflake width={28} height={28} />
             </div>
             <p className="text-center text-[13px] font-extrabold uppercase tracking-[0.14em] text-blue">
-              Once only
+              {store.freezeDaysUsed === 0 ? "Two days available" : "One day left"}
             </p>
             <p className="mt-1 text-center text-[22px] font-extrabold leading-tight text-pine">
-              Use your freeze day?
+              Use a freeze day?
             </p>
             <p className="mt-2 text-center text-[16px] font-semibold leading-snug text-pine-soft">
               Today pauses. Nothing counts as missed. You cannot undo this.
@@ -1343,7 +1340,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
 
 export function ProfileScreen({ store }: { store: TummyStore }) {
   const rows: { label: string; sub: string; Icon: typeof IconUser; to?: ScreenKey }[] = [
-    { label: "Subject ID", sub: "STF-0142 · cohort B", Icon: IconUser },
+    { label: "Subject ID", sub: "STF-0142", Icon: IconUser },
     { label: "Daily times", sub: "Meals, sleep and wake", Icon: IconClock, to: "scheduling" },
     {
       label: "Technical Setup",

@@ -136,7 +136,8 @@ export type TummyStore = {
   chooseStudyMeal: (m: Meal) => void;
   /** tick off a scheduled diary item that matches what was just logged */
   completeMealLog: (which: string) => void;
-  freezeUsed: boolean;
+  /** freeze days already used, out of FREEZE_DAYS_ALLOWED */
+  freezeDaysUsed: number;
   /** today's plan is paused, no recordings, meals or questions expected */
   frozen: boolean;
   useFreeze: () => void;
@@ -279,6 +280,9 @@ export const WINDOW_RULE =
 
 export const QUALITY_RULE =
   "A usable recording matters more than a complete set. If you can't do this one properly, kindly skip it and tell us why.";
+
+/** How many full days a person can pause during the study. */
+export const FREEZE_DAYS_ALLOWED = 2;
 
 /** Post-meal recording offsets in minutes, measured from the END of the meal. */
 export const POST_MEAL_OFFSETS = [0, 30, 60, 90, 120, 150, 180, 210];
@@ -526,10 +530,8 @@ export function computeNextTask(plan: PlanItem[]): NextTask {
     return {
       kind: "questions",
       tag: evening ? "Evening check-in" : "Wake-up questions",
-      title: evening ? "A few questions about your day" : "A few questions before you record",
-      sub: evening
-        ? "What you ate, anything you missed, and how you felt. About three minutes."
-        : "Sleep, anything you've eaten or drunk, bathroom, and activity since waking.",
+      title: "A few questions",
+      sub: "",
       cta: "Answer questions",
       screen: evening ? "eveningCheckin" : "morningQuestions",
       state: "due",
@@ -568,7 +570,7 @@ export function useTummyStore(): TummyStore {
   const [demoTick, setDemoTick] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [questions, setQuestions] = useState({ morning: false, night: false });
-  const [freezeUsed, setFreezeUsed] = useState(false);
+  const [freezeDaysUsed, setFreezeDaysUsed] = useState(0);
   const [frozen, setFrozen] = useState(false);
   const [pendingMissAsk, setPendingMissAsk] = useState<{ id: string; label: string } | null>(
     null,
@@ -819,10 +821,11 @@ export function useTummyStore(): TummyStore {
     meal,
     setMeal,
     chooseStudyMeal,
-    freezeUsed,
+    freezeDaysUsed,
     frozen,
     useFreeze: () => {
-      setFreezeUsed(true);
+      if (frozen || freezeDaysUsed >= FREEZE_DAYS_ALLOWED) return;
+      setFreezeDaysUsed((n) => Math.min(FREEZE_DAYS_ALLOWED, n + 1));
       setFrozen(true);
       setPlan((prev) =>
         prev.map((p) =>
