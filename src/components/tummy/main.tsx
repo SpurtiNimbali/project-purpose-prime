@@ -200,20 +200,20 @@ export function HomeScreen({ store }: { store: TummyStore }) {
         <div
           className={cn(
             "relative mt-2 overflow-hidden rounded-[28px] p-5",
-            due ? "bg-teal text-surface shadow-md" : "border border-line bg-surface text-pine",
+            due ? "bg-pine text-surface shadow-md" : "border border-line bg-surface text-pine",
           )}
         >
           {due ? (
             <>
-              <span className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-mint/25" />
-              <span className="pointer-events-none absolute -bottom-14 left-8 h-28 w-28 rounded-full bg-pine/15" />
+              <span className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-teal/40" />
+              <span className="pointer-events-none absolute -bottom-14 left-8 h-28 w-28 rounded-full bg-blue/30" />
             </>
           ) : null}
           <div className="relative flex items-center gap-3">
             <span
               className={cn(
                 "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
-                due ? "bg-surface/15" : "bg-mint-soft text-teal",
+                due ? "bg-mint text-pine" : "bg-mint-soft text-teal",
               )}
             >
               <TaskIcon width={26} height={26} />
@@ -283,7 +283,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             onClick={startTask}
             className={cn(
               "relative mt-4 flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl text-[18px] font-extrabold active:scale-[0.99]",
-              due ? "bg-surface text-teal" : "bg-teal text-surface",
+              due ? "bg-surface text-pine" : "bg-teal text-surface",
             )}
           >
             {task.cta}
@@ -298,9 +298,9 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             </p>
             <button
               onClick={() => store.go("sessionHub")}
-              className="shrink-0 text-[15px] font-extrabold text-teal"
+              className="shrink-0 rounded-full bg-mint-soft px-3 py-1.5 text-[14px] font-extrabold text-teal"
             >
-              Open
+              See today's plan
             </button>
           </div>
           <div className="mt-3 flex items-start">
@@ -363,26 +363,24 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             store.startExtraSession();
             store.go("extraSession");
           }}
-          className="relative mt-4 w-full overflow-hidden rounded-3xl bg-pine px-5 py-5 text-left shadow-md active:scale-[0.99]"
+          className="relative mt-4 w-full overflow-hidden rounded-3xl border border-line bg-surface px-5 py-5 text-left shadow-sm active:scale-[0.99]"
         >
-          <span className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-teal/40" />
-          <span className="pointer-events-none absolute -bottom-12 right-10 h-28 w-28 rounded-full bg-blue/30" />
           <span className="relative flex items-center gap-4">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-mint text-pine">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-mint-soft text-teal">
               <IconMic width={26} height={26} />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
+              <span className="block text-[12px] font-extrabold uppercase tracking-[0.16em] text-teal">
                 Optional · anytime
               </span>
-              <span className="mt-1 block text-[19px] font-extrabold leading-tight text-surface">
+              <span className="mt-1 block text-[19px] font-extrabold leading-tight text-pine">
                 Something feels different?
               </span>
-              <span className="mt-1 block text-[15px] font-semibold leading-snug text-mint/90">
-                Log an extra two-minute recording if you notice loud gurgles, pain, or a sudden change
+              <span className="mt-1 block text-[15px] font-semibold leading-snug text-pine-soft">
+                Log an extra 2 minute recording
               </span>
             </span>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface/15 text-[20px] font-extrabold text-surface">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mint-soft text-[20px] font-extrabold text-teal">
               +
             </span>
           </span>
@@ -392,17 +390,9 @@ export function HomeScreen({ store }: { store: TummyStore }) {
 
         {/* quick log */}
         <div className="mt-5">
-          <div className="flex items-end justify-between gap-3">
-            <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-              Quick log
-            </p>
-            <button
-              onClick={() => store.go("logHub")}
-              className="shrink-0 text-[15px] font-extrabold text-teal"
-            >
-              More
-            </button>
-          </div>
+          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+            Quick log
+          </p>
           <div className="mt-2 grid grid-cols-4 gap-2">
             {HOME_LOGS.map(({ k, label, kind, Icon }) => {
               const count = store.entries.filter((e) => e.kind === kind).length;
@@ -439,46 +429,15 @@ export function HomeScreen({ store }: { store: TummyStore }) {
 const LOG_ITEMS: {
   k: ScreenKey;
   label: string;
-  sub: string;
   Icon: typeof IconBowl;
   kind: LogKind;
 }[] = [
-  {
-    k: "logMeal",
-    label: "Meal or snack",
-    sub: "A photo, or a short description",
-    Icon: IconBowl,
-    kind: "meal",
-  },
-  {
-    k: "logHydration",
-    label: "Drinks",
-    sub: "Water, tea, or anything fizzy",
-    Icon: IconDroplet,
-    kind: "hydration",
-  },
-  {
-    k: "logSymptom",
-    label: "Symptom",
-    sub: "What it is, and how strong",
-    Icon: IconWave,
-    kind: "symptom",
-  },
-  {
-    k: "logToilet",
-    label: "Toilet habits",
-    sub: "When, and what it was like",
-    Icon: IconToilet,
-    kind: "toilet",
-  },
-  { k: "logSleep", label: "Sleep", sub: "How last night went", Icon: IconMoon, kind: "sleep" },
-  {
-    k: "logActivity",
-    label: "Activity",
-    sub: "Walks, workouts, or rest",
-    Icon: IconRun,
-    kind: "activity",
-  },
+  { k: "logMeal", label: "Meal or snack", Icon: IconBowl, kind: "meal" },
+  { k: "logHydration", label: "Drinks", Icon: IconDroplet, kind: "hydration" },
+  { k: "logSymptom", label: "Symptom", Icon: IconWave, kind: "symptom" },
+  { k: "logToilet", label: "Toilet habits", Icon: IconToilet, kind: "toilet" },
+  { k: "logSleep", label: "Sleep", Icon: IconMoon, kind: "sleep" },
+  { k: "logActivity", label: "Activity", Icon: IconRun, kind: "activity" },
 ];
 
 const KIND_ICON: Record<LogKind, typeof IconBowl> = {
@@ -525,22 +484,17 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
         {tab === "add" ? (
           <>
             <div className="grid grid-cols-2 gap-3">
-              {LOG_ITEMS.map(({ k, label, sub, Icon, kind }) => (
+              {LOG_ITEMS.map(({ k, label, Icon, kind }) => (
                 <button
                   key={k}
                   onClick={() => store.go(k)}
-                  className="relative flex min-h-[126px] flex-col justify-between rounded-[26px] border border-line bg-surface p-4 text-left shadow-sm active:scale-[0.99]"
+                  className="relative flex min-h-[108px] flex-col justify-between rounded-[26px] border border-line bg-surface p-4 text-left shadow-sm active:scale-[0.99]"
                 >
                   <span className="flex h-12 w-12 items-center justify-center rounded-full bg-mint-soft text-teal">
                     <Icon width={26} height={26} />
                   </span>
-                  <span>
-                    <span className="block text-[17px] font-extrabold leading-tight text-pine">
-                      {label}
-                    </span>
-                    <span className="block text-[14px] font-semibold leading-snug text-pine-soft">
-                      {sub}
-                    </span>
+                  <span className="block text-[17px] font-extrabold leading-tight text-pine">
+                    {label}
                   </span>
                   {counts(kind) ? (
                     <span className="absolute right-3 top-3 flex h-7 min-w-7 items-center justify-center rounded-full bg-teal px-2 text-[14px] font-extrabold text-surface">
@@ -617,12 +571,6 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
                   })}
                 </div>
               )}
-            </div>
-
-            <div className="mt-4">
-              <Note tone="green" title="Everything is saved against your subject ID">
-                You can add anything you forgot later in the day. Nothing locks.
-              </Note>
             </div>
           </>
         )}
@@ -1334,16 +1282,11 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
 /* ---------------- profile ---------------- */
 
 export function ProfileScreen({ store }: { store: TummyStore }) {
-  const rows: { label: string; sub: string; Icon: typeof IconUser; to?: ScreenKey }[] = [
+  const rows: { label: string; sub?: string; Icon: typeof IconUser; to?: ScreenKey }[] = [
     { label: "Subject ID", sub: "STF-0142", Icon: IconUser },
-    { label: "Daily times", sub: "Meals, sleep and wake", Icon: IconClock, to: "scheduling" },
-    {
-      label: "Technical Setup",
-      sub: "iPhone 14 · bottom microphone",
-      Icon: IconPhone,
-      to: "technicalSetup",
-    },
-    { label: "Setup guide", sub: "Rewatch the instruction video", Icon: IconMic, to: "video" },
+    { label: "Daily times", Icon: IconClock, to: "scheduling" },
+    { label: "Technical Setup", Icon: IconPhone, to: "technicalSetup" },
+    { label: "Setup guide", Icon: IconMic, to: "video" },
   ];
   return (
     <Screen>
@@ -1369,7 +1312,9 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[17px] font-extrabold text-pine">{label}</span>
-                <span className="block text-[15px] font-semibold text-pine-soft">{sub}</span>
+                {sub ? (
+                  <span className="block text-[15px] font-semibold text-pine-soft">{sub}</span>
+                ) : null}
               </span>
               {to ? (
                 <span className="shrink-0 text-pine-soft">
@@ -1378,13 +1323,6 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
               ) : null}
             </button>
           ))}
-        </div>
-
-        <div className="mt-4">
-          <Note tone="green" title="Your data is anonymous">
-            Recordings and logs are stored against your subject ID. Message your coordinator if
-            you have questions.
-          </Note>
         </div>
 
         <div className="mt-4 space-y-3">

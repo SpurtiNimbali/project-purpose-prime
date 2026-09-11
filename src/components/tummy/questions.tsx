@@ -83,7 +83,7 @@ export const MORNING_QS: FlowQ[] = [
     textIf: ["Yes, something else"],
     followUp: "What was it, and roughly when?",
     warnIf: ["Yes, something else"],
-    warn: "This recording is meant to capture your gut before anything except water. Food or drink changes that activity. I'll still save what you had and when, so the team can read the audio in context. Record anyway today, and please do not skip any meals because of this. If this happens again on another day, we will skip that morning's fasted recording.",
+    warn: "This recording is meant to capture your gut before you consume anything but water. Any food or drink changes that activity. Record your gut activity today, but please ensure this doesn't repeat. I'll ask what you had and when, so the team can analyze your following recording with the appropriate context. If this does happen again on another day, we will, unfortunately, have to skip that morning's fasted recording.",
   },
   { id: "outOfBed", q: "What time did you get out of bed?", type: "time", def: "07:15" },
   {
@@ -488,7 +488,7 @@ function QuestionFlow({
         {!done && needExplain ? (
           <div className="mt-4 space-y-2">
             <p className="text-[15px] font-semibold text-pine-soft">
-              Add a note if you want, or continue.
+              Add a note if you want.
             </p>
             <TextInput
               value={note}
@@ -509,7 +509,7 @@ function QuestionFlow({
               onClick={() => submitExplain(true)}
               className="min-h-[52px] w-full rounded-2xl border-2 border-line bg-surface text-[16px] font-extrabold text-pine-soft"
             >
-              Continue
+              Nothing to add
             </button>
           </div>
         ) : null}

@@ -322,22 +322,21 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
               store.startExtraSession();
               store.go("extraSession");
             }}
-            className="relative mt-2 w-full overflow-hidden rounded-3xl bg-pine px-5 py-5 text-left shadow-md active:scale-[0.99]"
+            className="relative mt-2 w-full overflow-hidden rounded-3xl border border-line bg-surface px-5 py-5 text-left shadow-sm active:scale-[0.99]"
           >
-            <span className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-teal/40" />
             <span className="relative flex items-center gap-3">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-mint text-pine">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-mint-soft text-teal">
                 <IconMic width={22} height={22} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
+                <span className="block text-[12px] font-extrabold uppercase tracking-[0.16em] text-teal">
                   Optional · anytime
                 </span>
-                <span className="mt-1 block text-[17px] font-extrabold leading-tight text-surface">
+                <span className="mt-1 block text-[17px] font-extrabold leading-tight text-pine">
                   Record an extra session
                 </span>
               </span>
-              <span className="text-[22px] font-extrabold text-surface">+</span>
+              <span className="text-[22px] font-extrabold text-teal">+</span>
             </span>
           </button>
         </div>
@@ -1609,7 +1608,7 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
         {!done && needExplain ? (
           <div className="mt-4 space-y-2">
             <p className="text-[15px] font-semibold text-pine-soft">
-              Add a note if you want, or continue.
+              Add a note if you want.
             </p>
             <TextInput
               value={note}
@@ -1630,7 +1629,7 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
               onClick={() => submitExplain(true)}
               className="min-h-[52px] w-full rounded-2xl border-2 border-line bg-surface text-[16px] font-extrabold text-pine-soft"
             >
-              Continue
+              Nothing to add
             </button>
           </div>
         ) : null}
@@ -1652,8 +1651,7 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
             >
               Record a voice note instead
             </Btn>
-            {(current.optional && !needNote) ||
-            (needNote && current.followUp?.startsWith("Anything")) ? (
+            {current.optional && !needNote ? (
               <button
                 onClick={() => submitNote(true)}
                 className="min-h-[52px] w-full rounded-2xl border-2 border-line bg-surface text-[16px] font-extrabold text-pine-soft"
