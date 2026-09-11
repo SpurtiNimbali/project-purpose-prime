@@ -665,8 +665,8 @@ export function AbdomenGuide() {
         src={placementArt}
         alt="A seated participant holding a portrait phone against bare skin, 8 centimetres to their right and 3 centimetres below their belly button"
         loading="lazy"
-        width={1254}
-        height={872}
+        width={864}
+        height={920}
         className="w-full rounded-2xl"
       />
     </figure>

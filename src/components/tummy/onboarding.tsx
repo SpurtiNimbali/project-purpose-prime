@@ -179,14 +179,14 @@ const QUIZ = [
     options: ["On top of your shirt", "Directly on bare skin, with the case off"],
     answer: 1,
     why: "A shirt or a phone case holds the microphone off your skin. Gut sounds are too quiet to carry across that gap.",
-    hint: "The microphone needs to touch bare skin.",
+    hint: "Think about what the microphone needs in order to hear a quiet gut sound.",
   },
   {
     q: "You drank coffee 20 minutes ago. Can you still do a fasting recording?",
     options: ["Yes, drinks are acceptable", "No, even drinks are not permitted"],
     answer: 1,
     why: "Coffee, food, or anything other than a sip of water changes your gut activity, so the recording wouldn't count as fasting.",
-    hint: "Fasting here means nothing in your stomach except water.",
+    hint: "Think about what fasting means for this recording.",
   },
   {
     q: "After your chosen meal, when do you record?",
@@ -197,7 +197,7 @@ const QUIZ = [
     ],
     answer: 1,
     why: "Recording right after the meal and then every 30 minutes for 3.5 hours keeps the timing consistent across everyone in the study, so the data can be analyzed accurately.",
-    hint: "It starts when the meal ends, and the recordings are 30 minutes apart.",
+    hint: "Think about whether the post-meal times are a set schedule or up to you.",
   },
 
 ];
@@ -592,15 +592,9 @@ export function PermissionsScreen({ store }: { store: TummyStore }) {
     <Screen>
       <TopBar title="Permissions" onBack={store.back} step="Step 8 of 9" />
       <ScreenBody>
-        <Note tone="green" title="Audio stays private">
-          Recordings are encrypted and labelled with your subject ID only. No one on the study team
-          can link them back to you by name.
+        <Note tone="blue" title="Do not disturb is only for recordings">
+          Do not disturb turns on when a recording starts and off the moment it ends.
         </Note>
-        <div className="mt-3">
-          <Note tone="blue" title="Do not disturb is only for recordings">
-            Do not disturb turns on when a recording starts and off the moment it ends.
-          </Note>
-        </div>
         <div className="mt-4 space-y-3">
           {items.map(({ k, label, sub, Icon }) => (
             <Card key={k}>
@@ -739,6 +733,12 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
             <p className="mt-3 text-[17px] font-semibold leading-snug text-pine-soft">
               Find a quiet room and tap start when you're ready. Nothing from this run is uploaded.
             </p>
+            <div className="mt-5 w-full text-left">
+              <Note tone="green" title="Audio stays private">
+                Recordings are encrypted and labelled with your subject ID only. No one on the study
+                team can link them back to you by name.
+              </Note>
+            </div>
           </div>
         </ScreenBody>
         <StickyFooter>

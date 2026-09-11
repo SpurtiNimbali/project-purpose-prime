@@ -196,7 +196,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
       </div>
 
       <ScreenBody className="pb-[180px] pt-3">
-        <p className="text-[28px] font-extrabold leading-none text-pine">Next up</p>
+        <p className="text-[18px] font-extrabold tracking-tight text-teal">Next up</p>
         <div
           className={cn(
             "relative mt-2 overflow-hidden rounded-[28px] p-5",
@@ -1161,23 +1161,18 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
           <div className="relative flex items-center gap-3">
             <Mascot src={MASCOT.cheer} size={72} />
             <div className="min-w-0">
-              <p className="text-[34px] font-extrabold leading-none">Day {store.day} of 7</p>
-              <p className="text-[16px] font-bold text-surface/85">
-                {store.frozen
-                  ? "Freeze day. Your streak stays safe until tomorrow."
-                  : "Seven consecutive study days"}
-              </p>
+              <p className="text-[22px] font-extrabold leading-tight">Day {store.day} of 7</p>
             </div>
           </div>
-          <div className="relative mt-4 flex justify-between">
+          <div className="relative mt-6 grid grid-cols-7 gap-x-2.5">
             {days.map((d, i) => {
               const isFrozen = store.frozen && i === todayIdx;
               const isToday = i === todayIdx;
               return (
-                <div key={i} className="flex flex-col items-center gap-1">
+                <div key={i} className="flex flex-col items-center gap-1.5">
                   <span
                     className={cn(
-                      "flex h-11 w-11 items-center justify-center rounded-full border-[3px]",
+                      "flex h-10 w-10 items-center justify-center rounded-full border-[3px]",
                       isFrozen
                         ? "border-surface bg-surface text-blue"
                         : d
