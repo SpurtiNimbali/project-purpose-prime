@@ -2,3 +2,6 @@
 - [ ] Remove redundant copy while preserving protocol and safety meaning
 - [ ] Put meal-choice guidance inside each meal option
 - [ ] Verify key screens and clean build
+- [ ] Replace “How a day works” text cards with an interactive screen-by-screen tutorial
+- [ ] Use actual app UI patterns with one highlighted action, arrow, and blurred surroundings
+- [ ] Verify tutorial at narrow and standard phone widths
