@@ -32,7 +32,6 @@ import {
   IconDizzy,
   IconWind,
   IconLock,
-  IconChart,
   IconX,
 
 } from "./icons";
@@ -386,13 +385,14 @@ export function CaseOffLayout({
 }
 
 export function CaseReminderScreen({ store }: { store: TummyStore }) {
-  // the wake-up questions already cover food and drink, so fasted sessions go straight on
-  const next = () =>
-    store.go(
-      store.sessionKind === "fasted" || store.sessionKind === "extra"
-        ? "positioning"
-        : "sessionCheck",
-    );
+  // No eat-check before the meal, or right after it. Snack checks start on later post-meal recordings.
+  const item = store.plan.find((p) => p.id === store.activeItemId);
+  const skipEatCheck =
+    store.sessionKind === "fasted" ||
+    store.sessionKind === "extra" ||
+    store.sessionKind === "preMeal" ||
+    (store.sessionKind === "postMeal" && item?.offset === 0);
+  const next = () => store.go(skipEatCheck ? "positioning" : "sessionCheck");
 
   return (
     <CaseOffLayout title="Before we start" onBack={store.back} onContinue={next} />
@@ -584,7 +584,6 @@ export function MealEndScreen({ store }: { store: TummyStore }) {
 /* ---------------- session checklist ---------------- */
 
 export function SessionCheckScreen({ store }: { store: TummyStore }) {
-  const preMeal = store.sessionKind === "preMeal";
   return (
     <Screen>
       <TopBar title="Quick check" onBack={store.back} />
@@ -596,20 +595,16 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
             <Mascot src={MASCOT.calm} size={72} />
             <div className="min-w-0">
               <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
-                {preMeal ? "Before the meal" : "After the meal"}
+                After the meal
               </p>
               <p className="mt-1 text-[19px] font-extrabold leading-tight text-surface">
-                {preMeal
-                  ? "Have you eaten anything else before the upcoming meal?"
-                  : "Have you had anything at all since the meal?"}
+                Have you had anything at all since the meal?
               </p>
             </div>
           </div>
         </div>
         <p className="mt-4 text-[16px] font-semibold leading-snug text-pine-soft">
-          {preMeal
-            ? "This recording has to happen immediately before the first bite."
-            : "No snacks. Water only if it was right after a recording, and at least 15 minutes ago."}
+          No snacks. Water only if it was right after a recording, and at least 15 minutes ago.
         </p>
         <div className="mt-5 space-y-3">
           <button
@@ -621,14 +616,12 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
               <IconCheck width={24} height={24} />
             </span>
             <span className="relative min-w-0 flex-1">
-              <span className="block text-[17px] font-extrabold">
-                {preMeal ? "No, nothing yet" : "Nothing since the meal"}
-              </span>
+              <span className="block text-[17px] font-extrabold">Nothing since the meal</span>
               <span className="mt-1 block text-[15px] font-extrabold text-mint">Continue →</span>
             </span>
           </button>
           <button
-            onClick={() => store.go(preMeal ? "skipReason" : "snackSkip")}
+            onClick={() => store.go("snackSkip")}
             className="flex w-full items-center gap-3 rounded-3xl border border-line bg-surface p-4 text-left shadow-sm active:scale-[0.99]"
           >
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-coral-soft text-coral">
@@ -636,12 +629,10 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-[17px] font-extrabold text-pine">
-                {preMeal ? "Yes, I already ate something" : "I had a snack or a drink"}
+                I had a snack or a drink
               </span>
               <span className="mt-1 block text-[15px] font-semibold text-pine-soft">
-                {preMeal
-                  ? "Skip this recording and tell us what you had."
-                  : "We'll skip the rest of this window."}
+                We'll skip the rest of this window.
               </span>
             </span>
           </button>
@@ -658,15 +649,62 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- positioning ---------------- */
 
+/** Dual-scale ruler on the screen edge so they can measure against the glass. */
+export function ScreenRuler() {
+  const cms = Array.from({ length: 21 }, (_, i) => i / 2);
+  const inches = Array.from({ length: 9 }, (_, i) => i / 2);
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute bottom-[6.75rem] right-0 z-20 w-12 rounded-l-lg border border-r-0 border-amber bg-pine/90 shadow-md"
+    >
+      <div className="flex justify-between px-1 pt-1 text-[8px] font-extrabold uppercase tracking-wider">
+        <span className="text-amber">cm</span>
+        <span className="text-mint">in</span>
+      </div>
+      <div className="relative flex h-[10cm]">
+        <div className="relative w-7">
+          {cms.map((n) => (
+            <div
+              key={`cm-${n}`}
+              className="absolute left-0 flex items-center"
+              style={{ top: `calc(${n} * 1cm)`, transform: "translateY(-50%)" }}
+            >
+              <span className={cn("h-px bg-amber", Number.isInteger(n) ? "w-2.5" : "w-1.5")} />
+              {Number.isInteger(n) ? (
+                <span className="pl-0.5 text-[8px] font-extrabold leading-none text-amber">{n}</span>
+              ) : null}
+            </div>
+          ))}
+        </div>
+        <div className="relative w-5 border-l border-amber/50">
+          {inches.map((n) => (
+            <div
+              key={`in-${n}`}
+              className="absolute right-0 flex items-center"
+              style={{ top: `calc(${n} * 1in)`, transform: "translateY(-50%)" }}
+            >
+              {Number.isInteger(n) ? (
+                <span className="pr-0.5 text-[8px] font-extrabold leading-none text-mint">{n}</span>
+              ) : null}
+              <span className={cn("h-px bg-mint", Number.isInteger(n) ? "w-2.5" : "w-1.5")} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function AbdomenGuide() {
   return (
     <figure className="mx-auto w-full max-w-[340px]">
       <img
         src={placementArt}
-        alt="A seated participant holding a portrait phone against bare skin, 8 centimetres to their right and 3 centimetres below their belly button"
+        alt="Two front-facing panels. The top marks the spot on a seated participant's lower right belly, 8 centimetres or 3.1 inches across from the belly button and then 3 centimetres or 1.2 inches down. The bottom shows the phone on that same spot: speaker-edge corner on the mark, the other speaker-edge corner toward the navel, the top of the phone in the air, screen facing the sky, plus a zoom of the speaker end on the skin"
         loading="lazy"
         width={864}
-        height={920}
+        height={1152}
         className="w-full rounded-2xl"
       />
     </figure>
@@ -676,23 +714,18 @@ export function AbdomenGuide() {
 export const PLACEMENT_TIPS = [
   {
     t: "Right lower belly",
-    b: "8 cm to the right of your belly button, then 3 cm down.",
+    b: "From your belly button, 8 cm (3.1 in) to your right, then 3 cm (1.2 in) down. Put the bottom-right corner of the speaker edge on that point. The bottom-left corner sits on the same line, toward your belly button.",
     Icon: IconRuler,
   },
   {
-    t: "Microphone edge down",
-    b: "The bottom edge of the phone sits on that point.",
+    t: "Speakers on that spot",
+    b: "Press the speaker side — the short edge with the holes and the charging port — into the skin on that point. Not the camera side.",
     Icon: IconMic,
   },
   {
-    t: "Same way every time",
-    b: "Hold the phone upright, screen facing out, every session.",
+    t: "Screen up, camera down",
+    b: "Sit down and point the phone straight out from your belly. Screen faces the sky, camera faces the floor. Only the speaker edge touches you.",
     Icon: IconPhone,
-  },
-  {
-    t: "Measure, don't guess",
-    b: "Use the ruler app rather than guessing.",
-    Icon: IconChart,
   },
 ];
 
@@ -758,13 +791,14 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
   return (
     <Screen dark className="relative">
       <TopBar title="Positioning guide" onBack={store.back} dark step="Placement" />
-      <div className={cn("flex-1 overflow-y-auto px-5 pb-6", !checked && "blur-md")}>
+      <div className={cn("flex-1 overflow-y-auto px-5 pb-6 pr-14", !checked && "blur-md")}>
         <AbdomenGuide />
         <p className="mt-3 text-[16px] font-semibold leading-snug text-mint">
-          Bottom of the phone with the speakers on that spot, screen facing out.
+          Speaker edge on that spot. Screen facing up, camera toward the floor.
         </p>
         <PlacementTips index={tipIndex} />
       </div>
+      {checked ? <ScreenRuler /> : null}
       <div className="shrink-0 px-5 pb-7 pt-3">
         <Btn
           disabled={!checked}
@@ -1295,12 +1329,6 @@ function questionsFor(kind: SessionKind): Q[] {
         explainIf: ["Better than usual", "Worse than usual"],
       },
       {
-        id: "enoughSleep",
-        q: "Did you get enough sleep?",
-        type: "single",
-        options: ["Yes", "No", "Not sure"],
-      },
-      {
         id: "giAm",
         q: "Any gut symptoms this morning?",
         type: "single",
@@ -1335,26 +1363,12 @@ function questionsFor(kind: SessionKind): Q[] {
         options: ["Yes, eating now", "No, not yet"],
       },
       {
-        id: "physical",
-        q: "How do you feel physically, compared with usual?",
-        type: "single",
-        options: VS_USUAL,
-        explainIf: ["Better than usual", "Worse than usual"],
-      },
-      {
         id: "strenuous",
         q: "Any strenuous activity in the last hour?",
         type: "single",
         options: ["No", "Yes"],
         textIf: ["Yes"],
         followUp: "What did you do?",
-      },
-      {
-        id: "emotional",
-        q: "How do you feel emotionally, compared with usual?",
-        type: "single",
-        options: VS_USUAL,
-        explainIf: ["Better than usual", "Worse than usual"],
       },
       {
         id: "giSince",
@@ -1389,6 +1403,83 @@ function questionsFor(kind: SessionKind): Q[] {
 
 type Turn = { from: "bot" | "you"; text: string };
 
+type PickedSymptom = { key: string; label: string; sev: number };
+
+function SymptomMultiPicker({
+  value,
+  onChange,
+}: {
+  value: PickedSymptom[];
+  onChange: (next: PickedSymptom[]) => void;
+}) {
+  const toggle = (key: string, label: string) => {
+    onChange(
+      value.some((v) => v.key === key)
+        ? value.filter((v) => v.key !== key)
+        : [...value, { key, label, sev: 0 }],
+    );
+  };
+  const setSev = (key: string, sev: number) => {
+    onChange(value.map((v) => (v.key === key ? { ...v, sev } : v)));
+  };
+  return (
+    <div>
+      <div className="grid grid-cols-3 gap-3">
+        {SYMPTOMS.map(({ key, label, Icon }) => {
+          const on = value.some((v) => v.key === key);
+          return (
+            <button
+              key={key}
+              onClick={() => toggle(key, label)}
+              className={cn(
+                "flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border-2 bg-surface px-2",
+                on ? "border-teal bg-mint-soft" : "border-line",
+              )}
+            >
+              <span className="text-teal">
+                <Icon width={28} height={28} />
+              </span>
+              <span className="text-[15px] font-extrabold text-pine">{label}</span>
+            </button>
+          );
+        })}
+      </div>
+      {value.length > 0 ? (
+        <div className="mt-5 space-y-4">
+          {value.map((s) => (
+            <div key={s.key}>
+              <p className="text-[16px] font-extrabold text-pine">How strong is the {s.label.toLowerCase()}?</p>
+              <div className="mt-2 flex gap-2">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setSev(s.key, n)}
+                    className={cn(
+                      "min-h-[56px] flex-1 rounded-2xl border-2 text-[18px] font-extrabold",
+                      s.sev === n
+                        ? "border-teal bg-teal text-surface"
+                        : "border-line bg-surface text-pine",
+                    )}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+          <p className="text-center text-[15px] font-semibold text-pine-soft">
+            1 is very mild, 5 is very strong.
+          </p>
+        </div>
+      ) : (
+        <p className="mt-3 text-[15px] font-semibold text-pine-soft">
+          Tap every symptom that applies. You'll set the strength of each one.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function PostMetaScreen({ store }: { store: TummyStore }) {
   const kind = store.sessionKind;
   const [qs] = useState<Q[]>(() => questionsFor(kind));
@@ -1399,10 +1490,10 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
   const [needNote, setNeedNote] = useState(false);
   const [needExplain, setNeedExplain] = useState(false);
   const [needSymptom, setNeedSymptom] = useState(false);
-  const [picked, setPicked] = useState<{ key: string; label: string } | null>(null);
-  const [sev, setSev] = useState(0);
+  const [symptoms, setSymptoms] = useState<PickedSymptom[]>([]);
   const done = step >= qs.length;
   const current = qs[Math.min(step, qs.length - 1)];
+  const symptomsReady = symptoms.length > 0 && symptoms.every((s) => s.sev >= 1);
 
   const nextAskable = (from: number, given: Record<string, string>) => {
     let n = from;
@@ -1425,8 +1516,7 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
     const next: Turn[] = [...turns, { from: "you", text: value }];
     if (current.symptomIf?.includes(value)) {
       setNeedSymptom(true);
-      setPicked(null);
-      setSev(0);
+      setSymptoms([]);
       setTurns([...next, { from: "bot", text: current.followUp ?? "Which ones, and how strong?" }]);
       return;
     }
@@ -1446,14 +1536,15 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
     advance(next, nextAskable(step + 1, given));
   };
 
-  const submitSymptom = () => {
-    if (!picked || sev < 1) return;
-    const text = `${picked.label} · ${SEV_LABELS[sev - 1]}`;
-    store.addEntry("symptom", picked.label, `${SEV_LABELS[sev - 1]} · after recording`);
+  const submitSymptoms = () => {
+    if (!symptomsReady) return;
+    const text = symptoms.map((s) => `${s.label} · ${SEV_LABELS[s.sev - 1]}`).join(", ");
+    symptoms.forEach((s) =>
+      store.addEntry("symptom", s.label, `${SEV_LABELS[s.sev - 1]} · after recording`),
+    );
     const given = { ...answers, [`${current.id}Note`]: text };
     setNeedSymptom(false);
-    setPicked(null);
-    setSev(0);
+    setSymptoms([]);
     setAnswers(given);
     advance([...turns, { from: "you", text }], nextAskable(step + 1, given));
   };
@@ -1501,7 +1592,7 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
       <TopBar
         title="Post-recording questions"
         onBack={store.back}
-        step={`${Math.min(step + 1, qs.length)} of ${qs.length}`}
+        progress={done ? 1 : (step + 1) / Math.max(qs.length, 1)}
       />
       <ScreenBody>
         <div className="space-y-3">
@@ -1554,55 +1645,12 @@ export function PostMetaScreen({ store }: { store: TummyStore }) {
 
         {!done && needSymptom ? (
           <div className="mt-4">
-            <div className="grid grid-cols-3 gap-3">
-              {SYMPTOMS.map(({ key, label, Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => {
-                    setPicked({ key, label });
-                    setSev(0);
-                  }}
-                  className={cn(
-                    "flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border-2 bg-surface px-2",
-                    picked?.key === key ? "border-teal bg-mint-soft" : "border-line",
-                  )}
-                >
-                  <span className="text-teal">
-                    <Icon width={28} height={28} />
-                  </span>
-                  <span className="text-[15px] font-extrabold text-pine">{label}</span>
-                </button>
-              ))}
+            <SymptomMultiPicker value={symptoms} onChange={setSymptoms} />
+            <div className="mt-4">
+              <Btn disabled={!symptomsReady} onClick={submitSymptoms}>
+                Save these symptoms
+              </Btn>
             </div>
-            {picked ? (
-              <>
-                <p className="mt-5 text-[16px] font-extrabold text-pine">How strong is it?</p>
-                <div className="mt-3 flex gap-2">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <button
-                      key={n}
-                      onClick={() => setSev(n)}
-                      className={cn(
-                        "min-h-[64px] flex-1 rounded-2xl border-2 text-[20px] font-extrabold",
-                        sev === n
-                          ? "border-teal bg-teal text-surface"
-                          : "border-line bg-surface text-pine",
-                      )}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-2 text-center text-[15px] font-semibold text-pine-soft">
-                  1 is very mild, 5 is very strong.
-                </p>
-                <div className="mt-4">
-                  <Btn disabled={sev < 1} onClick={submitSymptom}>
-                    Save this symptom
-                  </Btn>
-                </div>
-              </>
-            ) : null}
           </div>
         ) : null}
 
@@ -1882,15 +1930,17 @@ export function MissedWindowSheet({ store }: { store: TummyStore }) {
 
 export function ExtraSessionScreen({ store }: { store: TummyStore }) {
   const [reason, setReason] = useState<string>("");
-  const [symptom, setSymptom] = useState<{ key: string; label: string } | null>(null);
-  const [severity, setSeverity] = useState<number>(0);
+  const [symptoms, setSymptoms] = useState<PickedSymptom[]>([]);
 
   const needsSymptom = reason === "Symptoms higher than normal" || reason === "Both";
-  const ready = reason !== "" && (!needsSymptom || (symptom !== null && severity > 0));
+  const symptomsReady = symptoms.length > 0 && symptoms.every((s) => s.sev >= 1);
+  const ready = reason !== "" && (!needsSymptom || symptomsReady);
 
   const start = () => {
-    if (needsSymptom && symptom) {
-      store.addEntry("symptom", symptom.label, `${SEV_LABELS[severity - 1]} · before extra recording`);
+    if (needsSymptom) {
+      symptoms.forEach((s) =>
+        store.addEntry("symptom", s.label, `${SEV_LABELS[s.sev - 1]} · before extra recording`),
+      );
     }
     store.startExtraSession();
     store.go("caseReminder");
@@ -1920,7 +1970,10 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
             (r) => (
               <button
                 key={r}
-                onClick={() => setReason(r)}
+                onClick={() => {
+                  setReason(r);
+                  if (r !== "Symptoms higher than normal" && r !== "Both") setSymptoms([]);
+                }}
                 className={cn(
                   "flex min-h-[64px] w-full items-center rounded-2xl border-2 bg-surface px-5 text-left text-[17px] font-extrabold text-pine",
                   reason === r ? "border-teal bg-mint-soft" : "border-line",
@@ -1934,53 +1987,10 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
 
         {needsSymptom ? (
           <>
-            <h3 className="mt-6 text-[18px] font-extrabold text-pine">Which symptom?</h3>
-            <div className="mt-3 grid grid-cols-3 gap-3">
-              {SYMPTOMS.map(({ key, label, Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => {
-                    setSymptom({ key, label });
-                    setSeverity(0);
-                  }}
-                  className={cn(
-                    "flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border-2 bg-surface px-2",
-                    symptom?.key === key ? "border-teal bg-mint-soft" : "border-line",
-                  )}
-                >
-                  <span className="text-teal">
-                    <Icon width={28} height={28} />
-                  </span>
-                  <span className="text-[15px] font-extrabold text-pine">{label}</span>
-                </button>
-              ))}
+            <h3 className="mt-6 text-[18px] font-extrabold text-pine">Which symptoms?</h3>
+            <div className="mt-3">
+              <SymptomMultiPicker value={symptoms} onChange={setSymptoms} />
             </div>
-            {symptom ? (
-              <>
-                <h3 className="mt-6 text-[18px] font-extrabold text-pine">
-                  How strong is it right now?
-                </h3>
-                <div className="mt-3 flex gap-2">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <button
-                      key={n}
-                      onClick={() => setSeverity(n)}
-                      className={cn(
-                        "min-h-[64px] flex-1 rounded-2xl border-2 text-[20px] font-extrabold",
-                        severity === n
-                          ? "border-teal bg-teal text-surface"
-                          : "border-line bg-surface text-pine",
-                      )}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-2 text-center text-[15px] font-semibold text-pine-soft">
-                  1 is very mild, 5 is very strong.
-                </p>
-              </>
-            ) : null}
           </>
         ) : null}
 

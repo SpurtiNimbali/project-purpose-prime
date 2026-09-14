@@ -196,12 +196,9 @@ export function HomeScreen({ store }: { store: TummyStore }) {
       </div>
 
       <ScreenBody className="pb-[180px] pt-3">
-        <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-          Next up
-        </p>
         <div
           className={cn(
-            "relative mt-2 overflow-hidden rounded-[28px] p-5",
+            "relative overflow-hidden rounded-[28px] p-4",
             due ? "bg-pine text-surface shadow-md" : "border border-line bg-surface text-pine",
           )}
         >
@@ -211,7 +208,19 @@ export function HomeScreen({ store }: { store: TummyStore }) {
               <span className="pointer-events-none absolute -bottom-14 left-8 h-28 w-28 rounded-full bg-blue/30" />
             </>
           ) : null}
-          <div className="relative flex items-center gap-3">
+          <p
+            className={cn(
+              "relative text-[13px] font-extrabold uppercase tracking-[0.14em]",
+              due ? "text-mint" : "text-teal",
+            )}
+          >
+            Next up
+          </p>
+          <div className={cn("relative mt-3 h-px", due ? "bg-surface/20" : "bg-line")} />
+          <button
+            onClick={startTask}
+            className="relative mt-3 flex w-full items-center gap-3 text-left active:scale-[0.99]"
+          >
             <span
               className={cn(
                 "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
@@ -220,27 +229,35 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             >
               <TaskIcon width={26} height={26} />
             </span>
-            <div className="min-w-0 flex-1">
-              <p
+            <span className="min-w-0 flex-1">
+              <span
                 className={cn(
-                  "text-[13px] font-extrabold uppercase tracking-[0.12em]",
+                  "block text-[13px] font-extrabold uppercase tracking-[0.12em]",
                   due ? "text-mint" : "text-teal",
                 )}
               >
                 {task.tag}
-              </p>
-              <p className="text-[20px] font-extrabold leading-tight">{task.title}</p>
-            </div>
-          </div>
-
-          {currentPastDue && currentItem ? (
-            <p className="relative mt-2 text-[15px] font-extrabold text-amber">
-              Past due · {clockLabel(currentItem.at)}
-            </p>
-          ) : null}
+              </span>
+              <span className="block text-[20px] font-extrabold leading-tight">{task.title}</span>
+              {currentPastDue && currentItem ? (
+                <span className="mt-1 block text-[15px] font-extrabold text-amber">
+                  Past due · {clockLabel(currentItem.at)}
+                </span>
+              ) : null}
+            </span>
+            <span
+              className={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                due ? "bg-surface/15 text-surface" : "bg-mint-soft text-teal",
+              )}
+              aria-hidden
+            >
+              <IconArrowRight width={18} height={18} />
+            </span>
+          </button>
 
           {task.note ? (
-            <div className="mt-3 flex gap-3 rounded-2xl bg-amber-soft px-4 py-3">
+            <div className="relative mt-3 flex gap-3 rounded-2xl bg-amber-soft px-4 py-3">
               <span className="shrink-0 text-teal">
                 <IconDroplet width={22} height={22} />
               </span>
@@ -251,7 +268,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           ) : null}
 
           {task.minsUntil !== null ? (
-            <div className="mt-4 flex items-center gap-3 rounded-2xl bg-mint-soft px-4 py-3 text-pine">
+            <div className="relative mt-3 flex items-center gap-3 rounded-2xl bg-mint-soft px-4 py-2.5 text-pine">
               <span className="shrink-0 text-teal">
                 <IconClock width={22} height={22} />
               </span>
@@ -271,33 +288,30 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                 store.go("skipReason");
               }}
               className={cn(
-                "relative mt-3 min-h-[54px] w-full rounded-2xl border-2 text-[16px] font-extrabold active:scale-[0.99]",
-                due
-                  ? "border-surface/40 bg-surface/10 text-surface"
-                  : "border-line bg-wash text-pine",
+                "relative mt-3 min-h-[44px] w-full text-[15px] font-extrabold active:scale-[0.99]",
+                due ? "text-amber-soft" : "text-pine-soft",
               )}
             >
               Skip this recording
             </button>
           ) : null}
-
-          <button
-            onClick={startTask}
-            className={cn(
-              "relative mt-4 flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl text-[18px] font-extrabold active:scale-[0.99]",
-              due ? "bg-surface text-pine" : "bg-teal text-surface",
-            )}
-          >
-            {task.cta}
-          </button>
         </div>
 
         {/* day rail, recordings, meals and question blocks */}
-        <div className="mt-5 rounded-3xl border border-line bg-surface px-4 py-4">
-          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-            Today's tasks
-          </p>
-          <div className="mt-4 flex items-start">
+        <button
+          onClick={() => store.go("sessionHub")}
+          className="mt-4 w-full rounded-3xl border border-line bg-surface px-4 py-3 text-left shadow-sm active:scale-[0.99]"
+        >
+          <span className="flex items-center justify-between gap-2">
+            <span className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+              Today's tasks
+            </span>
+            <span className="flex items-center gap-1 text-[13px] font-extrabold text-teal">
+              Plan
+              <IconArrowRight width={16} height={16} />
+            </span>
+          </span>
+          <span className="mt-3 flex items-start">
             {railStart > 0 ? (
               <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-teal" aria-label={`${railStart} earlier items`}>•••</span>
             ) : null}
@@ -308,9 +322,8 @@ export function HomeScreen({ store }: { store: TummyStore }) {
               const planIndex = railStart + i;
               const pastDue = isPastDue(p, now, mealFinished);
               return (
-                <button
+                <span
                   key={p.id}
-                  onClick={() => store.go("sessionHub")}
                   className="relative flex min-w-0 flex-1 flex-col items-center gap-1.5"
                 >
                   {planIndex > 0 ? (
@@ -343,46 +356,32 @@ export function HomeScreen({ store }: { store: TummyStore }) {
                   >
                     {clockLabel(p.at).replace(" ", "")}
                   </span>
-                </button>
+                </span>
               );
             })}
             {railStart + railItems.length < store.plan.length ? (
               <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-pine-soft" aria-label={`${store.plan.length - railStart - railItems.length} later items`}>•••</span>
             ) : null}
-          </div>
-          <button
-            onClick={() => store.go("sessionHub")}
-            className="mt-4 flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-teal text-[16px] font-extrabold text-surface active:scale-[0.99]"
-          >
-            View today's plan
-          </button>
-        </div>
+          </span>
+        </button>
 
         <button
           onClick={() => {
             store.startExtraSession();
             store.go("extraSession");
           }}
-          className="relative mt-4 w-full overflow-hidden rounded-3xl bg-teal px-5 py-5 text-left shadow-md active:scale-[0.99]"
+          className="relative mt-4 w-full overflow-hidden rounded-3xl bg-teal px-4 py-3.5 text-left shadow-md active:scale-[0.99]"
         >
           <span className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-mint/25" />
-          <span className="pointer-events-none absolute -bottom-12 right-10 h-28 w-28 rounded-full bg-pine/15" />
-          <span className="relative flex items-center gap-4">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface">
-              <IconMic width={26} height={26} />
+          <span className="relative flex items-center gap-3">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface">
+              <IconMic width={22} height={22} />
             </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
-                Optional · anytime
-              </span>
-              <span className="mt-1 block text-[19px] font-extrabold leading-tight text-surface">
-                Something feels different?
-              </span>
-              <span className="mt-1 block text-[15px] font-semibold leading-snug text-mint/90">
-                Log an extra 2 minute recording
-              </span>
+            <span className="min-w-0 flex-1 text-[16px] font-extrabold leading-snug text-surface">
+              Something feels different?{" "}
+              <span className="font-bold text-mint">Log a bowel sound</span>
             </span>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface/15 text-[20px] font-extrabold text-surface">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface/15 text-[18px] font-extrabold text-surface">
               +
             </span>
           </span>
@@ -912,39 +911,40 @@ export function LogActivityScreen({ store }: { store: TummyStore }) {
 }
 
 export function LogHydrationScreen({ store }: { store: TummyStore }) {
-  const [glasses, setGlasses] = useState(3);
-  const [kind, setKind] = useState("Water");
+  const drinks = store.entries.filter((e) => e.kind === "hydration");
+  const [kind, setKind] = useState("");
+  const [other, setOther] = useState("");
+  const label = kind === "Other" ? other.trim() : kind;
+  const canAdd = kind !== "" && (kind !== "Other" || other.trim().length > 0);
+
   return (
     <Screen>
-      <TopBar title="Log hydration" onBack={store.back} />
+      <TopBar title="Log a drink" onBack={store.back} />
       <ScreenBody>
-        <div className="rounded-3xl border border-line bg-surface p-5 text-center">
-          <p className="text-[16px] font-extrabold text-pine">Glasses today</p>
-          <p className="mt-1 text-[52px] font-extrabold leading-none text-teal">{glasses}</p>
-          <div className="mt-4 flex gap-3">
-            <button
-              onClick={() => setGlasses((g) => Math.max(0, g - 1))}
-              className="min-h-[64px] flex-1 rounded-2xl border-2 border-line bg-wash text-[26px] font-extrabold text-pine"
-            >
-              −
-            </button>
-            <button
-              onClick={() => setGlasses((g) => g + 1)}
-              className="min-h-[64px] flex-1 rounded-2xl bg-teal text-[26px] font-extrabold text-surface"
-            >
-              +
-            </button>
-          </div>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
-            {Array.from({ length: glasses }, (_, i) => (
-              <span key={i} className="text-teal">
-                <IconDroplet width={30} height={30} />
-              </span>
-            ))}
-          </div>
+        <div className="rounded-3xl border border-line bg-surface p-4">
+          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+            Today's drinks
+          </p>
+          {drinks.length === 0 ? (
+            <p className="mt-3 text-[16px] font-semibold text-pine-soft">Nothing logged yet.</p>
+          ) : (
+            <div className="mt-3 space-y-2">
+              {drinks.map((d) => (
+                <div key={d.id} className="flex items-center gap-3 rounded-2xl bg-wash px-3 py-2.5">
+                  <span className="text-teal">
+                    <IconDroplet width={22} height={22} />
+                  </span>
+                  <p className="min-w-0 flex-1 truncate text-[16px] font-extrabold text-pine">
+                    {d.label}
+                  </p>
+                  <p className="shrink-0 text-[14px] font-bold text-pine-soft">{d.time}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="mt-4">
-          <Field label="What did you drink?">
+        <div className="mt-5">
+          <Field label="This glass is">
             <div className="space-y-2">
               {["Water", "Tea or coffee", "Carbonated drink", "Other"].map((k) => (
                 <Choice key={k} label={k} selected={kind === k} onClick={() => setKind(k)} />
@@ -952,16 +952,35 @@ export function LogHydrationScreen({ store }: { store: TummyStore }) {
             </div>
           </Field>
         </div>
+        {kind === "Other" ? (
+          <div className="mt-3">
+            <Field label="What was it?">
+              <TextInput
+                value={other}
+                onChange={(e) => setOther(e.target.value)}
+                placeholder="Juice, a smoothie, milk"
+              />
+            </Field>
+          </div>
+        ) : null}
       </ScreenBody>
       <StickyFooter>
         <Btn
+          disabled={!canAdd}
           onClick={() => {
-            store.addEntry("hydration", kind, `${glasses} ${glasses === 1 ? "glass" : "glasses"}`);
-            store.go("logHub");
+            store.addEntry("hydration", label);
+            setKind("");
+            setOther("");
           }}
         >
-          Save hydration
+          Add this glass
         </Btn>
+        <button
+          onClick={() => store.go("logHub")}
+          className="mt-3 min-h-[52px] w-full text-[16px] font-extrabold text-pine-soft"
+        >
+          Done
+        </button>
       </StickyFooter>
     </Screen>
   );
@@ -1373,7 +1392,7 @@ export function PeriodCheckScreen({ store }: { store: TummyStore }) {
           Last question for today. Are you on your period right now?
         </MascotSays>
         <div className="mt-5 space-y-2">
-          {["Yes", "No", "Not sure", "Prefer not to say"].map((o) => (
+          {["Yes", "No"].map((o) => (
             <Choice
               key={o}
               label={o}
@@ -1408,8 +1427,8 @@ export function ContactScreen({ store }: { store: TummyStore }) {
         <div className="mt-5 space-y-3">
           {[
             {
-              t: "Ask me first",
-              b: "Missed recordings, timings, reminders, or trouble with the app.",
+              t: "Ask Tummy first",
+              b: "Missed recordings, timings, reminders, trouble with the app, or anything about the study protocol.",
               Icon: IconChat,
               action: () => store.setChatOpen(true),
               cta: "Open chat",
@@ -1429,7 +1448,7 @@ export function ContactScreen({ store }: { store: TummyStore }) {
               cta: "Write or record",
             },
           ].map(({ t, b, Icon, action, cta }) => {
-            const featured = t === "Ask me first";
+            const featured = t === "Ask Tummy first";
             return (
             <button
               key={t}

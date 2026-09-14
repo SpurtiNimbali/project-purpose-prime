@@ -50,43 +50,58 @@ export function TopBar({
   right,
   dark,
   step,
+  progress,
 }: {
   title?: string;
   onBack?: () => void;
   right?: ReactNode;
   dark?: boolean;
   step?: string;
+  /** 0 to 1. When set, the step count is hidden and a bar is shown instead. */
+  progress?: number;
 }) {
+  const pct = progress === undefined ? null : Math.round(Math.min(1, Math.max(0, progress)) * 100);
   return (
-    <div
-      className={cn(
-        "flex shrink-0 items-center gap-3 px-4 pb-3 pt-14",
-        dark ? "text-surface" : "text-pine",
-      )}
-    >
-      {onBack ? (
-        <button
-          onClick={onBack}
-          aria-label="Go back"
-          className={cn(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
-            dark ? "bg-surface/15" : "bg-surface",
-          )}
-        >
-          <IconArrowLeft width={22} height={22} />
-        </button>
-      ) : (
-        <div className="h-11 w-1" />
-      )}
-      <div className="min-w-0 flex-1">
-        {step ? (
-          <p className={cn("text-[13px] font-bold", dark ? "text-mint" : "text-teal")}>{step}</p>
-        ) : null}
-        {title ? (
-          <h1 className="truncate text-[19px] font-extrabold leading-tight">{title}</h1>
-        ) : null}
+    <div className={cn("shrink-0", dark ? "text-surface" : "text-pine")}>
+      <div className="flex items-center gap-3 px-4 pb-3 pt-14">
+        {onBack ? (
+          <button
+            onClick={onBack}
+            aria-label="Go back"
+            className={cn(
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
+              dark ? "bg-surface/15" : "bg-surface",
+            )}
+          >
+            <IconArrowLeft width={22} height={22} />
+          </button>
+        ) : (
+          <div className="h-11 w-1" />
+        )}
+        <div className="min-w-0 flex-1">
+          {step && pct === null ? (
+            <p className={cn("text-[13px] font-bold", dark ? "text-mint" : "text-teal")}>{step}</p>
+          ) : null}
+          {title ? (
+            <h1 className="truncate text-[19px] font-extrabold leading-tight">{title}</h1>
+          ) : null}
+        </div>
+        {right}
       </div>
-      {right}
+      {pct !== null ? (
+        <div
+          className={cn("mx-4 mb-2 h-1.5 overflow-hidden rounded-full", dark ? "bg-surface/20" : "bg-line")}
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={pct}
+        >
+          <div
+            className={cn("h-full rounded-full transition-all", dark ? "bg-mint" : "bg-teal")}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

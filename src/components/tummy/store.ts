@@ -51,6 +51,8 @@ export type ScreenKey =
 
 export type Gender = "female" | "male" | "other" | "unsaid";
 
+export type SnackHabit = "never" | "once" | "few" | "threePlus";
+
 export type Track = "fasting" | "postMeal";
 export type Meal = "breakfast" | "lunch" | "dinner";
 
@@ -184,6 +186,8 @@ export type TummyStore = {
   /** weekday snack times in minutes from midnight; empty if they don't snack */
   snackTimes: number[];
   setSnackTimes: (mins: number[]) => void;
+  snackHabit: SnackHabit | null;
+  setSnackHabit: (habit: SnackHabit) => void;
   /** prototype clock: current simulated minutes from midnight */
   demoNow: number;
   setDemoNow: (mins: number) => void;
@@ -576,6 +580,7 @@ export function useTummyStore(): TummyStore {
     null,
   );
   const [snackTimes, setSnackTimesState] = useState<number[]>([]);
+  const [snackHabit, setSnackHabit] = useState<SnackHabit | null>(null);
   const [brokeFastDays, setBrokeFastDays] = useState(0);
 
   const chooseStudyMeal = useCallback((m: Meal) => {
@@ -795,6 +800,8 @@ export function useTummyStore(): TummyStore {
     setGender,
     snackTimes,
     setSnackTimes,
+    snackHabit,
+    setSnackHabit,
     brokeFastDays,
     noteBrokeFastDay: () => {
       let next = brokeFastDays + 1;

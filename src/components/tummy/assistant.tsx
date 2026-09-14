@@ -167,7 +167,7 @@ function reply(store: TummyStore, raw: string): Msg[] {
 
   if (/case|position|9 ?cm|belly/.test(t)) {
     return say(
-      "Case off, bare skin, 8 cm to the right and 3 cm down from your belly button. Sit still for two minutes.",
+      "Case off, bare skin, 8 cm (3.1 in) to the right and 3 cm (1.2 in) down from your belly button. Bottom-right corner of the speaker edge on that spot, bottom-left corner on the same line toward your navel, screen facing up, camera toward the floor. Sit still for two minutes.",
     );
   }
   return say(

@@ -103,67 +103,86 @@ export const MORNING_QS: FlowQ[] = [
   },
 ];
 
-export const EVENING_QS: FlowQ[] = [
-  {
-    id: "intakeLogged",
-    q: "Did you log everything you ate and drank today?",
-    type: "single",
-    options: ["Yes, all of it", "No, some is missing"],
-    textIf: ["No, some is missing"],
-    followUp: "What's missing, and roughly when?",
-  },
-  {
-    id: "physical",
-    q: "How do you feel physically, compared with a usual evening?",
-    type: "single",
-    options: VS_USUAL,
-    explainIf: ["Better than usual", "Worse than usual"],
-  },
-  {
-    id: "missed",
-    q: "Did you miss any recordings today?",
-    type: "single",
-    options: ["No, I did them all", "Yes, one or more"],
-    textIf: ["Yes, one or more"],
-    followUp: "Which ones, and what got in the way?",
-  },
-  {
-    id: "giScore",
-    q: "Overall, how bad were your gut symptoms today?",
-    type: "scale",
-  },
-  {
-    id: "giWords",
-    q: "In a few words, what were they like?",
-    type: "text",
-    optional: true,
-    hint: "For example: bloating was very bad, nothing else. Skip this if you had none.",
-  },
-  {
-    id: "emotional",
-    q: "How do you feel emotionally, compared with a usual evening?",
-    type: "single",
-    options: VS_USUAL,
-    explainIf: ["Better than usual", "Worse than usual"],
-  },
-  {
-    id: "unusual",
-    q: "Was today unusual in any way? An exam, a stressful event, an argument?",
-    type: "text",
-    optional: true,
-    hint: "Only the study team sees this.",
-  },
-  {
-    id: "difficulty",
-    q: "Was anything else about today hard to manage?",
-    type: "single",
-    options: ["No, it went fine", "Yes"],
-    textIf: ["Yes"],
-    followUp: "What made it hard?",
-  },
-  { id: "anythingElse", q: "Anything else you'd like to tell us?", type: "text", optional: true },
-  ...WATCH_QS,
-];
+function eveningQuestions(missedCount: number): FlowQ[] {
+  const missed: FlowQ[] =
+    missedCount > 0
+      ? [
+          {
+            id: "missed",
+            q: `We noticed you missed ${missedCount} recording${missedCount === 1 ? "" : "s"}. Tell us what happened`,
+            type: "text",
+          },
+        ]
+      : [];
+  return [
+    {
+      id: "intakeLogged",
+      q: "Did you log everything you ate and drank today?",
+      type: "single",
+      options: ["Yes, all of it", "No, some is missing"],
+      textIf: ["No, some is missing"],
+      followUp: "What's missing, and roughly when?",
+    },
+    {
+      id: "physical",
+      q: "How do you feel physically, compared with a usual evening?",
+      type: "single",
+      options: VS_USUAL,
+      explainIf: ["Better than usual", "Worse than usual"],
+    },
+    ...missed,
+    {
+      id: "giScore",
+      q: "Overall, how bad were your gut symptoms today?",
+      type: "scale",
+    },
+    {
+      id: "giWords",
+      q: "In a few words, what were they like?",
+      type: "text",
+      optional: true,
+      hint: "For example: bloating was very bad, nothing else. Skip this if you had none.",
+    },
+    {
+      id: "emotional",
+      q: "How do you feel emotionally, compared with a usual evening?",
+      type: "single",
+      options: VS_USUAL,
+      explainIf: ["Better than usual", "Worse than usual"],
+    },
+    {
+      id: "unusual",
+      q: "Was today unusual in any way? An exam, a stressful event, an argument?",
+      type: "text",
+      optional: true,
+      hint: "Only the study team sees this.",
+    },
+    {
+      id: "difficulty",
+      q: "Was anything else about logging today's recordings hard?",
+      type: "single",
+      options: ["No, it went fine", "Yes"],
+      textIf: ["Yes"],
+      followUp: "What made it hard?",
+    },
+    { id: "anythingElse", q: "Anything else you'd like to tell us?", type: "text", optional: true },
+    ...WATCH_QS,
+  ];
+}
+
+function WarnCopy({ text }: { text: string }) {
+  const mark = "please ensure this doesn't repeat";
+  const i = text.toLowerCase().indexOf(mark);
+  if (i < 0) return <>{text}</>;
+  const end = i + mark.length;
+  return (
+    <>
+      {text.slice(0, i)}
+      <strong className="font-extrabold">{text.slice(i, end)}</strong>
+      {text.slice(end)}
+    </>
+  );
+}
 
 function QuestionFlow({
   store,
@@ -267,7 +286,7 @@ function QuestionFlow({
       <TopBar
         title={title}
         onBack={store.back}
-        step={`${Math.min(step + 1, questions.length)} of ${questions.length}`}
+        progress={done ? 1 : (step + 1) / Math.max(questions.length, 1)}
       />
       <ScreenBody>
         <div className="space-y-3">
@@ -283,7 +302,7 @@ function QuestionFlow({
                       : "border-line bg-surface text-pine",
                   )}
                 >
-                  {t.text}
+                  {t.warn ? <WarnCopy text={t.text} /> : t.text}
                 </p>
               </div>
             ) : (
@@ -581,12 +600,15 @@ export function MorningQuestionsScreen({ store }: { store: TummyStore }) {
 }
 
 export function EveningCheckinScreen({ store }: { store: TummyStore }) {
+  const missedCount = store.plan.filter(
+    (p) => p.kind === "recording" && (p.missed || p.needsWhy),
+  ).length;
   return (
     <QuestionFlow
       store={store}
       title="Evening check-in"
       intro="Last thing for today. Honest gaps are more useful to the study than tidy guesses."
-      questions={EVENING_QS}
+      questions={eveningQuestions(missedCount)}
       finishLabel="Finish the day"
       onFinish={(a) => {
         store.addEntry(
@@ -599,7 +621,7 @@ export function EveningCheckinScreen({ store }: { store: TummyStore }) {
         if (a.intakeLogged === "No, some is missing" && a.intakeLoggedNote) {
           store.addEntry("meal", "Added at the evening check-in", a.intakeLoggedNote);
         }
-        if (a.missed === "Yes" && a.missedNote) {
+        if (a.missedNote && a.missedNote !== "Nothing to add") {
           store.addEntry("recording", "Missed sessions reported", a.missedNote);
         }
         if (a.unusualNote && a.unusualNote !== "Nothing to add") {
