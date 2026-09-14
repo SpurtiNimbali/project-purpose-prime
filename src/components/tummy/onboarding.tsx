@@ -410,6 +410,9 @@ const APP_TOUR: TourStep[] = [
     clock: 7 * 60 + 10,
     done: ["qMorning"],
     spot: "skip-recording",
+    highlight: "plan-cta",
+    dim: false,
+    explore: true,
     coach: "Skip if you cannot record well, and say why.",
   },
   {
@@ -528,6 +531,7 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "log-save",
+    highlight: "tour-widget",
     coach: "Time, consistency, and urgency.",
   },
   {
@@ -697,17 +701,8 @@ function pointerPath(x1: number, y1: number, x2: number, y2: number) {
   return `M ${x2 - (dx / len) * stub} ${y2 - (dy / len) * stub} L ${x2} ${y2}`;
 }
 
-function cutRadius(hole: TourBox, pad: number) {
-  const circle =
-    Math.abs(hole.w - hole.h) < 10 && hole.r >= Math.min(hole.w, hole.h) / 2 - 1;
-  if (circle) return Math.min(hole.w, hole.h) / 2 + pad;
-  if (Math.min(hole.w, hole.h) < 90) return Math.min(hole.r + 2, 12);
-  return Math.min(hole.r + 2, 24);
-}
-
 const COACH_FILL =
-  "border-[2.5px] border-teal-deep bg-mint text-pine shadow-[0_12px_28px_rgba(20,48,46,0.18)]";
-const TOUR_RING = "0 0 0 2px #ffffff, 0 0 0 5px #2e7d6b";
+  "border-2 border-teal bg-mint-soft text-pine shadow-[0_12px_28px_rgba(20,48,46,0.14)]";
 
 function FrostPanel({
   left,
@@ -845,15 +840,8 @@ function TourGuide({
     };
   }, [rootRef, spot, highlight, coachLow, coachAt]);
 
-  const pad = hole && hole.h > 220 ? 5 : 4;
   const cut = hole
-    ? {
-        x: Math.max(0, hole.x - pad),
-        y: Math.max(0, hole.y - pad),
-        w: hole.w + pad * 2,
-        h: hole.h + pad * 2,
-        r: cutRadius(hole, pad),
-      }
+    ? { x: hole.x, y: hole.y, w: hole.w, h: hole.h, r: hole.r }
     : null;
 
   return (
@@ -865,13 +853,11 @@ function TourGuide({
           z-index: 1;
           filter: none !important;
         }
-        ${
-          explore
-            ? ""
-            : `#tour-root [data-tour-spot="${highlight}"] {
-          pointer-events: auto !important;
+        #tour-root [data-tour-spot="${highlight}"] {
+          outline: 3px solid #2e7d6b;
+          outline-offset: -3px;
+          ${explore ? "" : "pointer-events: auto !important;"}
           filter: none !important;
-        }`
         }
       `}</style>
       <div className="pointer-events-none absolute inset-0 z-50">
@@ -885,17 +871,6 @@ function TourGuide({
                 <FrostPanel left={cut.x + cut.w} top={cut.y} right={0} height={cut.h} />
               </>
             ) : null}
-            <div
-              className="absolute"
-              style={{
-                left: cut.x,
-                top: cut.y,
-                width: cut.w,
-                height: cut.h,
-                borderRadius: cut.r,
-                boxShadow: TOUR_RING,
-              }}
-            />
           </>
         ) : null}
         {link ? (
@@ -963,7 +938,7 @@ function TourGuide({
               <Mascot src={MASCOT.calm} size={64} />
             </span>
             <div ref={coachRef} className={cn("rounded-3xl rounded-bl-md px-4 py-3", COACH_FILL)}>
-              <p className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-teal-deep">
+              <p className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-teal">
                 {step} of {total}
               </p>
               <p className="mt-1 text-[16px] font-bold leading-snug text-pine">{coach}</p>
@@ -1378,8 +1353,8 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const finished = left === 0;
 
   const banner = (
-    <span className="flex items-center gap-1.5 rounded-full border-2 border-teal-deep bg-mint px-2.5 py-1 text-[13px] font-extrabold text-pine">
-      <IconLock width={14} height={14} className="text-teal-deep" />
+    <span className="flex items-center gap-1.5 rounded-full border-2 border-teal bg-mint-soft px-2.5 py-1 text-[13px] font-extrabold text-pine">
+      <IconLock width={14} height={14} className="text-teal" />
       Dry run
     </span>
   );

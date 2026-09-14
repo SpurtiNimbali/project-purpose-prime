@@ -208,11 +208,13 @@ export function HomeScreen({ store }: { store: TummyStore }) {
 
       <ScreenBody className="pb-[180px] pt-3">
         <p className="text-[18px] font-extrabold tracking-tight text-teal">Next up</p>
-        <div className="relative mt-2 overflow-hidden rounded-[28px] bg-pine p-4 text-surface shadow-md">
+        <div
+          data-tour-spot={store.tourPreview ? "next-up" : undefined}
+          className="relative mt-2 overflow-hidden rounded-[28px] bg-pine p-4 text-surface shadow-md"
+        >
           <span className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-teal/40" />
           <span className="pointer-events-none absolute -bottom-14 left-8 h-28 w-28 rounded-full bg-blue/30" />
           <button
-            data-tour-spot={store.tourPreview ? "next-up" : undefined}
             onClick={startTask}
             className="relative flex w-full items-center gap-3 text-left active:scale-[0.99]"
           >
@@ -278,9 +280,11 @@ export function HomeScreen({ store }: { store: TummyStore }) {
         </div>
 
         {/* day rail, recordings, meals and question blocks */}
-        <div className="mt-4 rounded-[28px] border border-line bg-surface p-4 shadow-sm">
+        <div
+          data-tour-spot={store.tourPreview ? "todays-plan" : undefined}
+          className="mt-4 rounded-[28px] border border-line bg-surface p-4 shadow-sm"
+        >
           <button
-            data-tour-spot={store.tourPreview ? "todays-plan" : undefined}
             onClick={() => store.go("sessionHub")}
             className="relative flex w-full items-center gap-3 text-left active:scale-[0.99]"
           >
@@ -993,6 +997,10 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
         tourSpot={store.tourPreview ? "back" : undefined}
       />
       <ScreenBody>
+        <div
+          data-tour-spot={store.tourPreview ? "tour-widget" : undefined}
+          className="rounded-[28px]"
+        >
         <Note tone="green" title="Only your subject ID is attached">
           This is routine research data. Nothing here is shared with anyone outside the study team.
         </Note>
@@ -1080,6 +1088,7 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
               ))}
             </div>
           </Field>
+        </div>
         </div>
       </ScreenBody>
       <StickyFooter>
@@ -1225,7 +1234,10 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               </div>
             </div>
           ) : (
-            <div className="relative overflow-hidden rounded-3xl bg-blue px-4 py-4 text-surface shadow-md">
+            <div
+              data-tour-spot={store.tourPreview ? "freeze-day" : undefined}
+              className="relative overflow-hidden rounded-3xl bg-blue px-4 py-4 text-surface shadow-md"
+            >
               <span className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-surface/15" />
               <div className="relative flex items-center gap-3">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface/15">
@@ -1249,7 +1261,6 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               </div>
               {!store.frozen && store.freezeDaysUsed < FREEZE_DAYS_ALLOWED ? (
                 <button
-                  data-tour-spot={store.tourPreview ? "freeze-day" : undefined}
                   onClick={() => setConfirmFreeze(true)}
                   className="relative mt-3 flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-surface text-[17px] font-extrabold text-blue active:scale-[0.99]"
                 >
