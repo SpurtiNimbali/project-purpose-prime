@@ -224,6 +224,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                     </button>
                     {p.kind === "recording" ? (
                       <button
+                        data-tour-spot={store.tourPreview ? "skip-recording" : undefined}
                         onClick={() => {
                           store.startItem(p.id);
                           store.go("skipReason");
@@ -320,6 +321,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
           ) : null}
 
           <button
+            data-tour-spot={store.tourPreview ? "extra-session" : undefined}
             onClick={() => {
               store.startExtraSession();
               store.go("extraSession");
@@ -1949,7 +1951,11 @@ export function SkipReasonScreen({ store }: { store: TummyStore }) {
   const reasons = skipReasonsFor(kind);
   return (
     <Screen>
-      <TopBar title="Skip this session" onBack={store.back} />
+      <TopBar
+        title="Skip this session"
+        onBack={store.back}
+        tourSpot={store.tourPreview ? "back" : undefined}
+      />
       <ScreenBody>
         <MascotSays src={MASCOT.calm} size={80}>
           Skipping is the right call if you can't record properly. Tell us what got in the way.
@@ -2075,7 +2081,11 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
 
   return (
     <Screen>
-      <TopBar title="Extra recording" onBack={store.back} />
+      <TopBar
+        title="Extra recording"
+        onBack={store.back}
+        tourSpot={store.tourPreview ? "back" : undefined}
+      />
       <ScreenBody>
         <div className="relative overflow-hidden rounded-3xl bg-pine px-5 py-5 shadow-md">
           <span className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-teal/40" />

@@ -34,15 +34,20 @@ import {
   CaseOffLayout,
   SessionHubScreen,
   MealCaptureScreen,
+  SkipReasonScreen,
+  ExtraSessionScreen,
   PositioningGuideLayout,
 } from "./recording";
 import {
   HomeScreen,
   LogHubScreen,
+  LogToiletScreen,
   ProgressScreen,
   ProfileScreen,
+  ContactScreen,
 } from "./main";
-import { MorningQuestionsScreen } from "./questions";
+import { MorningQuestionsScreen, EveningCheckinScreen } from "./questions";
+import { AssistantButton } from "./assistant";
 
 import type { PlanItem, ScreenKey, SnackHabit, TummyStore } from "./store";
 import { computeNextTask, minutesNow } from "./store";
@@ -324,7 +329,24 @@ type TourStep = {
   done: string[];
   coach: string;
   spot: string;
+  activeItemId?: string;
 };
+
+const TOUR_THROUGH_MEAL = ["qMorning", "fasted", "preMeal", "mealStart"];
+const TOUR_DAY_DONE = [
+  ...TOUR_THROUGH_MEAL,
+  "p0",
+  "p30",
+  "p60",
+  "p90",
+  "p120",
+  "p150",
+  "p180",
+  "p210",
+  "log-lunch",
+  "log-dinner",
+  "qEvening",
+];
 
 const APP_TOUR: TourStep[] = [
   {
@@ -332,16 +354,24 @@ const APP_TOUR: TourStep[] = [
     tabs: true,
     clock: 7 * 60 - 2,
     done: [],
-    spot: "todays-plan",
+    spot: "next-up",
     coach:
-      "This is home. Next up is the thing due right now. Open Today's plan to see the whole day.",
+      "This is Next up. When something is due now, this is the thing to do first.",
+  },
+  {
+    view: "home",
+    tabs: true,
+    clock: 7 * 60 - 2,
+    done: [],
+    spot: "todays-plan",
+    coach: "Today's plan is the full list, in order. Open it to walk the day.",
   },
   {
     view: "sessionHub",
     clock: 7 * 60 - 2,
     done: [],
     spot: "plan-cta",
-    coach: "The day is this list, in order. First come a few wake-up questions.",
+    coach: "First come a few wake-up questions.",
   },
   {
     view: "morningQuestions",
@@ -356,7 +386,22 @@ const APP_TOUR: TourStep[] = [
     done: ["qMorning"],
     spot: "plan-cta",
     coach:
-      "Then the fasted morning recording. Two minutes, sitting still, before food or drink. This is the button. We will not open the recorder now.",
+      "Then the fasted morning recording. Two minutes, sitting still, before food or drink. We will not open the recorder now.",
+  },
+  {
+    view: "sessionHub",
+    clock: 7 * 60 + 10,
+    done: ["qMorning"],
+    spot: "skip-recording",
+    coach: "If you cannot record well, skip and tell us why. Do not just leave it blank.",
+  },
+  {
+    view: "skipReason",
+    clock: 7 * 60 + 10,
+    done: ["qMorning"],
+    activeItemId: "fasted",
+    spot: "back",
+    coach: "Pick the reason that fits. The study team sees this. Use back.",
   },
   {
     view: "sessionHub",
@@ -364,7 +409,7 @@ const APP_TOUR: TourStep[] = [
     done: ["qMorning", "fasted", "preMeal"],
     spot: "plan-cta",
     coach:
-      "Then your study meal. Photo the plate and tap when you start and finish. The later recordings are timed from that last bite.",
+      "Then your study meal. Photo the plate and tap when you start and finish. Later recordings are timed from that last bite.",
   },
   {
     view: "mealCapture",
@@ -376,23 +421,78 @@ const APP_TOUR: TourStep[] = [
   {
     view: "sessionHub",
     clock: 8 * 60 + 25,
-    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    done: TOUR_THROUGH_MEAL,
     spot: "plan-cta",
     coach:
-      "Right after the last bite, then every 30 minutes for 3.5 hours. If you cannot record well, skip it and tell us why.",
+      "Right after the last bite, then every 30 minutes for 3.5 hours. If you snack in that window, skip the rest and tell us.",
   },
   {
     view: "sessionHub",
     clock: 8 * 60 + 25,
-    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    done: TOUR_THROUGH_MEAL,
+    spot: "extra-session",
+    coach: "You can also record an extra session any time, if something feels different.",
+  },
+  {
+    view: "extraSession",
+    clock: 8 * 60 + 25,
+    done: TOUR_THROUGH_MEAL,
     spot: "back",
-    coach: "Back takes you home, where the tabs move you around the app.",
+    coach: "Say what made you want an extra recording. Same two-minute rules. We will not start it now.",
+  },
+  {
+    view: "eveningCheckin",
+    clock: 21 * 60,
+    done: TOUR_THROUGH_MEAL,
+    spot: "back",
+    coach: "Night ends with a short evening check-in. How the day felt, then you are done.",
+  },
+  {
+    view: "sessionHub",
+    clock: 8 * 60 + 25,
+    done: TOUR_THROUGH_MEAL,
+    spot: "back",
+    coach: "Back takes you home. Next up changes as the day goes.",
+  },
+  {
+    view: "home",
+    tabs: true,
+    clock: 8 * 60,
+    done: TOUR_THROUGH_MEAL,
+    spot: "next-up",
+    coach: "Before something is due, Next up stays here and shows how long you have.",
+  },
+  {
+    view: "home",
+    tabs: true,
+    clock: 9 * 60,
+    done: TOUR_THROUGH_MEAL,
+    spot: "next-up",
+    coach:
+      "If the window has passed, Next up says past due. You can still do it, or skip and tell us why.",
+  },
+  {
+    view: "home",
+    tabs: true,
+    clock: 21 * 60,
+    done: TOUR_DAY_DONE,
+    spot: "next-up",
+    coach: "When the day is finished, Next up says so. Nothing more until tomorrow morning.",
   },
   {
     view: "home",
     tabs: true,
     clock: 12 * 60,
-    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    done: TOUR_THROUGH_MEAL,
+    spot: "ask-tummy",
+    coach:
+      "Ask Tummy is the chat. You can log a meal, ask what's next, or get help without leaving the page.",
+  },
+  {
+    view: "home",
+    tabs: true,
+    clock: 12 * 60,
+    done: TOUR_THROUGH_MEAL,
     spot: "logHub",
     coach: "Log is for everything else you eat, drink, or feel. Add things whenever you remember.",
   },
@@ -400,23 +500,65 @@ const APP_TOUR: TourStep[] = [
     view: "logHub",
     tabs: true,
     clock: 12 * 60,
-    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    done: TOUR_THROUGH_MEAL,
+    spot: "log-toilet",
+    coach:
+      "Toilet habits is a bowel movement log. We'll do one as an example. Nothing is saved.",
+  },
+  {
+    view: "logToilet",
+    clock: 12 * 60,
+    done: TOUR_THROUGH_MEAL,
+    spot: "log-save",
+    coach:
+      "Time, consistency, and urgency. Tap Save to see how it works. This walkthrough will not keep it.",
+  },
+  {
+    view: "logHub",
+    tabs: true,
+    clock: 12 * 60,
+    done: TOUR_THROUGH_MEAL,
     spot: "progress",
-    coach: "Progress is the week at a glance. Freeze days live here if you need a pause.",
+    coach: "Progress is the week at a glance.",
   },
   {
     view: "progress",
     tabs: true,
     clock: 12 * 60,
-    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    done: TOUR_THROUGH_MEAL,
+    spot: "freeze-day",
+    coach:
+      "You get two freeze days. Use one if you need a pause. Nothing that day counts as missed.",
+  },
+  {
+    view: "progress",
+    tabs: true,
+    clock: 12 * 60,
+    done: TOUR_THROUGH_MEAL,
     spot: "profile",
-    coach: "Profile is settings and help. You can change reminder times or reach the study team.",
+    coach: "Profile is settings and help.",
   },
   {
     view: "profile",
     tabs: true,
     clock: 12 * 60,
-    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    done: TOUR_THROUGH_MEAL,
+    spot: "contact-team",
+    coach:
+      "Contact the study team from here if you have a question, a missed session, or a concern.",
+  },
+  {
+    view: "contact",
+    clock: 12 * 60,
+    done: TOUR_THROUGH_MEAL,
+    spot: "back",
+    coach: "Chat, write the coordinator, or raise a concern. Use back.",
+  },
+  {
+    view: "profile",
+    tabs: true,
+    clock: 12 * 60,
+    done: TOUR_THROUGH_MEAL,
     spot: "daily-times",
     coach: "Set your daily times here. That is the next step after this walkthrough.",
   },
@@ -438,6 +580,8 @@ function tourStore(store: TummyStore, item: TourStep): TummyStore {
     demoNow: item.clock,
     plan,
     nextTask: computeNextTask(plan),
+    activeItemId: item.activeItemId ?? store.activeItemId,
+    sessionKind: item.activeItemId === "fasted" ? "fasted" : store.sessionKind,
     go: noop,
     back: noop,
     startItem: noop,
@@ -465,9 +609,14 @@ function TourView({ view, store }: { view: ScreenKey; store: TummyStore }) {
   if (view === "home") return <HomeScreen store={store} />;
   if (view === "sessionHub") return <SessionHubScreen store={store} />;
   if (view === "morningQuestions") return <MorningQuestionsScreen store={store} />;
+  if (view === "eveningCheckin") return <EveningCheckinScreen store={store} />;
   if (view === "mealCapture") return <MealCaptureScreen store={store} />;
+  if (view === "skipReason") return <SkipReasonScreen store={store} />;
+  if (view === "extraSession") return <ExtraSessionScreen store={store} />;
   if (view === "logHub") return <LogHubScreen store={store} />;
+  if (view === "logToilet") return <LogToiletScreen store={store} />;
   if (view === "progress") return <ProgressScreen store={store} />;
+  if (view === "contact") return <ContactScreen store={store} />;
   return <ProfileScreen store={store} />;
 }
 
@@ -523,14 +672,29 @@ function connectorPath(x1: number, y1: number, x2: number, y2: number) {
   return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
 }
 
-function holeMask(width: number, height: number, hole: TourBox, pad: number) {
-  const x = Math.max(0, hole.x - pad);
-  const y = Math.max(0, hole.y - pad);
-  const w = hole.w + pad * 2;
-  const h = hole.h + pad * 2;
-  const r = Math.min(22, w / 2, h / 2);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="${width}" height="${height}" fill="white"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="black"/></svg>`;
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+function FrostPanel({
+  left,
+  top,
+  width,
+  height,
+  right,
+  bottom,
+}: {
+  left?: number;
+  top?: number;
+  width?: number;
+  height?: number;
+  right?: number;
+  bottom?: number;
+}) {
+  if (width !== undefined && width <= 0) return null;
+  if (height !== undefined && height <= 0) return null;
+  return (
+    <div
+      className="absolute bg-wash/35 backdrop-blur-[2.5px]"
+      style={{ left, top, width, height, right, bottom }}
+    />
+  );
 }
 
 function TourGuide({
@@ -550,7 +714,6 @@ function TourGuide({
 }) {
   const coachRef = useRef<HTMLDivElement>(null);
   const [hole, setHole] = useState<TourBox | null>(null);
-  const [rootSize, setRootSize] = useState({ w: 0, h: 0 });
   const [coachLow, setCoachLow] = useState(false);
   const [link, setLink] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const advanceRef = useRef(onAdvance);
@@ -571,7 +734,6 @@ function TourGuide({
       const rootBox = root.getBoundingClientRect();
       const nextHole = toBox(rootBox, node.getBoundingClientRect());
       setHole(nextHole);
-      setRootSize({ w: root.clientWidth, h: root.clientHeight });
       setCoachLow(nextHole.y < 170);
 
       const bubble = coachRef.current;
@@ -622,7 +784,16 @@ function TourGuide({
     };
   }, [rootRef, spot, coachLow]);
 
-  const pad = 7;
+  const pad = 8;
+  const cut = hole
+    ? {
+        x: Math.max(0, hole.x - pad),
+        y: Math.max(0, hole.y - pad),
+        w: hole.w + pad * 2,
+        h: hole.h + pad * 2,
+        r: Math.min(22, (hole.w + pad * 2) / 2, (hole.h + pad * 2) / 2),
+      }
+    : null;
 
   return (
     <>
@@ -630,30 +801,27 @@ function TourGuide({
         #tour-root [data-tour-spot="${spot}"] {
           pointer-events: auto !important;
           position: relative;
+          z-index: 1;
+          filter: none !important;
         }
       `}</style>
       <div className="pointer-events-none absolute inset-0 z-30">
-        {hole && rootSize.w > 0 ? (
+        {cut ? (
           <>
+            <FrostPanel left={0} top={0} right={0} height={cut.y} />
+            <FrostPanel left={0} top={cut.y + cut.h} right={0} bottom={0} />
+            <FrostPanel left={0} top={cut.y} width={cut.x} height={cut.h} />
+            <FrostPanel left={cut.x + cut.w} top={cut.y} right={0} height={cut.h} />
             <div
-              className="absolute inset-0 bg-wash/25 backdrop-blur-[2px]"
+              className="absolute"
               style={{
-                maskImage: holeMask(rootSize.w, rootSize.h, hole, pad),
-                WebkitMaskImage: holeMask(rootSize.w, rootSize.h, hole, pad),
-                maskSize: "100% 100%",
-                WebkitMaskSize: "100% 100%",
-                maskRepeat: "no-repeat",
-                WebkitMaskRepeat: "no-repeat",
-              }}
-            />
-            <div
-              className="absolute rounded-[22px] ring-[3px] ring-teal"
-              style={{
-                left: hole.x - pad,
-                top: hole.y - pad,
-                width: hole.w + pad * 2,
-                height: hole.h + pad * 2,
-                borderRadius: Math.min(22, (hole.w + pad * 2) / 2, (hole.h + pad * 2) / 2),
+                left: cut.x,
+                top: cut.y,
+                width: cut.w,
+                height: cut.h,
+                borderRadius: cut.r,
+                boxShadow:
+                  "0 0 0 3px #e7f1ec, 0 0 0 6px #2e7d6b, 0 10px 28px rgba(20, 48, 46, 0.16)",
               }}
             />
           </>
@@ -744,8 +912,9 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
               Let's walk through a day
             </h2>
             <p className="mt-3 text-[17px] font-semibold leading-snug text-pine-soft">
-              I'll point from here to the real buttons. Tap the one I'm pointing to. You will
-              not fill anything in, and nothing from this walkthrough is saved.
+              I'll point from here to the real buttons: the day, logging, freeze days, chat, and
+              how to reach us. Tap the one I'm pointing to. Nothing from this walkthrough is
+              saved.
             </p>
           </div>
         </ScreenBody>
@@ -769,6 +938,11 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
         {item.tabs ? (
           <div className="pointer-events-none">
             <TabBar store={previewStore} />
+          </div>
+        ) : null}
+        {item.tabs ? (
+          <div className="pointer-events-none">
+            <AssistantButton store={previewStore} />
           </div>
         ) : null}
         <TourGuide

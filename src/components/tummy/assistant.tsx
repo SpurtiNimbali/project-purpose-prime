@@ -320,6 +320,7 @@ export function AssistantButton({ store, dark }: { store: TummyStore; dark?: boo
   if (store.chatOpen) return null;
   return (
     <button
+      data-tour-spot={store.tourPreview ? "ask-tummy" : undefined}
       onClick={() => store.setChatOpen(true)}
       aria-label="Ask Tummy"
       className={cn(

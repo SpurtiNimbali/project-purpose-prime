@@ -101,7 +101,6 @@ export function HomeScreen({ store }: { store: TummyStore }) {
   const task = store.frozen ? store.nextTask : computeNextTask(store.plan);
 
   const hour = Math.floor(store.demoNow / 60);
-  const due = task.state === "due";
   const now = minutesNow();
   const mealFinished = store.plan.some((p) => p.id === "mealStart" && p.done && !p.missed);
   const currentItem = store.plan.find((p) => p.id === task.itemId);
@@ -209,38 +208,19 @@ export function HomeScreen({ store }: { store: TummyStore }) {
 
       <ScreenBody className="pb-[180px] pt-3">
         <p className="text-[18px] font-extrabold tracking-tight text-teal">Next up</p>
-        <div
-          className={cn(
-            "relative mt-2 overflow-hidden rounded-[28px] p-4",
-            due ? "bg-pine text-surface shadow-md" : "border border-line bg-surface text-pine",
-          )}
-        >
-          {due ? (
-            <>
-              <span className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-teal/40" />
-              <span className="pointer-events-none absolute -bottom-14 left-8 h-28 w-28 rounded-full bg-blue/30" />
-            </>
-          ) : null}
+        <div className="relative mt-2 overflow-hidden rounded-[28px] bg-pine p-4 text-surface shadow-md">
+          <span className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-teal/40" />
+          <span className="pointer-events-none absolute -bottom-14 left-8 h-28 w-28 rounded-full bg-blue/30" />
           <button
             data-tour-spot={store.tourPreview ? "next-up" : undefined}
             onClick={startTask}
             className="relative flex w-full items-center gap-3 text-left active:scale-[0.99]"
           >
-            <span
-              className={cn(
-                "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
-                due ? "bg-mint text-pine" : "bg-mint-soft text-teal",
-              )}
-            >
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint text-pine">
               <TaskIcon width={26} height={26} />
             </span>
             <span className="min-w-0 flex-1">
-              <span
-                className={cn(
-                  "block text-[13px] font-extrabold uppercase tracking-[0.12em]",
-                  due ? "text-mint" : "text-teal",
-                )}
-              >
+              <span className="block text-[13px] font-extrabold uppercase tracking-[0.12em] text-mint">
                 {task.tag}
               </span>
               <span className="block text-[20px] font-extrabold leading-tight">{task.title}</span>
@@ -251,10 +231,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
               ) : null}
             </span>
             <span
-              className={cn(
-                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
-                due ? "bg-surface/15 text-surface" : "bg-mint-soft text-teal",
-              )}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface"
               aria-hidden
             >
               <IconArrowRight width={18} height={18} />
@@ -273,11 +250,11 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           ) : null}
 
           {task.minsUntil !== null ? (
-            <div className="relative mt-3 flex items-center gap-3 rounded-2xl bg-mint-soft px-4 py-2.5 text-pine">
-              <span className="shrink-0 text-teal">
+            <div className="relative mt-3 flex items-center gap-3 rounded-2xl bg-surface/15 px-4 py-2.5">
+              <span className="shrink-0 text-mint">
                 <IconClock width={22} height={22} />
               </span>
-              <p className="min-w-0 flex-1 truncate text-[15px] font-bold text-pine-soft">
+              <p className="min-w-0 flex-1 truncate text-[15px] font-bold text-mint">
                 Starts in
               </p>
               <p className="shrink-0 text-[20px] font-extrabold leading-none tabular-nums">
@@ -288,14 +265,12 @@ export function HomeScreen({ store }: { store: TummyStore }) {
 
           {task.kind === "recording" && task.itemId ? (
             <button
+              data-tour-spot={store.tourPreview ? "skip-recording" : undefined}
               onClick={() => {
                 store.startItem(task.itemId!);
                 store.go("skipReason");
               }}
-              className={cn(
-                "relative mt-3 min-h-[44px] w-full text-[15px] font-extrabold active:scale-[0.99]",
-                due ? "text-amber-soft" : "text-pine-soft",
-              )}
+              className="relative mt-3 min-h-[44px] w-full text-[15px] font-extrabold text-amber-soft active:scale-[0.99]"
             >
               Skip this recording
             </button>
@@ -388,6 +363,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
         </div>
 
         <button
+          data-tour-spot={store.tourPreview ? "extra-session" : undefined}
           onClick={() => {
             store.startExtraSession();
             store.go("extraSession");
@@ -506,6 +482,7 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
               {LOG_ITEMS.map(({ k, label, sub, Icon, kind }) => (
                 <button
                   key={k}
+                  data-tour-spot={store.tourPreview && k === "logToilet" ? "log-toilet" : undefined}
                   onClick={() => store.go(k)}
                   className="relative flex min-h-[114px] flex-col justify-between rounded-[26px] border border-line bg-surface p-4 text-left shadow-sm active:scale-[0.99]"
                 >
@@ -522,7 +499,7 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
                   </span>
                   {counts(kind) ? (
                     <span className="absolute right-3 top-3 flex h-7 min-w-7 items-center justify-center rounded-full bg-teal px-2 text-[14px] font-extrabold text-surface">
-                      {counts(kind)}
+                      {kind === "sleep" ? <IconCheck width={16} height={16} /> : counts(kind)}
                     </span>
                   ) : null}
                 </button>
@@ -642,7 +619,7 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
   const isSnack = which === "Snack";
   return (
     <Screen>
-      <TopBar title="Log food or drink" onBack={store.back} />
+      <TopBar title="Log food" onBack={store.back} />
       <ScreenBody>
         <button
           onClick={() => setPhotos((p) => p + 1)}
@@ -661,7 +638,7 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
         <p className="mt-2 text-[15px] font-semibold text-pine-soft">
           {isSnack
             ? "A photo is best. A short description is fine for a snack."
-            : "Please add a photo for meals and drinks. Add another if one shot doesn't cover it."}
+            : "Please add a photo for meals. Add another if one shot doesn't cover it."}
         </p>
         <div className="mt-4">
           <Field label="What time was this?">
@@ -676,7 +653,7 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
         <div className="mt-4 space-y-4">
           <Field label="What was it?">
             <div className="space-y-2">
-              {["Breakfast", "Lunch", "Dinner", "Snack", "Drink"].map((m) => (
+              {["Breakfast", "Lunch", "Dinner", "Snack"].map((m) => (
                 <Choice key={m} label={m} selected={which === m} onClick={() => setWhich(m)} />
               ))}
             </div>
@@ -745,7 +722,7 @@ export function LogMealScreen({ store }: { store: TummyStore }) {
             ]
               .filter(Boolean)
               .join(" · ");
-            store.addEntry(which === "Drink" ? "hydration" : "meal", which, detail);
+            store.addEntry("meal", which, detail);
             const scheduled = store.plan.find(
               (p) => p.id === store.activeItemId && p.mealLog && !p.done,
             );
@@ -1010,7 +987,11 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
   const [urgencyInfo, setUrgencyInfo] = useState(false);
   return (
     <Screen>
-      <TopBar title="Log toilet habits" onBack={store.back} />
+      <TopBar
+        title="Log toilet habits"
+        onBack={store.back}
+        tourSpot={store.tourPreview ? "back" : undefined}
+      />
       <ScreenBody>
         <Note tone="green" title="Only your subject ID is attached">
           This is routine research data. Nothing here is shared with anyone outside the study team.
@@ -1102,18 +1083,20 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn
-          onClick={() => {
-            store.addEntry(
-              "toilet",
-              "Toilet habits",
-              `Consistency ${consistency || "-"}${urgency ? ` · urgency: ${urgency.toLowerCase()}` : ""}`,
-            );
-            store.go("logHub");
-          }}
-        >
-          Save entry
-        </Btn>
+        <div data-tour-spot={store.tourPreview ? "log-save" : undefined}>
+          <Btn
+            onClick={() => {
+              store.addEntry(
+                "toilet",
+                "Toilet habits",
+                `Consistency ${consistency || "-"}${urgency ? ` · urgency: ${urgency.toLowerCase()}` : ""}`,
+              );
+              store.go("logHub");
+            }}
+          >
+            Save entry
+          </Btn>
+        </div>
       </StickyFooter>
     </Screen>
   );
@@ -1266,6 +1249,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               </div>
               {!store.frozen && store.freezeDaysUsed < FREEZE_DAYS_ALLOWED ? (
                 <button
+                  data-tour-spot={store.tourPreview ? "freeze-day" : undefined}
                   onClick={() => setConfirmFreeze(true)}
                   className="relative mt-3 flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-surface text-[17px] font-extrabold text-blue active:scale-[0.99]"
                 >
@@ -1359,6 +1343,7 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
 
         <div className="mt-3 space-y-2">
           <button
+            data-tour-spot={store.tourPreview ? "contact-team" : undefined}
             onClick={() => store.go("contact")}
             className="relative flex min-h-[68px] w-full items-center gap-3 overflow-hidden rounded-3xl bg-teal px-4 py-2.5 text-left shadow-md active:scale-[0.99]"
           >
@@ -1423,7 +1408,11 @@ export function PeriodCheckScreen({ store }: { store: TummyStore }) {
 export function ContactScreen({ store }: { store: TummyStore }) {
   return (
     <Screen>
-      <TopBar title="Contact the study team" onBack={store.back} />
+      <TopBar
+        title="Contact the study team"
+        onBack={store.back}
+        tourSpot={store.tourPreview ? "back" : undefined}
+      />
       <ScreenBody>
         <MascotSays size={78}>
           What's going on? I'll point you to the right place.
