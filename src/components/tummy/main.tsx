@@ -478,7 +478,10 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
       <ScreenBody className="pt-1">
         {tab === "add" ? (
           <>
-            <div className="grid grid-cols-2 gap-3">
+            <div
+              data-tour-spot={store.tourPreview ? "log-grid" : undefined}
+              className="grid grid-cols-2 gap-3"
+            >
               {LOG_ITEMS.map(({ k, label, sub, Icon, kind }) => (
                 <button
                   key={k}
@@ -1125,6 +1128,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
     <Screen>
       <TopBar title="Progress" />
       <ScreenBody className="pb-4">
+        <div data-tour-spot={store.tourPreview ? "progress-overview" : undefined}>
         <Card
           className={cn(
             "relative overflow-hidden border-0 p-4 text-surface shadow-md",
@@ -1210,6 +1214,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
           </Card>
         </div>
         )}
+        </div>
 
         <div className="mt-3">
           {store.freezeDaysUsed >= FREEZE_DAYS_ALLOWED && !store.frozen ? (
@@ -1311,6 +1316,10 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
     <Screen>
       <TopBar title="Profile" />
       <ScreenBody className="pb-4">
+        <div
+          data-tour-spot={store.tourPreview ? "profile-card" : undefined}
+          className="space-y-3"
+        >
         <div className="flex items-center gap-3 rounded-3xl border border-line bg-surface px-4 py-3">
           <Mascot size={52} />
           <div>
@@ -1319,7 +1328,7 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
           </div>
         </div>
 
-        <div className="mt-3 space-y-2">
+        <div className="space-y-2">
           {rows.map(({ label, sub, Icon, to }) => (
             <button
               key={label}
@@ -1339,6 +1348,7 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
               </span>
             </button>
           ))}
+        </div>
         </div>
 
         <div className="mt-3 space-y-2">
@@ -1414,6 +1424,7 @@ export function ContactScreen({ store }: { store: TummyStore }) {
         tourSpot={store.tourPreview ? "back" : undefined}
       />
       <ScreenBody>
+        <div data-tour-spot={store.tourPreview ? "tour-widget" : undefined}>
         <MascotSays size={78}>
           What's going on? I'll point you to the right place.
         </MascotSays>
@@ -1498,10 +1509,6 @@ export function ContactScreen({ store }: { store: TummyStore }) {
             );
           })}
         </div>
-        <div className="mt-4">
-          <Note tone="green" title="Prefer to talk it through?">
-            Send a message any time. Your coordinator replies on weekdays, 9am to 5pm.
-          </Note>
         </div>
       </ScreenBody>
     </Screen>

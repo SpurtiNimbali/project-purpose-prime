@@ -139,7 +139,10 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
         tourSpot={store.tourPreview ? "back" : undefined}
       />
       <div className="flex min-h-0 flex-1 flex-col px-5 pb-4">
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div
+          data-tour-spot={store.tourPreview ? "tour-widget" : undefined}
+          className="min-h-0 flex-1 overflow-y-auto"
+        >
           {store.frozen ? (
             <div className="relative mb-4 overflow-hidden rounded-3xl bg-blue px-5 py-5 text-surface shadow-md">
               <span className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-surface/15" />
@@ -185,7 +188,10 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                 </div>
 
                 {isNext ? (
-                  <div className="relative min-w-0 flex-1 overflow-hidden rounded-3xl bg-teal p-5 text-surface shadow-md">
+                  <div
+                    data-tour-spot={store.tourPreview ? "plan-cta" : undefined}
+                    className="relative min-w-0 flex-1 overflow-hidden rounded-3xl bg-teal p-5 text-surface shadow-md"
+                  >
                     <span className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-mint/25" />
                     <span className="pointer-events-none absolute -bottom-12 left-6 h-24 w-24 rounded-full bg-pine/15" />
                     <p className="relative text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
@@ -208,7 +214,6 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                       </div>
                     </div>
                     <button
-                      data-tour-spot={store.tourPreview ? "plan-cta" : undefined}
                       onClick={() => open(p)}
                       className="relative mt-4 flex min-h-[56px] w-full items-center justify-center rounded-2xl bg-surface text-[17px] font-extrabold text-teal active:scale-[0.99]"
                     >
@@ -496,6 +501,10 @@ export function MealCaptureScreen({ store }: { store: TummyStore }) {
         step="Start of meal"
         tourSpot={store.tourPreview ? "back" : undefined}
       />
+      <div
+        data-tour-spot={store.tourPreview ? "tour-widget" : undefined}
+        className="flex min-h-0 flex-1 flex-col"
+      >
       <ScreenBody>
         <button
           onClick={() => setPhotos((p) => p + 1)}
@@ -547,6 +556,7 @@ export function MealCaptureScreen({ store }: { store: TummyStore }) {
           </Btn>
         </div>
       </StickyFooter>
+      </div>
     </Screen>
   );
 }
@@ -739,8 +749,19 @@ export function ScreenRuler() {
   );
 }
 
-export function AbdomenGuide({ play = true }: { play?: boolean }) {
+export function AbdomenGuide({
+  play = true,
+  onEnded,
+  videoRef,
+}: {
+  play?: boolean;
+  onEnded?: () => void;
+  videoRef?: { current: HTMLVideoElement | null };
+}) {
   const ref = useRef<HTMLVideoElement>(null);
+  const endedRef = useRef(onEnded);
+  endedRef.current = onEnded;
+  const [replay, setReplay] = useState(false);
   useEffect(() => {
     const video = ref.current;
     if (!video) return;
@@ -748,17 +769,34 @@ export function AbdomenGuide({ play = true }: { play?: boolean }) {
       video.pause();
       return;
     }
+    video.loop = false;
     void video.play().catch(() => undefined);
+    const done = () => {
+      setReplay(true);
+      endedRef.current?.();
+    };
+    const failed = () => endedRef.current?.();
+    video.addEventListener("ended", done);
+    video.addEventListener("error", failed);
+    return () => {
+      video.removeEventListener("ended", done);
+      video.removeEventListener("error", failed);
+    };
   }, [play]);
   return (
     <figure className="h-full w-full">
       <video
-        ref={ref}
+        ref={(node) => {
+          ref.current = node;
+          if (videoRef) videoRef.current = node;
+        }}
         src={placementGuide}
-        autoPlay
         muted
-        loop
+        loop={replay}
         playsInline
+        onClick={() => {
+          void ref.current?.play().catch(() => undefined);
+        }}
         aria-label="How to place the phone: measure from the navel, then rest the speaker edge on that spot with the screen facing up"
         className="h-full w-full object-contain object-center"
       />
@@ -775,6 +813,7 @@ function GuideCard({
   cta,
   onNext,
   onBack,
+  nextDisabled,
 }: {
   step?: number;
   total?: number;
@@ -784,6 +823,7 @@ function GuideCard({
   cta: string;
   onNext: () => void;
   onBack?: () => void;
+  nextDisabled?: boolean;
 }) {
   return (
     <div className="px-0">
@@ -813,7 +853,11 @@ function GuideCard({
           <button
             type="button"
             onClick={onNext}
-            className="min-h-[48px] min-w-[118px] rounded-full bg-teal px-7 text-[16px] font-extrabold text-surface shadow-[0_5px_0_0_var(--color-teal-deep)] active:translate-y-[2px] active:shadow-[0_3px_0_0_var(--color-teal-deep)]"
+            disabled={nextDisabled}
+            className={cn(
+              "min-h-[48px] min-w-[118px] rounded-full bg-teal px-7 text-[16px] font-extrabold text-surface shadow-[0_5px_0_0_var(--color-teal-deep)] active:translate-y-[2px] active:shadow-[0_3px_0_0_var(--color-teal-deep)]",
+              nextDisabled && "pointer-events-none opacity-40 shadow-none",
+            )}
           >
             {cta}
           </button>
@@ -902,20 +946,35 @@ export function PositioningGuideLayout({
 }) {
   const [checked, setChecked] = useState(false);
   const [tip, setTip] = useState(0);
+  const [videoDone, setVideoDone] = useState(false);
+  const filmRef = useRef<HTMLVideoElement>(null);
   const placement = PLACEMENT_TIPS[Math.min(tip, PLACEMENT_TIPS.length - 1)];
   const lastTip = tip >= PLACEMENT_TIPS.length - 1;
+  const waitForFilm = tip === 0 && !videoDone;
   return (
     <Screen className="relative overflow-hidden">
       <TopBar title="Positioning guide" onBack={onBack} step={step} right={banner} />
       <div className="relative min-h-0 flex-1">
         <div className="h-full w-full overflow-hidden bg-pine">
-          <AbdomenGuide play={checked} />
+          <AbdomenGuide
+            play={checked}
+            videoRef={filmRef}
+            onEnded={() => setVideoDone(true)}
+          />
         </div>
         {checked ? <ScreenRuler /> : null}
       </div>
       <div className="shrink-0 px-4 pb-6 pt-4">
         {!checked ? (
-          <PositionChecksGate onDone={() => setChecked(true)} />
+          <PositionChecksGate
+            onDone={() => {
+              setChecked(true);
+              const film = filmRef.current;
+              if (!film) return;
+              film.currentTime = 0;
+              void film.play().catch(() => undefined);
+            }}
+          />
         ) : (
           <GuideCard
             step={tip + 1}
@@ -924,8 +983,10 @@ export function PositioningGuideLayout({
             body={placement.b}
             Icon={placement.Icon}
             cta={lastTip ? "I'm in position" : "Next"}
+            nextDisabled={waitForFilm}
             onBack={tip > 0 ? () => setTip((i) => i - 1) : undefined}
             onNext={() => {
+              if (waitForFilm) return;
               if (lastTip) onReady();
               else setTip((i) => i + 1);
             }}
@@ -1956,6 +2017,10 @@ export function SkipReasonScreen({ store }: { store: TummyStore }) {
         onBack={store.back}
         tourSpot={store.tourPreview ? "back" : undefined}
       />
+      <div
+        data-tour-spot={store.tourPreview ? "tour-widget" : undefined}
+        className="flex min-h-0 flex-1 flex-col"
+      >
       <ScreenBody>
         <MascotSays src={MASCOT.calm} size={80}>
           Skipping is the right call if you can't record properly. Tell us what got in the way.
@@ -1999,6 +2064,7 @@ export function SkipReasonScreen({ store }: { store: TummyStore }) {
           </Btn>
         </div>
       </StickyFooter>
+      </div>
     </Screen>
   );
 }
@@ -2086,6 +2152,10 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
         onBack={store.back}
         tourSpot={store.tourPreview ? "back" : undefined}
       />
+      <div
+        data-tour-spot={store.tourPreview ? "tour-widget" : undefined}
+        className="flex min-h-0 flex-1 flex-col"
+      >
       <ScreenBody>
         <div className="relative overflow-hidden rounded-3xl bg-pine px-5 py-5 shadow-md">
           <span className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-teal/40" />
@@ -2142,6 +2212,7 @@ export function ExtraSessionScreen({ store }: { store: TummyStore }) {
           Start the extra recording
         </Btn>
       </StickyFooter>
+      </div>
     </Screen>
   );
 }
@@ -2166,7 +2237,7 @@ export function UploadDoneScreen({ store }: { store: TummyStore }) {
   const detail = !next
     ? "Nothing more until tomorrow morning's fasted recording."
     : next.kind === "recording" && next.sessionKind === "postMeal"
-      ? "Please don't eat or drink until the window is over. If you need water, one cup now."
+      ? WINDOW_RULE
       : next.kind === "meal" && !next.mealLog
         ? next.started
           ? "Tap the moment your last bite is done. Every recording after that is timed from it."

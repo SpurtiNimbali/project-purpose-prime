@@ -220,7 +220,10 @@ export function AssistantSheet({ store }: { store: TummyStore }) {
         className="h-16 w-full shrink-0"
         onClick={() => store.setChatOpen(false)}
       />
-      <div className="flex min-h-0 flex-1 flex-col rounded-t-[32px] bg-wash shadow-2xl">
+      <div
+        data-tour-spot={store.tourPreview ? "ask-tummy-sheet" : undefined}
+        className="flex min-h-0 flex-1 flex-col rounded-t-[32px] bg-wash shadow-2xl"
+      >
         <div className="flex shrink-0 items-center gap-3 border-b border-line px-5 pb-3 pt-4">
           <Mascot size={44} />
           <div className="min-w-0 flex-1">
@@ -228,6 +231,7 @@ export function AssistantSheet({ store }: { store: TummyStore }) {
             <p className="text-[14px] font-bold text-teal">I'll log what you tell me</p>
           </div>
           <button
+            data-tour-spot={store.tourPreview ? "ask-tummy-close" : undefined}
             onClick={() => store.setChatOpen(false)}
             aria-label="Close"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface text-pine"

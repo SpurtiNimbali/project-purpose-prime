@@ -234,10 +234,6 @@ function QuestionFlow({
   };
 
   const record = (value: string) => {
-    if (store.tourPreview) {
-      store.go("sessionHub");
-      return;
-    }
     const given = { ...answers, [current.id]: value };
     setAnswers(given);
     const next: Turn[] = [...turns, { from: "you", text: value }];
@@ -293,6 +289,10 @@ function QuestionFlow({
         progress={done ? 1 : (step + 1) / Math.max(questions.length, 1)}
         tourSpot={store.tourPreview ? "back" : undefined}
       />
+      <div
+        data-tour-spot={store.tourPreview ? "tour-widget" : undefined}
+        className="flex min-h-0 flex-1 flex-col"
+      >
       <ScreenBody>
         <div className="space-y-3">
           {turns.map((t, i) =>
@@ -554,6 +554,7 @@ function QuestionFlow({
           </div>
         </StickyFooter>
       ) : null}
+      </div>
     </Screen>
   );
 }

@@ -47,7 +47,7 @@ import {
   ContactScreen,
 } from "./main";
 import { MorningQuestionsScreen, EveningCheckinScreen } from "./questions";
-import { AssistantButton } from "./assistant";
+import { AssistantButton, AssistantSheet } from "./assistant";
 
 import type { PlanItem, ScreenKey, SnackHabit, TummyStore } from "./store";
 import { computeNextTask, minutesNow } from "./store";
@@ -329,8 +329,27 @@ type TourStep = {
   done: string[];
   coach: string;
   spot: string;
+  /** Ring this node instead of `spot` (arrow still goes to `spot`). */
+  highlight?: string;
   activeItemId?: string;
+  chatOpen?: boolean;
+  explore?: boolean;
+  dim?: boolean;
+  tone?: "light" | "green";
+  coachAt?: "top" | "under" | "bottom";
 };
+
+function tourChrome(item: TourStep) {
+  const back = item.spot === "back";
+  return {
+    highlight: item.highlight ?? (back ? "tour-widget" : item.spot),
+    explore: item.explore ?? back,
+    dim: item.dim ?? !back,
+    tone: item.tone ?? (back ? "green" : "light"),
+    coachAt: item.coachAt,
+    chatOpen: !!item.chatOpen,
+  };
+}
 
 const TOUR_THROUGH_MEAL = ["qMorning", "fasted", "preMeal", "mealStart"];
 const TOUR_DAY_DONE = [
@@ -355,8 +374,7 @@ const APP_TOUR: TourStep[] = [
     clock: 7 * 60 - 2,
     done: [],
     spot: "next-up",
-    coach:
-      "This is Next up. When something is due now, this is the thing to do first.",
+    coach: "When something is due, start here.",
   },
   {
     view: "home",
@@ -364,36 +382,35 @@ const APP_TOUR: TourStep[] = [
     clock: 7 * 60 - 2,
     done: [],
     spot: "todays-plan",
-    coach: "Today's plan is the full list, in order. Open it to walk the day.",
+    coach: "Today's plan is the full day, in order.",
   },
   {
     view: "sessionHub",
     clock: 7 * 60 - 2,
     done: [],
     spot: "plan-cta",
-    coach: "First come a few wake-up questions.",
+    coach: "A few questions when you wake up.",
   },
   {
     view: "morningQuestions",
     clock: 7 * 60,
     done: [],
     spot: "back",
-    coach: "This is the wake-up check-in. Have a look, then use back. You do not need to answer.",
+    coach: "This is the morning check-in. Try a question if you like, then tap back.",
   },
   {
     view: "sessionHub",
     clock: 7 * 60 + 10,
     done: ["qMorning"],
     spot: "plan-cta",
-    coach:
-      "Then the fasted morning recording. Two minutes, sitting still, before food or drink. We will not open the recorder now.",
+    coach: "Then a two-minute fasted recording.",
   },
   {
     view: "sessionHub",
     clock: 7 * 60 + 10,
     done: ["qMorning"],
     spot: "skip-recording",
-    coach: "If you cannot record well, skip and tell us why. Do not just leave it blank.",
+    coach: "Skip if you cannot record well, and say why.",
   },
   {
     view: "skipReason",
@@ -401,58 +418,56 @@ const APP_TOUR: TourStep[] = [
     done: ["qMorning"],
     activeItemId: "fasted",
     spot: "back",
-    coach: "Pick the reason that fits. The study team sees this. Use back.",
+    coach: "Pick a reason. Tap back when you are done looking.",
   },
   {
     view: "sessionHub",
     clock: 8 * 60,
     done: ["qMorning", "fasted", "preMeal"],
     spot: "plan-cta",
-    coach:
-      "Then your study meal. Photo the plate and tap when you start and finish. Later recordings are timed from that last bite.",
+    coach: "Photo the plate, then mark start and finish.",
   },
   {
     view: "mealCapture",
     clock: 8 * 60,
     done: ["qMorning", "fasted", "preMeal"],
     spot: "back",
-    coach: "This is the meal page. Photo, start, then finish. Use back when you are done looking.",
+    coach: "This is the meal page. Tap back when you are done looking.",
   },
   {
     view: "sessionHub",
     clock: 8 * 60 + 25,
     done: TOUR_THROUGH_MEAL,
     spot: "plan-cta",
-    coach:
-      "Right after the last bite, then every 30 minutes for 3.5 hours. If you snack in that window, skip the rest and tell us.",
+    coach: "A recording right after the last bite, then every 30 minutes.",
   },
   {
     view: "sessionHub",
     clock: 8 * 60 + 25,
     done: TOUR_THROUGH_MEAL,
     spot: "extra-session",
-    coach: "You can also record an extra session any time, if something feels different.",
+    coach: "You can record an extra session any time.",
   },
   {
     view: "extraSession",
     clock: 8 * 60 + 25,
     done: TOUR_THROUGH_MEAL,
     spot: "back",
-    coach: "Say what made you want an extra recording. Same two-minute rules. We will not start it now.",
+    coach: "Say what prompted it. Tap back when you are done looking.",
   },
   {
     view: "eveningCheckin",
     clock: 21 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "back",
-    coach: "Night ends with a short evening check-in. How the day felt, then you are done.",
+    coach: "Night ends with a short check-in. Tap back when you are done looking.",
   },
   {
     view: "sessionHub",
     clock: 8 * 60 + 25,
     done: TOUR_THROUGH_MEAL,
     spot: "back",
-    coach: "Back takes you home. Next up changes as the day goes.",
+    coach: "Back takes you home.",
   },
   {
     view: "home",
@@ -460,7 +475,7 @@ const APP_TOUR: TourStep[] = [
     clock: 8 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "next-up",
-    coach: "Before something is due, Next up stays here and shows how long you have.",
+    coach: "Before it is due, you can see how long you have.",
   },
   {
     view: "home",
@@ -468,8 +483,7 @@ const APP_TOUR: TourStep[] = [
     clock: 9 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "next-up",
-    coach:
-      "If the window has passed, Next up says past due. You can still do it, or skip and tell us why.",
+    coach: "If the window passed, you can still do it or skip.",
   },
   {
     view: "home",
@@ -477,16 +491,21 @@ const APP_TOUR: TourStep[] = [
     clock: 21 * 60,
     done: TOUR_DAY_DONE,
     spot: "next-up",
-    coach: "When the day is finished, Next up says so. Nothing more until tomorrow morning.",
+    coach: "When the day is done, Next up says so.",
   },
   {
     view: "home",
     tabs: true,
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
-    spot: "ask-tummy",
-    coach:
-      "Ask Tummy is the chat. You can log a meal, ask what's next, or get help without leaving the page.",
+    spot: "ask-tummy-close",
+    highlight: "ask-tummy-sheet",
+    chatOpen: true,
+    explore: true,
+    dim: false,
+    tone: "green",
+    coachAt: "bottom",
+    coach: "Ask Tummy can log a meal or tell you what's next.",
   },
   {
     view: "home",
@@ -494,7 +513,7 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "logHub",
-    coach: "Log is for everything else you eat, drink, or feel. Add things whenever you remember.",
+    coach: "Log is food, drinks, symptoms, toilet, sleep, and activity.",
   },
   {
     view: "logHub",
@@ -502,16 +521,15 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "log-toilet",
-    coach:
-      "Toilet habits is a bowel movement log. We'll do one as an example. Nothing is saved.",
+    highlight: "log-grid",
+    coach: "Add any of these when you remember. Open toilet for a look.",
   },
   {
     view: "logToilet",
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "log-save",
-    coach:
-      "Time, consistency, and urgency. Tap Save to see how it works. This walkthrough will not keep it.",
+    coach: "Time, consistency, and urgency.",
   },
   {
     view: "logHub",
@@ -519,7 +537,7 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "progress",
-    coach: "Progress is the week at a glance.",
+    coach: "Progress is your week.",
   },
   {
     view: "progress",
@@ -527,8 +545,9 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "freeze-day",
+    highlight: "progress-overview",
     coach:
-      "You get two freeze days. Use one if you need a pause. Nothing that day counts as missed.",
+      "Days, recordings, meals, and questions live here. You also get two freeze days if you need a pause.",
   },
   {
     view: "progress",
@@ -536,7 +555,7 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "profile",
-    coach: "Profile is settings and help.",
+    coach: "Profile is times, setup, and help.",
   },
   {
     view: "profile",
@@ -544,15 +563,15 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "contact-team",
-    coach:
-      "Contact the study team from here if you have a question, a missed session, or a concern.",
+    highlight: "profile-card",
+    coach: "Change your times, review setup, or reach the study team.",
   },
   {
     view: "contact",
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "back",
-    coach: "Chat, write the coordinator, or raise a concern. Use back.",
+    coach: "Chat, write the coordinator, or raise a concern. Tap back when you are done looking.",
   },
   {
     view: "profile",
@@ -560,7 +579,7 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "daily-times",
-    coach: "Set your daily times here. That is the next step after this walkthrough.",
+    coach: "Set your usual times next.",
   },
 ];
 
@@ -577,6 +596,7 @@ function tourStore(store: TummyStore, item: TourStep): TummyStore {
     day: 1,
     screen: item.view,
     tourPreview: true,
+    chatOpen: !!item.chatOpen,
     demoNow: item.clock,
     plan,
     nextTask: computeNextTask(plan),
@@ -662,7 +682,11 @@ function edgeToward(box: TourBox, toward: { x: number; y: number }, gap: number)
   return { x: cx, y: dy > 0 ? box.y + box.h + gap : box.y - gap };
 }
 
-function connectorPath(x1: number, y1: number, x2: number, y2: number) {
+function connectorPath(x1: number, y1: number, x2: number, y2: number, rail?: boolean) {
+  if (rail) {
+    const x = Math.min(x1, x2, 22);
+    return `M ${x1} ${y1} L ${x} ${y1} L ${x} ${y2} L ${x2} ${y2}`;
+  }
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.hypot(dx, dy) || 1;
@@ -700,17 +724,27 @@ function FrostPanel({
 function TourGuide({
   rootRef,
   spot,
+  highlight,
   coach,
   step,
   total,
   onAdvance,
+  dim,
+  explore,
+  tone,
+  coachAt,
 }: {
   rootRef: { current: HTMLDivElement | null };
   spot: string;
+  highlight: string;
   coach: string;
   step: number;
   total: number;
   onAdvance: () => void;
+  dim: boolean;
+  explore: boolean;
+  tone: "light" | "green";
+  coachAt?: "top" | "under" | "bottom";
 }) {
   const coachRef = useRef<HTMLDivElement>(null);
   const [hole, setHole] = useState<TourBox | null>(null);
@@ -718,23 +752,38 @@ function TourGuide({
   const [link, setLink] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const advanceRef = useRef(onAdvance);
   advanceRef.current = onAdvance;
+  const green = tone === "green";
 
   useLayoutEffect(() => {
     let cancelled = false;
     const find = () => {
       const root = tourRoot(rootRef);
       if (!root || cancelled) return;
-      const node = root.querySelector(`[data-tour-spot="${spot}"]`);
-      if (!(node instanceof HTMLElement) || node.getBoundingClientRect().width < 2) {
+      const ringNode = root.querySelector(`[data-tour-spot="${highlight}"]`);
+      const spotNode = root.querySelector(`[data-tour-spot="${spot}"]`);
+      const node =
+        ringNode instanceof HTMLElement && ringNode.getBoundingClientRect().width >= 2
+          ? ringNode
+          : spotNode instanceof HTMLElement && spotNode.getBoundingClientRect().width >= 2
+            ? spotNode
+            : null;
+      const tip =
+        spotNode instanceof HTMLElement && spotNode.getBoundingClientRect().width >= 2
+          ? spotNode
+          : node;
+      if (!node || !tip) {
         setHole(null);
         setLink(null);
         return;
       }
-      scrollSpotIntoView(node, root);
+      scrollSpotIntoView(tip, root);
       const rootBox = root.getBoundingClientRect();
       const nextHole = toBox(rootBox, node.getBoundingClientRect());
+      const nextTip = toBox(rootBox, tip.getBoundingClientRect());
       setHole(nextHole);
-      setCoachLow(nextHole.y < 170);
+      if (coachAt === "top" || coachAt === "under") setCoachLow(false);
+      else if (coachAt === "bottom") setCoachLow(true);
+      else setCoachLow(nextTip.y < 170);
 
       const bubble = coachRef.current;
       if (!bubble) {
@@ -744,10 +793,10 @@ function TourGuide({
       const coachBox = toBox(rootBox, bubble.getBoundingClientRect());
       const start = edgeToward(
         coachBox,
-        { x: nextHole.x + nextHole.w / 2, y: nextHole.y + nextHole.h / 2 },
+        { x: nextTip.x + nextTip.w / 2, y: nextTip.y + nextTip.h / 2 },
         8,
       );
-      const end = edgeToward(nextHole, start, 14);
+      const end = edgeToward(nextTip, start, 14);
       if (Math.hypot(end.x - start.x, end.y - start.y) < 28) {
         setLink(null);
         return;
@@ -782,16 +831,16 @@ function TourGuide({
       root?.removeEventListener("scroll", find, true);
       root?.removeEventListener("click", onClick, true);
     };
-  }, [rootRef, spot, coachLow]);
+  }, [rootRef, spot, highlight, coachLow, coachAt]);
 
-  const pad = 8;
+  const pad = hole && hole.h > 220 ? 6 : 8;
   const cut = hole
     ? {
         x: Math.max(0, hole.x - pad),
         y: Math.max(0, hole.y - pad),
         w: hole.w + pad * 2,
         h: hole.h + pad * 2,
-        r: Math.min(22, (hole.w + pad * 2) / 2, (hole.h + pad * 2) / 2),
+        r: Math.min(28, (hole.w + pad * 2) / 2, (hole.h + pad * 2) / 2),
       }
     : null;
 
@@ -804,14 +853,26 @@ function TourGuide({
           z-index: 1;
           filter: none !important;
         }
+        ${
+          explore
+            ? ""
+            : `#tour-root [data-tour-spot="${highlight}"] {
+          pointer-events: auto !important;
+          filter: none !important;
+        }`
+        }
       `}</style>
-      <div className="pointer-events-none absolute inset-0 z-30">
+      <div className="pointer-events-none absolute inset-0 z-50">
         {cut ? (
           <>
-            <FrostPanel left={0} top={0} right={0} height={cut.y} />
-            <FrostPanel left={0} top={cut.y + cut.h} right={0} bottom={0} />
-            <FrostPanel left={0} top={cut.y} width={cut.x} height={cut.h} />
-            <FrostPanel left={cut.x + cut.w} top={cut.y} right={0} height={cut.h} />
+            {dim ? (
+              <>
+                <FrostPanel left={0} top={0} right={0} height={cut.y} />
+                <FrostPanel left={0} top={cut.y + cut.h} right={0} bottom={0} />
+                <FrostPanel left={0} top={cut.y} width={cut.x} height={cut.h} />
+                <FrostPanel left={cut.x + cut.w} top={cut.y} right={0} height={cut.h} />
+              </>
+            ) : null}
             <div
               className="absolute"
               style={{
@@ -820,8 +881,9 @@ function TourGuide({
                 width: cut.w,
                 height: cut.h,
                 borderRadius: cut.r,
-                boxShadow:
-                  "0 0 0 3px #e7f1ec, 0 0 0 6px #2e7d6b, 0 10px 28px rgba(20, 48, 46, 0.16)",
+                boxShadow: dim
+                  ? "0 0 0 3px #e7f1ec, 0 0 0 6px #2e7d6b, 0 10px 28px rgba(20, 48, 46, 0.16)"
+                  : "0 0 0 3px #2e7d6b, 0 10px 28px rgba(20, 48, 46, 0.12)",
               }}
             />
           </>
@@ -841,7 +903,7 @@ function TourGuide({
               </marker>
             </defs>
             <path
-              d={connectorPath(link.x1, link.y1, link.x2, link.y2)}
+              d={connectorPath(link.x1, link.y1, link.x2, link.y2, spot === "back")}
               fill="none"
               stroke="#2e7d6b"
               strokeWidth="2.4"
@@ -850,17 +912,39 @@ function TourGuide({
             />
           </svg>
         ) : null}
-        <div className={cn("absolute inset-x-0 z-10 px-4", coachLow ? "bottom-4" : "top-3")}>
+        <div
+          className={cn(
+            "absolute inset-x-0 z-10 px-4",
+            coachLow ? "bottom-4" : coachAt === "under" ? "top-[76px]" : "top-3",
+          )}
+        >
           <div className="flex items-end gap-3">
             <Mascot src={MASCOT.calm} size={72} />
             <div
               ref={coachRef}
-              className="relative min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-3 shadow-[0_12px_32px_rgba(20,48,46,0.16)]"
+              className={cn(
+                "relative min-w-0 flex-1 rounded-3xl rounded-bl-md px-4 py-3",
+                green
+                  ? "bg-teal text-surface shadow-[0_12px_32px_rgba(20,48,46,0.28)]"
+                  : "bg-surface text-pine shadow-[0_12px_32px_rgba(20,48,46,0.16)]",
+              )}
             >
-              <p className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-teal">
+              <p
+                className={cn(
+                  "text-[12px] font-extrabold uppercase tracking-[0.14em]",
+                  green ? "text-mint" : "text-teal",
+                )}
+              >
                 {step} of {total}
               </p>
-              <p className="mt-1 text-[15px] font-semibold leading-snug text-pine">{coach}</p>
+              <p
+                className={cn(
+                  "mt-1 text-[15px] font-semibold leading-snug",
+                  green ? "text-surface" : "text-pine",
+                )}
+              >
+                {coach}
+              </p>
             </div>
           </div>
         </div>
@@ -873,6 +957,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
   const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
   const item = APP_TOUR[Math.min(step, APP_TOUR.length - 1)];
+  const chrome = tourChrome(item);
   const last = step >= APP_TOUR.length - 1;
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -912,9 +997,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
               Let's walk through a day
             </h2>
             <p className="mt-3 text-[17px] font-semibold leading-snug text-pine-soft">
-              I'll point from here to the real buttons: the day, logging, freeze days, chat, and
-              how to reach us. Tap the one I'm pointing to. Nothing from this walkthrough is
-              saved.
+              Tap what I point to. Nothing is saved.
             </p>
           </div>
         </ScreenBody>
@@ -932,26 +1015,37 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
         id="tour-root"
         className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
       >
-        <div className="pointer-events-none min-h-0 flex-1 overflow-hidden">
+        <div
+          className={cn(
+            "min-h-0 flex-1 overflow-hidden",
+            chrome.explore ? undefined : "pointer-events-none",
+          )}
+        >
           <TourView view={item.view} store={previewStore} />
         </div>
         {item.tabs ? (
-          <div className="pointer-events-none">
+          <div className={chrome.explore ? undefined : "pointer-events-none"}>
             <TabBar store={previewStore} />
           </div>
         ) : null}
-        {item.tabs ? (
+        {item.tabs && !chrome.chatOpen ? (
           <div className="pointer-events-none">
             <AssistantButton store={previewStore} />
           </div>
         ) : null}
+        {chrome.chatOpen ? <AssistantSheet store={previewStore} /> : null}
         <TourGuide
           rootRef={rootRef}
           spot={item.spot}
+          highlight={chrome.highlight}
           coach={item.coach}
           step={step + 1}
           total={APP_TOUR.length}
           onAdvance={advance}
+          dim={chrome.dim}
+          explore={chrome.explore}
+          tone={chrome.tone}
+          coachAt={chrome.coachAt}
         />
       </div>
     </Screen>

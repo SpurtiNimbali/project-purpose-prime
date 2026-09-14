@@ -282,7 +282,7 @@ export function untilLabel(mins: number) {
 }
 
 export const WINDOW_RULE =
-  "Please don't eat or drink until the 3.5 hours after your chosen meal are up. If thirsty, you may have one cup of water, right after a recording.";
+  "Please don't eat or drink right now. If thirsty, you may have one cup of water.";
 
 export const QUALITY_RULE =
   "A usable recording matters more than a complete set. If you can't do this one properly, kindly skip it and tell us why.";
