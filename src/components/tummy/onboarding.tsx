@@ -329,7 +329,7 @@ type TourStep = {
   done: string[];
   coach: string;
   spot: string;
-  /** Ring this node instead of `spot` (arrow still goes to `spot`). */
+  /** Ring this node instead of `spot`. */
   highlight?: string;
   activeItemId?: string;
   chatOpen?: boolean;
@@ -666,7 +666,12 @@ function scrollSpotIntoView(node: HTMLElement, root: HTMLElement) {
 type TourBox = { x: number; y: number; w: number; h: number; r: number };
 
 function nodeRadius(el: HTMLElement) {
-  const n = parseFloat(getComputedStyle(el).borderTopLeftRadius);
+  const raw = getComputedStyle(el).borderTopLeftRadius;
+  if (raw.endsWith("%")) {
+    const pct = parseFloat(raw);
+    return Number.isFinite(pct) ? (Math.min(el.offsetWidth, el.offsetHeight) * pct) / 100 : 16;
+  }
+  const n = parseFloat(raw);
   return Number.isFinite(n) ? n : 16;
 }
 
@@ -681,53 +686,8 @@ function toBox(root: DOMRect, el: HTMLElement): TourBox {
   };
 }
 
-function edgeToward(box: TourBox, toward: { x: number; y: number }, gap: number) {
-  const cx = box.x + box.w / 2;
-  const cy = box.y + box.h / 2;
-  const dx = toward.x - cx;
-  const dy = toward.y - cy;
-  if (Math.abs(dx) * box.h > Math.abs(dy) * box.w) {
-    return { x: dx > 0 ? box.x + box.w + gap : box.x - gap, y: cy };
-  }
-  return { x: cx, y: dy > 0 ? box.y + box.h + gap : box.y - gap };
-}
-
-/** Short stub that ends on the target, never a screen-long line. */
-function pointerPath(x1: number, y1: number, x2: number, y2: number) {
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const len = Math.hypot(dx, dy) || 1;
-  const stub = Math.min(52, len);
-  return `M ${x2 - (dx / len) * stub} ${y2 - (dy / len) * stub} L ${x2} ${y2}`;
-}
-
 const COACH_FILL =
   "border-2 border-teal bg-mint-soft text-pine shadow-[0_12px_28px_rgba(20,48,46,0.14)]";
-
-function FrostPanel({
-  left,
-  top,
-  width,
-  height,
-  right,
-  bottom,
-}: {
-  left?: number;
-  top?: number;
-  width?: number;
-  height?: number;
-  right?: number;
-  bottom?: number;
-}) {
-  if (width !== undefined && width <= 0) return null;
-  if (height !== undefined && height <= 0) return null;
-  return (
-    <div
-      className="absolute bg-pine/30 backdrop-blur-[4px]"
-      style={{ left, top, width, height, right, bottom }}
-    />
-  );
-}
 
 function TourGuide({
   rootRef,
@@ -753,10 +713,8 @@ function TourGuide({
   tone: "light" | "green";
   coachAt?: "top" | "under" | "bottom" | "above-tabs";
 }) {
-  const coachRef = useRef<HTMLDivElement>(null);
   const [hole, setHole] = useState<TourBox | null>(null);
   const [coachLow, setCoachLow] = useState(false);
-  const [link, setLink] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const advanceRef = useRef(onAdvance);
   advanceRef.current = onAdvance;
 
@@ -779,7 +737,6 @@ function TourGuide({
           : node;
       if (!node || !tip) {
         setHole(null);
-        setLink(null);
         return;
       }
       scrollSpotIntoView(tip, root);
@@ -790,25 +747,6 @@ function TourGuide({
       if (coachAt === "top" || coachAt === "under") setCoachLow(false);
       else if (coachAt === "bottom" || coachAt === "above-tabs") setCoachLow(true);
       else setCoachLow(nextTip.y < 170);
-
-      const bubble = coachRef.current;
-      const wideButton = nextTip.w > 200 && nextTip.h < 80;
-      if (!bubble || spot === "back" || wideButton) {
-        setLink(null);
-        return;
-      }
-      const coachBox = toBox(rootBox, bubble);
-      const start = edgeToward(
-        coachBox,
-        { x: nextTip.x + nextTip.w / 2, y: nextTip.y + nextTip.h / 2 },
-        8,
-      );
-      const end = edgeToward(nextTip, start, 12);
-      if (Math.hypot(end.x - start.x, end.y - start.y) < 56) {
-        setLink(null);
-        return;
-      }
-      setLink({ x1: start.x, y1: start.y, x2: end.x, y2: end.y });
     };
 
     find();
@@ -840,8 +778,16 @@ function TourGuide({
     };
   }, [rootRef, spot, highlight, coachLow, coachAt]);
 
+  const isBack = spot === "back";
+  const backPad = isBack ? 5 : 0;
   const cut = hole
-    ? { x: hole.x, y: hole.y, w: hole.w, h: hole.h, r: hole.r }
+    ? {
+        x: hole.x - backPad,
+        y: hole.y - backPad,
+        w: hole.w + backPad * 2,
+        h: hole.h + backPad * 2,
+        r: isBack ? (Math.min(hole.w, hole.h) + backPad * 2) / 2 : hole.r,
+      }
     : null;
 
   return (
@@ -854,55 +800,27 @@ function TourGuide({
           filter: none !important;
         }
         #tour-root [data-tour-spot="${highlight}"] {
-          outline: 3px solid #2e7d6b;
-          outline-offset: -3px;
           ${explore ? "" : "pointer-events: auto !important;"}
           filter: none !important;
         }
       `}</style>
       <div className="pointer-events-none absolute inset-0 z-50">
         {cut ? (
-          <>
-            {dim ? (
-              <>
-                <FrostPanel left={0} top={0} right={0} height={cut.y} />
-                <FrostPanel left={0} top={cut.y + cut.h} right={0} bottom={0} />
-                <FrostPanel left={0} top={cut.y} width={cut.x} height={cut.h} />
-                <FrostPanel left={cut.x + cut.w} top={cut.y} right={0} height={cut.h} />
-              </>
-            ) : null}
-          </>
-        ) : null}
-        {link ? (
-          <svg className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
-            <defs>
-              <marker
-                id="tour-arrowhead"
-                markerWidth="11"
-                markerHeight="11"
-                refX="9"
-                refY="5.5"
-                orient="auto"
-              >
-                <path d="M0 0.6 L10 5.5 L0 10.4 Z" fill="#2e7d6b" />
-              </marker>
-            </defs>
-            <path
-              d={pointerPath(link.x1, link.y1, link.x2, link.y2)}
-              fill="none"
-              stroke="#ffffff"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-            <path
-              d={pointerPath(link.x1, link.y1, link.x2, link.y2)}
-              fill="none"
-              stroke="#2e7d6b"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              markerEnd="url(#tour-arrowhead)"
-            />
-          </svg>
+          <div
+            className="absolute"
+            style={{
+              left: cut.x,
+              top: cut.y,
+              width: cut.w,
+              height: cut.h,
+              borderRadius: cut.r,
+              boxShadow: isBack
+                ? "0 0 0 4px #2e7d6b"
+                : dim
+                  ? "0 0 0 3px #2e7d6b, 0 0 0 9999px rgba(20, 48, 46, 0.28)"
+                  : "0 0 0 3px #2e7d6b",
+            }}
+          />
         ) : null}
         <div
           className={cn(
@@ -937,7 +855,7 @@ function TourGuide({
             >
               <Mascot src={MASCOT.calm} size={64} />
             </span>
-            <div ref={coachRef} className={cn("rounded-3xl rounded-bl-md px-4 py-3", COACH_FILL)}>
+            <div className={cn("rounded-3xl rounded-bl-md px-4 py-3", COACH_FILL)}>
               <p className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-teal">
                 {step} of {total}
               </p>
