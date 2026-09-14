@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Screen,
   ScreenBody,
@@ -42,7 +43,7 @@ import {
   ProgressScreen,
   ProfileScreen,
 } from "./main";
-import { MorningQuestionsScreen, EveningCheckinScreen } from "./questions";
+import { MorningQuestionsScreen } from "./questions";
 
 import type { PlanItem, ScreenKey, SnackHabit, TummyStore } from "./store";
 import { computeNextTask, minutesNow } from "./store";
@@ -323,7 +324,7 @@ type TourStep = {
   clock: number;
   done: string[];
   coach: string;
-  cta: string;
+  spot: string;
 };
 
 const APP_TOUR: TourStep[] = [
@@ -332,92 +333,93 @@ const APP_TOUR: TourStep[] = [
     tabs: true,
     clock: 7 * 60 - 2,
     done: [],
+    spot: "todays-plan",
     coach:
-      "This is home. Every day starts here. The top card is the next thing to do. Today's plan is the full list, and the tabs at the bottom move you around the app.",
-    cta: "Open today's plan",
+      "This is home. Next up is the thing due right now. Open Today's plan to see the whole day.",
   },
   {
     view: "sessionHub",
     clock: 7 * 60 - 2,
     done: [],
-    coach:
-      "The day is this list, in order. First come a few wake-up questions. Then the fasted recording.",
-    cta: "See the morning questions",
+    spot: "plan-cta",
+    coach: "The day is this list, in order. First come a few wake-up questions.",
   },
   {
     view: "morningQuestions",
     clock: 7 * 60,
     done: [],
-    coach:
-      "This is the wake-up check-in. A few short questions, then you record. You don't need to answer them here.",
-    cta: "Next, the morning recording",
+    spot: "back",
+    coach: "This is the wake-up check-in. Have a look, then use back. You do not need to answer.",
   },
   {
     view: "sessionHub",
     clock: 7 * 60 + 10,
     done: ["qMorning"],
+    spot: "plan-cta",
     coach:
-      "This is the fasted morning recording. Two minutes, sitting still, before food or drink. You'll practice that later. We stay on the pages for now.",
-    cta: "Next, the study meal",
+      "Then the fasted morning recording. Two minutes, sitting still, before food or drink. This is the button. We will not open the recorder now.",
   },
   {
     view: "sessionHub",
     clock: 8 * 60,
     done: ["qMorning", "fasted", "preMeal"],
+    spot: "plan-cta",
     coach:
-      "Just before you eat there is a short recording. Then you photo the plate and tap when you start and finish. The later recordings are timed from that last bite.",
-    cta: "See the meal page",
+      "Then your study meal. Photo the plate and tap when you start and finish. The later recordings are timed from that last bite.",
   },
   {
     view: "mealCapture",
     clock: 8 * 60,
     done: ["qMorning", "fasted", "preMeal"],
-    coach:
-      "This is the meal page. Photo, start, then finish. We skip the recorder and keep walking the day.",
-    cta: "Next, after the meal",
+    spot: "back",
+    coach: "This is the meal page. Photo, start, then finish. Use back when you are done looking.",
   },
   {
     view: "sessionHub",
     clock: 8 * 60 + 25,
     done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    spot: "plan-cta",
     coach:
-      "Right after the last bite, then every 30 minutes for 3.5 hours. If you can't record well, skip it and tell us why.",
-    cta: "Next, logging",
+      "Right after the last bite, then every 30 minutes for 3.5 hours. If you cannot record well, skip it and tell us why.",
+  },
+  {
+    view: "sessionHub",
+    clock: 8 * 60 + 25,
+    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    spot: "back",
+    coach: "Back takes you home, where the tabs move you around the app.",
+  },
+  {
+    view: "home",
+    tabs: true,
+    clock: 12 * 60,
+    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    spot: "logHub",
+    coach: "Log is for everything else you eat, drink, or feel. Add things whenever you remember.",
   },
   {
     view: "logHub",
     tabs: true,
     clock: 12 * 60,
     done: ["qMorning", "fasted", "preMeal", "mealStart"],
-    coach:
-      "The Log tab is how you move off the clock. Other meals, drinks, and symptoms can be added whenever you remember.",
-    cta: "Next, progress",
+    spot: "progress",
+    coach: "Progress is the week at a glance. Freeze days live here if you need a pause.",
   },
   {
     view: "progress",
     tabs: true,
     clock: 12 * 60,
     done: ["qMorning", "fasted", "preMeal", "mealStart"],
-    coach:
-      "Progress is the week at a glance. Freeze days live here if you need a pause.",
-    cta: "Next, profile",
+    spot: "profile",
+    coach: "Profile is settings and help. You can change reminder times or reach the study team.",
   },
   {
     view: "profile",
     tabs: true,
     clock: 12 * 60,
     done: ["qMorning", "fasted", "preMeal", "mealStart"],
-    coach:
-      "Profile is settings and help. After setup you can change reminder times or reach the study team.",
-    cta: "Last, evening",
-  },
-  {
-    view: "eveningCheckin",
-    clock: 21 * 60,
-    done: ["qMorning", "fasted", "preMeal", "mealStart"],
-    coach:
-      "Night ends with a short evening check-in. That's the last thing on the plan.",
-    cta: "That's the app",
+    spot: "daily-times",
+    coach: "Set your daily times here. That is the next step after this walkthrough.",
   },
 ];
 
@@ -467,16 +469,188 @@ function TourView({ view, store }: { view: ScreenKey; store: TummyStore }) {
   if (view === "mealCapture") return <MealCaptureScreen store={store} />;
   if (view === "logHub") return <LogHubScreen store={store} />;
   if (view === "progress") return <ProgressScreen store={store} />;
-  if (view === "profile") return <ProfileScreen store={store} />;
-  return <EveningCheckinScreen store={store} />;
+  return <ProfileScreen store={store} />;
+}
+
+function tourRoot(rootRef: { current: HTMLDivElement | null }) {
+  return rootRef.current ?? document.getElementById("tour-root");
+}
+
+function scrollSpotIntoView(node: HTMLElement, root: HTMLElement) {
+  let parent: HTMLElement | null = node.parentElement;
+  while (parent && root.contains(parent)) {
+    const overflow = getComputedStyle(parent).overflowY;
+    if (overflow === "auto" || overflow === "scroll") {
+      const n = node.getBoundingClientRect();
+      const p = parent.getBoundingClientRect();
+      if (n.top < p.top + 12 || n.bottom > p.bottom - 12) {
+        parent.scrollTop += n.top - p.top - (p.height - n.height) / 2;
+      }
+      return;
+    }
+    parent = parent.parentElement;
+  }
+}
+
+function TourGuide({
+  rootRef,
+  spot,
+  coach,
+  step,
+  total,
+  onAdvance,
+}: {
+  rootRef: { current: HTMLDivElement | null };
+  spot: string;
+  coach: string;
+  step: number;
+  total: number;
+  onAdvance: () => void;
+}) {
+  const [target, setTarget] = useState<HTMLElement | null>(null);
+  const [coachLow, setCoachLow] = useState(false);
+  const [arrowPos, setArrowPos] = useState<"above" | "below" | "right">("right");
+  const advanceRef = useRef(onAdvance);
+  advanceRef.current = onAdvance;
+
+  useLayoutEffect(() => {
+    let cancelled = false;
+    const find = () => {
+      const root = tourRoot(rootRef);
+      if (!root || cancelled) return;
+      const node = root.querySelector(`[data-tour-spot="${spot}"]`);
+      if (!(node instanceof HTMLElement) || node.getBoundingClientRect().width < 2) {
+        setTarget(null);
+        return;
+      }
+      scrollSpotIntoView(node, root);
+      const rootBox = root.getBoundingClientRect();
+      const box = node.getBoundingClientRect();
+      const nearTop = box.top - rootBox.top < 92;
+      const nearBottom = rootBox.bottom - box.bottom < 88;
+      setTarget(node);
+      setCoachLow(nearTop);
+      setArrowPos(nearBottom ? "above" : nearTop ? "below" : "right");
+    };
+
+    find();
+    const frames = [requestAnimationFrame(find), 0];
+    frames[1] = requestAnimationFrame(() => find());
+    const poll = window.setInterval(find, 160);
+    const root = tourRoot(rootRef);
+    const ro = new ResizeObserver(find);
+    if (root) ro.observe(root);
+    root?.addEventListener("scroll", find, true);
+
+    const onClick = (event: Event) => {
+      const el = (event.target as Element | null)?.closest?.("[data-tour-spot]");
+      if (!el || el.getAttribute("data-tour-spot") !== spot) return;
+      event.preventDefault();
+      event.stopPropagation();
+      advanceRef.current();
+    };
+    root?.addEventListener("click", onClick, true);
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frames[0]);
+      cancelAnimationFrame(frames[1]);
+      window.clearInterval(poll);
+      ro.disconnect();
+      root?.removeEventListener("scroll", find, true);
+      root?.removeEventListener("click", onClick, true);
+    };
+  }, [rootRef, spot]);
+
+  return (
+    <>
+      <style>{`
+        #tour-root [data-tour-spot="${spot}"] {
+          pointer-events: auto !important;
+          position: relative;
+          z-index: 40;
+        }
+      `}</style>
+      <div className="pointer-events-none absolute inset-0 z-30">
+        <div className={cn("absolute inset-x-0 px-4", coachLow ? "bottom-4" : "top-3")}>
+          <div className="flex items-end gap-3">
+            <Mascot src={MASCOT.calm} size={72} />
+            <div className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-3 shadow-[0_12px_32px_rgba(20,48,46,0.16)]">
+              <p className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-teal">
+                {step} of {total}
+              </p>
+              <p className="mt-1 text-[15px] font-semibold leading-snug text-pine">{coach}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {target
+        ? createPortal(
+            <>
+              <span
+                className="pointer-events-none absolute -inset-1 rounded-[22px] ring-[3px] ring-teal"
+                aria-hidden
+              />
+              <span
+                className={cn(
+                  "pointer-events-none absolute z-50 flex w-10 justify-center text-teal",
+                  arrowPos === "right"
+                    ? "right-10 top-1/2 -translate-y-1/2"
+                    : "left-1/2 -translate-x-1/2",
+                )}
+                style={
+                  arrowPos === "above"
+                    ? { top: -40 }
+                    : arrowPos === "below"
+                      ? { top: "calc(100% + 6px)" }
+                      : undefined
+                }
+                aria-hidden
+              >
+                <span className="animate-bounce">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                    {arrowPos === "above" ? (
+                      <path
+                        d="M12 5v14M6 13l6 6 6-6"
+                        stroke="currentColor"
+                        strokeWidth="2.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    ) : arrowPos === "below" ? (
+                      <path
+                        d="M12 19V5M6 11l6-6 6 6"
+                        stroke="currentColor"
+                        strokeWidth="2.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    ) : (
+                      <path
+                        d="M5 12h14M13 6l6 6-6 6"
+                        stroke="currentColor"
+                        strokeWidth="2.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    )}
+                  </svg>
+                </span>
+              </span>
+            </>,
+            target,
+          )
+        : null}
+    </>
+  );
 }
 
 export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
   const [started, setStarted] = useState(false);
-  const [done, setDone] = useState(false);
   const [step, setStep] = useState(0);
   const item = APP_TOUR[Math.min(step, APP_TOUR.length - 1)];
   const last = step >= APP_TOUR.length - 1;
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const prev = store.demoNow;
@@ -495,6 +669,14 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
     [store, step],
   );
 
+  const advance = () => {
+    if (last) {
+      store.go("scheduling");
+      return;
+    }
+    setStep((n) => n + 1);
+  };
+
   if (!started) {
     return (
       <Screen>
@@ -506,7 +688,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
               Let's walk through a day
             </h2>
             <p className="mt-3 text-[17px] font-semibold leading-snug text-pine-soft">
-              I'll show you the real screens, in order. Tap Next to move through. You will not fill
+              I'll point at the real buttons. Tap the one with the arrow. You will not fill
               anything in, and nothing from this walkthrough is saved.
             </p>
           </div>
@@ -520,75 +702,28 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
 
   return (
     <Screen className="relative">
-      <div className="shrink-0 px-4 pt-3">
-        <div className="flex items-center gap-2 rounded-2xl bg-mint-soft px-4 py-3">
-          <span className="text-teal">
-            <IconLock width={20} height={20} />
-          </span>
-          <p className="flex-1 text-[15px] font-extrabold text-pine">
-            Walkthrough · {step + 1} of {APP_TOUR.length}
-          </p>
-        </div>
-      </div>
-
-      <div className="relative min-h-0 flex-1 overflow-hidden">
-        <div className="pointer-events-none h-full overflow-hidden">
+      <div
+        ref={rootRef}
+        id="tour-root"
+        className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+      >
+        <div className="pointer-events-none min-h-0 flex-1 overflow-hidden">
           <TourView view={item.view} store={previewStore} />
         </div>
-        {!done ? (
-          <div className="absolute inset-x-0 bottom-0 z-40 bg-gradient-to-t from-pine via-pine/85 to-transparent px-5 pb-6 pt-16">
-            <div className="flex items-end gap-3">
-              <Mascot src={MASCOT.calm} size={84} />
-              <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[16px] font-semibold leading-snug text-pine">
-                {item.coach}
-              </p>
-            </div>
-            <div className="mt-4 flex items-center gap-3">
-              {step > 0 ? (
-                <button
-                  type="button"
-                  onClick={() => setStep((n) => Math.max(0, n - 1))}
-                  className="min-h-[56px] px-2 text-[16px] font-extrabold text-mint"
-                >
-                  Back
-                </button>
-              ) : null}
-              <div className="min-w-0 flex-1">
-                <Btn
-                  onClick={() => {
-                    if (last) setDone(true);
-                    else setStep((n) => n + 1);
-                  }}
-                >
-                  {item.cta}
-                </Btn>
-              </div>
-            </div>
+        {item.tabs ? (
+          <div className="pointer-events-none">
+            <TabBar store={previewStore} />
           </div>
         ) : null}
+        <TourGuide
+          rootRef={rootRef}
+          spot={item.spot}
+          coach={item.coach}
+          step={step + 1}
+          total={APP_TOUR.length}
+          onAdvance={advance}
+        />
       </div>
-
-      {item.tabs ? (
-        <div className="pointer-events-none">
-          <TabBar store={previewStore} />
-        </div>
-      ) : null}
-
-      {done ? (
-        <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5">
-          <div className="rounded-[28px] bg-surface p-6 text-center shadow-[0_18px_50px_rgba(20,48,46,0.28)]">
-            <Mascot src={MASCOT.cheer} size={140} className="mx-auto" />
-            <h2 className="mt-3 text-[24px] font-extrabold text-pine">That's the whole app</h2>
-            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
-              Home, the day's plan, logging, progress, and profile. Next you'll set the times we
-              use for reminders.
-            </p>
-            <div className="mt-5">
-              <Btn onClick={() => store.go("scheduling")}>Set my daily times</Btn>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </Screen>
   );
 }

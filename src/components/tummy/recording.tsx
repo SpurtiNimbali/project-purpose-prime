@@ -136,6 +136,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
         title="Today's plan"
         onBack={store.back}
         step={`Day ${store.day} of 7`}
+        tourSpot={store.tourPreview ? "back" : undefined}
       />
       <div className="flex min-h-0 flex-1 flex-col px-5 pb-4">
         <div className="min-h-0 flex-1 overflow-y-auto">
@@ -207,7 +208,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                       </div>
                     </div>
                     <button
-                      data-tour-spot={store.tourPreview ? "" : undefined}
+                      data-tour-spot={store.tourPreview ? "plan-cta" : undefined}
                       onClick={() => open(p)}
                       className="relative mt-4 flex min-h-[56px] w-full items-center justify-center rounded-2xl bg-surface text-[17px] font-extrabold text-teal active:scale-[0.99]"
                     >
@@ -379,7 +380,7 @@ export function CaseOffLayout({
         </p>
       </div>
       <div className="shrink-0 px-5 pb-7">
-        <div data-tour-spot="">
+        <div>
           <Btn onClick={onContinue}>My case is off</Btn>
         </div>
       </div>
@@ -487,7 +488,12 @@ export function MealCaptureScreen({ store }: { store: TummyStore }) {
   const [desc, setDesc] = useState("");
   return (
     <Screen>
-      <TopBar title={`Start your ${store.meal}`} onBack={store.back} step="Start of meal" />
+      <TopBar
+        title={`Start your ${store.meal}`}
+        onBack={store.back}
+        step="Start of meal"
+        tourSpot={store.tourPreview ? "back" : undefined}
+      />
       <ScreenBody>
         <button
           onClick={() => setPhotos((p) => p + 1)}
@@ -522,7 +528,7 @@ export function MealCaptureScreen({ store }: { store: TummyStore }) {
         </div>
       </ScreenBody>
       <StickyFooter>
-        <div data-tour-spot={store.tourPreview ? "" : undefined}>
+        <div>
           <Btn
             disabled={!store.tourPreview && !photos && desc.trim().length === 0}
             onClick={() => {
@@ -566,7 +572,7 @@ export function MealEndScreen({ store }: { store: TummyStore }) {
         </p>
       </div>
       <div className="shrink-0 px-5 pb-7">
-        <div data-tour-spot={store.tourPreview ? "" : undefined}>
+        <div>
           <Btn
             onClick={() => {
               store.completeItem("mealStart");

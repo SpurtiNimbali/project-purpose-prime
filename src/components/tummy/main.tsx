@@ -222,7 +222,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             </>
           ) : null}
           <button
-            data-tour-spot={store.tourPreview ? "" : undefined}
+            data-tour-spot={store.tourPreview ? "next-up" : undefined}
             onClick={startTask}
             className="relative flex w-full items-center gap-3 text-left active:scale-[0.99]"
           >
@@ -305,7 +305,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
         {/* day rail, recordings, meals and question blocks */}
         <div className="mt-4 rounded-[28px] border border-line bg-surface p-4 shadow-sm">
           <button
-            data-tour-spot={store.tourPreview ? "" : undefined}
+            data-tour-spot={store.tourPreview ? "todays-plan" : undefined}
             onClick={() => store.go("sessionHub")}
             className="relative flex w-full items-center gap-3 text-left active:scale-[0.99]"
           >
@@ -502,7 +502,7 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
       <ScreenBody className="pt-1">
         {tab === "add" ? (
           <>
-            <div className="grid grid-cols-2 gap-3" data-tour-spot={store.tourPreview ? "" : undefined}>
+            <div className="grid grid-cols-2 gap-3">
               {LOG_ITEMS.map(({ k, label, sub, Icon, kind }) => (
                 <button
                   key={k}
@@ -1339,8 +1339,9 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
           {rows.map(({ label, sub, Icon, to }) => (
             <button
               key={label}
+              data-tour-spot={store.tourPreview && to === "scheduling" ? "daily-times" : undefined}
               onClick={() => store.go(to)}
-              className="flex min-h-[68px] w-full items-center gap-3 rounded-3xl border border-line bg-surface px-4 py-2.5 text-left"
+              className="relative flex min-h-[68px] w-full items-center gap-3 rounded-3xl border border-line bg-surface px-4 py-2.5 text-left"
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
                 <Icon width={22} height={22} />

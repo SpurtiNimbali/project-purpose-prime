@@ -291,6 +291,7 @@ function QuestionFlow({
         title={title}
         onBack={store.back}
         progress={done ? 1 : (step + 1) / Math.max(questions.length, 1)}
+        tourSpot={store.tourPreview ? "back" : undefined}
       />
       <ScreenBody>
         <div className="space-y-3">
@@ -321,7 +322,7 @@ function QuestionFlow({
         </div>
 
         {!done && !needNote && !needExplain && !needBristol ? (
-          <div className="mt-4" data-tour-spot={store.tourPreview ? "" : undefined}>
+          <div className="mt-4">
             {current.hint ? (
               <p className="mb-2 text-[15px] font-semibold text-pine-soft">{current.hint}</p>
             ) : null}
@@ -548,7 +549,7 @@ function QuestionFlow({
       </ScreenBody>
       {done ? (
         <StickyFooter>
-          <div data-tour-spot={store.tourPreview ? "" : undefined}>
+          <div>
             <Btn onClick={() => onFinish(answers)}>{finishLabel}</Btn>
           </div>
         </StickyFooter>

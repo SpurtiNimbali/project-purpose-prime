@@ -51,6 +51,7 @@ export function TopBar({
   dark,
   step,
   progress,
+  tourSpot,
 }: {
   title?: string;
   onBack?: () => void;
@@ -59,6 +60,7 @@ export function TopBar({
   step?: string;
   /** 0 to 1. When set, the step count is hidden and a bar is shown instead. */
   progress?: number;
+  tourSpot?: string;
 }) {
   const pct = progress === undefined ? null : Math.round(Math.min(1, Math.max(0, progress)) * 100);
   return (
@@ -68,8 +70,9 @@ export function TopBar({
           <button
             onClick={onBack}
             aria-label="Go back"
+            data-tour-spot={tourSpot}
             className={cn(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
+              "relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
               dark ? "bg-surface/15" : "bg-surface",
             )}
           >
@@ -456,10 +459,10 @@ export function TabBar({ store }: { store: TummyStore }) {
           return (
             <button
               key={key}
-              data-tour-spot={store.tourPreview ? "" : undefined}
+              data-tour-spot={store.tourPreview ? key : undefined}
               onClick={() => store.go(key)}
               className={cn(
-                "flex min-h-[58px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl",
+                "relative flex min-h-[58px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl",
                 active ? "bg-mint-soft text-teal" : "text-pine-soft",
               )}
             >
