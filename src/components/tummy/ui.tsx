@@ -121,7 +121,7 @@ export function Btn({
 }: {
   children: ReactNode;
   onClick?: () => void;
-  variant?: "primary" | "secondary" | "ghost" | "danger" | "blue";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "blue" | "mint";
   className?: string;
   disabled?: boolean;
   icon?: ReactNode;
@@ -129,6 +129,7 @@ export function Btn({
   const styles: Record<string, string> = {
     primary:
       "bg-teal text-surface shadow-[0_6px_0_0_var(--color-teal-deep)] active:translate-y-[3px] active:shadow-[0_3px_0_0_var(--color-teal-deep)]",
+    mint: "bg-mint text-pine shadow-[0_6px_0_0_#5ba88f] active:translate-y-[3px] active:shadow-[0_3px_0_0_#5ba88f]",
     blue: "bg-blue text-surface shadow-[0_6px_0_0_#2f6f85] active:translate-y-[3px]",
     secondary: "bg-surface text-pine border-2 border-line",
     ghost: "bg-transparent text-teal",
@@ -139,7 +140,7 @@ export function Btn({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl px-5 text-[17px] font-extrabold transition-all disabled:opacity-40",
+        "flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl px-5 text-[17px] font-extrabold transition-all disabled:pointer-events-none disabled:bg-line disabled:text-pine-soft disabled:shadow-none disabled:opacity-100",
         styles[variant],
         className,
       )}

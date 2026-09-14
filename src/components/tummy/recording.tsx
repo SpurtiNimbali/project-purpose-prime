@@ -388,7 +388,7 @@ export function CaseOffLayout({
       </div>
       <div className="shrink-0 px-5 pb-7">
         <div>
-          <Btn onClick={onContinue}>My case is off</Btn>
+          <Btn variant="mint" onClick={onContinue}>My case is off</Btn>
         </div>
       </div>
     </Screen>
@@ -855,8 +855,10 @@ function GuideCard({
             onClick={onNext}
             disabled={nextDisabled}
             className={cn(
-              "min-h-[48px] min-w-[118px] rounded-full bg-teal px-7 text-[16px] font-extrabold text-surface shadow-[0_5px_0_0_var(--color-teal-deep)] active:translate-y-[2px] active:shadow-[0_3px_0_0_var(--color-teal-deep)]",
-              nextDisabled && "pointer-events-none opacity-40 shadow-none",
+              "min-h-[48px] min-w-[118px] rounded-full px-7 text-[16px] font-extrabold",
+              nextDisabled
+                ? "pointer-events-none border-2 border-teal-deep bg-mint text-pine"
+                : "bg-teal text-surface shadow-[0_5px_0_0_var(--color-teal-deep)] active:translate-y-[2px] active:shadow-[0_3px_0_0_var(--color-teal-deep)]",
             )}
           >
             {cta}
@@ -982,7 +984,7 @@ export function PositioningGuideLayout({
             title={placement.t}
             body={placement.b}
             Icon={placement.Icon}
-            cta={lastTip ? "I'm in position" : "Next"}
+            cta={waitForFilm ? "Watch the guide" : lastTip ? "I'm in position" : "Next"}
             nextDisabled={waitForFilm}
             onBack={tip > 0 ? () => setTip((i) => i - 1) : undefined}
             onNext={() => {
@@ -1161,7 +1163,7 @@ export function SymptomGrid({
               onPick(key, label);
               if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(18);
             }}
-            className="relative flex h-[76px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-surface/20 bg-surface/10 text-surface active:bg-mint active:text-pine"
+            className="relative flex h-[76px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-surface/35 bg-surface/15 text-surface active:bg-mint active:text-pine"
           >
             <Icon width={26} height={26} />
             <span className="text-[14px] font-extrabold">{label}</span>

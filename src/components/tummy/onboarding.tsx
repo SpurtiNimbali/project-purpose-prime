@@ -342,11 +342,11 @@ type TourStep = {
 function tourChrome(item: TourStep) {
   const back = item.spot === "back";
   return {
-    highlight: item.highlight ?? (back ? "tour-widget" : item.spot),
+    highlight: item.highlight ?? item.spot,
     explore: item.explore ?? back,
     dim: item.dim ?? !back,
     tone: item.tone ?? (back ? "green" : "light"),
-    coachAt: item.coachAt,
+    coachAt: item.coachAt ?? (back ? "bottom" : undefined),
     chatOpen: !!item.chatOpen,
   };
 }
@@ -499,7 +499,6 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "ask-tummy-close",
-    highlight: "ask-tummy-sheet",
     chatOpen: true,
     explore: true,
     dim: false,
@@ -521,7 +520,6 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "log-toilet",
-    highlight: "log-grid",
     coach: "Add any of these when you remember. Open toilet for a look.",
   },
   {
@@ -545,7 +543,6 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "freeze-day",
-    highlight: "progress-overview",
     coach:
       "Days, recordings, meals, and questions live here. You also get two freeze days if you need a pause.",
   },
@@ -563,7 +560,6 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "contact-team",
-    highlight: "profile-card",
     coach: "Change your times, review setup, or reach the study team.",
   },
   {
@@ -696,6 +692,11 @@ function connectorPath(x1: number, y1: number, x2: number, y2: number, rail?: bo
   return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
 }
 
+const COACH_FILL =
+  "border-[2.5px] border-teal-deep bg-mint text-pine shadow-[0_12px_28px_rgba(20,48,46,0.18)]";
+const TOUR_RING =
+  "0 0 0 2px #ffffff, 0 0 0 7px #2e7d6b, 0 12px 28px rgba(20, 48, 46, 0.2)";
+
 function FrostPanel({
   left,
   top,
@@ -715,7 +716,7 @@ function FrostPanel({
   if (height !== undefined && height <= 0) return null;
   return (
     <div
-      className="absolute bg-wash/35 backdrop-blur-[2.5px]"
+      className="absolute bg-pine/30 backdrop-blur-[4px]"
       style={{ left, top, width, height, right, bottom }}
     />
   );
@@ -731,7 +732,6 @@ function TourGuide({
   onAdvance,
   dim,
   explore,
-  tone,
   coachAt,
 }: {
   rootRef: { current: HTMLDivElement | null };
@@ -752,7 +752,6 @@ function TourGuide({
   const [link, setLink] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const advanceRef = useRef(onAdvance);
   advanceRef.current = onAdvance;
-  const green = tone === "green";
 
   useLayoutEffect(() => {
     let cancelled = false;
@@ -881,9 +880,7 @@ function TourGuide({
                 width: cut.w,
                 height: cut.h,
                 borderRadius: cut.r,
-                boxShadow: dim
-                  ? "0 0 0 3px #e7f1ec, 0 0 0 6px #2e7d6b, 0 10px 28px rgba(20, 48, 46, 0.16)"
-                  : "0 0 0 3px #2e7d6b, 0 10px 28px rgba(20, 48, 46, 0.12)",
+                boxShadow: TOUR_RING,
               }}
             />
           </>
@@ -893,20 +890,27 @@ function TourGuide({
             <defs>
               <marker
                 id="tour-arrowhead"
-                markerWidth="10"
-                markerHeight="10"
-                refX="8"
-                refY="5"
+                markerWidth="11"
+                markerHeight="11"
+                refX="9"
+                refY="5.5"
                 orient="auto"
               >
-                <path d="M0 0.8 L9 5 L0 9.2 Z" fill="#2e7d6b" />
+                <path d="M0 0.6 L10 5.5 L0 10.4 Z" fill="#2e7d6b" />
               </marker>
             </defs>
             <path
               d={connectorPath(link.x1, link.y1, link.x2, link.y2, spot === "back")}
               fill="none"
+              stroke="#ffffff"
+              strokeWidth="7"
+              strokeLinecap="round"
+            />
+            <path
+              d={connectorPath(link.x1, link.y1, link.x2, link.y2, spot === "back")}
+              fill="none"
               stroke="#2e7d6b"
-              strokeWidth="2.4"
+              strokeWidth="3"
               strokeLinecap="round"
               markerEnd="url(#tour-arrowhead)"
             />
@@ -914,37 +918,36 @@ function TourGuide({
         ) : null}
         <div
           className={cn(
+            "pointer-events-none absolute inset-x-0 h-44",
+            coachLow
+              ? dim
+                ? "bottom-0 bg-gradient-to-t from-pine/35 to-transparent"
+                : "bottom-0 bg-gradient-to-t from-wash from-30% to-transparent"
+              : dim
+                ? "top-0 bg-gradient-to-b from-pine/30 to-transparent"
+                : "top-0 bg-gradient-to-b from-wash from-25% to-transparent",
+          )}
+        />
+        <div
+          className={cn(
             "absolute inset-x-0 z-10 px-4",
             coachLow ? "bottom-4" : coachAt === "under" ? "top-[76px]" : "top-3",
           )}
         >
           <div className="flex items-end gap-3">
-            <Mascot src={MASCOT.calm} size={72} />
-            <div
-              ref={coachRef}
+            <span
               className={cn(
-                "relative min-w-0 flex-1 rounded-3xl rounded-bl-md px-4 py-3",
-                green
-                  ? "bg-teal text-surface shadow-[0_12px_32px_rgba(20,48,46,0.28)]"
-                  : "bg-surface text-pine shadow-[0_12px_32px_rgba(20,48,46,0.16)]",
+                "flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full",
+                COACH_FILL,
               )}
             >
-              <p
-                className={cn(
-                  "text-[12px] font-extrabold uppercase tracking-[0.14em]",
-                  green ? "text-mint" : "text-teal",
-                )}
-              >
+              <Mascot src={MASCOT.calm} size={64} />
+            </span>
+            <div ref={coachRef} className={cn("rounded-3xl rounded-bl-md px-4 py-3", COACH_FILL)}>
+              <p className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-teal-deep">
                 {step} of {total}
               </p>
-              <p
-                className={cn(
-                  "mt-1 text-[15px] font-semibold leading-snug",
-                  green ? "text-surface" : "text-pine",
-                )}
-              >
-                {coach}
-              </p>
+              <p className="mt-1 text-[16px] font-bold leading-snug text-pine">{coach}</p>
             </div>
           </div>
         </div>
@@ -1028,7 +1031,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
             <TabBar store={previewStore} />
           </div>
         ) : null}
-        {item.tabs && !chrome.chatOpen ? (
+        {item.tabs && !chrome.chatOpen && item.view === "home" ? (
           <div className="pointer-events-none">
             <AssistantButton store={previewStore} />
           </div>
@@ -1356,8 +1359,8 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const finished = left === 0;
 
   const banner = (
-    <span className="flex items-center gap-1.5 rounded-full bg-mint-soft px-2.5 py-1 text-[13px] font-extrabold text-pine">
-      <IconLock width={14} height={14} className="text-teal" />
+    <span className="flex items-center gap-1.5 rounded-full border-2 border-teal-deep bg-mint px-2.5 py-1 text-[13px] font-extrabold text-pine">
+      <IconLock width={14} height={14} className="text-teal-deep" />
       Dry run
     </span>
   );
@@ -1463,14 +1466,16 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
         notSeen("severity") ? (
           <div className="absolute inset-0 z-40 flex flex-col justify-end bg-pine/80 px-5 pb-10 backdrop-blur-md">
             <div className="flex items-end gap-3">
-              <Mascot src={MASCOT.calm} size={78} />
-              <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[16px] font-semibold leading-snug text-pine">
+              <span className={cn("flex h-[78px] w-[78px] shrink-0 items-center justify-center rounded-full", COACH_FILL)}>
+                <Mascot src={MASCOT.calm} size={70} />
+              </span>
+              <p className={cn("px-4 py-4 text-[16px] font-bold leading-snug", COACH_FILL, "rounded-3xl rounded-bl-md")}>
                 Now tell me how strong it feels, from 1 to 5. Tapping a number saves it and
                 stamps the time. There's no extra save button.
               </p>
             </div>
             <div className="mt-4">
-              <Btn onClick={() => setSeen((s) => [...s, "severity"])}>Got it</Btn>
+              <Btn variant="mint" onClick={() => setSeen((s) => [...s, "severity"])}>Got it</Btn>
             </div>
           </div>
         ) : (
@@ -1489,13 +1494,15 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
       {coach && !pending && !finished ? (
         <div className="absolute inset-0 z-40 flex flex-col justify-end bg-pine/70 px-5 pb-10 backdrop-blur-md">
           <div className="flex items-end gap-3">
-            <Mascot src={MASCOT.calm} size={84} />
-            <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[17px] font-semibold leading-snug text-pine">
+            <span className={cn("flex h-[84px] w-[84px] shrink-0 items-center justify-center rounded-full", COACH_FILL)}>
+              <Mascot src={MASCOT.calm} size={76} />
+            </span>
+            <p className={cn("px-4 py-4 text-[17px] font-bold leading-snug", COACH_FILL, "rounded-3xl rounded-bl-md")}>
               {coach.text}
             </p>
           </div>
           <div className="mt-5">
-            <Btn onClick={() => setCoach(null)}>{coach.cta}</Btn>
+            <Btn variant="mint" onClick={() => setCoach(null)}>{coach.cta}</Btn>
           </div>
         </div>
       ) : null}

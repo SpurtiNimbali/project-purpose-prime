@@ -234,7 +234,7 @@ export function AssistantSheet({ store }: { store: TummyStore }) {
             data-tour-spot={store.tourPreview ? "ask-tummy-close" : undefined}
             onClick={() => store.setChatOpen(false)}
             aria-label="Close"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface text-pine"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-teal-deep bg-mint text-pine"
           >
             <IconX width={22} height={22} />
           </button>
