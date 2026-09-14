@@ -234,6 +234,10 @@ function QuestionFlow({
   };
 
   const record = (value: string) => {
+    if (store.tourPreview) {
+      store.go("sessionHub");
+      return;
+    }
     const given = { ...answers, [current.id]: value };
     setAnswers(given);
     const next: Turn[] = [...turns, { from: "you", text: value }];

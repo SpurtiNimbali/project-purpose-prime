@@ -366,8 +366,7 @@ export function CaseOffLayout({
 }) {
   return (
     <Screen dark className="relative">
-      <TopBar title={title} onBack={onBack} dark step={step} />
-      {banner}
+      <TopBar title={title} onBack={onBack} dark step={step} right={banner} />
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center">
         <span className="flex h-[132px] w-[132px] items-center justify-center rounded-full bg-surface/10 text-mint">
           <IconPhone width={72} height={72} />
@@ -779,7 +778,7 @@ function GuideCard({
   onBack?: () => void;
 }) {
   return (
-    <div className="absolute inset-x-0 bottom-0 z-40 px-4 pb-6">
+    <div className="px-0">
       <div className="rounded-[28px] bg-surface px-5 pb-5 pt-5 shadow-[0_18px_50px_rgba(20,48,46,0.16)]">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-mint-soft text-teal">
           <Icon width={28} height={28} />
@@ -841,6 +840,19 @@ const POSITION_CHECKS = [
     Icon: IconUser,
   },
   {
+    t: "Bare skin",
+    b: "The bare phone sits on bare skin. A case or shirt leaves a gap the microphone can't hear through.",
+    Icon: IconPhone,
+  },
+];
+
+const PLACEMENT_TIPS = [
+  {
+    t: "Match this placement",
+    b: "8 cm right of your navel, then 3 cm down. Speakers on the skin, screen facing up.",
+    Icon: IconNavelPoint,
+  },
+  {
     t: "Gentle pressure",
     b: "Press lightly. Harder contact muffles the sound.",
     Icon: IconPhone,
@@ -881,31 +893,39 @@ export function PositioningGuideLayout({
   banner?: ReactNode;
 }) {
   const [checked, setChecked] = useState(false);
+  const [tip, setTip] = useState(0);
+  const placement = PLACEMENT_TIPS[Math.min(tip, PLACEMENT_TIPS.length - 1)];
+  const lastTip = tip >= PLACEMENT_TIPS.length - 1;
   return (
     <Screen className="relative overflow-hidden">
-      <div className="relative z-50">
-        <TopBar title="Positioning guide" onBack={onBack} step={step} />
-        {banner}
-      </div>
-      <div className="relative min-h-0 flex-1 pb-[220px]">
-        <div className="flex h-full items-center justify-center px-5 pr-11 py-2">
+      <TopBar title="Positioning guide" onBack={onBack} step={step} right={banner} />
+      <div className="relative min-h-0 flex-1 px-5 pr-11 pb-1 pt-1">
+        <div className="flex h-full items-center justify-center">
           <div className="aspect-square max-h-full w-full overflow-hidden rounded-[28px] bg-pine shadow-[0_12px_40px_rgba(20,48,46,0.14)]">
             <AbdomenGuide play={checked} />
           </div>
         </div>
         {checked ? <ScreenRuler /> : null}
       </div>
-      {!checked ? (
-        <PositionChecksGate onDone={() => setChecked(true)} />
-      ) : (
-        <GuideCard
-          title="Match this placement"
-          body="8 cm right of your navel, then 3 cm down. Speakers on the skin, screen facing up."
-          Icon={IconNavelPoint}
-          cta="I'm in position"
-          onNext={onReady}
-        />
-      )}
+      <div className="shrink-0 px-4 pb-6 pt-4">
+        {!checked ? (
+          <PositionChecksGate onDone={() => setChecked(true)} />
+        ) : (
+          <GuideCard
+            step={tip + 1}
+            total={PLACEMENT_TIPS.length}
+            title={placement.t}
+            body={placement.b}
+            Icon={placement.Icon}
+            cta={lastTip ? "I'm in position" : "Next"}
+            onBack={tip > 0 ? () => setTip((i) => i - 1) : undefined}
+            onNext={() => {
+              if (lastTip) onReady();
+              else setTip((i) => i + 1);
+            }}
+          />
+        )}
+      </div>
     </Screen>
   );
 }

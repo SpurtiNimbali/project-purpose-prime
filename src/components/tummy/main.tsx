@@ -208,9 +208,10 @@ export function HomeScreen({ store }: { store: TummyStore }) {
       </div>
 
       <ScreenBody className="pb-[180px] pt-3">
+        <p className="text-[18px] font-extrabold tracking-tight text-teal">Next up</p>
         <div
           className={cn(
-            "relative overflow-hidden rounded-[28px] p-4",
+            "relative mt-2 overflow-hidden rounded-[28px] p-4",
             due ? "bg-pine text-surface shadow-md" : "border border-line bg-surface text-pine",
           )}
         >
@@ -220,19 +221,10 @@ export function HomeScreen({ store }: { store: TummyStore }) {
               <span className="pointer-events-none absolute -bottom-14 left-8 h-28 w-28 rounded-full bg-blue/30" />
             </>
           ) : null}
-          <p
-            className={cn(
-              "relative text-[13px] font-extrabold uppercase tracking-[0.14em]",
-              due ? "text-mint" : "text-teal",
-            )}
-          >
-            Next up
-          </p>
-          <div className={cn("relative mt-3 h-px", due ? "bg-surface/20" : "bg-line")} />
           <button
             data-tour-spot={store.tourPreview ? "" : undefined}
             onClick={startTask}
-            className="relative mt-3 flex w-full items-center gap-3 text-left active:scale-[0.99]"
+            className="relative flex w-full items-center gap-3 text-left active:scale-[0.99]"
           >
             <span
               className={cn(
@@ -323,9 +315,6 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             <span className="min-w-0 flex-1">
               <span className="block text-[20px] font-extrabold leading-tight text-pine">
                 Today's plan
-              </span>
-              <span className="mt-0.5 block text-[15px] font-semibold leading-snug text-pine-soft">
-                Recordings, your meal, and check-ins
               </span>
             </span>
             <span
