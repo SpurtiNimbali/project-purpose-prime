@@ -649,47 +649,99 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- positioning ---------------- */
 
-/** Dual-scale ruler on the screen edge so they can measure against the glass. */
+/** True-size dual ruler on the glass so they can measure the 8 cm and 3 cm marks. */
 export function ScreenRuler() {
-  const cms = Array.from({ length: 21 }, (_, i) => i / 2);
-  const inches = Array.from({ length: 9 }, (_, i) => i / 2);
+  const mm = Array.from({ length: 101 }, (_, i) => i);
+  const eighths = Array.from({ length: 33 }, (_, i) => i);
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute bottom-[6.75rem] right-0 z-20 w-12 rounded-l-lg border border-r-0 border-amber bg-pine/90 shadow-md"
+      className="pointer-events-none absolute bottom-[6.5rem] right-0 z-20 w-[58px]"
     >
-      <div className="flex justify-between px-1 pt-1 text-[8px] font-extrabold uppercase tracking-wider">
-        <span className="text-amber">cm</span>
-        <span className="text-mint">in</span>
-      </div>
-      <div className="relative flex h-[10cm]">
-        <div className="relative w-7">
-          {cms.map((n) => (
-            <div
-              key={`cm-${n}`}
-              className="absolute left-0 flex items-center"
-              style={{ top: `calc(${n} * 1cm)`, transform: "translateY(-50%)" }}
-            >
-              <span className={cn("h-px bg-amber", Number.isInteger(n) ? "w-2.5" : "w-1.5")} />
-              {Number.isInteger(n) ? (
-                <span className="pl-0.5 text-[8px] font-extrabold leading-none text-amber">{n}</span>
-              ) : null}
-            </div>
-          ))}
+      <div className="overflow-hidden rounded-l-2xl bg-amber-soft shadow-[0_10px_28px_rgba(0,0,0,0.35)] ring-1 ring-amber">
+        <div className="flex items-end justify-between px-1.5 pb-0.5 pt-1.5">
+          <span className="text-[8px] font-extrabold uppercase tracking-[0.16em] text-pine">
+            cm
+          </span>
+          <span className="text-[8px] font-extrabold uppercase tracking-[0.16em] text-teal">
+            in
+          </span>
         </div>
-        <div className="relative w-5 border-l border-amber/50">
-          {inches.map((n) => (
-            <div
-              key={`in-${n}`}
-              className="absolute right-0 flex items-center"
-              style={{ top: `calc(${n} * 1in)`, transform: "translateY(-50%)" }}
-            >
-              {Number.isInteger(n) ? (
-                <span className="pr-0.5 text-[8px] font-extrabold leading-none text-mint">{n}</span>
-              ) : null}
-              <span className={cn("h-px bg-mint", Number.isInteger(n) ? "w-2.5" : "w-1.5")} />
-            </div>
-          ))}
+        <div className="relative mx-[3px] mb-[5px] h-[10cm] overflow-hidden rounded-l-md bg-surface">
+          <span className="absolute inset-x-0 top-0 z-10 h-[2px] bg-pine" />
+          <div className="absolute inset-y-0 left-0 w-[34px]">
+            {mm.map((n) => {
+              const cm = n % 10 === 0;
+              const half = n % 5 === 0;
+              const key = n === 30 || n === 80;
+              return (
+                <span
+                  key={`mm-${n}`}
+                  className={cn(
+                    "absolute left-0 top-0",
+                    key
+                      ? "h-[2px] w-[18px] bg-teal"
+                      : cm
+                        ? "h-[1.5px] w-[14px] bg-pine"
+                        : half
+                          ? "h-px w-[9px] bg-pine/70"
+                          : "h-px w-[5px] bg-pine/35",
+                  )}
+                  style={{ top: `calc(${n} * 1mm)` }}
+                />
+              );
+            })}
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+              <span
+                key={`cmn-${n}`}
+                className={cn(
+                  "absolute left-[16px] text-[10px] font-extrabold leading-none",
+                  n === 3 || n === 8 ? "text-teal" : "text-pine",
+                )}
+                style={{
+                  top: `calc(${n} * 1cm)`,
+                  transform: n === 10 ? "translateY(-100%)" : "translateY(-50%)",
+                }}
+              >
+                {n}
+              </span>
+            ))}
+          </div>
+          <div className="absolute inset-y-0 right-0 w-[20px] border-l border-line">
+            {eighths.map((n) => {
+              const inch = n % 8 === 0;
+              const half = n % 4 === 0;
+              const quarter = n % 2 === 0;
+              return (
+                <span
+                  key={`ie-${n}`}
+                  className={cn(
+                    "absolute right-0 top-0",
+                    inch
+                      ? "h-[1.5px] w-[12px] bg-teal"
+                      : half
+                        ? "h-px w-[8px] bg-teal/80"
+                        : quarter
+                          ? "h-px w-[6px] bg-teal/50"
+                          : "h-px w-[4px] bg-teal/30",
+                  )}
+                  style={{ top: `calc(${n} * 0.125in)` }}
+                />
+              );
+            })}
+            {[1, 2, 3].map((n) => (
+              <span
+                key={`inn-${n}`}
+                className="absolute right-[13px] text-[10px] font-extrabold leading-none text-teal"
+                style={{
+                  top: `calc(${n} * 1in)`,
+                  transform: "translateY(-50%)",
+                }}
+              >
+                {n}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -714,17 +766,17 @@ export function AbdomenGuide() {
 export const PLACEMENT_TIPS = [
   {
     t: "Right lower belly",
-    b: "From your belly button, 8 cm (3.1 in) to your right, then 3 cm (1.2 in) down. Put the bottom-right corner of the speaker edge on that point. The bottom-left corner sits on the same line, toward your belly button.",
+    b: "Measure 8 cm right of your navel, then 3 cm down.",
     Icon: IconRuler,
   },
   {
     t: "Speakers on that spot",
-    b: "Press the speaker side — the short edge with the holes and the charging port — into the skin on that point. Not the camera side.",
+    b: "Press the speaker edge into the skin rather than the camera side.",
     Icon: IconMic,
   },
   {
     t: "Screen up, camera down",
-    b: "Sit down and point the phone straight out from your belly. Screen faces the sky, camera faces the floor. Only the speaker edge touches you.",
+    b: "Hold the phone so the screen faces up and only the speaker edge touches you.",
     Icon: IconPhone,
   },
 ];
@@ -752,9 +804,9 @@ export function PlacementTips({ index }: { index: number }) {
 }
 
 const POSITION_CHECKS = [
-  { t: "Quiet room", b: "Turn off the TV, radio, and fans. Close the door if you can." },
-  { t: "Sitting upright, no talking", b: "Feet on the floor, breathe normally, and stay still." },
-  { t: "Gentle pressure only", b: "Just enough to keep contact. Pressing harder muffles the sound." },
+  { t: "Quiet room", b: "Silence the room, and close the door if you can." },
+  { t: "Sitting upright, no talking", b: "Sit still with your feet on the floor." },
+  { t: "Gentle pressure only", b: "Press lightly, because harder contact muffles the sound." },
 ];
 
 /** One-at-a-time checks over a blurred positioning guide. */
@@ -791,10 +843,10 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
   return (
     <Screen dark className="relative">
       <TopBar title="Positioning guide" onBack={store.back} dark step="Placement" />
-      <div className={cn("flex-1 overflow-y-auto px-5 pb-6 pr-14", !checked && "blur-md")}>
+      <div className={cn("flex-1 overflow-y-auto px-5 pb-6 pr-16", !checked && "blur-md")}>
         <AbdomenGuide />
         <p className="mt-3 text-[16px] font-semibold leading-snug text-mint">
-          Speaker edge on that spot. Screen facing up, camera toward the floor.
+          Use the scale on the right to measure against your skin.
         </p>
         <PlacementTips index={tipIndex} />
       </div>

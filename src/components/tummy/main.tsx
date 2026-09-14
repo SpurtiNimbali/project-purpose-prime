@@ -298,20 +298,12 @@ export function HomeScreen({ store }: { store: TummyStore }) {
         </div>
 
         {/* day rail, recordings, meals and question blocks */}
-        <button
-          onClick={() => store.go("sessionHub")}
-          className="mt-4 w-full rounded-3xl border border-line bg-surface px-4 py-3 text-left shadow-sm active:scale-[0.99]"
-        >
-          <span className="flex items-center justify-between gap-2">
-            <span className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-              Today's tasks
-            </span>
-            <span className="flex items-center gap-1 text-[13px] font-extrabold text-teal">
-              Plan
-              <IconArrowRight width={16} height={16} />
-            </span>
-          </span>
-          <span className="mt-3 flex items-start">
+        <div className="mt-4 rounded-[28px] border border-line bg-surface p-4 shadow-sm">
+          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+            Today's tasks
+          </p>
+          <div className="mt-3 h-px bg-line" />
+          <div className="mt-3 flex items-start">
             {railStart > 0 ? (
               <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-teal" aria-label={`${railStart} earlier items`}>•••</span>
             ) : null}
@@ -362,8 +354,27 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             {railStart + railItems.length < store.plan.length ? (
               <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-pine-soft" aria-label={`${store.plan.length - railStart - railItems.length} later items`}>•••</span>
             ) : null}
-          </span>
-        </button>
+          </div>
+          <button
+            onClick={() => store.go("sessionHub")}
+            className="relative mt-3 flex w-full items-center gap-3 text-left active:scale-[0.99]"
+          >
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+              <IconList width={26} height={26} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[20px] font-extrabold leading-tight text-pine">
+                Open today's plan
+              </span>
+            </span>
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mint-soft text-teal"
+              aria-hidden
+            >
+              <IconArrowRight width={18} height={18} />
+            </span>
+          </button>
+        </div>
 
         <button
           onClick={() => {

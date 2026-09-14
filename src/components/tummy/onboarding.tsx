@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Screen,
   ScreenBody,
@@ -12,6 +12,7 @@ import {
   MascotSays,
   Mascot,
   StickyFooter,
+  TabBar,
   MASCOT,
 } from "./ui";
 import {
@@ -24,7 +25,6 @@ import {
   IconBowl,
   IconSunset,
   IconMoon,
-  IconDroplet,
 } from "./icons";
 import {
   AbdomenGuide,
@@ -37,9 +37,18 @@ import {
   SeveritySheet,
   QualityPanel,
   CaseOffLayout,
+  SessionHubScreen,
+  MealCaptureScreen,
 } from "./recording";
+import {
+  HomeScreen,
+  LogHubScreen,
+  ProgressScreen,
+  ProfileScreen,
+} from "./main";
+import { MorningQuestionsScreen, EveningCheckinScreen } from "./questions";
 
-import type { SnackHabit, TummyStore } from "./store";
+import type { ScreenKey, SnackHabit, TummyStore } from "./store";
 
 import { cn } from "@/lib/utils";
 
@@ -311,291 +320,249 @@ export function QuizScreen({ store }: { store: TummyStore }) {
 }
 
 
-/* ---------------- protocol intro, tutorial-style ---------------- */
+/* ---------------- how a day works: dry run of the real app ---------------- */
 
-function TourHint({ text, up }: { text: string; up?: boolean }) {
-  const arrow = (
-    <span className="text-[22px] leading-none text-amber" aria-hidden>
-      {up ? "↓" : "↑"}
-    </span>
-  );
-  const pill = (
-    <span className="rounded-full bg-amber px-3 py-1 text-[13px] font-extrabold text-pine">
-      {text}
-    </span>
-  );
-  return (
-    <div className="my-2 flex flex-col items-center gap-0.5">
-      {up ? (
-        <>
-          {pill}
-          {arrow}
-        </>
-      ) : (
-        <>
-          {arrow}
-          {pill}
-        </>
-      )}
-    </div>
-  );
-}
+type TourStep = {
+  id: string;
+  view: ScreenKey;
+  tabs?: boolean;
+  jumps: ScreenKey[];
+  coach: string;
+  cta: string;
+};
 
-function Dim({ children }: { children: ReactNode }) {
-  return (
-    <div className="pointer-events-none select-none opacity-45 blur-[1px]">{children}</div>
-  );
-}
-
-function Focus({
-  hint,
-  hintUp,
-  children,
-}: {
-  hint: string;
-  hintUp?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div className="relative z-20">
-      {hintUp ? <TourHint text={hint} up /> : null}
-      <div className="rounded-2xl ring-[3px] ring-amber ring-offset-2 ring-offset-wash">
-        {children}
-      </div>
-      {!hintUp ? <TourHint text={hint} /> : null}
-    </div>
-  );
-}
-
-function FakeChoice({ label, hot }: { label: string; hot?: boolean }) {
-  return (
-    <div
-      className={cn(
-        "flex min-h-[56px] items-center rounded-2xl border-2 px-4 text-[16px] font-bold",
-        hot ? "border-teal bg-mint-soft text-pine" : "border-line bg-surface text-pine",
-      )}
-    >
-      {label}
-    </div>
-  );
-}
-
-function FakeBtn({ label, light }: { label: string; light?: boolean }) {
-  return (
-    <div
-      className={cn(
-        "flex min-h-[56px] items-center justify-center rounded-2xl text-[17px] font-extrabold",
-        light ? "bg-surface text-pine" : "bg-teal text-surface",
-      )}
-    >
-      {label}
-    </div>
-  );
-}
-
-const DAY_TOUR: { title: string; preview: ReactNode }[] = [
+const APP_TOUR: TourStep[] = [
   {
-    title: "Wake-up questions",
-    preview: (
-      <div className="pointer-events-none">
-        <Dim>
-          <div className="mb-4 flex items-start gap-3">
-            <Mascot src={MASCOT.calm} size={56} />
-            <p className="mt-2 rounded-3xl rounded-tl-md border border-line bg-surface px-4 py-3 text-[16px] font-semibold leading-snug text-pine">
-              What time did you get into bed last night?
-            </p>
-          </div>
-        </Dim>
-        <div className="mb-3 h-[62px] rounded-2xl border-2 border-line bg-surface" />
-        <Focus hint="Tap to save">
-          <FakeBtn label="Save this time" />
-        </Focus>
-      </div>
-    ),
+    id: "home",
+    view: "home",
+    tabs: true,
+    jumps: ["home"],
+    coach:
+      "This is home. Every day starts here. The top card is always the next thing to do. The row under it is today's plan.",
+    cta: "Show me the plan",
   },
   {
-    title: "Fasted recording",
-    preview: (
-      <div className="pointer-events-none">
-        <div className="relative overflow-hidden rounded-[28px] bg-pine p-4 text-surface">
-          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-mint">Next up</p>
-          <div className="mt-2 h-px bg-surface/20" />
-          <Focus hint="Start here" hintUp>
-            <div className="flex items-center gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-extrabold uppercase tracking-[0.12em] text-mint">
-                  Fasted recording
-                </p>
-                <p className="text-[20px] font-extrabold leading-tight">Fasted morning recording</p>
-              </div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/15 text-lg font-extrabold">
-                →
-              </div>
-            </div>
-          </Focus>
-          <Dim>
-            <p className="mt-3 py-2 text-center text-[15px] font-extrabold text-surface/70">
-              Skip this recording
-            </p>
-          </Dim>
-        </div>
-      </div>
-    ),
+    id: "plan",
+    view: "sessionHub",
+    jumps: ["sessionHub"],
+    coach:
+      "Today's plan is the full list, in order: wake-up questions, recordings, your study meal, then the evening check-in. If you can't do a recording well, skip it and tell us why.",
+    cta: "Next, morning questions",
   },
   {
-    title: "Your study meal",
-    preview: (
-      <div className="pointer-events-none">
-        <Dim>
-          <div className="mb-4 flex h-24 items-center justify-center rounded-3xl border-2 border-dashed border-line bg-surface text-[16px] font-bold text-pine-soft">
-            Photo of the plate
-          </div>
-        </Dim>
-        <Focus hint="Tap when you start">
-          <FakeBtn label="I'm starting to eat now" />
-        </Focus>
-      </div>
-    ),
+    id: "morning",
+    view: "morningQuestions",
+    jumps: ["morningQuestions"],
+    coach:
+      "Days begin with a few wake-up questions. The fasted recording comes right after — you'll practice that later in setup.",
+    cta: "Next, the study meal",
   },
   {
-    title: "Recordings after the meal",
-    preview: (
-      <div className="pointer-events-none">
-        <Dim>
-          <div className="mb-3 rounded-3xl border border-line bg-surface px-4 py-4 text-[17px] font-extrabold text-pine">
-            Right after the meal
-          </div>
-        </Dim>
-        <div className="rounded-3xl bg-teal p-5 text-surface">
-          <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
-            Do this now
-          </p>
-          <p className="mt-2 text-[20px] font-extrabold leading-tight">Meal + 30 min</p>
-          <Focus hint="Start this one" hintUp>
-            <FakeBtn label="Start this recording" light />
-          </Focus>
-        </div>
-      </div>
-    ),
+    id: "meal",
+    view: "mealCapture",
+    jumps: ["mealCapture", "mealEnd", "whichMeal"],
+    coach:
+      "When it's time to eat your study meal, photo the plate and tap as you start. The recordings after it are timed from the moment you finish eating.",
+    cta: "Next, logging",
   },
   {
-    title: "Nothing but water",
-    preview: (
-      <div className="pointer-events-none">
-        <Dim>
-          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">Next up</p>
-          <p className="mt-2 text-[20px] font-extrabold text-pine">Meal + 60 min</p>
-        </Dim>
-        <Focus hint="Remember this">
-          <div className="mt-3 rounded-2xl bg-amber-soft px-4 py-3 text-[15px] font-semibold leading-snug text-pine">
-            Please don't eat or drink until the window is over. If thirsty, one cup of water right
-            after a recording.
-          </div>
-        </Focus>
-      </div>
-    ),
+    id: "log",
+    view: "logHub",
+    tabs: true,
+    jumps: ["logHub", "logMeal", "logHydration", "logToilet", "logSymptom", "logSleep", "logActivity"],
+    coach:
+      "The Log tab is for everything else you eat, drink, or feel. Add things whenever you remember. They don't have to be on the clock.",
+    cta: "Next, progress",
   },
   {
-    title: "Skip if you can't do it well",
-    preview: (
-      <div className="pointer-events-none">
-        <div className="rounded-3xl bg-teal p-5 text-surface">
-          <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-mint">
-            Do this now
-          </p>
-          <p className="mt-2 text-[20px] font-extrabold">Meal + 90 min</p>
-          <Dim>
-            <div className="mt-4">
-              <FakeBtn label="Start this recording" light />
-            </div>
-          </Dim>
-          <Focus hint="Skip and tell us why" hintUp>
-            <p className="py-3 text-center text-[15px] font-extrabold text-amber-soft">
-              Skip this one and tell us why
-            </p>
-          </Focus>
-        </div>
-      </div>
-    ),
+    id: "progress",
+    view: "progress",
+    tabs: true,
+    jumps: ["progress"],
+    coach:
+      "Progress is the week at a glance. If you need a pause, freeze days live here. Misses with a reason still help the study.",
+    cta: "Next, profile",
   },
   {
-    title: "Log the rest of your day",
-    preview: (
-      <div className="pointer-events-none">
-        <Dim>
-          <p className="mb-3 text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-            Add an entry
-          </p>
-        </Dim>
-        <div className="grid grid-cols-2 gap-3">
-          <Focus hint="Log a meal or snack">
-            <div className="rounded-3xl border border-line bg-surface p-4">
-              <IconBowl width={26} height={26} className="text-teal" />
-              <p className="mt-2 text-[16px] font-extrabold text-pine">Meal or snack</p>
-              <p className="mt-1 text-[14px] font-semibold text-pine-soft">Snap it, or say it</p>
-            </div>
-          </Focus>
-          <Dim>
-            <div className="rounded-3xl border border-line bg-surface p-4">
-              <IconDroplet width={26} height={26} className="text-teal" />
-              <p className="mt-2 text-[16px] font-extrabold text-pine">Drinks</p>
-              <p className="mt-1 text-[14px] font-semibold text-pine-soft">What you sipped</p>
-            </div>
-          </Dim>
-        </div>
-      </div>
-    ),
+    id: "profile",
+    view: "profile",
+    tabs: true,
+    jumps: ["profile", "contact", "contactForm", "scheduling", "video", "technicalSetup"],
+    coach:
+      "Profile is settings and help. After setup you can change reminder times, your phone, or reach the study team.",
+    cta: "Last stop, evening",
   },
   {
-    title: "Evening check-in",
-    preview: (
-      <div className="pointer-events-none">
-        <Dim>
-          <div className="mb-4 flex items-start gap-3">
-            <Mascot src={MASCOT.calm} size={56} />
-            <p className="mt-2 rounded-3xl rounded-tl-md border border-line bg-surface px-4 py-3 text-[16px] font-semibold leading-snug text-pine">
-              Did you log everything you ate and drank today?
-            </p>
-          </div>
-        </Dim>
-        <Focus hint="Pick an answer">
-          <FakeChoice label="Yes, all of it" hot />
-        </Focus>
-        <Dim>
-          <div className="mt-2">
-            <FakeChoice label="No, some is missing" />
-          </div>
-        </Dim>
-      </div>
-    ),
+    id: "evening",
+    view: "eveningCheckin",
+    jumps: ["eveningCheckin", "periodCheck"],
+    coach:
+      "Night ends with a short evening check-in. That's the last thing on the plan. Honest gaps are more useful than tidy guesses.",
+    cta: "That's the app",
   },
 ];
 
+function tourStore(store: TummyStore, view: ScreenKey, onNav: (s: ScreenKey | "back") => void): TummyStore {
+  const noop = () => undefined;
+  return {
+    ...store,
+    day: 1,
+    screen: view,
+    go: (s) => onNav(s),
+    back: () => onNav("back"),
+    startItem: noop,
+    completeItem: noop,
+    completeSession: noop,
+    missItem: noop,
+    reopenItem: noop,
+    addEntry: noop,
+    markQuestions: noop,
+    startExtraSession: noop,
+    useFreeze: noop,
+    setChatOpen: noop,
+    markMealStarted: noop,
+    explainMiss: noop,
+    skipRemainingAfterSnack: () => 0,
+    noteBrokeFastDay: () => store.brokeFastDays,
+    chooseStudyMeal: noop,
+    setSnackHabit: noop,
+    setSnackTimes: noop,
+    setDemoNow: noop,
+  };
+}
+
+function TourView({ view, store }: { view: ScreenKey; store: TummyStore }) {
+  if (view === "home") return <HomeScreen store={store} />;
+  if (view === "sessionHub") return <SessionHubScreen store={store} />;
+  if (view === "morningQuestions") return <MorningQuestionsScreen store={store} />;
+  if (view === "mealCapture") return <MealCaptureScreen store={store} />;
+  if (view === "logHub") return <LogHubScreen store={store} />;
+  if (view === "progress") return <ProgressScreen store={store} />;
+  if (view === "profile") return <ProfileScreen store={store} />;
+  return <EveningCheckinScreen store={store} />;
+}
+
 export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
+  const [started, setStarted] = useState(false);
+  const [done, setDone] = useState(false);
   const [step, setStep] = useState(0);
-  const item = DAY_TOUR[step];
-  const last = step >= DAY_TOUR.length - 1;
+  const item = APP_TOUR[Math.min(step, APP_TOUR.length - 1)];
+  const last = step >= APP_TOUR.length - 1;
+
+  useEffect(() => {
+    const prev = store.demoNow;
+    const first = store.plan[0]?.at ?? 7 * 60;
+    store.setDemoNow(first - 2);
+    return () => store.setDemoNow(prev);
+    // Pin the clock once so Next up looks like morning of a real day.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onNav = (s: ScreenKey | "back") => {
+    if (s === "back") {
+      setStep((n) => Math.max(0, n - 1));
+      return;
+    }
+    if (s === "welcome") {
+      setStarted(false);
+      setDone(false);
+      setStep(0);
+      return;
+    }
+    const idx = APP_TOUR.findIndex((t) => t.jumps.includes(s));
+    if (idx >= 0) setStep(idx);
+    else setStep((n) => Math.min(APP_TOUR.length - 1, n + 1));
+  };
+
+  const previewStore = useMemo(
+    () => tourStore(store, item.view, onNav),
+    // store identity is stable enough for this walkthrough; view must update the tab highlight
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [store, item.view],
+  );
+
+  if (!started) {
+    return (
+      <Screen>
+        <TopBar title="How a day works" onBack={store.back} step="Step 5 of 9" />
+        <ScreenBody className="flex flex-col">
+          <div className="flex flex-1 flex-col items-center justify-center text-center">
+            <Mascot src={MASCOT.wave} size={170} />
+            <h2 className="mt-4 text-[26px] font-extrabold leading-tight text-pine">
+              Let's walk through a day
+            </h2>
+            <p className="mt-3 text-[17px] font-semibold leading-snug text-pine-soft">
+              You'll see the real app screens. Tap around, then we'll set your daily times. Nothing
+              from this walkthrough is saved.
+            </p>
+            <div className="mt-5 w-full text-left">
+              <Note tone="green" title="This is a dry run">
+                Same idea as the practice recording: the screens are real, the data is not.
+              </Note>
+            </div>
+          </div>
+        </ScreenBody>
+        <StickyFooter>
+          <Btn onClick={() => setStarted(true)}>Start the walkthrough</Btn>
+        </StickyFooter>
+      </Screen>
+    );
+  }
+
   return (
-    <Screen>
-      <TopBar
-        title="How a day works"
-        onBack={store.back}
-        step={`Step 5 of 9 · ${step + 1} of ${DAY_TOUR.length}`}
-      />
-      <ScreenBody>
-        <h2 className="text-[22px] font-extrabold leading-tight text-pine">{item.title}</h2>
-        <p className="mt-1 text-[15px] font-semibold text-pine-soft">
-          The bright bit is what you tap. The rest is faded on purpose.
-        </p>
-        <div className="mt-5">{item.preview}</div>
-      </ScreenBody>
-      <StickyFooter>
-        {last ? (
-          <Btn onClick={() => store.go("scheduling")}>Continue</Btn>
-        ) : (
-          <Btn onClick={() => setStep((s) => s + 1)}>Got it, next screen</Btn>
-        )}
-      </StickyFooter>
+    <Screen className="relative">
+      <div className="shrink-0 px-4 pt-3">
+        <div className="flex items-center gap-2 rounded-2xl bg-mint-soft px-4 py-3">
+          <span className="text-teal">
+            <IconLock width={20} height={20} />
+          </span>
+          <p className="flex-1 text-[15px] font-extrabold text-pine">
+            Dry run · {step + 1} of {APP_TOUR.length}
+          </p>
+        </div>
+      </div>
+
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        <TourView view={item.view} store={previewStore} />
+        {!done ? (
+          <div className="absolute inset-x-0 bottom-0 z-40 bg-gradient-to-t from-pine via-pine/85 to-transparent px-5 pb-6 pt-16">
+            <div className="flex items-end gap-3">
+              <Mascot src={MASCOT.calm} size={84} />
+              <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[16px] font-semibold leading-snug text-pine">
+                {item.coach}
+              </p>
+            </div>
+            <div className="mt-4">
+              <Btn
+                onClick={() => {
+                  if (last) setDone(true);
+                  else setStep((n) => n + 1);
+                }}
+              >
+                {item.cta}
+              </Btn>
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      {item.tabs ? <TabBar store={previewStore} /> : null}
+
+      {done ? (
+        <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
+          <div className="rounded-[28px] bg-surface p-6 text-center">
+            <Mascot src={MASCOT.cheer} size={140} className="mx-auto" />
+            <h2 className="mt-3 text-[24px] font-extrabold text-pine">That's the whole app</h2>
+            <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
+              Home, the day's plan, logging, progress, and profile. Next you'll set the times we
+              use for reminders.
+            </p>
+            <div className="mt-5">
+              <Btn onClick={() => store.go("scheduling")}>Set my daily times</Btn>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </Screen>
   );
 }
@@ -966,10 +933,10 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
       <Screen dark className="relative">
         <TopBar title="Positioning guide" onBack={() => setStage("case")} dark step="Practice" />
         {banner}
-        <div className={cn("min-h-0 flex-1 overflow-y-auto px-5 pt-2 pr-14", !posChecked && "blur-md")}>
+        <div className={cn("min-h-0 flex-1 overflow-y-auto px-5 pt-2 pr-16", !posChecked && "blur-md")}>
           <AbdomenGuide />
           <p className="mt-3 text-[16px] font-semibold leading-snug text-mint">
-            Speaker edge on that spot. Screen facing up, camera toward the floor.
+            Use the scale on the right to measure against your skin.
           </p>
           <PlacementTips index={posTipIndex} />
         </div>
