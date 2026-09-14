@@ -1,5 +1,4 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import {
   Screen,
   ScreenBody,
@@ -492,6 +491,48 @@ function scrollSpotIntoView(node: HTMLElement, root: HTMLElement) {
   }
 }
 
+type TourBox = { x: number; y: number; w: number; h: number };
+
+function toBox(root: DOMRect, node: DOMRect): TourBox {
+  return {
+    x: node.left - root.left,
+    y: node.top - root.top,
+    w: node.width,
+    h: node.height,
+  };
+}
+
+function edgeToward(box: TourBox, toward: { x: number; y: number }, gap: number) {
+  const cx = box.x + box.w / 2;
+  const cy = box.y + box.h / 2;
+  const dx = toward.x - cx;
+  const dy = toward.y - cy;
+  if (Math.abs(dx) * box.h > Math.abs(dy) * box.w) {
+    return { x: dx > 0 ? box.x + box.w + gap : box.x - gap, y: cy };
+  }
+  return { x: cx, y: dy > 0 ? box.y + box.h + gap : box.y - gap };
+}
+
+function connectorPath(x1: number, y1: number, x2: number, y2: number) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.hypot(dx, dy) || 1;
+  const bow = Math.min(36, len * 0.14);
+  const cx = (x1 + x2) / 2 + (-dy / len) * bow;
+  const cy = (y1 + y2) / 2 + (dx / len) * bow;
+  return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+}
+
+function holeMask(width: number, height: number, hole: TourBox, pad: number) {
+  const x = Math.max(0, hole.x - pad);
+  const y = Math.max(0, hole.y - pad);
+  const w = hole.w + pad * 2;
+  const h = hole.h + pad * 2;
+  const r = Math.min(22, w / 2, h / 2);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="${width}" height="${height}" fill="white"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="black"/></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
 function TourGuide({
   rootRef,
   spot,
@@ -507,9 +548,11 @@ function TourGuide({
   total: number;
   onAdvance: () => void;
 }) {
-  const [target, setTarget] = useState<HTMLElement | null>(null);
+  const coachRef = useRef<HTMLDivElement>(null);
+  const [hole, setHole] = useState<TourBox | null>(null);
+  const [rootSize, setRootSize] = useState({ w: 0, h: 0 });
   const [coachLow, setCoachLow] = useState(false);
-  const [arrowPos, setArrowPos] = useState<"above" | "below" | "right">("right");
+  const [link, setLink] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const advanceRef = useRef(onAdvance);
   advanceRef.current = onAdvance;
 
@@ -520,17 +563,34 @@ function TourGuide({
       if (!root || cancelled) return;
       const node = root.querySelector(`[data-tour-spot="${spot}"]`);
       if (!(node instanceof HTMLElement) || node.getBoundingClientRect().width < 2) {
-        setTarget(null);
+        setHole(null);
+        setLink(null);
         return;
       }
       scrollSpotIntoView(node, root);
       const rootBox = root.getBoundingClientRect();
-      const box = node.getBoundingClientRect();
-      const nearTop = box.top - rootBox.top < 92;
-      const nearBottom = rootBox.bottom - box.bottom < 88;
-      setTarget(node);
-      setCoachLow(nearTop);
-      setArrowPos(nearBottom ? "above" : nearTop ? "below" : "right");
+      const nextHole = toBox(rootBox, node.getBoundingClientRect());
+      setHole(nextHole);
+      setRootSize({ w: root.clientWidth, h: root.clientHeight });
+      setCoachLow(nextHole.y < 170);
+
+      const bubble = coachRef.current;
+      if (!bubble) {
+        setLink(null);
+        return;
+      }
+      const coachBox = toBox(rootBox, bubble.getBoundingClientRect());
+      const start = edgeToward(
+        coachBox,
+        { x: nextHole.x + nextHole.w / 2, y: nextHole.y + nextHole.h / 2 },
+        8,
+      );
+      const end = edgeToward(nextHole, start, 14);
+      if (Math.hypot(end.x - start.x, end.y - start.y) < 28) {
+        setLink(null);
+        return;
+      }
+      setLink({ x1: start.x, y1: start.y, x2: end.x, y2: end.y });
     };
 
     find();
@@ -560,7 +620,9 @@ function TourGuide({
       root?.removeEventListener("scroll", find, true);
       root?.removeEventListener("click", onClick, true);
     };
-  }, [rootRef, spot]);
+  }, [rootRef, spot, coachLow]);
+
+  const pad = 7;
 
   return (
     <>
@@ -568,14 +630,65 @@ function TourGuide({
         #tour-root [data-tour-spot="${spot}"] {
           pointer-events: auto !important;
           position: relative;
-          z-index: 40;
         }
       `}</style>
       <div className="pointer-events-none absolute inset-0 z-30">
-        <div className={cn("absolute inset-x-0 px-4", coachLow ? "bottom-4" : "top-3")}>
+        {hole && rootSize.w > 0 ? (
+          <>
+            <div
+              className="absolute inset-0 bg-wash/25 backdrop-blur-[2px]"
+              style={{
+                maskImage: holeMask(rootSize.w, rootSize.h, hole, pad),
+                WebkitMaskImage: holeMask(rootSize.w, rootSize.h, hole, pad),
+                maskSize: "100% 100%",
+                WebkitMaskSize: "100% 100%",
+                maskRepeat: "no-repeat",
+                WebkitMaskRepeat: "no-repeat",
+              }}
+            />
+            <div
+              className="absolute rounded-[22px] ring-[3px] ring-teal"
+              style={{
+                left: hole.x - pad,
+                top: hole.y - pad,
+                width: hole.w + pad * 2,
+                height: hole.h + pad * 2,
+                borderRadius: Math.min(22, (hole.w + pad * 2) / 2, (hole.h + pad * 2) / 2),
+              }}
+            />
+          </>
+        ) : null}
+        {link ? (
+          <svg className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
+            <defs>
+              <marker
+                id="tour-arrowhead"
+                markerWidth="10"
+                markerHeight="10"
+                refX="8"
+                refY="5"
+                orient="auto"
+              >
+                <path d="M0 0.8 L9 5 L0 9.2 Z" fill="#2e7d6b" />
+              </marker>
+            </defs>
+            <path
+              d={connectorPath(link.x1, link.y1, link.x2, link.y2)}
+              fill="none"
+              stroke="#2e7d6b"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              markerEnd="url(#tour-arrowhead)"
+            />
+          </svg>
+        ) : null}
+        <div className={cn("absolute inset-x-0 z-10 px-4", coachLow ? "bottom-4" : "top-3")}>
           <div className="flex items-end gap-3">
             <Mascot src={MASCOT.calm} size={72} />
-            <div className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-3 shadow-[0_12px_32px_rgba(20,48,46,0.16)]">
+            <div
+              ref={coachRef}
+              className="relative min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-3 shadow-[0_12px_32px_rgba(20,48,46,0.16)]"
+            >
               <p className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-teal">
                 {step} of {total}
               </p>
@@ -584,63 +697,6 @@ function TourGuide({
           </div>
         </div>
       </div>
-      {target
-        ? createPortal(
-            <>
-              <span
-                className="pointer-events-none absolute -inset-1 rounded-[22px] ring-[3px] ring-teal"
-                aria-hidden
-              />
-              <span
-                className={cn(
-                  "pointer-events-none absolute z-50 flex w-10 justify-center text-teal",
-                  arrowPos === "right"
-                    ? "right-10 top-1/2 -translate-y-1/2"
-                    : "left-1/2 -translate-x-1/2",
-                )}
-                style={
-                  arrowPos === "above"
-                    ? { top: -40 }
-                    : arrowPos === "below"
-                      ? { top: "calc(100% + 6px)" }
-                      : undefined
-                }
-                aria-hidden
-              >
-                <span className="animate-bounce">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                    {arrowPos === "above" ? (
-                      <path
-                        d="M12 5v14M6 13l6 6 6-6"
-                        stroke="currentColor"
-                        strokeWidth="2.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    ) : arrowPos === "below" ? (
-                      <path
-                        d="M12 19V5M6 11l6-6 6 6"
-                        stroke="currentColor"
-                        strokeWidth="2.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    ) : (
-                      <path
-                        d="M5 12h14M13 6l6 6-6 6"
-                        stroke="currentColor"
-                        strokeWidth="2.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    )}
-                  </svg>
-                </span>
-              </span>
-            </>,
-            target,
-          )
-        : null}
     </>
   );
 }
@@ -688,8 +744,8 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
               Let's walk through a day
             </h2>
             <p className="mt-3 text-[17px] font-semibold leading-snug text-pine-soft">
-              I'll point at the real buttons. Tap the one with the arrow. You will not fill
-              anything in, and nothing from this walkthrough is saved.
+              I'll point from here to the real buttons. Tap the one I'm pointing to. You will
+              not fill anything in, and nothing from this walkthrough is saved.
             </p>
           </div>
         </ScreenBody>
