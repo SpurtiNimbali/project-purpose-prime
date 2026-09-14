@@ -661,8 +661,8 @@ export function ScreenRuler() {
   const mm = Array.from({ length: 81 }, (_, i) => i);
   const eighths = Array.from({ length: 25 }, (_, i) => i);
   return (
-    <div aria-hidden className="pointer-events-none absolute right-0 top-3 z-20 w-9">
-      <div className="overflow-hidden rounded-l-2xl bg-surface ring-1 ring-line shadow-[-8px_0_24px_rgba(20,48,46,0.12)]">
+    <div aria-hidden className="pointer-events-none absolute bottom-5 right-0 z-20 w-9">
+      <div className="overflow-hidden rounded-l-2xl bg-mint-soft shadow-[-8px_0_24px_rgba(20,48,46,0.28)] ring-2 ring-teal">
         <div className="flex items-end justify-between px-1 pt-1.5">
           <span className="text-[8px] font-extrabold uppercase tracking-[0.12em] text-pine">
             cm
@@ -672,7 +672,7 @@ export function ScreenRuler() {
           </span>
         </div>
         <div className="relative h-[8cm]">
-          <span className="absolute inset-x-0 top-0 h-px bg-line" />
+          <span className="absolute inset-x-0 top-0 h-px bg-teal/40" />
           {mm.map((n) => {
             const cm = n % 10 === 0;
             const half = n % 5 === 0;
@@ -688,7 +688,7 @@ export function ScreenRuler() {
                       ? "h-px w-2.5 bg-pine"
                       : half
                         ? "h-px w-1.5 bg-pine/50"
-                        : "h-px w-1 bg-pine/20",
+                        : "h-px w-1 bg-pine/25",
                 )}
                 style={{ top: `calc(${n} * 1mm)` }}
               />
@@ -719,7 +719,7 @@ export function ScreenRuler() {
                 key={`ie-${n}`}
                 className={cn(
                   "absolute right-0 top-0",
-                  inch ? "h-px w-2 bg-teal" : half ? "h-px w-1.5 bg-teal/60" : "h-px w-1 bg-teal/25",
+                  inch ? "h-px w-2 bg-teal" : half ? "h-px w-1.5 bg-teal/60" : "h-px w-1 bg-teal/30",
                 )}
                 style={{ top: `calc(${n} * 0.125in)` }}
               />
@@ -752,7 +752,7 @@ export function AbdomenGuide({ play = true }: { play?: boolean }) {
         loop
         playsInline
         aria-label="How to place the phone: measure from the navel, then rest the speaker edge on that spot with the screen facing up"
-        className="h-full w-full object-contain"
+        className="h-full w-full object-contain object-center"
       />
     </figure>
   );
@@ -899,11 +899,9 @@ export function PositioningGuideLayout({
   return (
     <Screen className="relative overflow-hidden">
       <TopBar title="Positioning guide" onBack={onBack} step={step} right={banner} />
-      <div className="relative min-h-0 flex-1 px-5 pr-11 pb-1 pt-1">
-        <div className="flex h-full items-center justify-center">
-          <div className="aspect-square max-h-full w-full overflow-hidden rounded-[28px] bg-pine shadow-[0_12px_40px_rgba(20,48,46,0.14)]">
-            <AbdomenGuide play={checked} />
-          </div>
+      <div className="relative min-h-0 flex-1">
+        <div className="h-full w-full overflow-hidden bg-pine">
+          <AbdomenGuide play={checked} />
         </div>
         {checked ? <ScreenRuler /> : null}
       </div>

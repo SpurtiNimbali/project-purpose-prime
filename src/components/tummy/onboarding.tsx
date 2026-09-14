@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Screen,
   ScreenBody,
@@ -25,11 +25,6 @@ import {
   IconBowl,
   IconSunset,
   IconMoon,
-  IconHome,
-  IconList,
-  IconBook,
-  IconChart,
-  IconUser,
 } from "./icons";
 import {
   RecordTimer,
@@ -44,30 +39,15 @@ import {
 import {
   HomeScreen,
   LogHubScreen,
-  LogMealScreen,
-  LogHydrationScreen,
-  LogToiletScreen,
-  LogSymptomScreen,
-  LogSleepScreen,
-  LogActivityScreen,
   ProgressScreen,
   ProfileScreen,
-  ContactScreen,
 } from "./main";
 import { MorningQuestionsScreen, EveningCheckinScreen } from "./questions";
 
-import type { ScreenKey, SnackHabit, TummyStore } from "./store";
+import type { PlanItem, ScreenKey, SnackHabit, TummyStore } from "./store";
+import { computeNextTask, minutesNow } from "./store";
 
 import { cn } from "@/lib/utils";
-import abdomenRight from "@/assets/quiz/abdomen-right.png";
-import abdomenLeft from "@/assets/quiz/abdomen-left.png";
-import abdomenNavel from "@/assets/quiz/abdomen-navel.png";
-import phoneSpeakers from "@/assets/quiz/phone-speakers.png";
-import phoneScreen from "@/assets/quiz/phone-screen.png";
-import roomBedroom from "@/assets/quiz/room-bedroom.png";
-import roomOffice from "@/assets/quiz/room-office.png";
-import roomBathroom from "@/assets/quiz/room-bathroom.png";
-import roomCafe from "@/assets/quiz/room-cafe.png";
 
 /* ---------------- welcome ---------------- */
 
@@ -197,74 +177,17 @@ export function VideoScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- attention check quiz ---------------- */
 
-type QuizOption = {
-  label: string;
-  img?: string;
-  cover?: boolean;
-};
-
-type QuizItem = {
-  q: string;
-  sub?: string;
-  options: QuizOption[];
-  answer: number | number[];
-  why: string;
-  hint: string;
-  multi?: boolean;
-};
-
-const QUIZ: QuizItem[] = [
-  {
-    q: "Where on the abdomen do you place the phone?",
-    options: [
-      { label: "Right of the navel", img: abdomenRight },
-      { label: "Left of the navel", img: abdomenLeft },
-      { label: "On the navel", img: abdomenNavel },
-    ],
-    answer: 0,
-    why: "The spot is about 8 cm to your right of the navel and 3 cm down — over the lower right abdomen.",
-    hint: "Look back at the measurements from the placement film.",
-  },
-  {
-    q: "Which side of the phone should touch your skin?",
-    options: [
-      { label: "Speaker edge", img: phoneSpeakers },
-      { label: "Screen", img: phoneScreen },
-    ],
-    answer: 0,
-    why: "The microphone sits on the speaker edge. That edge needs to press gently on bare skin.",
-    hint: "The microphone is on the short edge with the speaker holes, not on the glass.",
-  },
+const QUIZ = [
   {
     q: "Where should the phone be placed during a recording?",
-    options: [
-      { label: "On top of your shirt" },
-      { label: "Directly on bare skin, with the case off" },
-    ],
+    options: ["On top of your shirt", "Directly on bare skin, with the case off"],
     answer: 1,
     why: "A shirt or a phone case holds the microphone off your skin. Gut sounds are too quiet to carry across that gap.",
     hint: "Think about what the microphone needs in order to hear a quiet gut sound.",
   },
   {
-    q: "Which of these rooms are okay for a recording?",
-    sub: "Select every quiet indoor space you can close off.",
-    multi: true,
-    options: [
-      { label: "Bedroom", img: roomBedroom, cover: true },
-      { label: "Office", img: roomOffice, cover: true },
-      { label: "Bathroom", img: roomBathroom, cover: true },
-      { label: "Cafe", img: roomCafe, cover: true },
-    ],
-    answer: [0, 1, 2],
-    why: "A bedroom, office, or bathroom works if you can close the door and keep it quiet. A cafe is too noisy — other people will drown out your gut sounds.",
-    hint: "Think about background noise, not just privacy.",
-  },
-  {
     q: "You drank coffee 20 minutes ago. Can you still do a fasting recording?",
-    options: [
-      { label: "Yes, drinks are acceptable" },
-      { label: "No, even drinks are not permitted" },
-    ],
+    options: ["Yes, drinks are acceptable", "No, even drinks are not permitted"],
     answer: 1,
     why: "Coffee, food, or anything other than a sip of water changes your gut activity, so the recording wouldn't count as fasting.",
     hint: "Think about what fasting means for this recording.",
@@ -272,9 +195,9 @@ const QUIZ: QuizItem[] = [
   {
     q: "After your chosen meal, when do you record?",
     options: [
-      { label: "Once an hour, every hour, until bedtime" },
-      { label: "Right after eating, then every 30 minutes for 3.5 hours" },
-      { label: "Whenever you are available" },
+      "Once an hour, every hour, until bedtime",
+      "Right after eating, then every 30 minutes for 3.5 hours",
+      "Whenever you are available",
     ],
     answer: 1,
     why: "Recording right after the meal and then every 30 minutes for 3.5 hours keeps the timing consistent across everyone in the study, so the data can be analyzed accurately.",
@@ -282,32 +205,11 @@ const QUIZ: QuizItem[] = [
   },
 ];
 
-function sameAnswers(picked: number[], answer: number | number[]) {
-  const need = Array.isArray(answer) ? answer : [answer];
-  if (picked.length !== need.length) return false;
-  const set = new Set(picked);
-  return need.every((n) => set.has(n));
-}
-
 export function QuizScreen({ store }: { store: TummyStore }) {
   const [qi, setQi] = useState(0);
-  const [picked, setPicked] = useState<number[]>([]);
-  const [checked, setChecked] = useState(false);
+  const [pick, setPick] = useState<number | null>(null);
   const item = QUIZ[qi];
-  const visual = item.options.some((opt) => opt.img);
-  const correct = checked && sameAnswers(picked, item.answer);
-  const showHint = checked && !correct;
-
-  const choose = (oi: number) => {
-    if (correct) return;
-    if (item.multi) {
-      setChecked(false);
-      setPicked((cur) => (cur.includes(oi) ? cur.filter((n) => n !== oi) : [...cur, oi]));
-      return;
-    }
-    setPicked([oi]);
-    setChecked(true);
-  };
+  const correct = pick !== null && pick === item.answer;
 
   const next = () => {
     if (qi === QUIZ.length - 1) {
@@ -315,24 +217,7 @@ export function QuizScreen({ store }: { store: TummyStore }) {
       return;
     }
     setQi((n) => n + 1);
-    setPicked([]);
-    setChecked(false);
-  };
-
-  const footer = () => {
-    if (correct) {
-      return (
-        <Btn onClick={next}>{qi === QUIZ.length - 1 ? "Continue" : "Next question"}</Btn>
-      );
-    }
-    if (item.multi) {
-      return (
-        <Btn disabled={picked.length === 0} onClick={() => setChecked(true)}>
-          {picked.length === 0 ? "Select every room that works" : "Check answers"}
-        </Btn>
-      );
-    }
-    return <Btn disabled>Pick the right answer to continue</Btn>;
+    setPick(null);
   };
 
   return (
@@ -344,12 +229,10 @@ export function QuizScreen({ store }: { store: TummyStore }) {
       />
       <ScreenBody>
         <MascotSays size={78} src={correct ? MASCOT.cheer : MASCOT.calm}>
-          {!checked
+          {pick === null
             ? qi === 0
               ? "A few questions to make sure the instructions landed. You'll need the right answer before we move on."
-              : item.multi
-                ? "Pick every room that works."
-                : "Here's the next one."
+              : "Here's the next one."
             : correct
               ? "That's the one. Read why, then we'll continue."
               : "Not quite. Have another look."}
@@ -368,110 +251,41 @@ export function QuizScreen({ store }: { store: TummyStore }) {
         </div>
 
         <p className="mt-5 text-[22px] font-extrabold leading-snug text-pine">{item.q}</p>
-        {item.sub ? (
-          <p className="mt-1.5 text-[15px] font-semibold leading-snug text-pine-soft">{item.sub}</p>
-        ) : null}
 
-        {visual ? (
-          <div className="mt-4 grid grid-cols-2 gap-2.5">
-            {item.options.map((opt, oi) => {
-              const selected = picked.includes(oi);
-              const wrongPick = selected && showHint;
-              return (
-                <button
-                  key={opt.label}
-                  type="button"
-                  disabled={correct}
-                  onClick={() => choose(oi)}
+        <div className="mt-4 space-y-2.5">
+          {item.options.map((opt, oi) => {
+            const picked = pick === oi;
+            const wrongPick = picked && !correct;
+            const lock = correct;
+            return (
+              <button
+                key={opt}
+                disabled={lock}
+                onClick={() => setPick(oi)}
+                className={cn(
+                  "flex min-h-[68px] w-full items-center gap-3 rounded-2xl border-2 px-3 py-2 text-left text-[17px] font-bold",
+                  picked && correct
+                    ? "border-teal bg-mint-soft text-pine"
+                    : wrongPick
+                      ? "border-amber bg-amber-soft text-pine"
+                      : lock
+                        ? "border-line bg-surface text-pine-soft opacity-60"
+                        : "border-line bg-wash text-pine",
+                )}
+              >
+                <span
                   className={cn(
-                    "overflow-hidden rounded-2xl border-2 text-left",
-                    item.options.length === 3 && oi === 2 && "col-span-2 w-[calc(50%-5px)] justify-self-center",
-                    selected && correct
-                      ? "border-teal bg-mint-soft"
-                      : wrongPick
-                        ? "border-amber bg-amber-soft"
-                        : selected
-                          ? "border-teal bg-mint-soft"
-                          : correct
-                            ? "border-line bg-surface opacity-60"
-                            : "border-line bg-surface",
+                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[16px] font-black",
+                    picked && correct ? "bg-teal text-surface" : "bg-surface text-pine-soft",
                   )}
                 >
-                  <div className="aspect-[5/4] bg-[#e7efe8]">
-                    <img
-                      src={opt.img}
-                      alt={opt.label}
-                      className={cn(
-                        "h-full w-full",
-                        opt.cover ? "object-cover" : "object-contain",
-                      )}
-                    />
-                  </div>
-                  <span className="flex items-center gap-2 px-2.5 py-2.5 text-[14px] font-extrabold leading-snug text-pine">
-                    <span
-                      className={cn(
-                        "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black",
-                        selected && correct
-                          ? "bg-teal text-surface"
-                          : selected
-                            ? "bg-teal/15 text-teal"
-                            : "bg-wash text-pine-soft",
-                      )}
-                    >
-                      {selected && correct ? (
-                        <IconCheck width={14} height={14} />
-                      ) : item.multi ? (
-                        selected ? (
-                          <IconCheck width={14} height={14} />
-                        ) : (
-                          ""
-                        )
-                      ) : (
-                        "ABC"[oi]
-                      )}
-                    </span>
-                    <span className="min-w-0">{opt.label}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="mt-4 space-y-2.5">
-            {item.options.map((opt, oi) => {
-              const selected = picked.includes(oi);
-              const wrongPick = selected && showHint;
-              return (
-                <button
-                  key={opt.label}
-                  type="button"
-                  disabled={correct}
-                  onClick={() => choose(oi)}
-                  className={cn(
-                    "flex min-h-[68px] w-full items-center gap-3 rounded-2xl border-2 px-3 py-2 text-left text-[17px] font-bold",
-                    selected && correct
-                      ? "border-teal bg-mint-soft text-pine"
-                      : wrongPick
-                        ? "border-amber bg-amber-soft text-pine"
-                        : correct
-                          ? "border-line bg-surface text-pine-soft opacity-60"
-                          : "border-line bg-wash text-pine",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[16px] font-black",
-                      selected && correct ? "bg-teal text-surface" : "bg-surface text-pine-soft",
-                    )}
-                  >
-                    {selected && correct ? <IconCheck width={20} height={20} /> : "ABC"[oi]}
-                  </span>
-                  <span className="min-w-0 flex-1">{opt.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+                  {picked && correct ? <IconCheck width={20} height={20} /> : "ABC"[oi]}
+                </span>
+                <span className="min-w-0 flex-1">{opt}</span>
+              </button>
+            );
+          })}
+        </div>
 
         {correct ? (
           <div className="mt-4">
@@ -479,7 +293,7 @@ export function QuizScreen({ store }: { store: TummyStore }) {
               {item.why}
             </Note>
           </div>
-        ) : showHint ? (
+        ) : pick !== null ? (
           <div className="mt-4">
             <Note tone="amber" title="Try again">
               {item.hint}
@@ -487,134 +301,144 @@ export function QuizScreen({ store }: { store: TummyStore }) {
           </div>
         ) : null}
       </ScreenBody>
-      <StickyFooter>{footer()}</StickyFooter>
+      <StickyFooter>
+        <Btn disabled={!correct} onClick={next}>
+          {correct
+            ? qi === QUIZ.length - 1
+              ? "Continue"
+              : "Next question"
+            : "Pick the right answer to continue"}
+        </Btn>
+      </StickyFooter>
     </Screen>
   );
 }
 
 
-/* ---------------- how a day works: tap the real app ---------------- */
+/* ---------------- how a day works: a fixed walk through the real app ---------------- */
 
-const TOUR_TABS: ScreenKey[] = ["home", "logHub", "progress", "profile"];
-
-const TOUR_COACH: Partial<
-  Record<ScreenKey, { title: string; body: string; Icon: typeof IconHome }>
-> = {
-  home: {
-    title: "Home",
-    body: "Tap Next up, today's plan, or a tab at the bottom.",
-    Icon: IconHome,
-  },
-  sessionHub: {
-    title: "Today's plan",
-    body: "Tap a task to open it. Recordings, your meal, and check-ins live here.",
-    Icon: IconList,
-  },
-  morningQuestions: {
-    title: "Morning questions",
-    body: "A peek at the wake-up check-in. Tap an answer or back — you do not need to finish it.",
-    Icon: IconSun,
-  },
-  caseReminder: {
-    title: "Before a recording",
-    body: "The case comes off every time. Tap the button, then we'll skip the rest of this dry run.",
-    Icon: IconPhone,
-  },
-  mealCapture: {
-    title: "Your study meal",
-    body: "Tap when you start eating, or use back. You do not need to add a photo here.",
-    Icon: IconBowl,
-  },
-  logHub: {
-    title: "Log",
-    body: "Tap a tile to see a form, or pick another tab.",
-    Icon: IconBook,
-  },
-  logMeal: {
-    title: "A log form",
-    body: "This is how you add a meal. Use back when you are done looking.",
-    Icon: IconBowl,
-  },
-  logHydration: {
-    title: "A log form",
-    body: "This is how you add a drink. Use back when you are done looking.",
-    Icon: IconBook,
-  },
-  logToilet: {
-    title: "A log form",
-    body: "This is how you log toilet habits. Use back when you are done looking.",
-    Icon: IconBook,
-  },
-  logSymptom: {
-    title: "A log form",
-    body: "This is how you log a symptom. Use back when you are done looking.",
-    Icon: IconBook,
-  },
-  logSleep: {
-    title: "A log form",
-    body: "This is how you log sleep. Use back when you are done looking.",
-    Icon: IconBook,
-  },
-  logActivity: {
-    title: "A log form",
-    body: "This is how you log activity. Use back when you are done looking.",
-    Icon: IconBook,
-  },
-  progress: {
-    title: "Progress",
-    body: "The week at a glance, plus freeze days. Tap another tab to keep looking.",
-    Icon: IconChart,
-  },
-  profile: {
-    title: "Profile",
-    body: "Change reminder times or reach the study team. Tap another tab to keep looking.",
-    Icon: IconUser,
-  },
-  contact: {
-    title: "Study team",
-    body: "This is how you reach the team. Use back when you are done looking.",
-    Icon: IconUser,
-  },
-  eveningCheckin: {
-    title: "Evening check-in",
-    body: "Last thing on the plan. Tap an answer or back — you do not need to finish it.",
-    Icon: IconMoon,
-  },
+type TourStep = {
+  view: ScreenKey;
+  tabs?: boolean;
+  clock: number;
+  done: string[];
+  coach: string;
+  cta: string;
 };
 
-function mapTourView(s: ScreenKey, from: ScreenKey): ScreenKey | "done" | null {
-  if (s === "periodCheck" || s === "scheduling" || s === "onboardDone") return "done";
-  if (s === "whichMeal") return "mealCapture";
-  if (s === "mealEnd") return "sessionHub";
-  if (
-    s === "caseReminder" ||
-    s === "fastingCheck" ||
-    s === "sessionCheck" ||
-    s === "positioning" ||
-    s === "recording" ||
-    s === "skipReason"
-  ) {
-    return from === "caseReminder" ? "sessionHub" : "caseReminder";
-  }
-  if (s === "contactForm" || s === "contactComplaint") return "contact";
-  if (s === "extraSession") return "home";
-  if (TOUR_COACH[s]) return s;
-  return null;
+const APP_TOUR: TourStep[] = [
+  {
+    view: "home",
+    tabs: true,
+    clock: 7 * 60 - 2,
+    done: [],
+    coach:
+      "This is home. Every day starts here. The top card is the next thing to do. Today's plan is the full list, and the tabs at the bottom move you around the app.",
+    cta: "Open today's plan",
+  },
+  {
+    view: "sessionHub",
+    clock: 7 * 60 - 2,
+    done: [],
+    coach:
+      "The day is this list, in order. First come a few wake-up questions. Then the fasted recording.",
+    cta: "See the morning questions",
+  },
+  {
+    view: "morningQuestions",
+    clock: 7 * 60,
+    done: [],
+    coach:
+      "This is the wake-up check-in. A few short questions, then you record. You don't need to answer them here.",
+    cta: "Next, the morning recording",
+  },
+  {
+    view: "sessionHub",
+    clock: 7 * 60 + 10,
+    done: ["qMorning"],
+    coach:
+      "This is the fasted morning recording. Two minutes, sitting still, before food or drink. You'll practice that later. We stay on the pages for now.",
+    cta: "Next, the study meal",
+  },
+  {
+    view: "sessionHub",
+    clock: 8 * 60,
+    done: ["qMorning", "fasted", "preMeal"],
+    coach:
+      "Just before you eat there is a short recording. Then you photo the plate and tap when you start and finish. The later recordings are timed from that last bite.",
+    cta: "See the meal page",
+  },
+  {
+    view: "mealCapture",
+    clock: 8 * 60,
+    done: ["qMorning", "fasted", "preMeal"],
+    coach:
+      "This is the meal page. Photo, start, then finish. We skip the recorder and keep walking the day.",
+    cta: "Next, after the meal",
+  },
+  {
+    view: "sessionHub",
+    clock: 8 * 60 + 25,
+    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    coach:
+      "Right after the last bite, then every 30 minutes for 3.5 hours. If you can't record well, skip it and tell us why.",
+    cta: "Next, logging",
+  },
+  {
+    view: "logHub",
+    tabs: true,
+    clock: 12 * 60,
+    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    coach:
+      "The Log tab is how you move off the clock. Other meals, drinks, and symptoms can be added whenever you remember.",
+    cta: "Next, progress",
+  },
+  {
+    view: "progress",
+    tabs: true,
+    clock: 12 * 60,
+    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    coach:
+      "Progress is the week at a glance. Freeze days live here if you need a pause.",
+    cta: "Next, profile",
+  },
+  {
+    view: "profile",
+    tabs: true,
+    clock: 12 * 60,
+    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    coach:
+      "Profile is settings and help. After setup you can change reminder times or reach the study team.",
+    cta: "Last, evening",
+  },
+  {
+    view: "eveningCheckin",
+    clock: 21 * 60,
+    done: ["qMorning", "fasted", "preMeal", "mealStart"],
+    coach:
+      "Night ends with a short evening check-in. That's the last thing on the plan.",
+    cta: "That's the app",
+  },
+];
+
+function withDone(plan: PlanItem[], ids: string[]): PlanItem[] {
+  const set = new Set(ids);
+  return plan.map((p) => ({ ...p, done: set.has(p.id) }));
 }
 
-function tourStore(
-  store: TummyStore,
-  view: ScreenKey,
-  onNav: (s: ScreenKey | "back") => void,
-): TummyStore {
+function tourStore(store: TummyStore, item: TourStep): TummyStore {
+  const plan = withDone(store.plan, item.done);
   const noop = () => undefined;
   return {
     ...store,
     day: 1,
-    screen: view,
+    screen: item.view,
     tourPreview: true,
-    go: (s) => onNav(s),
-    back: () => onNav("back"),
+    demoNow: item.clock,
+    plan,
+    nextTask: computeNextTask(plan),
+    go: noop,
+    back: noop,
     startItem: noop,
     completeItem: noop,
     completeSession: noop,
@@ -640,211 +464,35 @@ function TourView({ view, store }: { view: ScreenKey; store: TummyStore }) {
   if (view === "home") return <HomeScreen store={store} />;
   if (view === "sessionHub") return <SessionHubScreen store={store} />;
   if (view === "morningQuestions") return <MorningQuestionsScreen store={store} />;
-  if (view === "caseReminder") {
-    return (
-      <CaseOffLayout
-        title="Before we start"
-        onBack={store.back}
-        onContinue={() => store.go("sessionHub")}
-      />
-    );
-  }
   if (view === "mealCapture") return <MealCaptureScreen store={store} />;
   if (view === "logHub") return <LogHubScreen store={store} />;
-  if (view === "logMeal") return <LogMealScreen store={store} />;
-  if (view === "logHydration") return <LogHydrationScreen store={store} />;
-  if (view === "logToilet") return <LogToiletScreen store={store} />;
-  if (view === "logSymptom") return <LogSymptomScreen store={store} />;
-  if (view === "logSleep") return <LogSleepScreen store={store} />;
-  if (view === "logActivity") return <LogActivityScreen store={store} />;
   if (view === "progress") return <ProgressScreen store={store} />;
   if (view === "profile") return <ProfileScreen store={store} />;
-  if (view === "contact") return <ContactScreen store={store} />;
   return <EveningCheckinScreen store={store} />;
-}
-
-function blurPanels(
-  holes: { x: number; y: number; w: number; h: number }[],
-  W: number,
-  H: number,
-  pad: number,
-) {
-  if (W <= 0 || H <= 0) return [{ x: 0, y: 0, w: W, h: H }];
-  const boxes: { x: number; y: number; r: number; b: number }[] = [];
-  for (const h of [...holes].sort((a, b) => a.y - b.y)) {
-    const next = {
-      x: Math.max(0, h.x - pad),
-      y: Math.max(0, h.y - pad),
-      r: Math.min(W, h.x + h.w + pad),
-      b: Math.min(H, h.y + h.h + pad),
-    };
-    const last = boxes[boxes.length - 1];
-    if (last && next.y < last.b && next.b > last.y) {
-      last.x = Math.min(last.x, next.x);
-      last.y = Math.min(last.y, next.y);
-      last.r = Math.max(last.r, next.r);
-      last.b = Math.max(last.b, next.b);
-    } else {
-      boxes.push(next);
-    }
-  }
-  const panels: { x: number; y: number; w: number; h: number }[] = [];
-  let y = 0;
-  for (const box of boxes) {
-    if (box.y > y) panels.push({ x: 0, y, w: W, h: box.y - y });
-    if (box.x > 0) panels.push({ x: 0, y: box.y, w: box.x, h: box.b - box.y });
-    if (box.r < W) panels.push({ x: box.r, y: box.y, w: W - box.r, h: box.b - box.y });
-    y = Math.max(y, box.b);
-  }
-  if (y < H) panels.push({ x: 0, y, w: W, h: H - y });
-  return panels.filter((p) => p.w > 0 && p.h > 0);
-}
-
-function TourGuide({
-  rootRef,
-  view,
-  title,
-  body,
-  Icon,
-}: {
-  rootRef: { current: HTMLDivElement | null };
-  view: ScreenKey;
-  title: string;
-  body: string;
-  Icon: typeof IconHome;
-}) {
-  const [holes, setHoles] = useState<{ x: number; y: number; w: number; h: number }[]>([]);
-  const [size, setSize] = useState({ w: 0, h: 0 });
-
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    const measure = () => {
-      const cr = root.getBoundingClientRect();
-      setSize({ w: cr.width, h: cr.height });
-      setHoles(
-        [...root.querySelectorAll("[data-tour-spot]")].map((node) => {
-          const r = node.getBoundingClientRect();
-          return {
-            x: r.left - cr.left,
-            y: r.top - cr.top,
-            w: r.width,
-            h: r.height,
-          };
-        }),
-      );
-    };
-    measure();
-    const id = requestAnimationFrame(measure);
-    const ro = new ResizeObserver(measure);
-    ro.observe(root);
-    root.querySelectorAll("[data-tour-spot]").forEach((n) => ro.observe(n));
-    root.addEventListener("scroll", measure, true);
-    return () => {
-      cancelAnimationFrame(id);
-      ro.disconnect();
-      root.removeEventListener("scroll", measure, true);
-    };
-  }, [rootRef, view, title]);
-
-  const pad = 8;
-  const panels = blurPanels(holes, size.w, size.h, pad);
-
-  return (
-    <div className="pointer-events-none absolute inset-0 z-30">
-      {panels.map((p, i) => (
-        <div
-          key={`${p.x}-${p.y}-${i}`}
-          className="absolute bg-pine/30"
-          style={{ left: p.x, top: p.y, width: p.w, height: p.h }}
-        />
-      ))}
-      {holes.map((h, i) => (
-        <div
-          key={`ring-${h.x}-${h.y}-${i}`}
-          className="absolute rounded-[24px] ring-[3px] ring-teal"
-          style={{
-            left: h.x - pad,
-            top: h.y - pad,
-            width: h.w + pad * 2,
-            height: h.h + pad * 2,
-          }}
-        />
-      ))}
-      <div className="absolute inset-x-0 top-3 px-4">
-        <div className="rounded-[28px] bg-surface px-5 py-4 shadow-[0_18px_50px_rgba(20,48,46,0.18)]">
-          <div className="flex items-start gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
-              <Icon width={24} height={24} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-[20px] font-extrabold leading-tight text-pine">{title}</h2>
-              <p className="mt-1 text-[15px] font-semibold leading-snug text-pine-soft">{body}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
   const [started, setStarted] = useState(false);
   const [done, setDone] = useState(false);
-  const [readyToFinish, setReadyToFinish] = useState(false);
-  const [stack, setStack] = useState<ScreenKey[]>(["home"]);
-  const [seenTabs, setSeenTabs] = useState<Set<ScreenKey>>(() => new Set(["home"]));
-  const view = stack[stack.length - 1] ?? "home";
-  const rootRef = useRef<HTMLDivElement>(null);
+  const [step, setStep] = useState(0);
+  const item = APP_TOUR[Math.min(step, APP_TOUR.length - 1)];
+  const last = step >= APP_TOUR.length - 1;
 
   useEffect(() => {
     const prev = store.demoNow;
-    const first = store.plan[0]?.at ?? 7 * 60;
-    store.setDemoNow(first - 2);
     return () => store.setDemoNow(prev);
-    // Pin the clock once so Next up looks like morning of a real day.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onNav = (s: ScreenKey | "back") => {
-    if (s === "back") {
-      setStack((st) => (st.length > 1 ? st.slice(0, -1) : st));
-      return;
-    }
-    if (s === "welcome") {
-      setStarted(false);
-      setDone(false);
-      setReadyToFinish(false);
-      setStack(["home"]);
-      setSeenTabs(new Set(["home"]));
-      return;
-    }
-    if (readyToFinish && TOUR_TABS.includes(s)) {
-      setDone(true);
-      return;
-    }
-    const mapped = mapTourView(s, view);
-    if (mapped === "done") {
-      setDone(true);
-      return;
-    }
-    if (!mapped) return;
-    setStack((st) => [...st, mapped]);
-    if (TOUR_TABS.includes(mapped)) {
-      setSeenTabs((prev) => {
-        const next = new Set(prev);
-        next.add(mapped);
-        if (TOUR_TABS.every((k) => next.has(k))) setReadyToFinish(true);
-        return next;
-      });
-    }
-  };
+  if (started && minutesNow() !== item.clock) {
+    store.setDemoNow(item.clock);
+  }
 
   const previewStore = useMemo(
-    () => tourStore(store, view, onNav),
-    // store identity is stable enough for this walkthrough; view must update the tab highlight
+    () => tourStore(store, item),
+    // store identity is stable enough for this walkthrough; the step drives the preview
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [store, view, readyToFinish],
+    [store, step],
   );
 
   if (!started) {
@@ -855,58 +503,82 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
           <div className="flex flex-1 flex-col items-center justify-center text-center">
             <Mascot src={MASCOT.wave} size={170} />
             <h2 className="mt-4 text-[26px] font-extrabold leading-tight text-pine">
-              A quick look around
+              Let's walk through a day
             </h2>
             <p className="mt-3 text-[17px] font-semibold leading-snug text-pine-soft">
-              You'll see the real app. Tap the buttons to move around. You will not fill anything
-              in, and nothing from this walkthrough is saved.
+              I'll show you the real screens, in order. Tap Next to move through. You will not fill
+              anything in, and nothing from this walkthrough is saved.
             </p>
           </div>
         </ScreenBody>
         <StickyFooter>
-          <Btn onClick={() => setStarted(true)}>Start the tour</Btn>
+          <Btn onClick={() => setStarted(true)}>Start the walkthrough</Btn>
         </StickyFooter>
       </Screen>
     );
   }
 
-  const coach = readyToFinish
-    ? {
-        title: "That's the app",
-        body: "You've seen the main screens. Tap a tab to set your daily times.",
-        Icon: IconCheck,
-      }
-    : (TOUR_COACH[view] ?? {
-        title: "Keep looking",
-        body: "Tap a button to keep moving through the app.",
-        Icon: IconHome,
-      });
-
   return (
     <Screen className="relative">
-      <div ref={rootRef} className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="min-h-0 flex-1 overflow-hidden">
-          <TourView view={view} store={previewStore} />
+      <div className="shrink-0 px-4 pt-3">
+        <div className="flex items-center gap-2 rounded-2xl bg-mint-soft px-4 py-3">
+          <span className="text-teal">
+            <IconLock width={20} height={20} />
+          </span>
+          <p className="flex-1 text-[15px] font-extrabold text-pine">
+            Walkthrough · {step + 1} of {APP_TOUR.length}
+          </p>
         </div>
-        {TOUR_TABS.includes(view) ? <TabBar store={previewStore} /> : null}
+      </div>
+
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        <div className="pointer-events-none h-full overflow-hidden">
+          <TourView view={item.view} store={previewStore} />
+        </div>
         {!done ? (
-          <TourGuide
-            rootRef={rootRef}
-            view={view}
-            title={coach.title}
-            body={coach.body}
-            Icon={coach.Icon}
-          />
+          <div className="absolute inset-x-0 bottom-0 z-40 bg-gradient-to-t from-pine via-pine/85 to-transparent px-5 pb-6 pt-16">
+            <div className="flex items-end gap-3">
+              <Mascot src={MASCOT.calm} size={84} />
+              <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[16px] font-semibold leading-snug text-pine">
+                {item.coach}
+              </p>
+            </div>
+            <div className="mt-4 flex items-center gap-3">
+              {step > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setStep((n) => Math.max(0, n - 1))}
+                  className="min-h-[56px] px-2 text-[16px] font-extrabold text-mint"
+                >
+                  Back
+                </button>
+              ) : null}
+              <div className="min-w-0 flex-1">
+                <Btn
+                  onClick={() => {
+                    if (last) setDone(true);
+                    else setStep((n) => n + 1);
+                  }}
+                >
+                  {item.cta}
+                </Btn>
+              </div>
+            </div>
+          </div>
         ) : null}
       </div>
+
+      {item.tabs ? (
+        <div className="pointer-events-none">
+          <TabBar store={previewStore} />
+        </div>
+      ) : null}
 
       {done ? (
         <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5">
           <div className="rounded-[28px] bg-surface p-6 text-center shadow-[0_18px_50px_rgba(20,48,46,0.28)]">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-mint-soft text-teal">
-              <IconCheck width={28} height={28} />
-            </div>
-            <h2 className="mt-4 text-[24px] font-extrabold text-pine">That's the whole app</h2>
+            <Mascot src={MASCOT.cheer} size={140} className="mx-auto" />
+            <h2 className="mt-3 text-[24px] font-extrabold text-pine">That's the whole app</h2>
             <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
               Home, the day's plan, logging, progress, and profile. Next you'll set the times we
               use for reminders.
