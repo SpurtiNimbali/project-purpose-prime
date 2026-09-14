@@ -42,6 +42,7 @@ import {
   IconWind,
   IconPhone,
   IconList,
+  IconCalendar,
   IconChat,
   IconSend,
 } from "./icons";
@@ -53,6 +54,7 @@ import {
   minutesNow,
   untilLabel,
   type LogKind,
+  type PlanItem,
   type ScreenKey,
   type TummyStore,
 } from "./store";
@@ -83,6 +85,16 @@ const HOME_LOGS: {
   { k: "logSymptom", label: "Symptom", kind: "symptom", Icon: IconWave },
 ];
 
+function railIcon(p: PlanItem) {
+  if (p.kind === "meal") return IconBowl;
+  if (p.kind === "questions") return p.id === "qEvening" ? IconMoon : IconSun;
+  return IconMic;
+}
+
+function railClock(mins: number) {
+  const [time, ampm] = clockLabel(mins).split(" ");
+  return { time, ampm };
+}
 
 export function HomeScreen({ store }: { store: TummyStore }) {
   useTick();
@@ -306,11 +318,14 @@ export function HomeScreen({ store }: { store: TummyStore }) {
             className="relative flex w-full items-center gap-3 text-left active:scale-[0.99]"
           >
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
-              <IconList width={26} height={26} />
+              <IconCalendar width={26} height={26} />
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-[20px] font-extrabold leading-tight text-pine">
-                Open today's plan
+                Today's plan
+              </span>
+              <span className="mt-0.5 block text-[15px] font-semibold leading-snug text-pine-soft">
+                Recordings, your meal, and check-ins
               </span>
             </span>
             <span
@@ -320,57 +335,66 @@ export function HomeScreen({ store }: { store: TummyStore }) {
               <IconArrowRight width={18} height={18} />
             </span>
           </button>
-          <div className="mt-3 flex items-start">
-            {railStart > 0 ? (
-              <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-teal" aria-label={`${railStart} earlier items`}>•••</span>
+          <div className="relative mt-4">
+            <div className="absolute left-4 right-4 top-[15px] h-0.5 rounded-full bg-line" />
+            {railItems.filter((p) => p.done).length > 0 ? (
+              <div
+                className="absolute left-4 top-[15px] h-0.5 rounded-full bg-teal"
+                style={{
+                  width: `calc((100% - 32px) * ${
+                    railItems.filter((p) => p.done).length / Math.max(railItems.length - 1, 1)
+                  })`,
+                }}
+              />
             ) : null}
-            {railItems.map((p, i) => {
-              const RailIcon =
-                p.kind === "recording" ? IconMic : p.kind === "meal" ? IconBowl : IconList;
-              const current = task.itemId === p.id;
-              const planIndex = railStart + i;
-              const pastDue = isPastDue(p, now, mealFinished);
-              return (
-                <span
-                  key={p.id}
-                  className="relative flex min-w-0 flex-1 flex-col items-center gap-1.5"
-                >
-                  {planIndex > 0 ? (
+            <div className="relative z-10 flex">
+              {railItems.map((p) => {
+                const RailIcon = railIcon(p);
+                const current = task.itemId === p.id;
+                const pastDue = isPastDue(p, now, mealFinished);
+                const { time, ampm } = railClock(p.at);
+                return (
+                  <span key={p.id} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
                     <span
                       className={cn(
-                        "absolute left-[-50%] top-[13px] h-[3px] w-full",
-                        p.done || store.plan[planIndex - 1].done ? "bg-teal" : "bg-line",
+                        "flex h-8 w-8 items-center justify-center rounded-full",
+                        p.missed
+                          ? "bg-amber-soft text-amber ring-2 ring-amber"
+                          : p.done
+                            ? "bg-teal text-surface"
+                            : current
+                              ? "bg-mint-soft text-teal ring-2 ring-teal"
+                              : "bg-wash text-pine-soft",
                       )}
-                    />
-                  ) : null}
-                  <span
-                    className={cn(
-                      "relative z-10 flex h-[28px] w-[28px] items-center justify-center rounded-full border-2",
-                      p.missed
-                        ? "border-amber bg-surface text-amber"
-                        : p.done
-                        ? "border-teal bg-teal text-surface"
-                        : current
-                          ? "border-teal bg-surface text-teal"
-                          : "border-line bg-surface text-pine-soft",
-                    )}
-                  >
-                    <RailIcon width={15} height={15} />
+                    >
+                      {p.done ? (
+                        <IconCheck width={16} height={16} />
+                      ) : (
+                        <RailIcon width={16} height={16} />
+                      )}
+                    </span>
+                    <span className="text-center leading-none">
+                      <span
+                        className={cn(
+                          "block text-[12px] font-extrabold tabular-nums",
+                          pastDue ? "text-amber" : current ? "text-teal" : "text-pine",
+                        )}
+                      >
+                        {time}
+                      </span>
+                      <span
+                        className={cn(
+                          "mt-0.5 block text-[10px] font-bold uppercase tracking-[0.08em]",
+                          pastDue ? "text-amber" : "text-pine-soft",
+                        )}
+                      >
+                        {ampm}
+                      </span>
+                    </span>
                   </span>
-                  <span
-                    className={cn(
-                      "w-full truncate text-center text-[12px] font-bold",
-                      pastDue ? "text-amber" : "text-pine-soft",
-                    )}
-                  >
-                    {clockLabel(p.at).replace(" ", "")}
-                  </span>
-                </span>
-              );
-            })}
-            {railStart + railItems.length < store.plan.length ? (
-              <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-pine-soft" aria-label={`${store.plan.length - railStart - railItems.length} later items`}>•••</span>
-            ) : null}
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -1141,7 +1165,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
             <Mascot src={MASCOT.cheer} size={56} />
             <p className="text-[20px] font-extrabold leading-tight">Day {store.day} of 7</p>
           </div>
-          <div className="relative mt-3 grid grid-cols-7 gap-x-2">
+          <div className="relative mt-3 grid grid-cols-7 gap-x-2.5">
             {days.map((d, i) => {
               const isFrozen = store.frozen && i === todayIdx;
               const isToday = i === todayIdx;
@@ -1149,7 +1173,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                 <div key={i} className="flex flex-col items-center gap-1">
                   <span
                     className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-full border-[3px]",
+                      "flex h-9 w-9 items-center justify-center rounded-full border-[3px]",
                       isFrozen
                         ? "border-surface bg-surface text-blue"
                         : d
@@ -1160,11 +1184,11 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                     )}
                   >
                     {isFrozen ? (
-                      <IconSnowflake width={16} height={16} />
+                      <IconSnowflake width={18} height={18} />
                     ) : d ? (
-                      <IconCheck width={16} height={16} />
+                      <IconCheck width={18} height={18} />
                     ) : (
-                      <IconSun width={15} height={15} />
+                      <IconSun width={16} height={16} />
                     )}
                   </span>
                   <span className="text-[12px] font-extrabold text-surface/85">{i + 1}</span>
@@ -1244,6 +1268,11 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                   <p className="text-[18px] font-extrabold leading-tight">
                     {store.frozen ? "Today is a freeze day" : "Need a pause?"}
                   </p>
+                  <p className="mt-1 text-[14px] font-semibold leading-snug text-surface/80">
+                    {store.frozen
+                      ? "The schedule picks up again tomorrow morning."
+                      : "Skip today if you need a break. Nothing will count as missed."}
+                  </p>
                 </div>
               </div>
               {!store.frozen && store.freezeDaysUsed < FREEZE_DAYS_ALLOWED ? (
@@ -1300,10 +1329,10 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
 /* ---------------- profile ---------------- */
 
 export function ProfileScreen({ store }: { store: TummyStore }) {
-  const rows: { label: string; Icon: typeof IconUser; to: ScreenKey }[] = [
-    { label: "Daily times", Icon: IconClock, to: "scheduling" },
-    { label: "Technical Setup", Icon: IconPhone, to: "technicalSetup" },
-    { label: "Setup guide", Icon: IconMic, to: "video" },
+  const rows: { label: string; sub: string; Icon: typeof IconUser; to: ScreenKey }[] = [
+    { label: "Daily times", sub: "Wake, meals, and sleep", Icon: IconClock, to: "scheduling" },
+    { label: "Technical Setup", sub: "Phone model and microphone", Icon: IconPhone, to: "technicalSetup" },
+    { label: "Setup guide", sub: "Rewatch the instruction video", Icon: IconMic, to: "video" },
   ];
   return (
     <Screen>
@@ -1318,16 +1347,19 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
         </div>
 
         <div className="mt-3 space-y-2">
-          {rows.map(({ label, Icon, to }) => (
+          {rows.map(({ label, sub, Icon, to }) => (
             <button
               key={label}
               onClick={() => store.go(to)}
-              className="flex min-h-[62px] w-full items-center gap-3 rounded-3xl border border-line bg-surface px-4 text-left"
+              className="flex min-h-[68px] w-full items-center gap-3 rounded-3xl border border-line bg-surface px-4 py-2.5 text-left"
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
                 <Icon width={22} height={22} />
               </span>
-              <span className="min-w-0 flex-1 text-[17px] font-extrabold text-pine">{label}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[17px] font-extrabold text-pine">{label}</span>
+                <span className="mt-0.5 block text-[14px] font-semibold text-pine-soft">{sub}</span>
+              </span>
               <span className="shrink-0 text-pine-soft">
                 <IconArrowRight width={20} height={20} />
               </span>
@@ -1338,14 +1370,19 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
         <div className="mt-3 space-y-2">
           <button
             onClick={() => store.go("contact")}
-            className="relative flex min-h-[62px] w-full items-center gap-3 overflow-hidden rounded-3xl bg-teal px-4 text-left shadow-md active:scale-[0.99]"
+            className="relative flex min-h-[68px] w-full items-center gap-3 overflow-hidden rounded-3xl bg-teal px-4 py-2.5 text-left shadow-md active:scale-[0.99]"
           >
             <span className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-mint/25" />
             <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface">
               <IconChat width={22} height={22} />
             </span>
-            <span className="relative min-w-0 flex-1 text-[17px] font-extrabold text-surface">
-              Contact the study team
+            <span className="relative min-w-0 flex-1">
+              <span className="block text-[17px] font-extrabold text-surface">
+                Contact the study team
+              </span>
+              <span className="mt-0.5 block text-[14px] font-semibold text-mint">
+                Questions, a missed session, or a concern
+              </span>
             </span>
             <span className="relative shrink-0 text-[20px] font-extrabold text-surface">›</span>
           </button>

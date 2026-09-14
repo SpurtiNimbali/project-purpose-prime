@@ -79,6 +79,14 @@ export const IconClock = (p: P) => (
   </Base>
 );
 
+export const IconCalendar = (p: P) => (
+  <Base {...p}>
+    <rect x="3.5" y="5" width="17" height="15.5" rx="2.2" />
+    <path d="M3.5 10h17M8 3.2v3.6M16 3.2v3.6" />
+    <path d="M8 14h.01M12 14h.01M16 14h.01M8 17.2h.01M12 17.2h.01" />
+  </Base>
+);
+
 export const IconMoon = (p: P) => (
   <Base {...p}>
     <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4 8.5 8.5 0 1 0 20 14.2" />

@@ -28,11 +28,12 @@ import {
   IconBalloon,
   IconBolt,
   IconSpiral,
-  IconRuler,
   IconDizzy,
   IconWind,
   IconLock,
   IconX,
+  IconUser,
+  IconNavelPoint,
 
 } from "./icons";
 import {
@@ -661,21 +662,18 @@ export function ScreenRuler() {
   const mm = Array.from({ length: 81 }, (_, i) => i);
   const eighths = Array.from({ length: 25 }, (_, i) => i);
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute right-0 top-2 z-20 w-8"
-    >
-      <div className="overflow-hidden rounded-l-md bg-surface/95 shadow-[-6px_0_18px_rgba(0,0,0,0.28)]">
-        <div className="flex items-end justify-between px-0.5 pt-1">
-          <span className="text-[7px] font-extrabold uppercase tracking-[0.12em] text-pine">
+    <div aria-hidden className="pointer-events-none absolute right-0 top-3 z-20 w-9">
+      <div className="overflow-hidden rounded-l-2xl bg-surface ring-1 ring-line shadow-[-8px_0_24px_rgba(20,48,46,0.12)]">
+        <div className="flex items-end justify-between px-1 pt-1.5">
+          <span className="text-[8px] font-extrabold uppercase tracking-[0.12em] text-pine">
             cm
           </span>
-          <span className="text-[7px] font-extrabold uppercase tracking-[0.12em] text-teal">
+          <span className="text-[8px] font-extrabold uppercase tracking-[0.12em] text-teal">
             in
           </span>
         </div>
         <div className="relative h-[8cm]">
-          <span className="absolute inset-x-0 top-0 h-px bg-pine" />
+          <span className="absolute inset-x-0 top-0 h-px bg-line" />
           {mm.map((n) => {
             const cm = n % 10 === 0;
             const half = n % 5 === 0;
@@ -686,12 +684,12 @@ export function ScreenRuler() {
                 className={cn(
                   "absolute left-0 top-0",
                   key
-                    ? "h-[2px] w-3 bg-teal"
+                    ? "h-[2px] w-3.5 bg-teal"
                     : cm
                       ? "h-px w-2.5 bg-pine"
                       : half
-                        ? "h-px w-1.5 bg-pine/65"
-                        : "h-px w-1 bg-pine/30",
+                        ? "h-px w-1.5 bg-pine/50"
+                        : "h-px w-1 bg-pine/20",
                 )}
                 style={{ top: `calc(${n} * 1mm)` }}
               />
@@ -701,8 +699,10 @@ export function ScreenRuler() {
             <span
               key={`cmn-${n}`}
               className={cn(
-                "absolute left-[11px] text-[8px] font-extrabold leading-none",
-                n === 3 || n === 8 ? "text-teal" : "text-pine",
+                "absolute left-[13px] font-extrabold leading-none",
+                n === 3 || n === 8
+                  ? "text-[9px] text-teal"
+                  : "text-[8px] text-pine-soft",
               )}
               style={{
                 top: `calc(${n} * 1cm)`,
@@ -720,7 +720,7 @@ export function ScreenRuler() {
                 key={`ie-${n}`}
                 className={cn(
                   "absolute right-0 top-0",
-                  inch ? "h-px w-2 bg-teal" : half ? "h-px w-1.5 bg-teal/70" : "h-px w-1 bg-teal/35",
+                  inch ? "h-px w-2 bg-teal" : half ? "h-px w-1.5 bg-teal/60" : "h-px w-1 bg-teal/25",
                 )}
                 style={{ top: `calc(${n} * 0.125in)` }}
               />
@@ -744,7 +744,7 @@ export function AbdomenGuide({ play = true }: { play?: boolean }) {
     void video.play().catch(() => undefined);
   }, [play]);
   return (
-    <figure className="flex h-full w-full items-start justify-center">
+    <figure className="h-full w-full">
       <video
         ref={ref}
         src={placementGuide}
@@ -753,80 +753,119 @@ export function AbdomenGuide({ play = true }: { play?: boolean }) {
         loop
         playsInline
         aria-label="How to place the phone: measure from the navel, then rest the speaker edge on that spot with the screen facing up"
-        className="max-h-full max-w-full rounded-2xl object-contain"
+        className="h-full w-full object-contain"
       />
     </figure>
   );
 }
 
-export const PLACEMENT_TIPS = [
-  {
-    t: "Right lower belly",
-    b: "Measure 8 cm right of your navel, then 3 cm down.",
-    Icon: IconRuler,
-  },
-  {
-    t: "Speakers on that spot",
-    b: "Press the speaker edge into the skin rather than the camera side.",
-    Icon: IconMic,
-  },
-  {
-    t: "Screen up, camera down",
-    b: "Hold the phone so the screen faces up and only the speaker edge touches you.",
-    Icon: IconPhone,
-  },
-];
-
-/** One placement rule at a time. The footer button advances the index. */
-export function PlacementTips({ index }: { index: number }) {
-  const tip = PLACEMENT_TIPS[Math.min(index, PLACEMENT_TIPS.length - 1)];
-  const { t, b, Icon } = tip;
+function GuideCard({
+  step,
+  total,
+  title,
+  body,
+  Icon,
+  cta,
+  onNext,
+  onBack,
+}: {
+  step?: number;
+  total?: number;
+  title: string;
+  body: string;
+  Icon: typeof IconPhone;
+  cta: string;
+  onNext: () => void;
+  onBack?: () => void;
+}) {
   return (
-    <div
-      key={t}
-      className="flex items-center gap-2.5 rounded-2xl bg-surface/10 px-3 py-2.5 text-surface"
-    >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber text-pine">
-        <Icon width={18} height={18} />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-[15px] font-bold leading-snug">{t}</span>
-        <span className="mt-0.5 block text-[13px] font-semibold leading-snug text-mint">{b}</span>
-      </span>
+    <div className="absolute inset-x-0 bottom-0 z-40 px-4 pb-6">
+      <div className="rounded-[28px] bg-surface px-5 pb-5 pt-5 shadow-[0_18px_50px_rgba(20,48,46,0.16)]">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+          <Icon width={28} height={28} />
+        </div>
+        {step && total ? (
+          <p className="mt-4 text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
+            {step} of {total}
+          </p>
+        ) : null}
+        <h2 className={cn("font-extrabold leading-tight text-pine", step ? "mt-1 text-[22px]" : "mt-4 text-[22px]")}>
+          {title}
+        </h2>
+        <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">{body}</p>
+        <div className="mt-5 flex items-center gap-3">
+          {onBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className="min-h-[48px] px-2 text-[16px] font-extrabold text-teal"
+            >
+              Back
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onNext}
+            className="min-h-[48px] min-w-[118px] rounded-full bg-teal px-7 text-[16px] font-extrabold text-surface shadow-[0_5px_0_0_var(--color-teal-deep)] active:translate-y-[2px] active:shadow-[0_3px_0_0_var(--color-teal-deep)]"
+          >
+            {cta}
+          </button>
+          {step && total ? (
+            <div className="ml-auto flex items-center gap-1.5" aria-hidden>
+              {Array.from({ length: total }, (_, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    "h-1.5 rounded-full",
+                    i === step - 1 ? "w-5 bg-teal" : "w-1.5 bg-line",
+                  )}
+                />
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }
 
 const POSITION_CHECKS = [
-  { t: "Quiet room", b: "Silence the room, and close the door if you can." },
-  { t: "Sitting upright, no talking", b: "Sit still with your feet on the floor." },
-  { t: "Gentle pressure only", b: "Press lightly, because harder contact muffles the sound." },
+  {
+    t: "Quiet room",
+    b: "Silence the room, and close the door if you can.",
+    Icon: IconMic,
+  },
+  {
+    t: "Sit still",
+    b: "Sit upright with your feet on the floor. Don't talk during the recording.",
+    Icon: IconUser,
+  },
+  {
+    t: "Gentle pressure",
+    b: "Press lightly. Harder contact muffles the sound.",
+    Icon: IconPhone,
+  },
 ];
 
-/** One-at-a-time checks over a blurred positioning guide. */
+/** One-at-a-time setup checks before the placement film plays. */
 export function PositionChecksGate({ onDone }: { onDone: () => void }) {
   const [step, setStep] = useState(0);
   const check = POSITION_CHECKS[Math.min(step, POSITION_CHECKS.length - 1)];
+  const last = step >= POSITION_CHECKS.length - 1;
   return (
-    <div className="absolute inset-0 z-30 flex flex-col justify-end bg-pine/70 px-5 pb-10">
-      <div className="rounded-3xl bg-surface p-5">
-        <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-          Check {step + 1} of {POSITION_CHECKS.length}
-        </p>
-        <p className="mt-2 text-[22px] font-extrabold leading-tight text-pine">{check.t}</p>
-        <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">{check.b}</p>
-        <div className="mt-5">
-          <Btn
-            onClick={() => {
-              if (step + 1 >= POSITION_CHECKS.length) onDone();
-              else setStep((s) => s + 1);
-            }}
-          >
-            Done, it's ready
-          </Btn>
-        </div>
-      </div>
-    </div>
+    <GuideCard
+      step={step + 1}
+      total={POSITION_CHECKS.length}
+      title={check.t}
+      body={check.b}
+      Icon={check.Icon}
+      cta={last ? "Show the guide" : "Next"}
+      onBack={step > 0 ? () => setStep((s) => s - 1) : undefined}
+      onNext={() => {
+        if (last) onDone();
+        else setStep((s) => s + 1);
+      }}
+    />
   );
 }
 
@@ -842,35 +881,31 @@ export function PositioningGuideLayout({
   banner?: ReactNode;
 }) {
   const [checked, setChecked] = useState(false);
-  const [tipIndex, setTipIndex] = useState(0);
-  const lastTip = tipIndex >= PLACEMENT_TIPS.length - 1;
   return (
-    <Screen dark className="relative overflow-hidden">
-      <TopBar title="Positioning guide" onBack={onBack} dark step={step} />
-      {banner}
-      <div className={cn("relative min-h-0 flex-1", !checked && "blur-md")}>
-        <div className="absolute inset-0 py-1 pl-4 pr-10">
-          <AbdomenGuide play={checked} />
+    <Screen className="relative overflow-hidden">
+      <div className="relative z-50">
+        <TopBar title="Positioning guide" onBack={onBack} step={step} />
+        {banner}
+      </div>
+      <div className="relative min-h-0 flex-1 pb-[220px]">
+        <div className="flex h-full items-center justify-center px-5 pr-11 py-2">
+          <div className="aspect-square max-h-full w-full overflow-hidden rounded-[28px] bg-pine shadow-[0_12px_40px_rgba(20,48,46,0.14)]">
+            <AbdomenGuide play={checked} />
+          </div>
         </div>
         {checked ? <ScreenRuler /> : null}
       </div>
-      <div className={cn("shrink-0 px-5 pt-2", !checked && "blur-md")}>
-        <PlacementTips index={tipIndex} />
-      </div>
-      <div className="shrink-0 px-5 pb-7 pt-3">
-        <Btn
-          disabled={!checked}
-          onClick={() => {
-            if (!lastTip) setTipIndex((i) => i + 1);
-            else onReady();
-          }}
-        >
-          {checked && !lastTip
-            ? `Next · ${tipIndex + 1} of ${PLACEMENT_TIPS.length}`
-            : "I'm in position"}
-        </Btn>
-      </div>
-      {!checked ? <PositionChecksGate onDone={() => setChecked(true)} /> : null}
+      {!checked ? (
+        <PositionChecksGate onDone={() => setChecked(true)} />
+      ) : (
+        <GuideCard
+          title="Match this placement"
+          body="8 cm right of your navel, then 3 cm down. Speakers on the skin, screen facing up."
+          Icon={IconNavelPoint}
+          cta="I'm in position"
+          onNext={onReady}
+        />
+      )}
     </Screen>
   );
 }

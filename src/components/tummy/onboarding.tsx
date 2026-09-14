@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Screen,
   ScreenBody,
@@ -25,6 +25,11 @@ import {
   IconBowl,
   IconSunset,
   IconMoon,
+  IconHome,
+  IconList,
+  IconBook,
+  IconChart,
+  IconUser,
 } from "./icons";
 import {
   RecordTimer,
@@ -34,21 +39,13 @@ import {
   CaseOffLayout,
   SessionHubScreen,
   MealCaptureScreen,
-  MealEndScreen,
   PositioningGuideLayout,
 } from "./recording";
 import {
   HomeScreen,
   LogHubScreen,
-  LogMealScreen,
-  LogHydrationScreen,
-  LogToiletScreen,
-  LogSymptomScreen,
-  LogSleepScreen,
-  LogActivityScreen,
   ProgressScreen,
   ProfileScreen,
-  ContactScreen,
 } from "./main";
 import { MorningQuestionsScreen, EveningCheckinScreen } from "./questions";
 
@@ -324,58 +321,75 @@ export function QuizScreen({ store }: { store: TummyStore }) {
 }
 
 
-/* ---------------- how a day works: walk the real app ---------------- */
+/* ---------------- how a day works: a short feature tour ---------------- */
 
 const TOUR_TABS: ScreenKey[] = ["home", "logHub", "progress", "profile"];
 
-const TOUR_COACH: Partial<Record<ScreenKey, string>> = {
-  home: "Tap Next up or today's plan. Use the tabs to see Log, Progress, and Profile.",
-  sessionHub: "Tap a task to open it. Every recording, meal, and question is on this list.",
-  morningQuestions: "Answer the same way you will each morning. Nothing here is saved.",
-  caseReminder: "Recordings start with the case off. Tap the button to keep looking around.",
-  mealCapture: "Photo the plate, then tap when you start eating.",
-  mealEnd: "Timers start when you finish. Use back to return to the plan.",
-  logHub: "Tap a tile to log something, or pick another tab.",
-  logMeal: "This is a log form. Use back when you are done looking.",
-  logHydration: "This is a log form. Use back when you are done looking.",
-  logToilet: "This is a log form. Use back when you are done looking.",
-  logSymptom: "This is a log form. Use back when you are done looking.",
-  logSleep: "This is a log form. Use back when you are done looking.",
-  logActivity: "This is a log form. Use back when you are done looking.",
-  progress: "This is the week at a glance. Freeze days live here too.",
-  profile: "Change reminder times or reach the study team from here.",
-  contact: "This is how you reach the study team. Use back when you are done.",
-  eveningCheckin: "This is the last thing on the plan. Tap an answer to continue.",
-};
+const TOUR_STEPS: {
+  view: ScreenKey;
+  title: string;
+  body: string;
+  Icon: typeof IconHome;
+}[] = [
+  {
+    view: "home",
+    title: "Home",
+    body: "Each day opens here. Next up is the one thing due right now.",
+    Icon: IconHome,
+  },
+  {
+    view: "sessionHub",
+    title: "Today's plan",
+    body: "Recordings, your study meal, and check-ins live on this list.",
+    Icon: IconList,
+  },
+  {
+    view: "morningQuestions",
+    title: "Morning questions",
+    body: "A short wake-up check-in. You'll answer these for real later.",
+    Icon: IconSun,
+  },
+  {
+    view: "mealCapture",
+    title: "Your study meal",
+    body: "Photo the plate, then mark when you start and finish eating.",
+    Icon: IconBowl,
+  },
+  {
+    view: "logHub",
+    title: "Log",
+    body: "Meals, drinks, symptoms, and the rest can be added any time.",
+    Icon: IconBook,
+  },
+  {
+    view: "progress",
+    title: "Progress",
+    body: "The week at a glance, plus freeze days if you need a pause.",
+    Icon: IconChart,
+  },
+  {
+    view: "profile",
+    title: "Profile",
+    body: "Change reminder times or reach the study team from here.",
+    Icon: IconUser,
+  },
+  {
+    view: "eveningCheckin",
+    title: "Evening check-in",
+    body: "A few questions at the end of the day. That's the last thing on the plan.",
+    Icon: IconMoon,
+  },
+];
 
-function mapTourView(s: ScreenKey): ScreenKey | "done" | null {
-  if (s === "periodCheck") return "done";
-  if (s === "whichMeal") return "mealCapture";
-  if (
-    s === "caseReminder" ||
-    s === "fastingCheck" ||
-    s === "sessionCheck" ||
-    s === "positioning" ||
-    s === "recording" ||
-    s === "skipReason"
-  ) {
-    return "caseReminder";
-  }
-  if (s === "contactForm" || s === "contactComplaint") return "contact";
-  if (s === "extraSession") return "home";
-  if (TOUR_COACH[s]) return s;
-  return null;
-}
-
-function tourStore(store: TummyStore, view: ScreenKey, onNav: (s: ScreenKey | "back") => void): TummyStore {
+function tourStore(store: TummyStore, view: ScreenKey): TummyStore {
   const noop = () => undefined;
   return {
     ...store,
     day: 1,
     screen: view,
     tourPreview: true,
-    go: (s) => onNav(s),
-    back: () => onNav("back"),
+    go: noop,
+    back: noop,
     startItem: noop,
     completeItem: noop,
     completeSession: noop,
@@ -401,140 +415,68 @@ function TourView({ view, store }: { view: ScreenKey; store: TummyStore }) {
   if (view === "home") return <HomeScreen store={store} />;
   if (view === "sessionHub") return <SessionHubScreen store={store} />;
   if (view === "morningQuestions") return <MorningQuestionsScreen store={store} />;
-  if (view === "caseReminder") {
-    return (
-      <CaseOffLayout
-        title="Before we start"
-        onBack={store.back}
-        onContinue={() => store.go("sessionHub")}
-      />
-    );
-  }
   if (view === "mealCapture") return <MealCaptureScreen store={store} />;
-  if (view === "mealEnd") return <MealEndScreen store={store} />;
   if (view === "logHub") return <LogHubScreen store={store} />;
-  if (view === "logMeal") return <LogMealScreen store={store} />;
-  if (view === "logHydration") return <LogHydrationScreen store={store} />;
-  if (view === "logToilet") return <LogToiletScreen store={store} />;
-  if (view === "logSymptom") return <LogSymptomScreen store={store} />;
-  if (view === "logSleep") return <LogSleepScreen store={store} />;
-  if (view === "logActivity") return <LogActivityScreen store={store} />;
   if (view === "progress") return <ProgressScreen store={store} />;
   if (view === "profile") return <ProfileScreen store={store} />;
-  if (view === "contact") return <ContactScreen store={store} />;
   return <EveningCheckinScreen store={store} />;
 }
 
-function blurPanels(
-  holes: { x: number; y: number; w: number; h: number }[],
-  W: number,
-  H: number,
-  pad: number,
-) {
-  if (W <= 0 || H <= 0) return [{ x: 0, y: 0, w: W, h: H }];
-  const boxes: { x: number; y: number; r: number; b: number }[] = [];
-  for (const h of [...holes].sort((a, b) => a.y - b.y)) {
-    const next = {
-      x: Math.max(0, h.x - pad),
-      y: Math.max(0, h.y - pad),
-      r: Math.min(W, h.x + h.w + pad),
-      b: Math.min(H, h.y + h.h + pad),
-    };
-    const last = boxes[boxes.length - 1];
-    if (last && next.y < last.b && next.b > last.y) {
-      last.x = Math.min(last.x, next.x);
-      last.y = Math.min(last.y, next.y);
-      last.r = Math.max(last.r, next.r);
-      last.b = Math.max(last.b, next.b);
-    } else {
-      boxes.push(next);
-    }
-  }
-  const panels: { x: number; y: number; w: number; h: number }[] = [];
-  let y = 0;
-  for (const box of boxes) {
-    if (box.y > y) panels.push({ x: 0, y, w: W, h: box.y - y });
-    if (box.x > 0) panels.push({ x: 0, y: box.y, w: box.x, h: box.b - box.y });
-    if (box.r < W) panels.push({ x: box.r, y: box.y, w: W - box.r, h: box.b - box.y });
-    y = Math.max(y, box.b);
-  }
-  if (y < H) panels.push({ x: 0, y, w: W, h: H - y });
-  return panels.filter((p) => p.w > 0 && p.h > 0);
-}
-
-function TourGuide({
-  rootRef,
-  coach,
-  view,
+function TourCard({
+  step,
+  total,
+  title,
+  body,
+  Icon,
+  onNext,
+  onBack,
+  last,
 }: {
-  rootRef: { current: HTMLDivElement | null };
-  coach: string;
-  view: ScreenKey;
+  step: number;
+  total: number;
+  title: string;
+  body: string;
+  Icon: typeof IconHome;
+  onNext: () => void;
+  onBack: () => void;
+  last: boolean;
 }) {
-  const [holes, setHoles] = useState<{ x: number; y: number; w: number; h: number }[]>([]);
-  const [size, setSize] = useState({ w: 0, h: 0 });
-
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    const measure = () => {
-      const cr = root.getBoundingClientRect();
-      setSize({ w: cr.width, h: cr.height });
-      setHoles(
-        [...root.querySelectorAll("[data-tour-spot]")].map((node) => {
-          const r = node.getBoundingClientRect();
-          return {
-            x: r.left - cr.left,
-            y: r.top - cr.top,
-            w: r.width,
-            h: r.height,
-          };
-        }),
-      );
-    };
-    measure();
-    const id = requestAnimationFrame(measure);
-    const ro = new ResizeObserver(measure);
-    ro.observe(root);
-    root.querySelectorAll("[data-tour-spot]").forEach((n) => ro.observe(n));
-    root.addEventListener("scroll", measure, true);
-    return () => {
-      cancelAnimationFrame(id);
-      ro.disconnect();
-      root.removeEventListener("scroll", measure, true);
-    };
-  }, [rootRef, view, coach]);
-
-  const pad = 8;
-  const panels = blurPanels(holes, size.w, size.h, pad);
-
   return (
-    <div className="pointer-events-none absolute inset-0 z-30">
-      {panels.map((p, i) => (
-        <div
-          key={`${p.x}-${p.y}-${i}`}
-          className="absolute bg-pine/50 backdrop-blur-xl"
-          style={{ left: p.x, top: p.y, width: p.w, height: p.h }}
-        />
-      ))}
-      {holes.map((h, i) => (
-        <div
-          key={`ring-${h.x}-${h.y}-${i}`}
-          className="absolute rounded-[24px] ring-[3px] ring-amber"
-          style={{
-            left: h.x - pad,
-            top: h.y - pad,
-            width: h.w + pad * 2,
-            height: h.h + pad * 2,
-          }}
-        />
-      ))}
-      <div className="absolute inset-x-0 top-3 px-4">
-        <div className="flex items-end gap-2">
-          <Mascot src={MASCOT.calm} size={64} />
-          <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-3 text-[15px] font-semibold leading-snug text-pine shadow-lg">
-            {coach}
-          </p>
+    <div className="absolute inset-x-0 bottom-0 z-40 px-4 pb-6">
+      <div className="rounded-[28px] bg-surface px-5 pb-5 pt-5 shadow-[0_18px_50px_rgba(20,48,46,0.28)]">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+          <Icon width={28} height={28} />
+        </div>
+        <h2 className="mt-4 text-[22px] font-extrabold leading-tight text-pine">{title}</h2>
+        <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">{body}</p>
+        <div className="mt-5 flex items-center gap-3">
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className="min-h-[48px] px-2 text-[16px] font-extrabold text-teal"
+            >
+              Back
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onNext}
+            className="min-h-[48px] min-w-[118px] rounded-full bg-teal px-7 text-[16px] font-extrabold text-surface shadow-[0_5px_0_0_var(--color-teal-deep)] active:translate-y-[2px] active:shadow-[0_3px_0_0_var(--color-teal-deep)]"
+          >
+            {last ? "Finish" : "Next"}
+          </button>
+          <div className="ml-auto flex items-center gap-1.5" aria-hidden>
+            {Array.from({ length: total }, (_, i) => (
+              <span
+                key={i}
+                className={cn(
+                  "h-1.5 rounded-full",
+                  i === step - 1 ? "w-5 bg-teal" : "w-1.5 bg-line",
+                )}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -544,11 +486,9 @@ function TourGuide({
 export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
   const [started, setStarted] = useState(false);
   const [done, setDone] = useState(false);
-  const [readyToFinish, setReadyToFinish] = useState(false);
-  const [stack, setStack] = useState<ScreenKey[]>(["home"]);
-  const [seenTabs, setSeenTabs] = useState<Set<ScreenKey>>(() => new Set(["home"]));
-  const view = stack[stack.length - 1] ?? "home";
-  const rootRef = useRef<HTMLDivElement>(null);
+  const [step, setStep] = useState(0);
+  const current = TOUR_STEPS[step] ?? TOUR_STEPS[0];
+  const last = step === TOUR_STEPS.length - 1;
 
   useEffect(() => {
     const prev = store.demoNow;
@@ -559,49 +499,11 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onNav = (s: ScreenKey | "back") => {
-    if (s === "back") {
-      setStack((st) => (st.length > 1 ? st.slice(0, -1) : st));
-      return;
-    }
-    if (s === "welcome") {
-      setStarted(false);
-      setDone(false);
-      setReadyToFinish(false);
-      setStack(["home"]);
-      setSeenTabs(new Set(["home"]));
-      return;
-    }
-    if (view === "eveningCheckin" && (s === "home" || s === "periodCheck")) {
-      setDone(true);
-      return;
-    }
-    if (readyToFinish && TOUR_TABS.includes(s)) {
-      setDone(true);
-      return;
-    }
-    const mapped = mapTourView(s);
-    if (mapped === "done") {
-      setDone(true);
-      return;
-    }
-    if (!mapped) return;
-    setStack((st) => [...st, mapped]);
-    if (TOUR_TABS.includes(mapped)) {
-      setSeenTabs((prev) => {
-        const next = new Set(prev);
-        next.add(mapped);
-        if (TOUR_TABS.every((k) => next.has(k))) setReadyToFinish(true);
-        return next;
-      });
-    }
-  };
-
   const previewStore = useMemo(
-    () => tourStore(store, view, onNav),
+    () => tourStore(store, current.view),
     // store identity is stable enough for this walkthrough; view must update the tab highlight
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [store, view, readyToFinish],
+    [store, current.view],
   );
 
   if (!started) {
@@ -612,40 +514,54 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
           <div className="flex flex-1 flex-col items-center justify-center text-center">
             <Mascot src={MASCOT.wave} size={170} />
             <h2 className="mt-4 text-[26px] font-extrabold leading-tight text-pine">
-              Let's walk through a day
+              A quick look around
             </h2>
             <p className="mt-3 text-[17px] font-semibold leading-snug text-pine-soft">
-              You'll see the real app screens. Tap the buttons to move around, then we'll set your
-              daily times. Nothing from this walkthrough is saved.
+              This is a short tour of the main screens. You will not fill anything in. Nothing
+              from this walkthrough is saved.
             </p>
           </div>
         </ScreenBody>
         <StickyFooter>
-          <Btn onClick={() => setStarted(true)}>Start the walkthrough</Btn>
+          <Btn onClick={() => setStarted(true)}>Start the tour</Btn>
         </StickyFooter>
       </Screen>
     );
   }
 
-  const coach = readyToFinish
-    ? "You've now seen the whole app. Tap a tab to set your daily times."
-    : (TOUR_COACH[view] ?? "Tap a button to keep looking around.");
-
   return (
     <Screen className="relative">
-      <div ref={rootRef} className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="pointer-events-none relative flex min-h-0 flex-1 flex-col overflow-hidden">
         <div className="min-h-0 flex-1 overflow-hidden">
-          <TourView view={view} store={previewStore} />
+          <TourView view={current.view} store={previewStore} />
         </div>
-        {TOUR_TABS.includes(view) ? <TabBar store={previewStore} /> : null}
-        {!done ? <TourGuide rootRef={rootRef} coach={coach} view={view} /> : null}
+        {TOUR_TABS.includes(current.view) ? <TabBar store={previewStore} /> : null}
       </div>
 
-      {done ? (
-        <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
-          <div className="rounded-[28px] bg-surface p-6 text-center">
-            <Mascot src={MASCOT.cheer} size={140} className="mx-auto" />
-            <h2 className="mt-3 text-[24px] font-extrabold text-pine">That's the whole app</h2>
+      {!done ? (
+        <>
+          <div className="absolute inset-0 z-30 bg-pine/30" />
+          <TourCard
+            step={step + 1}
+            total={TOUR_STEPS.length}
+            title={current.title}
+            body={current.body}
+            Icon={current.Icon}
+            last={last}
+            onBack={() => setStep((s) => Math.max(0, s - 1))}
+            onNext={() => {
+              if (last) setDone(true);
+              else setStep((s) => s + 1);
+            }}
+          />
+        </>
+      ) : (
+        <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5">
+          <div className="rounded-[28px] bg-surface p-6 text-center shadow-[0_18px_50px_rgba(20,48,46,0.28)]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+              <IconCheck width={28} height={28} />
+            </div>
+            <h2 className="mt-4 text-[24px] font-extrabold text-pine">That's the whole app</h2>
             <p className="mt-2 text-[16px] font-semibold leading-snug text-pine-soft">
               Home, the day's plan, logging, progress, and profile. Next you'll set the times we
               use for reminders.
@@ -655,7 +571,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
             </div>
           </div>
         </div>
-      ) : null}
+      )}
     </Screen>
   );
 }
@@ -965,13 +881,11 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
 
   const banner = (
     <div className="shrink-0 px-4 pt-3">
-      <div className="flex items-center gap-2 rounded-2xl bg-surface/10 px-4 py-3">
-        <span className="text-mint">
+      <div className="flex items-center gap-2 rounded-2xl bg-mint-soft px-4 py-3">
+        <span className="text-teal">
           <IconLock width={20} height={20} />
         </span>
-        <p className="flex-1 text-[15px] font-extrabold text-surface">
-          Dry run
-        </p>
+        <p className="flex-1 text-[15px] font-extrabold text-pine">Dry run</p>
       </div>
     </div>
   );
