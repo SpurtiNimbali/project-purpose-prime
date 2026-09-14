@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Screen,
   ScreenBody,
@@ -27,24 +27,28 @@ import {
   IconMoon,
 } from "./icons";
 import {
-  AbdomenGuide,
-  PlacementTips,
-  PLACEMENT_TIPS,
-  PositionChecksGate,
   RecordTimer,
-  ScreenRuler,
   SymptomGrid,
   SeveritySheet,
   QualityPanel,
   CaseOffLayout,
   SessionHubScreen,
   MealCaptureScreen,
+  MealEndScreen,
+  PositioningGuideLayout,
 } from "./recording";
 import {
   HomeScreen,
   LogHubScreen,
+  LogMealScreen,
+  LogHydrationScreen,
+  LogToiletScreen,
+  LogSymptomScreen,
+  LogSleepScreen,
+  LogActivityScreen,
   ProgressScreen,
   ProfileScreen,
+  ContactScreen,
 } from "./main";
 import { MorningQuestionsScreen, EveningCheckinScreen } from "./questions";
 
@@ -320,87 +324,48 @@ export function QuizScreen({ store }: { store: TummyStore }) {
 }
 
 
-/* ---------------- how a day works: dry run of the real app ---------------- */
+/* ---------------- how a day works: walk the real app ---------------- */
 
-type TourStep = {
-  id: string;
-  view: ScreenKey;
-  tabs?: boolean;
-  jumps: ScreenKey[];
-  coach: string;
-  cta: string;
+const TOUR_TABS: ScreenKey[] = ["home", "logHub", "progress", "profile"];
+
+const TOUR_COACH: Partial<Record<ScreenKey, string>> = {
+  home: "Tap Next up or today's plan. Use the tabs to see Log, Progress, and Profile.",
+  sessionHub: "Tap a task to open it. Every recording, meal, and question is on this list.",
+  morningQuestions: "Answer the same way you will each morning. Nothing here is saved.",
+  caseReminder: "Recordings start with the case off. Tap the button to keep looking around.",
+  mealCapture: "Photo the plate, then tap when you start eating.",
+  mealEnd: "Timers start when you finish. Use back to return to the plan.",
+  logHub: "Tap a tile to log something, or pick another tab.",
+  logMeal: "This is a log form. Use back when you are done looking.",
+  logHydration: "This is a log form. Use back when you are done looking.",
+  logToilet: "This is a log form. Use back when you are done looking.",
+  logSymptom: "This is a log form. Use back when you are done looking.",
+  logSleep: "This is a log form. Use back when you are done looking.",
+  logActivity: "This is a log form. Use back when you are done looking.",
+  progress: "This is the week at a glance. Freeze days live here too.",
+  profile: "Change reminder times or reach the study team from here.",
+  contact: "This is how you reach the study team. Use back when you are done.",
+  eveningCheckin: "This is the last thing on the plan. Tap an answer to continue.",
 };
 
-const APP_TOUR: TourStep[] = [
-  {
-    id: "home",
-    view: "home",
-    tabs: true,
-    jumps: ["home"],
-    coach:
-      "This is home. Every day starts here. The top card is always the next thing to do. The row under it is today's plan.",
-    cta: "Show me the plan",
-  },
-  {
-    id: "plan",
-    view: "sessionHub",
-    jumps: ["sessionHub"],
-    coach:
-      "Today's plan is the full list, in order: wake-up questions, recordings, your study meal, then the evening check-in. If you can't do a recording well, skip it and tell us why.",
-    cta: "Next, morning questions",
-  },
-  {
-    id: "morning",
-    view: "morningQuestions",
-    jumps: ["morningQuestions"],
-    coach:
-      "Days begin with a few wake-up questions. The fasted recording comes right after — you'll practice that later in setup.",
-    cta: "Next, the study meal",
-  },
-  {
-    id: "meal",
-    view: "mealCapture",
-    jumps: ["mealCapture", "mealEnd", "whichMeal"],
-    coach:
-      "When it's time to eat your study meal, photo the plate and tap as you start. The recordings after it are timed from the moment you finish eating.",
-    cta: "Next, logging",
-  },
-  {
-    id: "log",
-    view: "logHub",
-    tabs: true,
-    jumps: ["logHub", "logMeal", "logHydration", "logToilet", "logSymptom", "logSleep", "logActivity"],
-    coach:
-      "The Log tab is for everything else you eat, drink, or feel. Add things whenever you remember. They don't have to be on the clock.",
-    cta: "Next, progress",
-  },
-  {
-    id: "progress",
-    view: "progress",
-    tabs: true,
-    jumps: ["progress"],
-    coach:
-      "Progress is the week at a glance. If you need a pause, freeze days live here. Misses with a reason still help the study.",
-    cta: "Next, profile",
-  },
-  {
-    id: "profile",
-    view: "profile",
-    tabs: true,
-    jumps: ["profile", "contact", "contactForm", "scheduling", "video", "technicalSetup"],
-    coach:
-      "Profile is settings and help. After setup you can change reminder times, your phone, or reach the study team.",
-    cta: "Last stop, evening",
-  },
-  {
-    id: "evening",
-    view: "eveningCheckin",
-    jumps: ["eveningCheckin", "periodCheck"],
-    coach:
-      "Night ends with a short evening check-in. That's the last thing on the plan. Honest gaps are more useful than tidy guesses.",
-    cta: "That's the app",
-  },
-];
+function mapTourView(s: ScreenKey): ScreenKey | "done" | null {
+  if (s === "periodCheck") return "done";
+  if (s === "whichMeal") return "mealCapture";
+  if (
+    s === "caseReminder" ||
+    s === "fastingCheck" ||
+    s === "sessionCheck" ||
+    s === "positioning" ||
+    s === "recording" ||
+    s === "skipReason"
+  ) {
+    return "caseReminder";
+  }
+  if (s === "contactForm" || s === "contactComplaint") return "contact";
+  if (s === "extraSession") return "home";
+  if (TOUR_COACH[s]) return s;
+  return null;
+}
 
 function tourStore(store: TummyStore, view: ScreenKey, onNav: (s: ScreenKey | "back") => void): TummyStore {
   const noop = () => undefined;
@@ -408,6 +373,7 @@ function tourStore(store: TummyStore, view: ScreenKey, onNav: (s: ScreenKey | "b
     ...store,
     day: 1,
     screen: view,
+    tourPreview: true,
     go: (s) => onNav(s),
     back: () => onNav("back"),
     startItem: noop,
@@ -435,19 +401,154 @@ function TourView({ view, store }: { view: ScreenKey; store: TummyStore }) {
   if (view === "home") return <HomeScreen store={store} />;
   if (view === "sessionHub") return <SessionHubScreen store={store} />;
   if (view === "morningQuestions") return <MorningQuestionsScreen store={store} />;
+  if (view === "caseReminder") {
+    return (
+      <CaseOffLayout
+        title="Before we start"
+        onBack={store.back}
+        onContinue={() => store.go("sessionHub")}
+      />
+    );
+  }
   if (view === "mealCapture") return <MealCaptureScreen store={store} />;
+  if (view === "mealEnd") return <MealEndScreen store={store} />;
   if (view === "logHub") return <LogHubScreen store={store} />;
+  if (view === "logMeal") return <LogMealScreen store={store} />;
+  if (view === "logHydration") return <LogHydrationScreen store={store} />;
+  if (view === "logToilet") return <LogToiletScreen store={store} />;
+  if (view === "logSymptom") return <LogSymptomScreen store={store} />;
+  if (view === "logSleep") return <LogSleepScreen store={store} />;
+  if (view === "logActivity") return <LogActivityScreen store={store} />;
   if (view === "progress") return <ProgressScreen store={store} />;
   if (view === "profile") return <ProfileScreen store={store} />;
+  if (view === "contact") return <ContactScreen store={store} />;
   return <EveningCheckinScreen store={store} />;
+}
+
+function blurPanels(
+  holes: { x: number; y: number; w: number; h: number }[],
+  W: number,
+  H: number,
+  pad: number,
+) {
+  if (W <= 0 || H <= 0) return [{ x: 0, y: 0, w: W, h: H }];
+  const boxes: { x: number; y: number; r: number; b: number }[] = [];
+  for (const h of [...holes].sort((a, b) => a.y - b.y)) {
+    const next = {
+      x: Math.max(0, h.x - pad),
+      y: Math.max(0, h.y - pad),
+      r: Math.min(W, h.x + h.w + pad),
+      b: Math.min(H, h.y + h.h + pad),
+    };
+    const last = boxes[boxes.length - 1];
+    if (last && next.y < last.b && next.b > last.y) {
+      last.x = Math.min(last.x, next.x);
+      last.y = Math.min(last.y, next.y);
+      last.r = Math.max(last.r, next.r);
+      last.b = Math.max(last.b, next.b);
+    } else {
+      boxes.push(next);
+    }
+  }
+  const panels: { x: number; y: number; w: number; h: number }[] = [];
+  let y = 0;
+  for (const box of boxes) {
+    if (box.y > y) panels.push({ x: 0, y, w: W, h: box.y - y });
+    if (box.x > 0) panels.push({ x: 0, y: box.y, w: box.x, h: box.b - box.y });
+    if (box.r < W) panels.push({ x: box.r, y: box.y, w: W - box.r, h: box.b - box.y });
+    y = Math.max(y, box.b);
+  }
+  if (y < H) panels.push({ x: 0, y, w: W, h: H - y });
+  return panels.filter((p) => p.w > 0 && p.h > 0);
+}
+
+function TourGuide({
+  rootRef,
+  coach,
+  view,
+}: {
+  rootRef: { current: HTMLDivElement | null };
+  coach: string;
+  view: ScreenKey;
+}) {
+  const [holes, setHoles] = useState<{ x: number; y: number; w: number; h: number }[]>([]);
+  const [size, setSize] = useState({ w: 0, h: 0 });
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const measure = () => {
+      const cr = root.getBoundingClientRect();
+      setSize({ w: cr.width, h: cr.height });
+      setHoles(
+        [...root.querySelectorAll("[data-tour-spot]")].map((node) => {
+          const r = node.getBoundingClientRect();
+          return {
+            x: r.left - cr.left,
+            y: r.top - cr.top,
+            w: r.width,
+            h: r.height,
+          };
+        }),
+      );
+    };
+    measure();
+    const id = requestAnimationFrame(measure);
+    const ro = new ResizeObserver(measure);
+    ro.observe(root);
+    root.querySelectorAll("[data-tour-spot]").forEach((n) => ro.observe(n));
+    root.addEventListener("scroll", measure, true);
+    return () => {
+      cancelAnimationFrame(id);
+      ro.disconnect();
+      root.removeEventListener("scroll", measure, true);
+    };
+  }, [rootRef, view, coach]);
+
+  const pad = 8;
+  const panels = blurPanels(holes, size.w, size.h, pad);
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-30">
+      {panels.map((p, i) => (
+        <div
+          key={`${p.x}-${p.y}-${i}`}
+          className="absolute bg-pine/50 backdrop-blur-xl"
+          style={{ left: p.x, top: p.y, width: p.w, height: p.h }}
+        />
+      ))}
+      {holes.map((h, i) => (
+        <div
+          key={`ring-${h.x}-${h.y}-${i}`}
+          className="absolute rounded-[24px] ring-[3px] ring-amber"
+          style={{
+            left: h.x - pad,
+            top: h.y - pad,
+            width: h.w + pad * 2,
+            height: h.h + pad * 2,
+          }}
+        />
+      ))}
+      <div className="absolute inset-x-0 top-3 px-4">
+        <div className="flex items-end gap-2">
+          <Mascot src={MASCOT.calm} size={64} />
+          <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-3 text-[15px] font-semibold leading-snug text-pine shadow-lg">
+            {coach}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
   const [started, setStarted] = useState(false);
   const [done, setDone] = useState(false);
-  const [step, setStep] = useState(0);
-  const item = APP_TOUR[Math.min(step, APP_TOUR.length - 1)];
-  const last = step >= APP_TOUR.length - 1;
+  const [readyToFinish, setReadyToFinish] = useState(false);
+  const [stack, setStack] = useState<ScreenKey[]>(["home"]);
+  const [seenTabs, setSeenTabs] = useState<Set<ScreenKey>>(() => new Set(["home"]));
+  const view = stack[stack.length - 1] ?? "home";
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const prev = store.demoNow;
@@ -460,25 +561,47 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
 
   const onNav = (s: ScreenKey | "back") => {
     if (s === "back") {
-      setStep((n) => Math.max(0, n - 1));
+      setStack((st) => (st.length > 1 ? st.slice(0, -1) : st));
       return;
     }
     if (s === "welcome") {
       setStarted(false);
       setDone(false);
-      setStep(0);
+      setReadyToFinish(false);
+      setStack(["home"]);
+      setSeenTabs(new Set(["home"]));
       return;
     }
-    const idx = APP_TOUR.findIndex((t) => t.jumps.includes(s));
-    if (idx >= 0) setStep(idx);
-    else setStep((n) => Math.min(APP_TOUR.length - 1, n + 1));
+    if (view === "eveningCheckin" && (s === "home" || s === "periodCheck")) {
+      setDone(true);
+      return;
+    }
+    if (readyToFinish && TOUR_TABS.includes(s)) {
+      setDone(true);
+      return;
+    }
+    const mapped = mapTourView(s);
+    if (mapped === "done") {
+      setDone(true);
+      return;
+    }
+    if (!mapped) return;
+    setStack((st) => [...st, mapped]);
+    if (TOUR_TABS.includes(mapped)) {
+      setSeenTabs((prev) => {
+        const next = new Set(prev);
+        next.add(mapped);
+        if (TOUR_TABS.every((k) => next.has(k))) setReadyToFinish(true);
+        return next;
+      });
+    }
   };
 
   const previewStore = useMemo(
-    () => tourStore(store, item.view, onNav),
+    () => tourStore(store, view, onNav),
     // store identity is stable enough for this walkthrough; view must update the tab highlight
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [store, item.view],
+    [store, view, readyToFinish],
   );
 
   if (!started) {
@@ -492,14 +615,9 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
               Let's walk through a day
             </h2>
             <p className="mt-3 text-[17px] font-semibold leading-snug text-pine-soft">
-              You'll see the real app screens. Tap around, then we'll set your daily times. Nothing
-              from this walkthrough is saved.
+              You'll see the real app screens. Tap the buttons to move around, then we'll set your
+              daily times. Nothing from this walkthrough is saved.
             </p>
-            <div className="mt-5 w-full text-left">
-              <Note tone="green" title="This is a dry run">
-                Same idea as the practice recording: the screens are real, the data is not.
-              </Note>
-            </div>
           </div>
         </ScreenBody>
         <StickyFooter>
@@ -509,44 +627,19 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
     );
   }
 
+  const coach = readyToFinish
+    ? "You've now seen the whole app. Tap a tab to set your daily times."
+    : (TOUR_COACH[view] ?? "Tap a button to keep looking around.");
+
   return (
     <Screen className="relative">
-      <div className="shrink-0 px-4 pt-3">
-        <div className="flex items-center gap-2 rounded-2xl bg-mint-soft px-4 py-3">
-          <span className="text-teal">
-            <IconLock width={20} height={20} />
-          </span>
-          <p className="flex-1 text-[15px] font-extrabold text-pine">
-            Dry run · {step + 1} of {APP_TOUR.length}
-          </p>
+      <div ref={rootRef} className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <TourView view={view} store={previewStore} />
         </div>
+        {TOUR_TABS.includes(view) ? <TabBar store={previewStore} /> : null}
+        {!done ? <TourGuide rootRef={rootRef} coach={coach} view={view} /> : null}
       </div>
-
-      <div className="relative min-h-0 flex-1 overflow-hidden">
-        <TourView view={item.view} store={previewStore} />
-        {!done ? (
-          <div className="absolute inset-x-0 bottom-0 z-40 bg-gradient-to-t from-pine via-pine/85 to-transparent px-5 pb-6 pt-16">
-            <div className="flex items-end gap-3">
-              <Mascot src={MASCOT.calm} size={84} />
-              <p className="min-w-0 flex-1 rounded-3xl rounded-bl-md bg-surface px-4 py-4 text-[16px] font-semibold leading-snug text-pine">
-                {item.coach}
-              </p>
-            </div>
-            <div className="mt-4">
-              <Btn
-                onClick={() => {
-                  if (last) setDone(true);
-                  else setStep((n) => n + 1);
-                }}
-              >
-                {item.cta}
-              </Btn>
-            </div>
-          </div>
-        ) : null}
-      </div>
-
-      {item.tabs ? <TabBar store={previewStore} /> : null}
 
       {done ? (
         <div className="absolute inset-0 z-40 flex flex-col justify-center bg-pine/80 px-5 backdrop-blur-md">
@@ -804,8 +897,6 @@ type Coach = { id: string; text: string; cta: string };
 export function PracticeRunScreen({ store }: { store: TummyStore }) {
   const TOTAL = 120;
   const [stage, setStage] = useState<"intro" | "case" | "position" | "record">("intro");
-  const [posChecked, setPosChecked] = useState(false);
-  const [posTipIndex, setPosTipIndex] = useState(0);
   const [left, setLeft] = useState(TOTAL);
   const [marks, setMarks] = useState<{ key: string; label: string; severity: number }[]>([]);
   const [pending, setPending] = useState<{ key: string; label: string; at: number } | null>(null);
@@ -930,33 +1021,12 @@ export function PracticeRunScreen({ store }: { store: TummyStore }) {
   /* stage 2, positioning guide, exactly like the real thing */
   if (stage === "position") {
     return (
-      <Screen dark className="relative">
-        <TopBar title="Positioning guide" onBack={() => setStage("case")} dark step="Practice" />
-        {banner}
-        <div className={cn("min-h-0 flex-1 overflow-y-auto px-5 pt-2 pr-16", !posChecked && "blur-md")}>
-          <AbdomenGuide />
-          <p className="mt-3 text-[16px] font-semibold leading-snug text-mint">
-            Use the scale on the right to measure against your skin.
-          </p>
-          <PlacementTips index={posTipIndex} />
-        </div>
-        {posChecked ? <ScreenRuler /> : null}
-
-        <div className="shrink-0 px-5 pb-7 pt-3">
-          <Btn
-            disabled={!posChecked}
-            onClick={() => {
-              if (posTipIndex < PLACEMENT_TIPS.length - 1) setPosTipIndex((i) => i + 1);
-              else setStage("record");
-            }}
-          >
-            {posChecked && posTipIndex < PLACEMENT_TIPS.length - 1
-              ? `Next · ${posTipIndex + 1} of ${PLACEMENT_TIPS.length}`
-              : "I'm in position"}
-          </Btn>
-        </div>
-        {!posChecked ? <PositionChecksGate onDone={() => setPosChecked(true)} /> : null}
-      </Screen>
+      <PositioningGuideLayout
+        onBack={() => setStage("case")}
+        onReady={() => setStage("record")}
+        step="Practice"
+        banner={banner}
+      />
     );
   }
 

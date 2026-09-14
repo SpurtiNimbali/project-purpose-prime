@@ -317,7 +317,7 @@ function QuestionFlow({
         </div>
 
         {!done && !needNote && !needExplain && !needBristol ? (
-          <div className="mt-4">
+          <div className="mt-4" data-tour-spot={store.tourPreview ? "" : undefined}>
             {current.hint ? (
               <p className="mb-2 text-[15px] font-semibold text-pine-soft">{current.hint}</p>
             ) : null}
@@ -544,7 +544,9 @@ function QuestionFlow({
       </ScreenBody>
       {done ? (
         <StickyFooter>
-          <Btn onClick={() => onFinish(answers)}>{finishLabel}</Btn>
+          <div data-tour-spot={store.tourPreview ? "" : undefined}>
+            <Btn onClick={() => onFinish(answers)}>{finishLabel}</Btn>
+          </div>
         </StickyFooter>
       ) : null}
     </Screen>

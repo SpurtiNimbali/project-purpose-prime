@@ -218,6 +218,7 @@ export function HomeScreen({ store }: { store: TummyStore }) {
           </p>
           <div className={cn("relative mt-3 h-px", due ? "bg-surface/20" : "bg-line")} />
           <button
+            data-tour-spot={store.tourPreview ? "" : undefined}
             onClick={startTask}
             className="relative mt-3 flex w-full items-center gap-3 text-left active:scale-[0.99]"
           >
@@ -299,10 +300,26 @@ export function HomeScreen({ store }: { store: TummyStore }) {
 
         {/* day rail, recordings, meals and question blocks */}
         <div className="mt-4 rounded-[28px] border border-line bg-surface p-4 shadow-sm">
-          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-teal">
-            Today's tasks
-          </p>
-          <div className="mt-3 h-px bg-line" />
+          <button
+            data-tour-spot={store.tourPreview ? "" : undefined}
+            onClick={() => store.go("sessionHub")}
+            className="relative flex w-full items-center gap-3 text-left active:scale-[0.99]"
+          >
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+              <IconList width={26} height={26} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[20px] font-extrabold leading-tight text-pine">
+                Open today's plan
+              </span>
+            </span>
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mint-soft text-teal"
+              aria-hidden
+            >
+              <IconArrowRight width={18} height={18} />
+            </span>
+          </button>
           <div className="mt-3 flex items-start">
             {railStart > 0 ? (
               <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-teal" aria-label={`${railStart} earlier items`}>•••</span>
@@ -355,25 +372,6 @@ export function HomeScreen({ store }: { store: TummyStore }) {
               <span className="flex h-[28px] w-5 shrink-0 items-center justify-center text-[18px] font-extrabold text-pine-soft" aria-label={`${store.plan.length - railStart - railItems.length} later items`}>•••</span>
             ) : null}
           </div>
-          <button
-            onClick={() => store.go("sessionHub")}
-            className="relative mt-3 flex w-full items-center gap-3 text-left active:scale-[0.99]"
-          >
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
-              <IconList width={26} height={26} />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[20px] font-extrabold leading-tight text-pine">
-                Open today's plan
-              </span>
-            </span>
-            <span
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mint-soft text-teal"
-              aria-hidden
-            >
-              <IconArrowRight width={18} height={18} />
-            </span>
-          </button>
         </div>
 
         <button
@@ -472,11 +470,6 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
     <Screen>
       <div className="shrink-0 px-5 pb-3 pt-14">
         <h1 className="text-[24px] font-extrabold leading-tight text-pine">Logging</h1>
-        <p className="mt-1 text-[16px] font-semibold text-pine-soft">
-          {entries.length === 1
-            ? "1 thing logged today. Add the rest whenever you remember."
-            : `${entries.length} things logged today. Add the rest whenever you remember.`}
-        </p>
         <div className="mt-4 flex rounded-2xl bg-surface p-1">
           {(["add", "today"] as const).map((t) => (
             <button
@@ -496,7 +489,7 @@ export function LogHubScreen({ store }: { store: TummyStore }) {
       <ScreenBody className="pt-1">
         {tab === "add" ? (
           <>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3" data-tour-spot={store.tourPreview ? "" : undefined}>
               {LOG_ITEMS.map(({ k, label, sub, Icon, kind }) => (
                 <button
                   key={k}
@@ -1135,30 +1128,28 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
   return (
     <Screen>
       <TopBar title="Progress" />
-      <ScreenBody>
+      <ScreenBody className="pb-4">
         <Card
           className={cn(
-            "relative overflow-hidden border-0 text-surface shadow-md",
+            "relative overflow-hidden border-0 p-4 text-surface shadow-md",
             store.frozen ? "bg-blue" : "bg-teal",
           )}
         >
           <span className="pointer-events-none absolute -right-12 -top-14 h-40 w-40 rounded-full bg-mint/25" />
           <span className="pointer-events-none absolute -bottom-16 left-10 h-32 w-32 rounded-full bg-pine/15" />
           <div className="relative flex items-center gap-3">
-            <Mascot src={MASCOT.cheer} size={72} />
-            <div className="min-w-0">
-              <p className="text-[22px] font-extrabold leading-tight">Day {store.day} of 7</p>
-            </div>
+            <Mascot src={MASCOT.cheer} size={56} />
+            <p className="text-[20px] font-extrabold leading-tight">Day {store.day} of 7</p>
           </div>
-          <div className="relative mt-6 grid grid-cols-7 gap-x-2.5">
+          <div className="relative mt-3 grid grid-cols-7 gap-x-2">
             {days.map((d, i) => {
               const isFrozen = store.frozen && i === todayIdx;
               const isToday = i === todayIdx;
               return (
-                <div key={i} className="flex flex-col items-center gap-1.5">
+                <div key={i} className="flex flex-col items-center gap-1">
                   <span
                     className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-full border-[3px]",
+                      "flex h-8 w-8 items-center justify-center rounded-full border-[3px]",
                       isFrozen
                         ? "border-surface bg-surface text-blue"
                         : d
@@ -1169,14 +1160,14 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                     )}
                   >
                     {isFrozen ? (
-                      <IconSnowflake width={20} height={20} />
+                      <IconSnowflake width={16} height={16} />
                     ) : d ? (
-                      <IconCheck width={20} height={20} />
+                      <IconCheck width={16} height={16} />
                     ) : (
-                      <IconSun width={18} height={18} />
+                      <IconSun width={15} height={15} />
                     )}
                   </span>
-                  <span className="text-[13px] font-extrabold text-surface/85">{i + 1}</span>
+                  <span className="text-[12px] font-extrabold text-surface/85">{i + 1}</span>
                 </div>
               );
             })}
@@ -1184,39 +1175,39 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
         </Card>
 
         {store.frozen ? null : (
-        <div className="mt-4">
-          <Card>
+        <div className="mt-3">
+          <Card className="p-4">
             <div className="flex items-center gap-2 text-teal">
-              <IconChart width={22} height={22} />
-              <p className="text-[17px] font-extrabold text-pine">Today</p>
+              <IconChart width={20} height={20} />
+              <p className="text-[16px] font-extrabold text-pine">Today</p>
             </div>
-            <div className="mt-3 h-5 w-full overflow-hidden rounded-full bg-wash">
+            <div className="mt-2.5 h-4 w-full overflow-hidden rounded-full bg-wash">
               <div
                 className="h-full rounded-full bg-sage transition-all"
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <p className="mt-2 text-[16px] font-extrabold text-teal">
+            <p className="mt-2 text-[15px] font-extrabold text-teal">
               {recDone} of {REQUIRED} recordings · {minutes} min
               {extras > 0 ? ` · +${extras} extra` : ""}
             </p>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-wash px-3 py-3">
-                <p className="text-[13px] font-extrabold uppercase tracking-[0.12em] text-teal">
+            <div className="mt-3 grid grid-cols-2 gap-2.5">
+              <div className="rounded-2xl bg-wash px-3 py-2.5">
+                <p className="text-[12px] font-extrabold uppercase tracking-[0.12em] text-teal">
                   Meals
                 </p>
-                <p className="mt-1 text-[22px] font-extrabold leading-none text-pine">
+                <p className="mt-0.5 text-[20px] font-extrabold leading-none text-pine">
                   {mealsDone}
-                  <span className="text-[15px] font-bold text-pine-soft">/{mealsTotal}</span>
+                  <span className="text-[14px] font-bold text-pine-soft">/{mealsTotal}</span>
                 </p>
               </div>
-              <div className="rounded-2xl bg-wash px-3 py-3">
-                <p className="text-[13px] font-extrabold uppercase tracking-[0.12em] text-teal">
+              <div className="rounded-2xl bg-wash px-3 py-2.5">
+                <p className="text-[12px] font-extrabold uppercase tracking-[0.12em] text-teal">
                   Questions
                 </p>
-                <p className="mt-1 text-[22px] font-extrabold leading-none text-pine">
+                <p className="mt-0.5 text-[20px] font-extrabold leading-none text-pine">
                   {qDone}
-                  <span className="text-[15px] font-bold text-pine-soft">/{qTotal}</span>
+                  <span className="text-[14px] font-bold text-pine-soft">/{qTotal}</span>
                 </p>
               </div>
             </div>
@@ -1224,29 +1215,25 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
         </div>
         )}
 
-        <div className="mt-4">
+        <div className="mt-3">
           {store.freezeDaysUsed >= FREEZE_DAYS_ALLOWED && !store.frozen ? (
-            <div className="flex items-center gap-3 rounded-3xl border border-line bg-surface p-5">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-wash text-blue">
-                <IconSnowflake width={26} height={26} />
+            <div className="flex items-center gap-3 rounded-3xl border border-line bg-surface p-4">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-wash text-blue">
+                <IconSnowflake width={22} height={22} />
               </span>
               <div className="min-w-0">
-                <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-blue">
+                <p className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-blue">
                   Used
                 </p>
-                <p className="mt-0.5 text-[17px] font-extrabold text-pine">Both freeze days used</p>
-                <p className="mt-1 text-[15px] font-semibold leading-snug text-pine-soft">
-                  You've used both freeze days. The remaining days run back to back.
-                </p>
+                <p className="text-[17px] font-extrabold text-pine">Both freeze days used</p>
               </div>
             </div>
           ) : (
-            <div className="relative overflow-hidden rounded-3xl bg-blue px-5 py-5 text-surface shadow-md">
+            <div className="relative overflow-hidden rounded-3xl bg-blue px-4 py-4 text-surface shadow-md">
               <span className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-surface/15" />
-              <span className="pointer-events-none absolute -bottom-14 left-8 h-28 w-28 rounded-full bg-pine/20" />
-              <div className="relative flex items-start gap-3">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface/15">
-                  <IconSnowflake width={26} height={26} />
+              <div className="relative flex items-center gap-3">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface/15">
+                  <IconSnowflake width={22} height={22} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-surface/80">
@@ -1254,22 +1241,15 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
                       ? "Paused today"
                       : `${store.freezeDaysUsed} of ${FREEZE_DAYS_ALLOWED} used`}
                   </p>
-                  <p className="mt-1 text-[19px] font-extrabold leading-tight">
+                  <p className="text-[18px] font-extrabold leading-tight">
                     {store.frozen ? "Today is a freeze day" : "Need a pause?"}
-                  </p>
-                  <p className="mt-1 text-[15px] font-semibold leading-snug text-surface/85">
-                    {store.frozen
-                      ? "Nothing today counts as missed. The study picks up tomorrow morning."
-                      : store.freezeDaysUsed === 0
-                        ? "You can pause two days during the study if you need them. A freeze day cannot be undone."
-                        : "You have one freeze day left. A freeze day cannot be undone."}
                   </p>
                 </div>
               </div>
               {!store.frozen && store.freezeDaysUsed < FREEZE_DAYS_ALLOWED ? (
                 <button
                   onClick={() => setConfirmFreeze(true)}
-                  className="relative mt-4 flex min-h-[56px] w-full items-center justify-center rounded-2xl bg-surface text-[17px] font-extrabold text-blue active:scale-[0.99]"
+                  className="relative mt-3 flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-surface text-[17px] font-extrabold text-blue active:scale-[0.99]"
                 >
                   Use my freeze day
                 </button>
@@ -1320,8 +1300,7 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
 /* ---------------- profile ---------------- */
 
 export function ProfileScreen({ store }: { store: TummyStore }) {
-  const rows: { label: string; sub?: string; Icon: typeof IconUser; to?: ScreenKey }[] = [
-    { label: "Subject ID", sub: "STF-0142", Icon: IconUser },
+  const rows: { label: string; Icon: typeof IconUser; to: ScreenKey }[] = [
     { label: "Daily times", Icon: IconClock, to: "scheduling" },
     { label: "Technical Setup", Icon: IconPhone, to: "technicalSetup" },
     { label: "Setup guide", Icon: IconMic, to: "video" },
@@ -1329,59 +1308,46 @@ export function ProfileScreen({ store }: { store: TummyStore }) {
   return (
     <Screen>
       <TopBar title="Profile" />
-      <ScreenBody>
-        <div className="flex items-center gap-3 rounded-3xl border border-line bg-surface p-5">
-          <Mascot size={64} />
+      <ScreenBody className="pb-4">
+        <div className="flex items-center gap-3 rounded-3xl border border-line bg-surface px-4 py-3">
+          <Mascot size={52} />
           <div>
-            <p className="text-[19px] font-extrabold text-pine">Participant STF-0142</p>
-            <p className="text-[16px] font-semibold text-pine-soft">Day {store.day} of 7</p>
+            <p className="text-[18px] font-extrabold text-pine">Participant STF-0142</p>
+            <p className="text-[15px] font-semibold text-pine-soft">Day {store.day} of 7</p>
           </div>
         </div>
 
-        <div className="mt-4 space-y-3">
-          {rows.map(({ label, sub, Icon, to }) => (
+        <div className="mt-3 space-y-2">
+          {rows.map(({ label, Icon, to }) => (
             <button
               key={label}
-              onClick={() => to && store.go(to)}
-              className="flex min-h-[78px] w-full items-center gap-4 rounded-3xl border border-line bg-surface px-5 text-left"
+              onClick={() => store.go(to)}
+              className="flex min-h-[62px] w-full items-center gap-3 rounded-3xl border border-line bg-surface px-4 text-left"
             >
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
-                <Icon width={24} height={24} />
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-mint-soft text-teal">
+                <Icon width={22} height={22} />
               </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[17px] font-extrabold text-pine">{label}</span>
-                {sub ? (
-                  <span className="block text-[15px] font-semibold text-pine-soft">{sub}</span>
-                ) : null}
+              <span className="min-w-0 flex-1 text-[17px] font-extrabold text-pine">{label}</span>
+              <span className="shrink-0 text-pine-soft">
+                <IconArrowRight width={20} height={20} />
               </span>
-              {to ? (
-                <span className="shrink-0 text-pine-soft">
-                  <IconArrowRight width={22} height={22} />
-                </span>
-              ) : null}
             </button>
           ))}
         </div>
 
-        <div className="mt-4 space-y-3">
+        <div className="mt-3 space-y-2">
           <button
             onClick={() => store.go("contact")}
-            className="relative flex w-full items-center gap-3 overflow-hidden rounded-3xl bg-teal px-5 py-4 text-left shadow-md active:scale-[0.99]"
+            className="relative flex min-h-[62px] w-full items-center gap-3 overflow-hidden rounded-3xl bg-teal px-4 text-left shadow-md active:scale-[0.99]"
           >
             <span className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-mint/25" />
-            <span className="pointer-events-none absolute -bottom-12 left-16 h-24 w-24 rounded-full bg-pine/15" />
-            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface">
-              <IconChat width={24} height={24} />
+            <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface/15 text-surface">
+              <IconChat width={22} height={22} />
             </span>
-            <span className="relative min-w-0 flex-1">
-              <span className="block text-[17px] font-extrabold text-surface">
-                Contact the study team
-              </span>
-              <span className="mt-0.5 block text-[15px] font-semibold leading-snug text-mint/90">
-                Questions, a missed session, or a concern
-              </span>
+            <span className="relative min-w-0 flex-1 text-[17px] font-extrabold text-surface">
+              Contact the study team
             </span>
-            <span className="relative shrink-0 text-[22px] font-extrabold text-surface">›</span>
+            <span className="relative shrink-0 text-[20px] font-extrabold text-surface">›</span>
           </button>
           <Btn variant="secondary" onClick={() => store.go("welcome")}>
             Restart the walkthrough

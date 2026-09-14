@@ -1,4 +1,4 @@
-import placementArt from "@/assets/placement-main.png";
+import placementGuide from "@/assets/placement-guide.mp4";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Screen,
@@ -156,7 +156,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
           {plan.map((p, i) => {
             const isNext = p.id === next?.id;
             const pastDue = isPastDue(p, now, mealFinished);
-            const canOpen = !store.frozen && !p.done && (isNext || pastDue);
+            const canOpen = !store.frozen && !p.done && (isNext || pastDue || !!store.tourPreview);
             const Icon = planIcon(p);
             const mins = p.at - now;
             const timeLabel = pastDue
@@ -206,6 +206,7 @@ export function SessionHubScreen({ store }: { store: TummyStore }) {
                       </div>
                     </div>
                     <button
+                      data-tour-spot={store.tourPreview ? "" : undefined}
                       onClick={() => open(p)}
                       className="relative mt-4 flex min-h-[56px] w-full items-center justify-center rounded-2xl bg-surface text-[17px] font-extrabold text-teal active:scale-[0.99]"
                     >
@@ -378,7 +379,9 @@ export function CaseOffLayout({
         </p>
       </div>
       <div className="shrink-0 px-5 pb-7">
-        <Btn onClick={onContinue}>My case is off</Btn>
+        <div data-tour-spot="">
+          <Btn onClick={onContinue}>My case is off</Btn>
+        </div>
       </div>
     </Screen>
   );
@@ -519,20 +522,22 @@ export function MealCaptureScreen({ store }: { store: TummyStore }) {
         </div>
       </ScreenBody>
       <StickyFooter>
-        <Btn
-          disabled={!photos && desc.trim().length === 0}
-          onClick={() => {
-            store.addEntry(
-              "meal",
-              store.meal[0].toUpperCase() + store.meal.slice(1),
-              desc.trim() || `${photos} photo${photos === 1 ? "" : "s"}`,
-            );
-            store.markMealStarted();
-            store.go("mealEnd");
-          }}
-        >
-          I'm starting to eat now
-        </Btn>
+        <div data-tour-spot={store.tourPreview ? "" : undefined}>
+          <Btn
+            disabled={!store.tourPreview && !photos && desc.trim().length === 0}
+            onClick={() => {
+              store.addEntry(
+                "meal",
+                store.meal[0].toUpperCase() + store.meal.slice(1),
+                desc.trim() || `${photos} photo${photos === 1 ? "" : "s"}`,
+              );
+              store.markMealStarted();
+              store.go("mealEnd");
+            }}
+          >
+            I'm starting to eat now
+          </Btn>
+        </div>
       </StickyFooter>
     </Screen>
   );
@@ -561,15 +566,17 @@ export function MealEndScreen({ store }: { store: TummyStore }) {
         </p>
       </div>
       <div className="shrink-0 px-5 pb-7">
-        <Btn
-          onClick={() => {
-            store.completeItem("mealStart");
-            store.addEntry("meal", "Finished eating", "Recording timers set");
-            store.go("sessionHub");
-          }}
-        >
-          I've finished eating
-        </Btn>
+        <div data-tour-spot={store.tourPreview ? "" : undefined}>
+          <Btn
+            onClick={() => {
+              store.completeItem("mealStart");
+              store.addEntry("meal", "Finished eating", "Recording timers set");
+              store.go("sessionHub");
+            }}
+          >
+            I've finished eating
+          </Btn>
+        </div>
         <button
           onClick={() => store.go("home")}
           className="mt-3 min-h-[52px] w-full text-[16px] font-extrabold text-mint"
@@ -649,115 +656,104 @@ export function SessionCheckScreen({ store }: { store: TummyStore }) {
 
 /* ---------------- positioning ---------------- */
 
-/** True-size dual ruler on the glass so they can measure the 8 cm and 3 cm marks. */
+/** Slim true-size ruler on the glass edge for the 8 cm and 3 cm marks. */
 export function ScreenRuler() {
-  const mm = Array.from({ length: 101 }, (_, i) => i);
-  const eighths = Array.from({ length: 33 }, (_, i) => i);
+  const mm = Array.from({ length: 81 }, (_, i) => i);
+  const eighths = Array.from({ length: 25 }, (_, i) => i);
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute bottom-[6.5rem] right-0 z-20 w-[58px]"
+      className="pointer-events-none absolute right-0 top-2 z-20 w-8"
     >
-      <div className="overflow-hidden rounded-l-2xl bg-amber-soft shadow-[0_10px_28px_rgba(0,0,0,0.35)] ring-1 ring-amber">
-        <div className="flex items-end justify-between px-1.5 pb-0.5 pt-1.5">
-          <span className="text-[8px] font-extrabold uppercase tracking-[0.16em] text-pine">
+      <div className="overflow-hidden rounded-l-md bg-surface/95 shadow-[-6px_0_18px_rgba(0,0,0,0.28)]">
+        <div className="flex items-end justify-between px-0.5 pt-1">
+          <span className="text-[7px] font-extrabold uppercase tracking-[0.12em] text-pine">
             cm
           </span>
-          <span className="text-[8px] font-extrabold uppercase tracking-[0.16em] text-teal">
+          <span className="text-[7px] font-extrabold uppercase tracking-[0.12em] text-teal">
             in
           </span>
         </div>
-        <div className="relative mx-[3px] mb-[5px] h-[10cm] overflow-hidden rounded-l-md bg-surface">
-          <span className="absolute inset-x-0 top-0 z-10 h-[2px] bg-pine" />
-          <div className="absolute inset-y-0 left-0 w-[34px]">
-            {mm.map((n) => {
-              const cm = n % 10 === 0;
-              const half = n % 5 === 0;
-              const key = n === 30 || n === 80;
-              return (
-                <span
-                  key={`mm-${n}`}
-                  className={cn(
-                    "absolute left-0 top-0",
-                    key
-                      ? "h-[2px] w-[18px] bg-teal"
-                      : cm
-                        ? "h-[1.5px] w-[14px] bg-pine"
-                        : half
-                          ? "h-px w-[9px] bg-pine/70"
-                          : "h-px w-[5px] bg-pine/35",
-                  )}
-                  style={{ top: `calc(${n} * 1mm)` }}
-                />
-              );
-            })}
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+        <div className="relative h-[8cm]">
+          <span className="absolute inset-x-0 top-0 h-px bg-pine" />
+          {mm.map((n) => {
+            const cm = n % 10 === 0;
+            const half = n % 5 === 0;
+            const key = n === 30 || n === 80;
+            return (
               <span
-                key={`cmn-${n}`}
+                key={`mm-${n}`}
                 className={cn(
-                  "absolute left-[16px] text-[10px] font-extrabold leading-none",
-                  n === 3 || n === 8 ? "text-teal" : "text-pine",
-                )}
-                style={{
-                  top: `calc(${n} * 1cm)`,
-                  transform: n === 10 ? "translateY(-100%)" : "translateY(-50%)",
-                }}
-              >
-                {n}
-              </span>
-            ))}
-          </div>
-          <div className="absolute inset-y-0 right-0 w-[20px] border-l border-line">
-            {eighths.map((n) => {
-              const inch = n % 8 === 0;
-              const half = n % 4 === 0;
-              const quarter = n % 2 === 0;
-              return (
-                <span
-                  key={`ie-${n}`}
-                  className={cn(
-                    "absolute right-0 top-0",
-                    inch
-                      ? "h-[1.5px] w-[12px] bg-teal"
+                  "absolute left-0 top-0",
+                  key
+                    ? "h-[2px] w-3 bg-teal"
+                    : cm
+                      ? "h-px w-2.5 bg-pine"
                       : half
-                        ? "h-px w-[8px] bg-teal/80"
-                        : quarter
-                          ? "h-px w-[6px] bg-teal/50"
-                          : "h-px w-[4px] bg-teal/30",
-                  )}
-                  style={{ top: `calc(${n} * 0.125in)` }}
-                />
-              );
-            })}
-            {[1, 2, 3].map((n) => (
+                        ? "h-px w-1.5 bg-pine/65"
+                        : "h-px w-1 bg-pine/30",
+                )}
+                style={{ top: `calc(${n} * 1mm)` }}
+              />
+            );
+          })}
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+            <span
+              key={`cmn-${n}`}
+              className={cn(
+                "absolute left-[11px] text-[8px] font-extrabold leading-none",
+                n === 3 || n === 8 ? "text-teal" : "text-pine",
+              )}
+              style={{
+                top: `calc(${n} * 1cm)`,
+                transform: n === 8 ? "translateY(-100%)" : "translateY(-50%)",
+              }}
+            >
+              {n}
+            </span>
+          ))}
+          {eighths.map((n) => {
+            const inch = n % 8 === 0;
+            const half = n % 4 === 0;
+            return (
               <span
-                key={`inn-${n}`}
-                className="absolute right-[13px] text-[10px] font-extrabold leading-none text-teal"
-                style={{
-                  top: `calc(${n} * 1in)`,
-                  transform: "translateY(-50%)",
-                }}
-              >
-                {n}
-              </span>
-            ))}
-          </div>
+                key={`ie-${n}`}
+                className={cn(
+                  "absolute right-0 top-0",
+                  inch ? "h-px w-2 bg-teal" : half ? "h-px w-1.5 bg-teal/70" : "h-px w-1 bg-teal/35",
+                )}
+                style={{ top: `calc(${n} * 0.125in)` }}
+              />
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
 
-export function AbdomenGuide() {
+export function AbdomenGuide({ play = true }: { play?: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    if (!play) {
+      video.pause();
+      return;
+    }
+    void video.play().catch(() => undefined);
+  }, [play]);
   return (
-    <figure className="mx-auto w-full max-w-[340px]">
-      <img
-        src={placementArt}
-        alt="Two front-facing panels. The top marks the spot on a seated participant's lower right belly, 8 centimetres or 3.1 inches across from the belly button and then 3 centimetres or 1.2 inches down. The bottom shows the phone on that same spot: speaker-edge corner on the mark, the other speaker-edge corner toward the navel, the top of the phone in the air, screen facing the sky, plus a zoom of the speaker end on the skin"
-        loading="lazy"
-        width={864}
-        height={1152}
-        className="w-full rounded-2xl"
+    <figure className="flex h-full w-full items-start justify-center">
+      <video
+        ref={ref}
+        src={placementGuide}
+        autoPlay
+        muted
+        loop
+        playsInline
+        aria-label="How to place the phone: measure from the navel, then rest the speaker edge on that spot with the screen facing up"
+        className="max-h-full max-w-full rounded-2xl object-contain"
       />
     </figure>
   );
@@ -786,19 +782,17 @@ export function PlacementTips({ index }: { index: number }) {
   const tip = PLACEMENT_TIPS[Math.min(index, PLACEMENT_TIPS.length - 1)];
   const { t, b, Icon } = tip;
   return (
-    <div className="mt-4">
-      <div
-        key={t}
-        className="flex items-center gap-3 rounded-2xl bg-surface/10 px-3 py-3 text-surface"
-      >
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber text-pine">
-          <Icon width={20} height={20} />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[16px] font-bold leading-snug">{t}</span>
-          <span className="mt-0.5 block text-[14px] font-semibold leading-snug text-mint">{b}</span>
-        </span>
-      </div>
+    <div
+      key={t}
+      className="flex items-center gap-2.5 rounded-2xl bg-surface/10 px-3 py-2.5 text-surface"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber text-pine">
+        <Icon width={18} height={18} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-bold leading-snug">{t}</span>
+        <span className="mt-0.5 block text-[13px] font-semibold leading-snug text-mint">{b}</span>
+      </span>
     </div>
   );
 }
@@ -836,27 +830,39 @@ export function PositionChecksGate({ onDone }: { onDone: () => void }) {
   );
 }
 
-export function PositioningScreen({ store }: { store: TummyStore }) {
+export function PositioningGuideLayout({
+  onBack,
+  onReady,
+  step,
+  banner,
+}: {
+  onBack?: () => void;
+  onReady: () => void;
+  step?: string;
+  banner?: ReactNode;
+}) {
   const [checked, setChecked] = useState(false);
   const [tipIndex, setTipIndex] = useState(0);
   const lastTip = tipIndex >= PLACEMENT_TIPS.length - 1;
   return (
-    <Screen dark className="relative">
-      <TopBar title="Positioning guide" onBack={store.back} dark step="Placement" />
-      <div className={cn("flex-1 overflow-y-auto px-5 pb-6 pr-16", !checked && "blur-md")}>
-        <AbdomenGuide />
-        <p className="mt-3 text-[16px] font-semibold leading-snug text-mint">
-          Use the scale on the right to measure against your skin.
-        </p>
+    <Screen dark className="relative overflow-hidden">
+      <TopBar title="Positioning guide" onBack={onBack} dark step={step} />
+      {banner}
+      <div className={cn("relative min-h-0 flex-1", !checked && "blur-md")}>
+        <div className="absolute inset-0 py-1 pl-4 pr-10">
+          <AbdomenGuide play={checked} />
+        </div>
+        {checked ? <ScreenRuler /> : null}
+      </div>
+      <div className={cn("shrink-0 px-5 pt-2", !checked && "blur-md")}>
         <PlacementTips index={tipIndex} />
       </div>
-      {checked ? <ScreenRuler /> : null}
       <div className="shrink-0 px-5 pb-7 pt-3">
         <Btn
           disabled={!checked}
           onClick={() => {
             if (!lastTip) setTipIndex((i) => i + 1);
-            else store.go("recording");
+            else onReady();
           }}
         >
           {checked && !lastTip
@@ -866,6 +872,16 @@ export function PositioningScreen({ store }: { store: TummyStore }) {
       </div>
       {!checked ? <PositionChecksGate onDone={() => setChecked(true)} /> : null}
     </Screen>
+  );
+}
+
+export function PositioningScreen({ store }: { store: TummyStore }) {
+  return (
+    <PositioningGuideLayout
+      onBack={store.back}
+      onReady={() => store.go("recording")}
+      step="Placement"
+    />
   );
 }
 

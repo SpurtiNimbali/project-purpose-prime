@@ -456,6 +456,7 @@ export function TabBar({ store }: { store: TummyStore }) {
           return (
             <button
               key={key}
+              data-tour-spot={store.tourPreview ? "" : undefined}
               onClick={() => store.go(key)}
               className={cn(
                 "flex min-h-[58px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl",

@@ -192,6 +192,8 @@ export type TummyStore = {
   demoNow: number;
   setDemoNow: (mins: number) => void;
   setGender: (g: Gender) => void;
+  /** onboarding walkthrough: real screens, nothing is saved */
+  tourPreview?: boolean;
 };
 
 export function nowLabel() {
