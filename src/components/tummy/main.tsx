@@ -1114,7 +1114,9 @@ export function LogToiletScreen({ store }: { store: TummyStore }) {
 /* ---------------- progress ---------------- */
 
 export function ProgressScreen({ store }: { store: TummyStore }) {
-  const [confirmFreeze, setConfirmFreeze] = useState(false);
+  const [confirmFreeze, setConfirmFreeze] = useState(
+    store.tourPreview && store.activeItemId === "tour-freeze-confirm",
+  );
   const todayIdx = Math.min(Math.max(store.day - 1, 0), 6);
   const days = [0, 1, 2, 3, 4, 5, 6].map((i) => i < todayIdx);
 
@@ -1273,7 +1275,10 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
       </ScreenBody>
 
       {confirmFreeze ? (
-        <div className="absolute inset-0 z-40 flex items-end bg-pine/45 backdrop-blur-sm">
+        <div
+          data-tour-spot={store.tourPreview ? "freeze-confirm" : undefined}
+          className="absolute inset-0 z-40 flex items-end bg-pine/45 backdrop-blur-sm"
+        >
           <div className="w-full rounded-t-[32px] bg-surface px-5 pb-7 pt-6">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#e3eff4] text-blue">
               <IconSnowflake width={28} height={28} />
@@ -1297,9 +1302,11 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
               >
                 Yes, freeze today
               </Btn>
-              <Btn variant="secondary" onClick={() => setConfirmFreeze(false)}>
-                Keep going today
-              </Btn>
+              <div data-tour-spot={store.tourPreview ? "freeze-cancel" : undefined}>
+                <Btn variant="secondary" onClick={() => setConfirmFreeze(false)}>
+                  Keep going today
+                </Btn>
+              </div>
             </div>
           </div>
         </div>

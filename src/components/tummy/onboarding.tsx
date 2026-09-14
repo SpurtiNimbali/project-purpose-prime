@@ -369,6 +369,7 @@ const TOUR_DAY_DONE = [
   "log-dinner",
   "qEvening",
 ];
+const TOUR_BEFORE_EVENING = TOUR_DAY_DONE.filter((id) => id !== "qEvening");
 
 const APP_TOUR: TourStep[] = [
   {
@@ -462,11 +463,18 @@ const APP_TOUR: TourStep[] = [
     coach: "Say what prompted it. Tap back when you are done looking.",
   },
   {
+    view: "sessionHub",
+    clock: 21 * 60,
+    done: TOUR_BEFORE_EVENING,
+    spot: "plan-cta",
+    coach: "At night, open your evening check-in here.",
+  },
+  {
     view: "eveningCheckin",
     clock: 21 * 60,
-    done: TOUR_THROUGH_MEAL,
+    done: TOUR_BEFORE_EVENING,
     spot: "back",
-    coach: "Night ends with a short check-in. Tap back when you are done looking.",
+    coach: "Answer the short check-in, then tap back.",
   },
   {
     view: "sessionHub",
@@ -498,6 +506,15 @@ const APP_TOUR: TourStep[] = [
     done: TOUR_DAY_DONE,
     spot: "next-up",
     coach: "When the day is done, Next up says so.",
+  },
+  {
+    view: "home",
+    tabs: true,
+    clock: 12 * 60,
+    done: TOUR_THROUGH_MEAL,
+    spot: "ask-tummy",
+    coachAt: "bottom",
+    coach: "Tap Ask Tummy to open the chat.",
   },
   {
     view: "home",
@@ -555,6 +572,16 @@ const APP_TOUR: TourStep[] = [
     spot: "freeze-day",
     coach:
       "Days, recordings, meals, and questions live here. You also get two freeze days if you need a pause.",
+  },
+  {
+    view: "progress",
+    tabs: true,
+    clock: 12 * 60,
+    done: TOUR_THROUGH_MEAL,
+    activeItemId: "tour-freeze-confirm",
+    spot: "freeze-cancel",
+    highlight: "freeze-confirm",
+    coach: "Check the warning before you freeze a day.",
   },
   {
     view: "progress",
