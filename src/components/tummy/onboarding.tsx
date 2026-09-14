@@ -336,7 +336,7 @@ type TourStep = {
   explore?: boolean;
   dim?: boolean;
   tone?: "light" | "green";
-  coachAt?: "top" | "under" | "bottom";
+  coachAt?: "top" | "under" | "bottom" | "above-tabs";
 };
 
 function tourChrome(item: TourStep) {
@@ -512,6 +512,7 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "logHub",
+    coachAt: "above-tabs",
     coach: "Log is food, drinks, symptoms, toilet, sleep, and activity.",
   },
   {
@@ -535,6 +536,7 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "progress",
+    coachAt: "above-tabs",
     coach: "Progress is your week.",
   },
   {
@@ -552,6 +554,7 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "profile",
+    coachAt: "above-tabs",
     coach: "Profile is times, setup, and help.",
   },
   {
@@ -656,14 +659,21 @@ function scrollSpotIntoView(node: HTMLElement, root: HTMLElement) {
   }
 }
 
-type TourBox = { x: number; y: number; w: number; h: number };
+type TourBox = { x: number; y: number; w: number; h: number; r: number };
 
-function toBox(root: DOMRect, node: DOMRect): TourBox {
+function nodeRadius(el: HTMLElement) {
+  const n = parseFloat(getComputedStyle(el).borderTopLeftRadius);
+  return Number.isFinite(n) ? n : 16;
+}
+
+function toBox(root: DOMRect, el: HTMLElement): TourBox {
+  const node = el.getBoundingClientRect();
   return {
     x: node.left - root.left,
     y: node.top - root.top,
     w: node.width,
     h: node.height,
+    r: nodeRadius(el),
   };
 }
 
@@ -678,24 +688,26 @@ function edgeToward(box: TourBox, toward: { x: number; y: number }, gap: number)
   return { x: cx, y: dy > 0 ? box.y + box.h + gap : box.y - gap };
 }
 
-function connectorPath(x1: number, y1: number, x2: number, y2: number, rail?: boolean) {
-  if (rail) {
-    const x = Math.min(x1, x2, 22);
-    return `M ${x1} ${y1} L ${x} ${y1} L ${x} ${y2} L ${x2} ${y2}`;
-  }
+/** Short stub that ends on the target, never a screen-long line. */
+function pointerPath(x1: number, y1: number, x2: number, y2: number) {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.hypot(dx, dy) || 1;
-  const bow = Math.min(36, len * 0.14);
-  const cx = (x1 + x2) / 2 + (-dy / len) * bow;
-  const cy = (y1 + y2) / 2 + (dx / len) * bow;
-  return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+  const stub = Math.min(52, len);
+  return `M ${x2 - (dx / len) * stub} ${y2 - (dy / len) * stub} L ${x2} ${y2}`;
+}
+
+function cutRadius(hole: TourBox, pad: number) {
+  const circle =
+    Math.abs(hole.w - hole.h) < 10 && hole.r >= Math.min(hole.w, hole.h) / 2 - 1;
+  if (circle) return Math.min(hole.w, hole.h) / 2 + pad;
+  if (Math.min(hole.w, hole.h) < 90) return Math.min(hole.r + 2, 12);
+  return Math.min(hole.r + 2, 24);
 }
 
 const COACH_FILL =
   "border-[2.5px] border-teal-deep bg-mint text-pine shadow-[0_12px_28px_rgba(20,48,46,0.18)]";
-const TOUR_RING =
-  "0 0 0 2px #ffffff, 0 0 0 7px #2e7d6b, 0 12px 28px rgba(20, 48, 46, 0.2)";
+const TOUR_RING = "0 0 0 2px #ffffff, 0 0 0 5px #2e7d6b";
 
 function FrostPanel({
   left,
@@ -744,7 +756,7 @@ function TourGuide({
   dim: boolean;
   explore: boolean;
   tone: "light" | "green";
-  coachAt?: "top" | "under" | "bottom";
+  coachAt?: "top" | "under" | "bottom" | "above-tabs";
 }) {
   const coachRef = useRef<HTMLDivElement>(null);
   const [hole, setHole] = useState<TourBox | null>(null);
@@ -777,26 +789,27 @@ function TourGuide({
       }
       scrollSpotIntoView(tip, root);
       const rootBox = root.getBoundingClientRect();
-      const nextHole = toBox(rootBox, node.getBoundingClientRect());
-      const nextTip = toBox(rootBox, tip.getBoundingClientRect());
+      const nextHole = toBox(rootBox, node);
+      const nextTip = toBox(rootBox, tip);
       setHole(nextHole);
       if (coachAt === "top" || coachAt === "under") setCoachLow(false);
-      else if (coachAt === "bottom") setCoachLow(true);
+      else if (coachAt === "bottom" || coachAt === "above-tabs") setCoachLow(true);
       else setCoachLow(nextTip.y < 170);
 
       const bubble = coachRef.current;
-      if (!bubble) {
+      const wideButton = nextTip.w > 200 && nextTip.h < 80;
+      if (!bubble || spot === "back" || wideButton) {
         setLink(null);
         return;
       }
-      const coachBox = toBox(rootBox, bubble.getBoundingClientRect());
+      const coachBox = toBox(rootBox, bubble);
       const start = edgeToward(
         coachBox,
         { x: nextTip.x + nextTip.w / 2, y: nextTip.y + nextTip.h / 2 },
         8,
       );
-      const end = edgeToward(nextTip, start, 14);
-      if (Math.hypot(end.x - start.x, end.y - start.y) < 28) {
+      const end = edgeToward(nextTip, start, 12);
+      if (Math.hypot(end.x - start.x, end.y - start.y) < 56) {
         setLink(null);
         return;
       }
@@ -832,14 +845,14 @@ function TourGuide({
     };
   }, [rootRef, spot, highlight, coachLow, coachAt]);
 
-  const pad = hole && hole.h > 220 ? 6 : 8;
+  const pad = hole && hole.h > 220 ? 5 : 4;
   const cut = hole
     ? {
         x: Math.max(0, hole.x - pad),
         y: Math.max(0, hole.y - pad),
         w: hole.w + pad * 2,
         h: hole.h + pad * 2,
-        r: Math.min(28, (hole.w + pad * 2) / 2, (hole.h + pad * 2) / 2),
+        r: cutRadius(hole, pad),
       }
     : null;
 
@@ -900,17 +913,17 @@ function TourGuide({
               </marker>
             </defs>
             <path
-              d={connectorPath(link.x1, link.y1, link.x2, link.y2, spot === "back")}
+              d={pointerPath(link.x1, link.y1, link.x2, link.y2)}
               fill="none"
               stroke="#ffffff"
-              strokeWidth="7"
+              strokeWidth="4"
               strokeLinecap="round"
             />
             <path
-              d={connectorPath(link.x1, link.y1, link.x2, link.y2, spot === "back")}
+              d={pointerPath(link.x1, link.y1, link.x2, link.y2)}
               fill="none"
               stroke="#2e7d6b"
-              strokeWidth="3"
+              strokeWidth="2.2"
               strokeLinecap="round"
               markerEnd="url(#tour-arrowhead)"
             />
@@ -931,7 +944,13 @@ function TourGuide({
         <div
           className={cn(
             "absolute inset-x-0 z-10 px-4",
-            coachLow ? "bottom-4" : coachAt === "under" ? "top-[76px]" : "top-3",
+            coachAt === "above-tabs"
+              ? "bottom-[100px]"
+              : coachLow
+                ? "bottom-4"
+                : coachAt === "under"
+                  ? "top-[76px]"
+                  : "top-3",
           )}
         >
           <div className="flex items-end gap-3">
@@ -1031,7 +1050,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
             <TabBar store={previewStore} />
           </div>
         ) : null}
-        {item.tabs && !chrome.chatOpen && item.view === "home" ? (
+        {item.tabs && !chrome.chatOpen && item.view === "home" && item.spot !== "logHub" ? (
           <div className="pointer-events-none">
             <AssistantButton store={previewStore} />
           </div>
