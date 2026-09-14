@@ -341,6 +341,7 @@ export function AssistantButton({ store, dark }: { store: TummyStore; dark?: boo
 export function AssistantHint({ store }: { store: TummyStore }) {
   return (
     <button
+      data-tour-spot={store.tourPreview ? "ask-tummy" : undefined}
       onClick={() => store.setChatOpen(true)}
       className="relative flex w-full items-center gap-3 overflow-hidden rounded-3xl bg-mint-soft px-4 py-4 text-left shadow-sm"
     >
