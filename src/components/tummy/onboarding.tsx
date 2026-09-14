@@ -974,7 +974,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
             chrome.explore ? undefined : "pointer-events-none",
           )}
         >
-          <TourView view={item.view} store={previewStore} />
+          <TourView key={step} view={item.view} store={previewStore} />
         </div>
         {item.tabs ? (
           <div className={chrome.explore ? undefined : "pointer-events-none"}>
