@@ -331,6 +331,8 @@ type TourStep = {
   spot: string;
   /** Ring this node instead of `spot`. */
   highlight?: string;
+  /** Keep the full screen clear instead of drawing a spotlight box. */
+  wholePage?: boolean;
   activeItemId?: string;
   chatOpen?: boolean;
   explore?: boolean;
@@ -348,6 +350,7 @@ function tourChrome(item: TourStep) {
     tone: item.tone ?? (back ? "green" : "light"),
     coachAt: item.coachAt ?? (back ? "bottom" : undefined),
     chatOpen: !!item.chatOpen,
+    wholePage: !!item.wholePage,
   };
 }
 
@@ -531,7 +534,8 @@ const APP_TOUR: TourStep[] = [
     clock: 12 * 60,
     done: TOUR_THROUGH_MEAL,
     spot: "log-save",
-    highlight: "tour-widget",
+    wholePage: true,
+    dim: false,
     coach: "Time, consistency, and urgency.",
   },
   {
@@ -700,6 +704,7 @@ function TourGuide({
   dim,
   explore,
   coachAt,
+  wholePage,
 }: {
   rootRef: { current: HTMLDivElement | null };
   spot: string;
@@ -712,6 +717,7 @@ function TourGuide({
   explore: boolean;
   tone: "light" | "green";
   coachAt?: "top" | "under" | "bottom" | "above-tabs";
+  wholePage?: boolean;
 }) {
   const [hole, setHole] = useState<TourBox | null>(null);
   const [coachLow, setCoachLow] = useState(false);
@@ -725,6 +731,11 @@ function TourGuide({
       if (!root || cancelled) return;
       const ringNode = root.querySelector(`[data-tour-spot="${highlight}"]`);
       const spotNode = root.querySelector(`[data-tour-spot="${spot}"]`);
+      if (wholePage) {
+        setHole(null);
+        setCoachLow(false);
+        return;
+      }
       const node =
         ringNode instanceof HTMLElement && ringNode.getBoundingClientRect().width >= 2
           ? ringNode
@@ -776,7 +787,7 @@ function TourGuide({
       root?.removeEventListener("scroll", find, true);
       root?.removeEventListener("click", onClick, true);
     };
-  }, [rootRef, spot, highlight, coachLow, coachAt]);
+  }, [rootRef, spot, highlight, coachLow, coachAt, wholePage]);
 
   const isBack = spot === "back";
   const backPad = isBack ? 5 : 0;
@@ -961,6 +972,7 @@ export function ProtocolIntroScreen({ store }: { store: TummyStore }) {
           explore={chrome.explore}
           tone={chrome.tone}
           coachAt={chrome.coachAt}
+          wholePage={chrome.wholePage}
         />
       </div>
     </Screen>
