@@ -1117,6 +1117,12 @@ export function ProgressScreen({ store }: { store: TummyStore }) {
   const [confirmFreeze, setConfirmFreeze] = useState(
     store.tourPreview && store.activeItemId === "tour-freeze-confirm",
   );
+  const tourWantsFreeze = !!store.tourPreview && store.activeItemId === "tour-freeze-confirm";
+  useEffect(() => {
+    if (!store.tourPreview) return;
+    setConfirmFreeze(tourWantsFreeze);
+  }, [store.tourPreview, tourWantsFreeze]);
+
   const todayIdx = Math.min(Math.max(store.day - 1, 0), 6);
   const days = [0, 1, 2, 3, 4, 5, 6].map((i) => i < todayIdx);
 
